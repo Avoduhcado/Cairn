@@ -50,13 +50,14 @@ public class Player extends Actor implements Combatant {
 				pos.y + (skeleton.getData().getCenterY() * scale) - ((skeleton.getData().getHeight() * 0.15f) * scale),
 				(skeleton.getData().getWidth() * 0.3f) * scale, (skeleton.getData().getHeight() * 0.15f) * scale);
 		
+		setDadSkull(false);
 		setDadArmRight(false);
 		setDadArmLeft(false);
 				
 		this.stats = new Stats();
 		this.stats.getHealth().setCurrent(2000f);
 		this.equipment = new Equipment();
-		this.changeWeapon(Equipment.lightMace);
+		//this.changeWeapon(Equipment.lightMace);
 	}
 	
 	@Override
@@ -259,8 +260,14 @@ public class Player extends Actor implements Combatant {
 	public void setDadSkull(boolean enabled) {
 		if(enabled) {
 			skeleton.setAttachment("HEAD F", "HEAD F");
+			skeleton.setAttachment("HEAD STRING LEFT", "HEAD STRING LEFT");
+			skeleton.setAttachment("HEAD STRING MIDDLE", "HEAD STRING MIDDLE");
+			skeleton.setAttachment("HEAD STRING RIGHT", "HEAD STRING RIGHT");
 		} else {
 			skeleton.setAttachment("HEAD F", null);
+			skeleton.setAttachment("HEAD STRING LEFT", null);
+			skeleton.setAttachment("HEAD STRING MIDDLE", null);
+			skeleton.setAttachment("HEAD STRING RIGHT", null);
 		}
 	}
 	
@@ -333,6 +340,7 @@ public class Player extends Actor implements Combatant {
 	
 	@Override
 	public void attack() {
+		// TODO Check if Dad skull is enabled
 		if(getState() == CharState.IDLE || (getState() == CharState.WALK && getVelocity().length() <= getMaxSpeed() / 2f)) {
 			setDadArmRight(true);
 			setState(CharState.ATTACK);

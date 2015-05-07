@@ -27,7 +27,7 @@ public class Equipment implements Serializable {
 	private boolean invulnerable;
 	
 	public Equipment() {
-		weapon = new Weapon("LIGHT MACE", AttackType.LIGHT);
+		//weapon = new Weapon("LIGHT MACE", AttackType.LIGHT);
 	}
 	
 	public Weapon getWeapon() {

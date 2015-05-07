@@ -1,17 +1,14 @@
 package core.entities;
 
 import java.awt.geom.Rectangle2D;
-import java.io.Serializable;
-
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import core.Camera;
 import core.Theater;
 import core.render.DrawUtils;
 import core.render.SpriteIndex;
 
-public class Prop extends Entity implements Serializable {
+public class Prop extends Entity {
 	
 	/**
 	 * 

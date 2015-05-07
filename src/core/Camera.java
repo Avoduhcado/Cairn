@@ -265,6 +265,8 @@ public class Camera {
 	}
 	
 	public Vector2f getFrameSpeed() {
+		if(frameSpeed.length() == 0 && (panCurrent.length() != 0 && Math.abs(panCurrent.y) < Math.abs(panLimit.y)))
+			return panCurrent.normalise(null);
 		return frameSpeed;
 	}
 	
@@ -345,6 +347,7 @@ public class Camera {
 	}
 	
 	public void pan() {
+		// TODO this is a mess
 		if(pan.z != 0) {
 			if(panDelay < 0.45f) {
 				panDelay += Theater.getDeltaSpeed(0.025f);
@@ -368,7 +371,7 @@ public class Camera {
 						panCurrent.y < 0 ? -panLimit.y : 0, panCurrent.y < 0 ? 0 : panLimit.y);
 			}
 		}
-
+		
 		frame.setFrame(frame.getX() + panCurrent.x, frame.getY() + panCurrent.y, frame.getWidth(), frame.getHeight());
 	}
 	

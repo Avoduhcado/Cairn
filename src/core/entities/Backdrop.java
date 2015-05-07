@@ -1,18 +1,17 @@
 package core.entities;
 
 import java.awt.geom.Rectangle2D;
-import java.io.Serializable;
-
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Camera;
 import core.Theater;
-import core.entities.interfaces.Mobile;
 import core.render.DrawUtils;
 import core.render.SpriteIndex;
 
-public class Backdrop extends Entity implements Mobile, Serializable {
+public class Backdrop extends Entity {
 
 	/**
 	 * 
@@ -22,7 +21,7 @@ public class Backdrop extends Entity implements Mobile, Serializable {
 	private static transient int count = 0;
 	
 	private float depth;
-	private transient Vector2f velocity;
+	private transient Vector2f offset;
 	
 	public Backdrop(float x, float y, String ref, float scale, float depth) {
 		this.pos = new Vector2f(x, y);
@@ -33,9 +32,14 @@ public class Backdrop extends Entity implements Mobile, Serializable {
 				SpriteIndex.getSprite(sprite).getWidth() * scale, SpriteIndex.getSprite(sprite).getHeight() * scale);
 		
 		this.depth = depth;
-		this.velocity = new Vector2f();
+		this.offset = new Vector2f();
 	}
 	
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		this.offset = new Vector2f();
+	}
+
 	@Override
 	public void draw() {
 		//SpriteIndex.getSprite(sprite).setStill(true);
@@ -48,11 +52,11 @@ public class Backdrop extends Entity implements Mobile, Serializable {
 		/*if(!animations.isEmpty()) {
 				SpriteIndex.getSprite(sprite).setFrame(animations.get(state.toString()).getFrame());
 			}*/
-		SpriteIndex.getSprite(sprite).draw(pos.x, pos.y);
+		SpriteIndex.getSprite(sprite).draw(pos.x + offset.x, pos.y + offset.y);
 
 		if(Theater.get().debug) {
 			DrawUtils.setColor(new Vector3f(1f, 0, 0.25f));
-			DrawUtils.drawRect(pos.x, pos.y, getBox());
+			DrawUtils.drawRect(pos.x + offset.x, pos.y + offset.y, getBox());
 		}
 	}
 	
@@ -60,30 +64,13 @@ public class Backdrop extends Entity implements Mobile, Serializable {
 		Vector2f focalVelocity = new Vector2f();
 		focalVelocity.set(Camera.get().getFrameSpeed());
 		focalVelocity.scale(-depth);
-		this.velocity = focalVelocity;
-		
-		if(velocity.length() != 0) {
-			move();
+		if(focalVelocity.length() != 0) {
+			Vector2f.add(focalVelocity, offset, offset);
 		}
 	}
 	
 	public float getDepth() {
 		return depth;
-	}
-
-	@Override
-	public void checkCollision() {
-		
-	}
-
-	@Override
-	public void move() {
-		Vector2f.add(velocity, pos, pos);
-	}
-
-	@Override
-	public Vector2f getVelocity() {
-		return null;
 	}
 
 	@Override
