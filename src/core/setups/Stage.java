@@ -44,9 +44,9 @@ public class Stage extends GameSetup {
 			Ensemble.get().swapBackground(new Track("CairnArea"), 5f, 5f);
 		}
 		
-		//map = new Map();
+		map = new Map();
 		
-		map = Map.deserialize("Map001");
+		//map = Map.deserialize("Map001");
 
 		for(Entity e : map.getScenery()) {
 			System.out.println(e.getID());
