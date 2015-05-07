@@ -50,14 +50,14 @@ public class Player extends Actor implements Combatant {
 				pos.y + (skeleton.getData().getCenterY() * scale) - ((skeleton.getData().getHeight() * 0.15f) * scale),
 				(skeleton.getData().getWidth() * 0.3f) * scale, (skeleton.getData().getHeight() * 0.15f) * scale);
 		
-		setDadSkull(false);
+		//setDadSkull(false);
 		setDadArmRight(false);
 		setDadArmLeft(false);
 				
 		this.stats = new Stats();
 		this.stats.getHealth().setCurrent(2000f);
 		this.equipment = new Equipment();
-		//this.changeWeapon(Equipment.lightMace);
+		this.changeWeapon(Equipment.lightMace);
 	}
 	
 	@Override

@@ -27,7 +27,8 @@ public class Equipment implements Serializable {
 	private boolean invulnerable;
 	
 	public Equipment() {
-		//weapon = new Weapon("LIGHT MACE", AttackType.LIGHT);
+		// TODO Remove dependancy? Or at least make a better default "Unarmed" weapon
+		weapon = new Weapon("LIGHT MACE", AttackType.LIGHT);
 	}
 	
 	public Weapon getWeapon() {
