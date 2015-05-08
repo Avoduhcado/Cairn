@@ -46,10 +46,6 @@ public class Player extends Actor implements Combatant {
 	public Player(float x, float y, String ref, float scale) {
 		super(x, y, ref, scale);
 		
-		this.box = new Rectangle2D.Double(pos.x - (((skeleton.getData().getWidth() * 0.3f) * scale) / 2f),
-				pos.y + (skeleton.getData().getCenterY() * scale) - ((skeleton.getData().getHeight() * 0.15f) * scale),
-				(skeleton.getData().getWidth() * 0.3f) * scale, (skeleton.getData().getHeight() * 0.15f) * scale);
-		
 		//setDadSkull(false);
 		setDadArmRight(false);
 		setDadArmLeft(false);
@@ -129,9 +125,12 @@ public class Player extends Actor implements Combatant {
 		skeleton = new Skeleton(json.readSkeletonData(this.name));
 		skeleton.updateWorldTransform();
 				
-		this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
+		/*this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				pos.y + (skeleton.getData().getCenterY() * scale) - ((skeleton.getData().getHeight() * 0.3f) * scale),
-				(skeleton.getData().getWidth() * 0.8f) * scale, (skeleton.getData().getHeight() * 0.3f) * scale);
+				(skeleton.getData().getWidth() * 0.8f) * scale, (skeleton.getData().getHeight() * 0.3f) * scale);*/
+		this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
+				pos.y - ((skeleton.getData().getHeight() * scale) / 2f), 
+				skeleton.getData().getWidth() * scale, skeleton.getData().getHeight() * scale);
 		
 		animStateData = new AnimationStateData(skeleton.getData());
 		animStateData.setDefaultMix(0.1f);
@@ -252,8 +251,11 @@ public class Player extends Actor implements Combatant {
 	
 	@Override
 	public void updateBox() {
-		this.box.setFrame(pos.x - (box.getWidth() / 2f),
+		/*this.box.setFrame(pos.x - (box.getWidth() / 2f),
 				pos.y + (skeleton.getData().getCenterY() * scale) - ((skeleton.getData().getHeight() * 0.15f) * scale),
+				box.getWidth(), box.getHeight());*/
+		this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
+				(pos.y - (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale) / 2f), 
 				box.getWidth(), box.getHeight());
 	}
 	
