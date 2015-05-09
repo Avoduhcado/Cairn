@@ -22,6 +22,7 @@ import core.Theater;
 import core.render.DrawUtils;
 import core.setups.Stage;
 import core.utilities.MathFunctions;
+import core.utilities.keyboard.Keybinds;
 import core.audio.Ensemble;
 import core.entities.interfaces.Combatant;
 import core.entities.utils.CharState;
@@ -125,12 +126,9 @@ public class Player extends Actor implements Combatant {
 		json.setScale(scale);
 		skeleton = new Skeleton(json.readSkeletonData(this.name));
 		skeleton.updateWorldTransform();
-				
-		/*this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
-				pos.y + (skeleton.getData().getCenterY() * scale) - ((skeleton.getData().getHeight() * 0.3f) * scale),
-				(skeleton.getData().getWidth() * 0.8f) * scale, (skeleton.getData().getHeight() * 0.3f) * scale);*/
+
 		this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
-				pos.y - ((skeleton.getData().getHeight() * scale) / 2f), 
+				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)), 
 				skeleton.getData().getWidth() * scale, skeleton.getData().getHeight() * scale);
 		
 		animStateData = new AnimationStateData(skeleton.getData());
@@ -242,6 +240,8 @@ public class Player extends Actor implements Combatant {
 			break;
 		case QUICKSTEP:
 			if(animState.getCurrent(0).isComplete()) {
+				if(!Keybinds.RIGHT.press() && !Keybinds.LEFT.press())
+					velocity.set(0, 0);
 				setState(CharState.IDLE);
 			}
 			break;
@@ -256,7 +256,7 @@ public class Player extends Actor implements Combatant {
 				pos.y + (skeleton.getData().getCenterY() * scale) - ((skeleton.getData().getHeight() * 0.15f) * scale),
 				box.getWidth(), box.getHeight());*/
 		this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
-				(pos.y - (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale) / 2f), 
+				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)),
 				box.getWidth(), box.getHeight());
 	}
 	
@@ -344,7 +344,7 @@ public class Player extends Actor implements Combatant {
 	@Override
 	public void attack() {
 		// TODO Check if Dad skull is enabled
-		if(getState() == CharState.IDLE || (getState() == CharState.WALK && getVelocity().length() <= getMaxSpeed() / 2f)) {
+		if(getState() == CharState.IDLE || (getVelocity().length() <= getMaxSpeed() / 2f)) {
 			setDadArmRight(true);
 			setState(CharState.ATTACK);
 		}
@@ -352,7 +352,7 @@ public class Player extends Actor implements Combatant {
 
 	@Override
 	public void defend() {
-		if(getState() == CharState.IDLE || (getState() == CharState.WALK && getVelocity().length() <= getMaxSpeed() / 2f)) {
+		if(getState() == CharState.IDLE || (getVelocity().length() <= getMaxSpeed() / 2f)) {
 			setDadArmLeft(true);
 			setState(CharState.DEFEND);
 		}

@@ -78,14 +78,14 @@ public class Input {
 			}
 
 			if(((Stage) setup).getPlayer().canWalk()) {
-				if(Keybinds.RIGHT.doubleClicked()) {
-					((Stage) setup).getPlayer().dodge(new Vector2f(5f, 0f));
-				} else if(Keybinds.RIGHT.press()) {
+				if(Keybinds.DODGE.clicked()) {
+					((Stage) setup).getPlayer().dodge(null);
+				}
+				
+				if(Keybinds.RIGHT.press()) {
 					((Stage) setup).getPlayer().moveRight();
 				}
-				if(Keybinds.LEFT.doubleClicked()) {
-					((Stage) setup).getPlayer().dodge(new Vector2f(-5f, 0f));
-				} else if(Keybinds.LEFT.press()) {
+				if(Keybinds.LEFT.press()) {
 					((Stage) setup).getPlayer().moveLeft();
 				}
 				

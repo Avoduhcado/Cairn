@@ -362,12 +362,15 @@ public class Actor extends Entity implements Mobile {
 			}
 		}
 	}
-	
+
 	public void dodge(Vector2f direction) {
-		this.setState(CharState.QUICKSTEP);
-		//this.velocity.scale(Vector2f.dot(velocity, direction));
-		this.velocity.set(direction);
-		//Vector2f.add(velocity, direction, velocity);
+		if(direction == null && state != CharState.WALK) {
+			this.velocity.setX(getDirection() == 0 ? -5f : 5f);
+			this.setState(CharState.QUICKSTEP);
+		} else if(direction != null) {
+			this.velocity.set(direction);
+			this.setState(CharState.QUICKSTEP);
+		}
 	}
 	
 	public Skeleton getSkeleton() {

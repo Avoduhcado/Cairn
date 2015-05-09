@@ -19,6 +19,7 @@ public enum Keybinds {
 	RUN (Keyboard.KEY_LSHIFT),
 	ATTACK (Keyboard.KEY_E),
 	DEFEND (Keyboard.KEY_Q),
+	DODGE (Keyboard.KEY_S),
 	MENU (Keyboard.KEY_M),
 	PAUSE (Keyboard.KEY_P),
 	DEBUG (Keyboard.KEY_F3),

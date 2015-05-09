@@ -41,7 +41,7 @@ public class Stage extends GameSetup {
 		Camera.get().setFadeTimer(-0.1f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		if(Ensemble.get().getBackground() != null) {
-			Ensemble.get().swapBackground(new Track("CairnArea"), 5f, 5f);
+			Ensemble.get().swapBackground(new Track("CairnArea4"), 5f, 5f);
 		}
 		
 		map = new Map();
