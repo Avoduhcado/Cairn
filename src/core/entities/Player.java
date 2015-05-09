@@ -85,6 +85,7 @@ public class Player extends Actor implements Combatant {
 			box.translate((int) ((Region) skeleton.findSlot(equipment.getWeapon().getSlot()).getAttachment()).getWorldX(),
 					(int) ((Region) skeleton.findSlot(equipment.getWeapon().getSlot()).getAttachment()).getWorldY());
 			
+			// TODO Change damage based on location of hit/Which segment got hit and how far from center it is
 			for(Actor e : ((Stage) Theater.get().getSetup()).getCast()) {
 				if(e instanceof Combatant) {
 					for(Rectangle2D r : ((Enemy) e).getHitBoxes(this)) {
