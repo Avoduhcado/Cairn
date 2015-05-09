@@ -1,5 +1,9 @@
 package core.entities;
 
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+
+import core.Camera;
 import core.entities.interfaces.Scriptable;
 import core.setups.Stage;
 import core.utilities.scripts.Script;
@@ -33,8 +37,7 @@ public class Ally extends Actor implements Scriptable {
 		super.draw();
 		
 		if(dialogue != null && dialogue.isActive()) {
-			dialogue.draw((float) (getBox().getMaxX() + (getBox().getWidth() * 0.2f)),
-					(float) (getBox().getY() - (getBox().getHeight() * 1.2f)));
+			dialogue.draw(this, this.getX() > Camera.get().frame.getCenterX());
 		}
 	}
 
@@ -50,12 +53,12 @@ public class Ally extends Actor implements Scriptable {
 
 	@Override
 	public void activateScript(Entity player, Stage stage) {
-		if(!dialogue.isActive() && player.getBox().intersects(getBox().getX() - getBox().getWidth(),
-				getBox().getY(), getBox().getWidth() * 3f, getBox().getHeight())) {
+		if(!dialogue.isActive() && Point2D.distance(player.getX(), player.getY(), this.getX(), this.getY()) <= 150
+				&& Line2D.ptLineDist(0, this.getY(), 1, this.getY(), player.getX(), player.getY()) <= 100) {
 			dialogue.setActive(true);
 			animState.setAnimation(0, "Talking", true);
-		} else if(dialogue.isActive() && !player.getBox().intersects(getBox().getX() - getBox().getWidth(),
-				getBox().getY(), getBox().getWidth() * 3f, getBox().getHeight())) {
+		} else if(dialogue.isActive() && (Point2D.distance(player.getX(), player.getY(), this.getX(), this.getY()) > 150
+				|| Line2D.ptLineDist(0, this.getY(), 1, this.getY(), player.getX(), player.getY()) > 100)) {
 			dialogue.leave();
 			animState.setAnimation(0, "Idle", true);
 		}

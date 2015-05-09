@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 import core.Camera;
 import core.Theater;
+import core.entities.Entity;
 import core.setups.Stage;
 import core.ui.TextBox;
 import core.ui.event.ScreenText;
@@ -18,7 +19,9 @@ public class Script implements Serializable, ScriptEvent {
 	private static final long serialVersionUID = 1L;
 	
 	private transient TextBox prompt;
-	// TODO Make flavortext an array for available text options like interruptions
+	/** TODO Make flavortext an array for available text options like interruptions
+	 * Add prompt text to setup UI and include a callback to kill/update it as necessary
+	 */
 	private String flavorText;
 	private transient boolean active;
 	
@@ -50,9 +53,13 @@ public class Script implements Serializable, ScriptEvent {
 		}
 	}
 	
-	public void draw(float x, float y) {
+	public void draw(Entity talker, boolean right) {
 		if(prompt.isEnabled()) {
-			prompt.draw(x, y);
+			if(right) {
+				prompt.draw((float) talker.getBox().getMaxX(), talker.getY());
+			} else {
+				prompt.draw((float) talker.getBox().getX() - prompt.getWidth((int) prompt.getTextFill()), talker.getY());
+			}
 		}
 	}
 	

@@ -154,6 +154,10 @@ public class TextBox extends UIElement {
 		textFill += Theater.getDeltaSpeed(fillSpeed);
 	}
 	
+	public float getTextFill() {
+		return textFill;
+	}
+	
 	public void setTextFill(float textFill) {
 		if(textFill == -1)
 			this.textFill = getLength();
