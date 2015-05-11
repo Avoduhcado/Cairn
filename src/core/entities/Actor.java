@@ -297,6 +297,7 @@ public class Actor extends Entity implements Mobile {
 	}
 
 	@Override
+	// TODO THIS IS STTUUUUUUPID
 	public Vector2f getVelocity() {
 		return speed;
 	}

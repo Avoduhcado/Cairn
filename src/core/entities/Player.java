@@ -350,7 +350,7 @@ public class Player extends Actor implements Combatant {
 	@Override
 	public void attack() {
 		// TODO Check if Dad skull is enabled
-		if(getState() == CharState.IDLE || (getVelocity().length() <= getMaxSpeed() / 2f)) {
+		if((getState() == CharState.IDLE || (velocity.length() <= getMaxSpeed() / 2f)) && getState().canAct()) {
 			setDadArmRight(true);
 			setState(CharState.ATTACK);
 		}
@@ -358,7 +358,7 @@ public class Player extends Actor implements Combatant {
 
 	@Override
 	public void defend() {
-		if(getState() == CharState.IDLE || (getVelocity().length() <= getMaxSpeed() / 2f)) {
+		if((getState() == CharState.IDLE || (velocity.length() <= getMaxSpeed() / 2f)) && getState().canAct()) {
 			setDadArmLeft(true);
 			setState(CharState.DEFEND);
 		}
