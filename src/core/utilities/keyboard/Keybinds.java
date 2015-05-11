@@ -16,6 +16,8 @@ public enum Keybinds {
 	DOWN (Keyboard.KEY_DOWN),
 	MENU_RIGHT (Keyboard.KEY_D),
 	MENU_LEFT (Keyboard.KEY_A),
+	MENU_DOWN (Keyboard.KEY_S),
+	MENU_UP (Keyboard.KEY_W),
 	RUN (Keyboard.KEY_LSHIFT),
 	ATTACK (Keyboard.KEY_E),
 	DEFEND (Keyboard.KEY_Q),

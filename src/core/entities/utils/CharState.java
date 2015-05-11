@@ -10,6 +10,7 @@ public enum CharState {
 	DEFEND ("Defend"),
 	RECOIL ("Recoil"),
 	HIT ("Hit"),
+	REVIVE ("Revive"),
 	DEATH ("Death"),
 	DEAD ("Dead");
 	
@@ -24,8 +25,10 @@ public enum CharState {
 		case ATTACK:
 		case DEFEND:
 		case DEATH:
+		case DEAD:
 		case HIT:
 		case RECOIL:
+		case REVIVE:
 			return false;
 		default:
 			return true;

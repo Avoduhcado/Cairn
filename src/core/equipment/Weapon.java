@@ -10,24 +10,36 @@ public class Weapon implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private boolean damage;
+	private float damage;
+	private boolean damaging;
 	private boolean knockback;
+	
 	private String slot;
 	private String name;
+	
 	private AttackType attackType = AttackType.LIGHT;
 	private Rectangle2D damageHitbox;
+	private Rectangle2D attackRange;
 	
-	public Weapon(String name, AttackType attackType) {
+	public Weapon(String name, AttackType attackType, float damage) {
 		this.name = name;
 		this.attackType = attackType;
 	}
 	
-	public boolean isDamaging() {
+	public float getDamage() {
 		return damage;
 	}
-	
-	public void setDamage(boolean damage) {
+
+	public void setDamage(float damage) {
 		this.damage = damage;
+	}
+
+	public boolean isDamaging() {
+		return damaging;
+	}
+	
+	public void setDamaging(boolean damaging) {
+		this.damaging = damaging;
 	}
 	
 	public boolean isReversedKnockback() {
@@ -59,6 +71,9 @@ public class Weapon implements Serializable {
 	}
 
 	public String getAttackAnim() {
+		if(attackType == AttackType.UNARMED) {
+			return name;
+		}
 		return attackType.animation;
 	}
 	
@@ -68,6 +83,14 @@ public class Weapon implements Serializable {
 	
 	public void setDamageHitbox(Rectangle2D damageHitbox) {
 		this.damageHitbox = damageHitbox;
+	}
+	
+	public Rectangle2D getAttackRange() {
+		return attackRange;
+	}
+	
+	public void setAttackRange(Rectangle2D attackRange) {
+		this.attackRange = attackRange;
 	}
 	
 }

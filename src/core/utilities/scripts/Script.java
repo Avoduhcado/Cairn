@@ -10,6 +10,7 @@ import core.entities.Entity;
 import core.setups.Stage;
 import core.ui.TextBox;
 import core.ui.event.ScreenText;
+import core.utilities.keyboard.Keybinds;
 
 public class Script implements Serializable, ScriptEvent {
 
@@ -25,16 +26,15 @@ public class Script implements Serializable, ScriptEvent {
 	private String flavorText;
 	private transient boolean active;
 	
-	private String event = "{event: [{showText: 'Fair tidings, child.;Good to see you returned unharmed.'},{showText: 'Might you care for a super cool playable demo?'}, {choose: [{option: 'YES!!',result: [{showText: 'Neato'}]},{option: No,result: [{showText: 'Oh'},{showText: 'Ok then...'}]}]},{showText: Goodbye} ] }";
+	private String event;
 	private transient ScriptData data;
 	
-	public Script(String flavorText) {
+	public Script(String flavorText, String event) {
 		this.flavorText = flavorText;
 		this.prompt = new TextBox(this.flavorText, 0, 0, "Textbox", true);
 		this.prompt.setEvent(this);
 		this.prompt.setOpacity(1f);
-		
-		data = new ScriptData(event);
+		setEvent(event);
 	}
 	
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -56,9 +56,10 @@ public class Script implements Serializable, ScriptEvent {
 	public void draw(Entity talker, boolean right) {
 		if(prompt.isEnabled()) {
 			if(right) {
-				prompt.draw((float) talker.getBox().getMaxX(), talker.getY());
+				prompt.draw((float) talker.getBox().getMaxX(), (float) talker.getBox().getY());
 			} else {
-				prompt.draw((float) talker.getBox().getX() - prompt.getWidth((int) prompt.getTextFill()), talker.getY());
+				prompt.draw((float) talker.getBox().getX() - prompt.getWidth((int) prompt.getTextFill()),
+						(float) talker.getBox().getY());
 			}
 		}
 	}
@@ -108,15 +109,18 @@ public class Script implements Serializable, ScriptEvent {
 		}
 	}
 
+	public void setEvent(String event) {
+		this.event = event;
+		data = new ScriptData(this.event);
+	}
+	
 	@Override
 	public void processed() {
-		System.out.println("PRocessing bruh :DD");
 		readScript();
 	}
 
 	@Override
 	public void processedResult(int result) {
-		System.out.println("PRocessing result DDDD:");
 		data.parseResult(result);
 		readScript();
 	}

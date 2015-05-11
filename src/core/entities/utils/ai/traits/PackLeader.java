@@ -20,7 +20,8 @@ public class PackLeader extends Trait {
 	private int wanderRange = 300;
 	
 	public PackLeader(ArrayList<Intelligent> minions) {
-		setMinions(minions);
+		if(minions != null)
+			setMinions(minions);
 	}
 	
 	@Override

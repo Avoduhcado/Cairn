@@ -168,12 +168,13 @@ public class Actor extends Entity implements Mobile {
 	public void buildSkeleton() {
 		SkeletonJson json = new SkeletonJson(null);
 		json.setScale(scale);
-		skeleton = new Skeleton(json.readSkeletonData(this.name));
+		if(name.contains("_")) {
+			skeleton = new Skeleton(json.readSkeletonData(name.split("_")[0]));
+		} else {
+			skeleton = new Skeleton(json.readSkeletonData(name));
+		}
 		skeleton.updateWorldTransform();
 				
-		/*this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
-				pos.y + (skeleton.getData().getCenterY() * scale) - ((skeleton.getData().getHeight() * 0.3f) * scale),
-				(skeleton.getData().getWidth() * 0.8f) * scale, (skeleton.getData().getHeight() * 0.3f) * scale);*/
 		this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				pos.y - ((skeleton.getData().getHeight() * scale) / 2f), 
 				skeleton.getData().getWidth() * scale, skeleton.getData().getHeight() * scale);
@@ -324,7 +325,8 @@ public class Actor extends Entity implements Mobile {
 	}
 	
 	public boolean canWalk() {
-		if(state != CharState.ATTACK && state != CharState.DEFEND && state != CharState.HIT) {
+		// TODO THE FUCK IS THISSSSS??? Put in CharState
+		if(state != CharState.ATTACK && state != CharState.DEFEND && state != CharState.HIT && state != CharState.REVIVE) {
 			return true;
 		}
 		

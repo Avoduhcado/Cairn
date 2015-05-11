@@ -79,6 +79,22 @@ public class Button extends UIElement {
 		}
 	}
 	
+	public void highlight() {
+		this.hover = true;
+	}
+	
+	public void click() {
+		this.clicked = true;
+	}
+	
+	@Override
+	public boolean isClicked() {
+		if(clicked)
+			return clicked;
+		
+		return super.isClicked();
+	}
+	
 	public String getText() {
 		return text;
 	}

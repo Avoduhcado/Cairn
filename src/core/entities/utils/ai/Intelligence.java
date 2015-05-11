@@ -3,6 +3,7 @@ package core.entities.utils.ai;
 import java.awt.Shape;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.RectangularShape;
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -31,6 +31,9 @@ import core.entities.Entity;
 import core.entities.Fog;
 import core.entities.LightSource;
 import core.entities.Prop;
+import core.entities.interfaces.Intelligent;
+import core.entities.utils.ai.traits.Minion;
+import core.entities.utils.ai.traits.PackLeader;
 
 public class Map implements Serializable {
 
@@ -63,12 +66,47 @@ public class Map implements Serializable {
 		
 		loadProp("Graveyard");
 		
-		cast.add(new Ally(8450, 710, "The Fool", Camera.ASPECT_RATIO, new Script("Boopity bop!")));
-		cast.add(new Ally(1875, 1000, "Gravedigger", Camera.ASPECT_RATIO, new Script("Holy fuck, a skeleton.")));
-		cast.add(new Enemy(420, 670, "Shepherd", Camera.ASPECT_RATIO));
+		cast.add(new Ally(8450, 710, "The Fool", Camera.ASPECT_RATIO, new Script("<s0.3>She had a cradle...",
+				"{event: [{showText: 'You reached the end.'},{showText: 'Congratulations.'}] }")));
+		cast.add(new Ally(1875, 1000, "Gravedigger", Camera.ASPECT_RATIO, new Script("<s0.3>How curious.", 
+				"{event: [{showText: 'Fair tidings, child.;Good to see you returned unharmed.'},"
+				+ "{showText: 'Might you care for a release date?'}, {choose: [{option: 'YES!!',result: [{showText: 'Neato'}]},"
+				+ "{option: No,result: [{showText: 'Oh'},{showText: 'Ok then...'}]}]},{showText: Goodbye} ] }")));
+		
+		/*cast.add(new Enemy(420, 670, "Shepherd", Camera.ASPECT_RATIO));
 		cast.add(new Enemy(570, 750, "Flock", Camera.ASPECT_RATIO));
 		cast.add(new Enemy(510, 800, "Flock 2", Camera.ASPECT_RATIO));
-		cast.add(new Enemy(720, 770, "Flock 3", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(720, 770, "Flock 3", Camera.ASPECT_RATIO));*/
+		
+		cast.add(new Enemy(700, 705, "Flock", Camera.ASPECT_RATIO));
+		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion(null));
+		cast.add(new Enemy(1850, 570, "Flock 3", Camera.ASPECT_RATIO));
+		cast.getLast().setDirection(1);
+		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion(null));
+		
+		cast.add(new Enemy(3020, 410, "Shepherd", Camera.ASPECT_RATIO));
+		cast.getLast().setDirection(1);
+		cast.getLast().setMaxSpeed(1.6f);
+		((Enemy) cast.getLast()).getIntelligence().addTrait(new PackLeader(null));
+		cast.add(new Enemy(2835, 470, "Flock", Camera.ASPECT_RATIO));
+		cast.getLast().setDirection(1);
+		cast.getLast().setMaxSpeed(1.4f);
+		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion((Intelligent) cast.get(cast.size() - 2)));
+		cast.add(new Enemy(2905, 625, "Flock 2", Camera.ASPECT_RATIO));
+		cast.getLast().setDirection(1);
+		cast.getLast().setMaxSpeed(1.4f);
+		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion((Intelligent) cast.get(cast.size() - 3)));
+		
+		cast.add(new Enemy(3830, 805, "Acolyte", Camera.ASPECT_RATIO));
+		cast.getLast().setDirection(1);
+		cast.getLast().setMaxSpeed(1.6f);
+		
+		cast.add(new Enemy(4900, 750, "Shepherd", Camera.ASPECT_RATIO));
+		cast.getLast().setMaxSpeed(1.6f);
+		cast.add(new Enemy(5160, 800, "Shepherd", Camera.ASPECT_RATIO));
+		cast.getLast().setDirection(1);
+		cast.getLast().setMaxSpeed(1.6f);
+		
 		scenery.addAll(cast);
 		
 		//fog = new Fog("Fog", 0.5f, 0.75f, new Vector2f(-1f, 0f));

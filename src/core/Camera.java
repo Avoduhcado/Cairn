@@ -95,7 +95,7 @@ public class Camera {
 			Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
 			updateHeader();
 			try {
-				Display.setIcon(loadIcon(System.getProperty("resources") + "/ui/AGDG Logo.png"));
+				Display.setIcon(loadIcon(System.getProperty("resources") + "/ui/Icon.png"));
 			} catch (IOException e) {
 				System.out.println("Failed to load icon");
 			}
@@ -153,7 +153,7 @@ public class Camera {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
-				
+		
 		DrawUtils.fillColor(1f, 1f, 1f, 1f);
 		
 		// Zoom in/out camera
@@ -240,11 +240,19 @@ public class Camera {
 	public void resize() {
 		displayWidth = Display.getWidth();
 		displayHeight = Display.getHeight();
+		/*if((double) displayWidth / (double) displayHeight != (double) WIDTH / (double) HEIGHT) {
+			int aspectHeight = (int) (displayWidth / ((double) WIDTH / (double) HEIGHT));
+			System.out.println(aspectHeight);
+			GL11.glViewport(0, ((Display.getHeight() - aspectHeight) / 2), displayWidth, aspectHeight);
+			frame = new Rectangle2D.Double(frame.getX(), frame.getY(), displayWidth, aspectHeight);
+		} else {
+			GL11.glViewport(0, 0, displayWidth, displayHeight);
+			frame = new Rectangle2D.Double(frame.getX(), frame.getY(), displayWidth, displayHeight);
+		}*/
 		GL11.glViewport(0, 0, displayWidth, displayHeight);
+		frame = new Rectangle2D.Double(frame.getX(), frame.getY(), displayWidth, displayHeight);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
-		
-		frame = new Rectangle2D.Double(frame.getX(), frame.getY(), displayWidth, displayHeight);
 		
 		if(upscale) {
 			// Upscale
@@ -265,8 +273,6 @@ public class Camera {
 	}
 	
 	public Vector2f getFrameSpeed() {
-		if(frameSpeed.length() == 0 && (panCurrent.length() != 0 && Math.abs(panCurrent.y) < Math.abs(panLimit.y)))
-			return panCurrent.normalise(null);
 		return frameSpeed;
 	}
 	
@@ -425,27 +431,26 @@ public class Camera {
 	 * @param fadeTimer Time to fade, positive to fade out, negative to fade in, 0 for no fade
 	 */
 	public void setFadeTimer(float fadeTimer) {
-		this.fadeTimer = fadeTimer;
+		this.fadeTimer = 0;
 		this.fadeTotal = fadeTimer;
 		
-		if(fadeTimer >= 0f)
+		if(fadeTotal >= 0f)
 			fade = 0f;
 		else
 			fade = 1f;
 	}
 	
 	public void fade() {
-		if(fadeTotal > 0f) {
-			fade += (1f / fadeTotal) * Theater.getDeltaSpeed(0.025f);
-			fadeTimer -= Theater.getDeltaSpeed(0.025f);
-		} else if(fadeTotal < 0f) {
-			fade -= (1f / Math.abs(fadeTotal)) * Theater.getDeltaSpeed(0.025f);
-			fadeTimer += Theater.getDeltaSpeed(0.025f);
-		}
-		
-		if(fadeTotal > 0f ? fadeTimer < 0f : fadeTimer > 0f) {
-			fadeTimer = 0f;
-			fadeTotal = 0f;
+		if(Math.abs(fadeTimer) < Math.abs(fadeTotal)) {
+			// Adjust fade value
+			fadeTimer += Theater.getDeltaSpeed(0.025f) * (fadeTotal > 0 ? 1f : -1f);
+			// Adjust volume
+			fade = MathFunctions.clamp(fadeTotal > 0 ? (fadeTimer / fadeTotal) : 1 - (fadeTimer / fadeTotal), 0, 1);
+			// Check if fading has ended
+			if(Math.abs(fadeTimer) >= Math.abs(fadeTotal)) {
+				fadeTimer = 0;
+				fadeTotal = 0;
+			}
 		}
 		
 		DrawUtils.fillColor(0f, 0f, 0f, fade);

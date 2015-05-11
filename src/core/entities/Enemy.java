@@ -4,6 +4,8 @@ import java.awt.Polygon;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RectangularShape;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import org.lwjgl.util.vector.Vector2f;
@@ -26,6 +28,7 @@ import core.entities.utils.CharState;
 import core.entities.utils.ai.Intelligence;
 import core.entities.utils.ai.traits.Trait;
 import core.entities.utils.stats.Stats;
+import core.equipment.AttackType;
 import core.equipment.Equipment;
 import core.equipment.Weapon;
 import core.render.DrawUtils;
@@ -40,7 +43,6 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	private static final long serialVersionUID = 1L;
 
 	private Equipment equipment;
-	private Rectangle2D attackBox;
 	private Intelligence intelligence;
 	private Stats stats;
 	
@@ -51,10 +53,14 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		
 		this.stats = new Stats();
 		this.stats.getHealth().setCurrent(20f);
-		this.equipment = new Equipment();
 		this.intelligence = new Intelligence(this);
+		this.equipment = new Equipment();
 		
-		setUpCombatData("Attack");
+		int index = 1;
+		while(skeleton.getData().findAnimation("Attack" + index) != null) {
+			setUpCombatData("Attack" + index);
+			index++;
+		}
 	}
 	
 	@Override
@@ -66,16 +72,16 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		
 		super.update();
 		
-		if(getState() == CharState.ATTACK && equipment.getWeapon().isDamaging()) {
-			Polygon box = ((Region) skeleton.findSlot(equipment.getWeapon().getSlot()).getAttachment())
-					.getRotatedBox(skeleton.findSlot(equipment.getWeapon().getSlot()), equipment.getWeapon().getDamageHitbox());
-			box.translate((int) ((Region) skeleton.findSlot(equipment.getWeapon().getSlot()).getAttachment()).getWorldX(),
-					(int) ((Region) skeleton.findSlot(equipment.getWeapon().getSlot()).getAttachment()).getWorldY());
+		if(getState() == CharState.ATTACK && equipment.getEquippedWeapon().isDamaging()) {
+			Polygon box = ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment())
+					.getRotatedBox(skeleton.findSlot(equipment.getEquippedWeapon().getSlot()), equipment.getEquippedWeapon().getDamageHitbox());
+			box.translate((int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldX(),
+					(int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldY());
 
 			for(Rectangle2D r : ((Stage) Theater.get().getSetup()).getPlayer().getHitBoxes(this)) {
 				if(box.intersects(r)
 						&& Point2D.distance(0, this.getYPlane(), 0, ((Actor) ((Stage) Theater.get().getSetup()).getPlayer()).getYPlane())
-						< (((Region) skeleton.findSlot(equipment.getWeapon().getSlot()).getAttachment()).getHeight() / 2f)) {
+						< (((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getHeight() / 2f)) {
 					((Stage) Theater.get().getSetup()).getPlayer().hit(this);
 					break;
 				}
@@ -118,9 +124,9 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 					Ensemble.get().playSoundEffect(step);
 					break;
 				case "Damage":
-					equipment.getWeapon().setDamage(event.getInt() == 1);
-					equipment.getWeapon().setKnockback(event.getFloat() == 1);
-					equipment.getWeapon().setSlot(event.getString());
+					equipment.getEquippedWeapon().setDamaging(event.getInt() == 1);
+					equipment.getEquippedWeapon().setKnockback(event.getFloat() == 1);
+					equipment.getEquippedWeapon().setSlot(event.getString());
 					break;
 				case "SuperArmor":
 					equipment.setSuperArmor(Boolean.parseBoolean(event.getString()));
@@ -137,7 +143,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		if(state == CharState.WALK)
 			animState.update(Theater.getDeltaSpeed(0.016f) * (velocity.length() == 0 ? 1 : velocity.length() / getMaxSpeed()));
 		else
-			animState.update(Theater.getDeltaSpeed(0.016f) * animationSpeed);
+			animState.update(Theater.getDeltaSpeed(0.016f * animationSpeed));
 		animState.apply(skeleton);
 	}
 	
@@ -161,6 +167,9 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		case HIT:
 		case QUICKSTEP:
 			if(animState.getCurrent(0).isComplete()) {
+				if(state == CharState.ATTACK) {
+					equipment.equipRandomWeapon();
+				}
 				setState(CharState.IDLE);
 			}
 			break;
@@ -179,19 +188,21 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		equipment.setSuperArmor(false);
 		equipment.setInvulnerable(false);
 		equipment.setBlock(false);
-		equipment.getWeapon().setDamage(false);
+		equipment.getEquippedWeapon().setDamaging(false);
 	}
 	
 	@Override
 	public void attack() {
-		if(getState() == CharState.IDLE || (getState() == CharState.WALK && getVelocity().length() <= getMaxSpeed() / 2f)) {
+		if(getState() == CharState.IDLE || getVelocity().length() <= getMaxSpeed() / 2f) {
 			setState(CharState.ATTACK);
 		}
 	}
 
 	@Override
 	public void defend() {
-
+		if(getState() == CharState.IDLE || getVelocity().length() <= getMaxSpeed() / 2f) {
+			setState(CharState.DEFEND);
+		}
 	}
 
 	@Override
@@ -240,15 +251,18 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		if(knockBack) {
 			endCombat();
 			setState(CharState.HIT);
-			if(attacker.getEquipment().getWeapon().isReversedKnockback()) {
-				Vector2f.sub(((Entity) attacker).getPosition(), getPosition(), this.velocity);
+			velocity.set(0,0);
+			if(attacker.getEquipment().getEquippedWeapon().isReversedKnockback()) {
+				Vector2f.sub(new Vector2f(((Entity) attacker).getX(), ((Actor) attacker).getYPlane()),
+						new Vector2f(getX(), getYPlane()), this.velocity);
 			} else {
-				Vector2f.sub(getPosition(), ((Entity) attacker).getPosition(), this.velocity);
+				Vector2f.sub(new Vector2f(getX(), getYPlane()),
+						new Vector2f(((Entity) attacker).getX(), ((Actor) attacker).getYPlane()), this.velocity);
 			}
 			this.velocity.normalise();
 			
 			// TODO Scale to damage
-			this.velocity.scale(3.5f * damageMod);
+			this.velocity.scale(1.5f);
 		} else {
 			equipment.setSuperInvulnerable(true);
 			System.out.println("SUPER DUPER " + ID);
@@ -262,54 +276,42 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 
 	@Override
 	public void setUpCombatData(String attackName) {
-		if(skeleton.getData().findAnimation(attackName) != null) {
-			Animation attack = skeleton.getData().findAnimation(attackName);
-			for(Timeline t : attack.getTimelines()) {
-				if(t instanceof EventTimeline) {
-					Rectangle2D startBox = null; //, endBox = null;
-					Region region = null;
-					Bone bone = null;
-					for(int i = 0; i<((EventTimeline) t).getFrameCount(); i++) {
-						if(((EventTimeline) t).getEvents()[i].getData().getName().matches("Damage")) {
-							// Apply animation transform to receive proper positioning
-							attack.apply(skeleton, 0, ((EventTimeline) t).getFrames()[i], false, null);
-							skeleton.updateWorldTransform();
-							if(region == null) {
-								region = (Region) skeleton.findSlot(((EventTimeline) t).getEvents()[i].getString()).getAttachment();
-								bone = skeleton.findBone(((EventTimeline) t).getEvents()[i].getString());
-							}
-							if(startBox == null) {
-								startBox = new Rectangle2D.Double(bone.getWorldX() + region.getOffsetX(),
-										bone.getWorldY(),
-										region.getBox().getWidth(), region.getBox().getHeight());
-							}/* else {
-								endBox = new Rectangle2D.Double(bone.getWorldX(), bone.getWorldY(),
-										region.getBox().getWidth(), region.getBox().getHeight());
-								break;
-							}*/
+		Animation attack = skeleton.getData().findAnimation(attackName);
+		Weapon weapon = new Weapon(attackName, AttackType.UNARMED, 10f);
+		for(Timeline t : attack.getTimelines()) {
+			if(t instanceof EventTimeline) {
+				Region region = null;
+				Bone bone = null;
+				for(int i = 0; i<((EventTimeline) t).getFrameCount(); i++) {
+					if(((EventTimeline) t).getEvents()[i].getData().getName().matches("Damage")) {
+						// Apply animation transform to receive proper positioning
+						attack.apply(skeleton, 0, ((EventTimeline) t).getFrames()[i], false, null);
+						skeleton.updateWorldTransform();
+						if(region == null) {
+							region = (Region) skeleton.findSlot(((EventTimeline) t).getEvents()[i].getString()).getAttachment();
+							bone = skeleton.findBone(((EventTimeline) t).getEvents()[i].getString());
 						}
+						weapon.setAttackRange(new Rectangle2D.Double(bone.getWorldX() + region.getOffsetX(),
+								bone.getWorldY(), region.getBox().getWidth(), region.getBox().getHeight()));
+						
+						equipment.addWeapon(weapon);
+						break;
 					}
-					
-					//attackBox = startBox.createUnion(endBox);
-					attackBox = startBox;
-					break;
 				}
 			}
-		} else {
-			attackBox = new Rectangle2D.Double();
 		}
 	}
 
 	@Override
 	public Rectangle2D getAttackBox() {
-		return attackBox;
+		return equipment.getEquippedWeapon().getAttackRange();
 	}
 
 	@Override
 	public ArrayList<Rectangle2D> getHitBoxes(Combatant attacker) {		
 		ArrayList<Rectangle2D> hitboxes = new ArrayList<Rectangle2D>();
 		for(Slot s : skeleton.getSlots()) {
-			if(s.getAttachment() != null && !s.getData().getName().matches("WEAPON")) {
+			if(s.getAttachment() != null && !s.getData().getName().startsWith("WEAPON")) {
 				Region region = (Region) s.getAttachment();
 				Polygon p = region.getRotatedBox(s, null);
 				p.translate((int) region.getWorldX(), (int) region.getWorldY());
@@ -323,11 +325,10 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	
 	public boolean canReach(Entity target) {
 		Rectangle2D hitBox = new Rectangle2D.Double((target.getX() > this.getX() ?
-				this.pos.x + attackBox.getX() : this.pos.x - attackBox.getX()),
-				this.pos.y + attackBox.getY(), attackBox.getWidth(), attackBox.getHeight());
-		if(hitBox.intersects(target.getBox()) 
-				&& Point2D.distance(0, this.getYPlane(), 0, ((Actor) target).getYPlane()) 
-				< getAttackBox().getHeight() / 2f) {
+				this.pos.x + getAttackBox().getX() : this.pos.x - getAttackBox().getMaxX()),
+				this.pos.y + getAttackBox().getY(), getAttackBox().getWidth(), getAttackBox().getHeight());
+		if(hitBox.intersectsLine(target.getX(), target.getYPlane(), target.getX(), target.getYPlane() - target.getBox().getHeight()) 
+				&& Point2D.distance(0, this.getYPlane(), 0, ((Actor) target).getYPlane()) < getAttackBox().getHeight() / 2f) {
 			return true;
 		}
 		
@@ -362,7 +363,8 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		if(this.state != state) {
 			switch(state) {
 			case ATTACK:
-				animState.setAnimation(0, "Attack", false);
+				animState.setAnimation(0, equipment.getEquippedWeapon().getAttackAnim(), false);
+				//animState.setAnimation(0, "Attack2", false);
 				break;
 			case DEFEND:
 				animState.setAnimation(0, "Defend", false);
@@ -393,8 +395,9 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			}
 			break;
 		case AGGRESSIVE:
-			if(canReach(stage.getPlayer()) && getState() != CharState.ATTACK) {
+			if(getState().canAct() && canReach(stage.getPlayer()) && getState() != CharState.ATTACK) {
 				lookAt(stage.getPlayer());
+				velocity.scale(0.25f);
 				attack();
 				intelligence.getApproachVector().set(0, 0);
 			} else if(getState().canAct()) {
@@ -421,11 +424,17 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		return equipment;
 	}
 	
+	public Stats getStats() {
+		return stats;
+	}
+	
 	public void changeWeapon(Weapon weapon) {
 		if(state.canAct()) {
-			equipment.setWeapon(weapon);
-			skeleton.setAttachment("WEAPON", weapon.getName());
-			//animStateOverlay.setAnimation(0, "ChangeWeapon", false);
+			equipment.equipWeapon(weapon);
+			if(!weapon.getName().startsWith("Attack")) {
+				skeleton.setAttachment("WEAPON", weapon.getName());
+				//animStateOverlay.setAnimation(0, "ChangeWeapon", false);
+			}
 		}
 	}
 

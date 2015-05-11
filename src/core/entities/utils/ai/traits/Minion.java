@@ -23,6 +23,26 @@ public class Minion extends Trait {
 	}
 	
 	@Override
+	public void setHost(Intelligent host) {
+		this.host = host;
+		
+		if(leader != null) {
+			for(Trait t : this.leader.getIntelligence().getTraits()) {
+				if(t instanceof PackLeader) {
+					((PackLeader) t).addMinion(this.host);
+					break;
+				}
+			}
+		} else {
+			System.out.println("FEARLESS LEADER!");
+			this.host.getIntelligence().setPersonality(Personality.DOCILE);
+			if(((Actor) this.host).getState().canAct()) {
+				((Actor) this.host).setState(CharState.IDLE);
+			}
+		}
+	}
+	
+	@Override
 	public void process() {
 		if(leader != null && ((Actor) host).getState().canAct()) {
 			if(!((Enemy) host).getIntelligence().isChasing() && Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(),

@@ -52,9 +52,14 @@ public class Player extends Actor implements Combatant {
 		setDadArmLeft(false);
 				
 		this.stats = new Stats();
-		this.stats.getHealth().setCurrent(2000f);
+		this.stats.getHealth().setCurrent(30f);
 		this.equipment = new Equipment();
+		this.equipment.addWeapon(Equipment.lightMace);
+		this.equipment.addWeapon(Equipment.heavyMace);
+		this.equipment.addWeapon(Equipment.polearm);
 		this.changeWeapon(Equipment.lightMace);
+		
+		setState(CharState.REVIVE);
 	}
 	
 	@Override
@@ -80,18 +85,18 @@ public class Player extends Actor implements Combatant {
 			}
 		}
 		
-		if(getState() == CharState.ATTACK && equipment.getWeapon().isDamaging()) {
-			Polygon box = ((Region) skeleton.findSlot(equipment.getWeapon().getSlot()).getAttachment())
-					.getRotatedBox(skeleton.findSlot(equipment.getWeapon().getSlot()), equipment.getWeapon().getDamageHitbox());
-			box.translate((int) ((Region) skeleton.findSlot(equipment.getWeapon().getSlot()).getAttachment()).getWorldX(),
-					(int) ((Region) skeleton.findSlot(equipment.getWeapon().getSlot()).getAttachment()).getWorldY());
+		if(getState() == CharState.ATTACK && equipment.getEquippedWeapon().isDamaging()) {
+			Polygon box = ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment())
+					.getRotatedBox(skeleton.findSlot(equipment.getEquippedWeapon().getSlot()), equipment.getEquippedWeapon().getDamageHitbox());
+			box.translate((int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldX(),
+					(int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldY());
 			
 			// TODO Change damage based on location of hit/Which segment got hit and how far from center it is
 			for(Actor e : ((Stage) Theater.get().getSetup()).getCast()) {
 				if(e instanceof Combatant) {
 					for(Rectangle2D r : ((Enemy) e).getHitBoxes(this)) {
 						if(box.intersects(r) && Point2D.distance(0, this.getYPlane(), 0, ((Actor) e).getYPlane()) 
-								< (((Region) skeleton.findSlot(equipment.getWeapon().getSlot()).getAttachment()).getHeight() / 2f)) {
+								< (((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getHeight() * 0.65f)) {
 							((Combatant) e).hit(this);
 							break;
 						}
@@ -106,13 +111,13 @@ public class Player extends Actor implements Combatant {
 		super.draw();
 		
 		if(Theater.get().debug) {
-			if(equipment.getWeapon().isDamaging()) {
+			if(equipment.getEquippedWeapon().isDamaging()) {
 				Slot weapon = skeleton.findSlot("WEAPON F");
 				if(weapon.getAttachment() != null) {
 					Region region = (Region) weapon.getAttachment();
 					//region.updateWorldVertices(weapon);
 					
-					Polygon box = region.getRotatedBox(weapon, equipment.getWeapon().getDamageHitbox());
+					Polygon box = region.getRotatedBox(weapon, equipment.getEquippedWeapon().getDamageHitbox());
 					DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
 					DrawUtils.drawPoly(region.getWorldX(), region.getWorldY(), box);
 				}
@@ -178,9 +183,9 @@ public class Player extends Actor implements Combatant {
 					//Ensemble.get().playSoundEffect(event.getString());
 					break;
 				case "Damage":
-					equipment.getWeapon().setDamage(event.getInt() == 1);
-					equipment.getWeapon().setKnockback(event.getFloat() == 1);
-					equipment.getWeapon().setSlot(event.getString());
+					equipment.getEquippedWeapon().setDamaging(event.getInt() == 1);
+					equipment.getEquippedWeapon().setKnockback(event.getFloat() == 1);
+					equipment.getEquippedWeapon().setSlot(event.getString());
 					break;
 				case "SuperArmor":
 					equipment.setSuperArmor(Boolean.parseBoolean(event.getString()));
@@ -223,6 +228,7 @@ public class Player extends Actor implements Combatant {
 			}
 			break;
 		case HIT:
+		case REVIVE:
 			if(animState.getCurrent(0).isComplete()) {
 				setState(CharState.IDLE);
 			}
@@ -281,7 +287,7 @@ public class Player extends Actor implements Combatant {
 			skeleton.setAttachment("RIGHT FOREARM F", "RIGHT FOREARM F");
 			skeleton.setAttachment("RIGHT FOREARM STRING", "RIGHT FOREARM STRING");
 			skeleton.setAttachment("RIGHT HAND F", "RIGHT HAND F");
-			skeleton.setAttachment("WEAPON F", equipment.getWeapon().getName() + " F");
+			skeleton.setAttachment("WEAPON F", equipment.getEquippedWeapon().getName() + " F");
 		} else {
 			skeleton.setAttachment("RIGHT ARM F", null);
 			skeleton.setAttachment("RIGHT ARM STRING", null);
@@ -330,7 +336,7 @@ public class Player extends Actor implements Combatant {
 		case ATTACK:
 			setDadArmRight(false);
 			equipment.setSuperArmor(false);
-			equipment.getWeapon().setDamage(false);
+			equipment.getEquippedWeapon().setDamaging(false);
 			break;
 		case DEFEND:
 			setDadArmLeft(false);
@@ -360,6 +366,7 @@ public class Player extends Actor implements Combatant {
 
 	@Override
 	public void hit(Combatant attacker) {
+		setLooking(0);
 		switch(state.getHitState()) {
 		case 0:
 			if(!equipment.isSuperArmor()) {
@@ -402,15 +409,17 @@ public class Player extends Actor implements Combatant {
 		if(knockBack) {
 			endCombat();
 			setState(CharState.HIT);
-			if(attacker.getEquipment().getWeapon().isReversedKnockback()) {
-				Vector2f.sub(((Entity) attacker).getPosition(), getPosition(), this.velocity);
+			if(attacker.getEquipment().getEquippedWeapon().isReversedKnockback()) {
+				Vector2f.sub(new Vector2f(((Entity) attacker).getX(), ((Actor) attacker).getYPlane()),
+						new Vector2f(getX(), getYPlane()), this.velocity);
 			} else {
-				Vector2f.sub(getPosition(), ((Entity) attacker).getPosition(), this.velocity);
+				Vector2f.sub(new Vector2f(getX(), getYPlane()),
+						new Vector2f(((Entity) attacker).getX(), ((Actor) attacker).getYPlane()), this.velocity);
 			}
 			this.velocity.normalise();
 			
 			// TODO Scale to damage
-			this.velocity.scale(3.5f);
+			this.velocity.scale(2.5f * damageMod);
 		} else {
 			equipment.setSuperInvulnerable(true);
 			System.out.println("SUPER DUPER " + ID);
@@ -453,10 +462,13 @@ public class Player extends Actor implements Combatant {
 		if(this.state != state) {
 			switch(state) {
 			case ATTACK:
-				animState.setAnimation(0, equipment.getWeapon().getAttackAnim(), false);
+				animState.setAnimation(0, equipment.getEquippedWeapon().getAttackAnim(), false);
 				break;
 			case DEFEND:
 				animState.setAnimation(0, "Defend", false);
+				break;
+			case REVIVE:
+				animState.setAnimation(0, "Revive", false);
 				break;
 			default:
 				break;
@@ -472,7 +484,7 @@ public class Player extends Actor implements Combatant {
 	
 	public void changeWeapon(Weapon weapon) {
 		if(state.canAct()) {
-			equipment.setWeapon(weapon);
+			equipment.equipWeapon(weapon);
 			skeleton.setAttachment("WEAPON", weapon.getName());
 			animStateOverlay.setAnimation(0, "ChangeWeapon", false);
 		}

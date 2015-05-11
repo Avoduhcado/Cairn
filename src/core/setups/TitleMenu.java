@@ -8,6 +8,7 @@ import core.render.textured.Sprite;
 import core.ui.Button;
 import core.ui.ButtonGroup;
 import core.ui.overlays.OptionsMenu;
+import core.utilities.keyboard.Keybinds;
 
 public class TitleMenu extends GameSetup {
 
@@ -58,7 +59,7 @@ public class TitleMenu extends GameSetup {
 			} else if(buttonGroup.getButton(1).isClicked()) {
 				// Open options menu
 				optionsMenu = new OptionsMenu(20, 20, "Menu2");
-			} else if(buttonGroup.getButton(2).isClicked()) {
+			} else if(buttonGroup.getButton(2).isClicked() || Keybinds.EXIT.clicked()) {
 				// Exit game
 				Theater.get().close();
 			}

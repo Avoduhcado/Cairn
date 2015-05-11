@@ -6,6 +6,7 @@ import core.render.DrawUtils;
 import core.setups.TitleMenu;
 import core.ui.Button;
 import core.ui.ButtonGroup;
+import core.utilities.keyboard.Keybinds;
 
 public class GameMenu extends MenuOverlay {
 
@@ -54,7 +55,7 @@ public class GameMenu extends MenuOverlay {
 
 	@Override
 	public boolean isCloseRequest() {
-		return buttons.getButton(0).isClicked();
+		return buttons.getButton(0).isClicked() || Keybinds.EXIT.clicked();
 	}
 
 }

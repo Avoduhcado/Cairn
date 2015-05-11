@@ -2,6 +2,7 @@ package core.equipment;
 
 public enum AttackType {
 
+	UNARMED ("Attack"),
 	LIGHT ("LightAttack"),
 	HEAVY ("HeavyAttack"),
 	THRUST ("ThrustAttack");

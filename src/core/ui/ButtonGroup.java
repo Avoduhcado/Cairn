@@ -4,11 +4,14 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import core.Camera;
+import core.utilities.MathFunctions;
+import core.utilities.keyboard.Keybinds;
 
 public class ButtonGroup extends UIElement {
 
 	private ArrayList<Button> buttons = new ArrayList<Button>();
 	private boolean centered;
+	private int selected = 0;
 	
 	public ButtonGroup(float x, float y, String image, boolean centered) {
 		super(x, y, image);
@@ -17,8 +20,31 @@ public class ButtonGroup extends UIElement {
 	}
 	
 	public void update() {
-		for(Button b : buttons) {
-			b.update();
+		for(int i = 0; i<buttons.size(); i++) {
+			buttons.get(i).update();
+			if(buttons.get(i).isHovering()) {
+				selected = i;
+			}
+		}
+		
+		if(Keybinds.MENU_UP.clicked()) {
+			if(selected <= 0)
+				selected = buttons.size() - 1;
+			else
+				selected = MathFunctions.clamp(selected - 1, 0, buttons.size() - 1);
+		} else if(Keybinds.MENU_DOWN.clicked()) {
+			if(selected >= buttons.size() - 1)
+				selected = 0;
+			else
+				selected = MathFunctions.clamp(selected + 1, 0, buttons.size() - 1);
+		}
+		
+		if(selected != -1) {
+			buttons.get(selected).highlight();
+		}
+		
+		if(Keybinds.CONFIRM.clicked() && selected != -1) {
+			buttons.get(selected).click();
 		}
 	}
 	

@@ -17,8 +17,6 @@ import core.scene.collisions.PathPolygon;
 import core.ui.Button;
 import core.ui.CheckBox;
 import core.ui.EmptyFrame;
-import core.utilities.KongAlgo;
-import core.utilities.Pathfinder;
 import core.utilities.keyboard.Keybinds;
 import core.utilities.mouse.MouseInput;
 
