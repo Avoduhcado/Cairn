@@ -45,6 +45,10 @@ public class Minion extends Trait {
 	@Override
 	public void process() {
 		if(leader != null && ((Actor) host).getState().canAct()) {
+			if(((Enemy) host).getIntelligence().isChasing()) {
+				leader.getIntelligence().alert();
+			}
+			
 			if(!((Enemy) host).getIntelligence().isChasing() && Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(),
 					((Entity) host).getX(), ((Entity) host).getY()) > wanderRange) {
 				host.getIntelligence().approach(null, (Entity) leader);

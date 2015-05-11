@@ -251,7 +251,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		if(knockBack) {
 			endCombat();
 			setState(CharState.HIT);
-			velocity.set(0,0);
+			intelligence.setApproachVector(0, 0);
 			if(attacker.getEquipment().getEquippedWeapon().isReversedKnockback()) {
 				Vector2f.sub(new Vector2f(((Entity) attacker).getX(), ((Actor) attacker).getYPlane()),
 						new Vector2f(getX(), getYPlane()), this.velocity);
@@ -262,7 +262,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			this.velocity.normalise();
 			
 			// TODO Scale to damage
-			this.velocity.scale(1.5f);
+			this.velocity.scale(2.5f * damageMod);
 		} else {
 			equipment.setSuperInvulnerable(true);
 			System.out.println("SUPER DUPER " + ID);
@@ -395,7 +395,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			}
 			break;
 		case AGGRESSIVE:
-			if(getState().canAct() && canReach(stage.getPlayer()) && getState() != CharState.ATTACK) {
+			if(getState().canAct() && canReach(stage.getPlayer()) && getState() != CharState.ATTACK && intelligence.isChasing()) {
 				lookAt(stage.getPlayer());
 				velocity.scale(0.25f);
 				attack();

@@ -32,12 +32,18 @@ public class GameMenu extends MenuOverlay {
 				options = null;
 		} else {
 			buttons.update();
-			if(buttons.getButton(1).isClicked()) {
+			switch(buttons.getClicks()) {
+			case 1:
 				options = new OptionsMenu(20, 20, "Menu2");
-			} else if(buttons.getButton(2).isClicked()) {
+				break;
+			case 2:
 				Theater.get().swapSetup(new TitleMenu());
-			} else if(buttons.getButton(3).isClicked()) {
+				break;
+			case 3:
 				Theater.get().close();
+				break;
+			default:
+				break;
 			}
 		}
 	}

@@ -20,7 +20,6 @@ import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
 import core.entities.utils.ai.Personality;
 import core.entities.utils.ai.traits.Minion;
-import core.entities.utils.stats.Health;
 import core.render.LightMap;
 import core.scene.Map;
 import core.ui.UIElement;
@@ -50,12 +49,14 @@ public class Stage extends GameSetup {
 		map = Map.deserialize("Map001");
 		map.getScenery().add(new Prop(1705, 990, "Cairn", Camera.ASPECT_RATIO));
 		map.getCast().add(new Enemy(6000, 625, "Acolyte_2", Camera.ASPECT_RATIO));
-		map.getCast().getLast().setMaxSpeed(1.6f);
+		map.getCast().getLast().setMaxSpeed(1.75f);
 		map.getCast().getLast().setDirection(1);
+		((Enemy) map.getCast().getLast()).getStats().getHealth().setCurrent(50f);
 		map.getScenery().add(map.getCast().getLast());
 		map.getCast().add(new Enemy(6180, 630, "Acolyte_2", Camera.ASPECT_RATIO));
-		map.getCast().getLast().setMaxSpeed(1.6f);
+		map.getCast().getLast().setMaxSpeed(1.75f);
 		map.getCast().getLast().setDirection(1);
+		((Enemy) map.getCast().getLast()).getStats().getHealth().setCurrent(50f);
 		map.getScenery().add(map.getCast().getLast());
 
 		for(Entity e : map.getScenery()) {
@@ -75,8 +76,11 @@ public class Stage extends GameSetup {
 		((Enemy) findEntity("Enemy3")).getIntelligence().addTrait(new Minion(null));
 		((Enemy) findEntity("Enemy4")).getStats().getHealth().setCurrent(45f);
 		((Enemy) findEntity("Enemy7")).getStats().getHealth().setCurrent(50f);
+		((Actor) findEntity("Enemy7")).setMaxSpeed(1.8f);
 		((Enemy) findEntity("Enemy8")).getStats().getHealth().setCurrent(40f);
+		((Actor) findEntity("Enemy8")).setDirection(0);
 		((Enemy) findEntity("Enemy9")).getStats().getHealth().setCurrent(40f);
+		findEntity("Enemy9").setPosition(5160, 775);
 		
 		for(Actor a : getCast()) {
 			if(a instanceof Intelligent) {

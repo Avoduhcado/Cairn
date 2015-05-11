@@ -31,7 +31,7 @@ public class Script implements Serializable, ScriptEvent {
 	
 	public Script(String flavorText, String event) {
 		this.flavorText = flavorText;
-		this.prompt = new TextBox(this.flavorText, 0, 0, "Textbox", true);
+		this.prompt = new TextBox(this.flavorText, 0, 0, null, true);
 		this.prompt.setEvent(this);
 		this.prompt.setOpacity(1f);
 		setEvent(event);

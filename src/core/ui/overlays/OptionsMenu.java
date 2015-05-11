@@ -22,6 +22,7 @@ public class OptionsMenu extends MenuOverlay {
 	
 	public OptionsMenu(float x, float y, String image) {
 		super(x, y, image);
+		System.out.println("We have options");
 		
 		setStill(true);
 		this.box = new Rectangle2D.Double(x, y, Camera.get().getDisplayWidth() - (this.frame.getWidth() * 0.667f),
@@ -104,7 +105,7 @@ public class OptionsMenu extends MenuOverlay {
 	
 	@Override
 	public boolean isCloseRequest() {
-		return close.isClicked();
+		return close.isClicked() || Keybinds.EXIT.clicked();
 	}
 
 }

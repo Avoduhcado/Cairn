@@ -53,15 +53,19 @@ public class TitleMenu extends GameSetup {
 		} else {
 			// Update buttons
 			buttonGroup.update();
-			if(buttonGroup.getButton(0).isClicked()) {
+			switch(buttonGroup.getClicks()) {
+			case 0:
 				// Start game, proceed with state swap
 				Theater.get().swapSetup(new Stage());
-			} else if(buttonGroup.getButton(1).isClicked()) {
+				break;
+			case 1:
 				// Open options menu
 				optionsMenu = new OptionsMenu(20, 20, "Menu2");
-			} else if(buttonGroup.getButton(2).isClicked() || Keybinds.EXIT.clicked()) {
+				break;
+			case 2:
 				// Exit game
 				Theater.get().close();
+				break;
 			}
 		}
 	}

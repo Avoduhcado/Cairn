@@ -72,6 +72,11 @@ public class Intelligence implements Serializable {
 		}	
 	}
 	
+	// TODO Pass in a target to alert this Enemy of
+	public void alert() {
+		setChase(true);
+	}
+	
 	public void attacked(Combatant attacker) {
 		switch(personality) {
 		case NEUTRAL:

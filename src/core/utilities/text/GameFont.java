@@ -18,6 +18,7 @@ public class GameFont {
 	
 	private float size;
 	private Color color;
+	private Color dropColor;
 	private boolean dropShadow = true;
 	private boolean still = false;
 	private boolean centered = false;
@@ -26,6 +27,7 @@ public class GameFont {
 		this.fontName = fontName;
 		this.size = defaultSize;
 		this.color = defaultColor;
+		this.dropColor = Color.black;
 		
 		try (BufferedReader reader = new BufferedReader(new FileReader(System.getProperty("resources") + "/fonts/" + fontName + ".fnt"))) {
 			String line;
@@ -70,7 +72,7 @@ public class GameFont {
 			getChar(text.charAt(i)).setSize(size);
 			getChar(text.charAt(i)).setStill(still);
 			if(dropShadow) {
-				getChar(text.charAt(i)).setColor(Color.black);
+				getChar(text.charAt(i)).setColor(dropColor);
 				getChar(text.charAt(i)).draw(x + advance + 2, y + 2);
 			}
 			getChar(text.charAt(i)).setColor(color);
@@ -93,11 +95,12 @@ public class GameFont {
 	private void reset() {
 		setSize(defaultSize);
 		setColor(defaultColor);
+		setDropColor(Color.black);
 		setDropShadow(true);
 		setStill(false);
 		setCentered(false);
 	}
-	
+
 	public Glyph getChar(Character c) {
 		if(glyphs.containsKey(c)) {
 			return glyphs.get(c);
@@ -146,6 +149,14 @@ public class GameFont {
 	
 	public void setColor(Color color) {
 		this.color = color;
+	}
+	
+	public Color getDropColor() {
+		return dropColor;
+	}
+	
+	public void setDropColor(Color dropColor) {
+		this.dropColor = dropColor;
 	}
 	
 	public boolean hasDropShadow() {

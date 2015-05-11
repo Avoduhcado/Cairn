@@ -42,10 +42,6 @@ public class ButtonGroup extends UIElement {
 		if(selected != -1) {
 			buttons.get(selected).highlight();
 		}
-		
-		if(Keybinds.CONFIRM.clicked() && selected != -1) {
-			buttons.get(selected).click();
-		}
 	}
 	
 	public void draw() {
@@ -53,6 +49,15 @@ public class ButtonGroup extends UIElement {
 		for(int i = 0; i<buttons.size(); i++) {
 			buttons.get(i).draw();
 		}
+	}
+	
+	public int getClicks() {
+		for(int i = 0; i < buttons.size(); i++) {
+			if(buttons.get(i).isClicked() || (i == selected && Keybinds.CONFIRM.clicked())) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	public void centerItems() {

@@ -37,7 +37,7 @@ public class Theater {
 	/** Second-by-second FPS */
 	private int currentfps = Camera.TARGET_FPS;
 	/** Game version, appears in Window Title */
-	public static String version = "v0.2.95";
+	public static String version = "v0.2.9985 FULL OF BUGS EDITION";
 	/** Game name, appears in Window Title */
 	public static String title = "The Cairn";
 	/** Current engine framework version */

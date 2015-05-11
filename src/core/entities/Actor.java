@@ -78,28 +78,16 @@ public class Actor extends Entity implements Mobile {
 		updateAnimations();
 		
 		if(velocity.length() != 0) {
-			if(velocity.x != 0) {
-				if(velocity.x > 0) {
-					velocity.x -= Theater.getDeltaSpeed(0.15f);
-					if(velocity.x < 0)
-						velocity.x = 0;
-				} else if(velocity.x < 0) {
-					velocity.x += Theater.getDeltaSpeed(0.15f);
-					if(velocity.x > 0)
-						velocity.x = 0;
-				}
+			if(velocity.x > 0) {
+				velocity.setX(MathFunctions.clamp(velocity.x - Theater.getDeltaSpeed(0.15f), 0, velocity.x));
+			} else if(velocity.x < 0) {
+				velocity.setX(MathFunctions.clamp(velocity.x + Theater.getDeltaSpeed(0.15f), velocity.x, 0));
 			}
 			
-			if(velocity.y != 0) {
-				if(velocity.y > 0) {
-					velocity.y -= Theater.getDeltaSpeed(0.25f);
-					if(velocity.y < 0)
-						velocity.y = 0;
-				} else if(velocity.y < 0) {
-					velocity.y += Theater.getDeltaSpeed(0.25f);
-					if(velocity.y > 0)
-						velocity.y = 0;
-				}
+			if(velocity.y > 0) {
+				velocity.setY(MathFunctions.clamp(velocity.y - Theater.getDeltaSpeed(0.25f), 0, velocity.y));
+			} else if(velocity.y < 0) {
+				velocity.setY(MathFunctions.clamp(velocity.y + Theater.getDeltaSpeed(0.25f), velocity.y, 0));
 			}
 			
 			checkCollision();
@@ -114,7 +102,6 @@ public class Actor extends Entity implements Mobile {
 			}
 		}
 		
-		// TODO Make this its own function
 		updateState();
 		
 		skeleton.setX(pos.x);
