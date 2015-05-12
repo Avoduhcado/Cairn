@@ -339,7 +339,8 @@ public class TextBox extends UIElement {
 			
 			public void draw(float x, float y, int limit) {
 				modifier.apply();
-				Text.getFont(modifier.getFontFace()).drawStringSegment(text, x, y, 0, limit > getLength() ? getLength() : limit);
+				Text.getFont(modifier.getFontFace()).drawStringSegment(modifier.getAddIn() + text, x, y, 0,
+						limit > getLength() ? getLength() : limit);
 			}
 			
 			// TODO
@@ -350,26 +351,28 @@ public class TextBox extends UIElement {
 			
 			public float getWidth() {
 				modifier.apply();
-				return Text.getFont(modifier.getFontFace()).getWidth(text);
+				return Text.getFont(modifier.getFontFace()).getWidth(modifier.getAddIn() + text);
 			}
 			
 			public float getHeight() {
 				modifier.apply();
-				return Text.getFont(modifier.getFontFace()).getHeight(text);
+				return Text.getFont(modifier.getFontFace()).getHeight(modifier.getAddIn() + text);
 			}
 			
 			public float getWidth(int limit) {
 				modifier.apply();
-				return Text.getFont(modifier.getFontFace()).getWidth(text.substring(0, limit > getLength() ? getLength() : limit));
+				return Text.getFont(modifier.getFontFace()).getWidth((modifier.getAddIn() + text)
+						.substring(0, limit > getLength() ? getLength() : limit));
 			}
 			
 			public float getHeight(int limit) {
 				modifier.apply();
-				return Text.getFont(modifier.getFontFace()).getHeight(text.substring(0, limit > getLength() ? getLength() : limit));
+				return Text.getFont(modifier.getFontFace()).getHeight((modifier.getAddIn() + text)
+						.substring(0, limit > getLength() ? getLength() : limit));
 			}
 			
 			public int getLength() {
-				return text.length();
+				return text.length() + modifier.getAddIn().length();
 			}
 			
 		}

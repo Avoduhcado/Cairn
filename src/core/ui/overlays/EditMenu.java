@@ -2,11 +2,13 @@ package core.ui.overlays;
 
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import org.lwjgl.input.Mouse;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Camera;
@@ -163,8 +165,24 @@ public class EditMenu extends MenuOverlay {
 	@Override
 	public void draw() {
 		for(Polygon p : polys) {
+			
 			DrawUtils.setColor(new Vector3f(0.8f, 0f, 0.4f));
-			DrawUtils.drawPoly(0, 0, p);
+			DrawUtils.drawShape(0, 0, p.getPathIterator(AffineTransform.getScaleInstance(Camera.get().getScale(), Camera.get().getScale())));
+			//DrawUtils.drawPoly(0, 0, p);
+			
+			/*for(int i = 0; i<p.npoints - 1; i++) {
+				Vector2f vec = new Vector2f(p.xpoints[i + 1] - p.xpoints[i], p.ypoints[i + 1] - p.ypoints[i]);
+				float magnitude = (float) Math.sqrt(Math.pow(vec.x, 2) + Math.pow(vec.y, 2));
+				vec.set(vec.x / magnitude, vec.y / magnitude);
+				vec.scale(10f);
+				Line2D line = new Line2D.Double(p.xpoints[i] + ((p.xpoints[i + 1] - p.xpoints[i]) / 2),
+						p.ypoints[i] + ((p.ypoints[i + 1] - p.ypoints[i]) / 2),
+						p.xpoints[i] + ((p.xpoints[i + 1] - p.xpoints[i]) / 2) + vec.y,
+						p.ypoints[i] + ((p.ypoints[i + 1] - p.ypoints[i]) / 2) + (vec.x * -1f));
+				DrawUtils.setColor(new Vector3f(0f, 0f, 1f));
+				DrawUtils.drawLine(line);
+			}*/
+			
 			if(editPolyPoints.isChecked()) {
 				for(int i = 0; i<p.npoints; i++) {
 					DrawUtils.setColor(new Vector3f(0f, 0f, 1f));
@@ -184,7 +202,21 @@ public class EditMenu extends MenuOverlay {
 		
 		if(currentPoly != null) {
 			DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
-			DrawUtils.drawPoly(0, 0, currentPoly);
+			/*AffineTransform at = AffineTransform.getTranslateInstance(-currentPoly.getBounds2D().getWidth() / 2f,
+					-currentPoly.getBounds2D().getHeight() / 2f);
+			at.scale(Camera.get().getScale(), Camera.get().getScale());
+			at.translate(currentPoly.getBounds2D().getWidth() / 2f, currentPoly.getBounds2D().getHeight() / 2f);*/
+			
+			AffineTransform at = AffineTransform.getScaleInstance(Camera.get().getScale(), Camera.get().getScale());
+			//at.translate(-Camera.get().frame.getWidth() / 2, -Camera.get().frame.getHeight() / 2);
+			
+			/*AffineTransform at = AffineTransform.getTranslateInstance(
+					(currentPoly.getBounds2D().getWidth() * (1 - Camera.get().getScale()) / 2f),
+					(currentPoly.getBounds2D().getHeight() * (1 - Camera.get().getScale()) / 2f));
+			at.scale(Camera.get().getScale(), Camera.get().getScale());*/
+			
+			DrawUtils.drawShape(0, 0, currentPoly.getPathIterator(at));
+			//DrawUtils.drawPoly(0, 0, currentPoly);
 			if(currentPoly.npoints > 0) {
 				DrawUtils.setColor(new Vector3f(0f, 0.2f, 1f));
 				DrawUtils.drawLine(new Line2D.Double(currentPoly.xpoints[currentPoly.npoints - 1],

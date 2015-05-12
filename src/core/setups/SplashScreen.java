@@ -152,11 +152,16 @@ public class SplashScreen extends GameSetup {
 	 * Draw current splash screen in center of screen.
 	 */
 	public void draw() {
+		
+	}
+
+	@Override
+	public void drawUI() {
 		if(splashImages.peek() != null) {
 			splashImages.peek().draw((float)point.getX(), (float)point.getY());
 		}
 	}
-
+	
 	@Override
 	public void resizeRefresh() {
 		point = new Point2D.Double(Camera.get().getDisplayWidth(0.5f) - (splashImages.peek().getWidth() * 0.5f), 

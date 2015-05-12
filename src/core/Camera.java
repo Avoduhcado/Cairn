@@ -65,7 +65,7 @@ public class Camera {
 	/** Panning settings */
 	private Vector3f pan = new Vector3f(0,0,0);
 	private Vector2f panCurrent = new Vector2f(0,0);
-	private Vector2f panLimit = new Vector2f(WIDTH * 0.15f, HEIGHT * 0.3f);
+	private Vector2f panLimit = new Vector2f(WIDTH * 0.15f, HEIGHT * 0.25f);
 	private float panDelay;
 	
 	/** Shake timer */
@@ -168,6 +168,11 @@ public class Camera {
 						
 		// Negate screen shake
 		settle();
+
+		// Reload identity to draw UI
+		GL11.glLoadIdentity();
+		
+		setup.drawUI();
 		
 		if(Theater.get().paused) {
 			Text.getDefault().setStill(true);

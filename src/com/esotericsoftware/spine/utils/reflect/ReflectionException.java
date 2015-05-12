@@ -18,6 +18,7 @@ package com.esotericsoftware.spine.utils.reflect;
 
 /** Thrown when an exception occurs during reflection.
  * @author nexsoftware */
+@SuppressWarnings("serial")
 public class ReflectionException extends Exception {
 
 	public ReflectionException () {

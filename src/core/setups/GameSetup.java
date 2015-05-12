@@ -12,6 +12,8 @@ public abstract class GameSetup {
 	public abstract void update();
 	/** Draw the current game state */
 	public abstract void draw();
+	/** Draw UI Elements of current game state */
+	public abstract void drawUI();
 	/** Readjust screen objects to match screen resize */
 	public abstract void resizeRefresh();
 	

@@ -3,6 +3,7 @@ package core.entities;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -47,11 +48,9 @@ public class Backdrop extends Entity {
 		if(depth == -1f) {
 			SpriteIndex.getSprite(sprite).setFixedSize(Camera.get().displayWidth, Camera.get().displayHeight);
 		} else {
-			SpriteIndex.getSprite(sprite).setFixedSize((int) box.getWidth(), (int) box.getHeight());
+			SpriteIndex.getSprite(sprite).setFixedSize((int) Math.ceil(box.getWidth()), (int) Math.ceil(box.getHeight()));
+			//SpriteIndex.getSprite(sprite).setFixedSize((int) box.getWidth(), (int) box.getHeight());
 		}
-		/*if(!animations.isEmpty()) {
-				SpriteIndex.getSprite(sprite).setFrame(animations.get(state.toString()).getFrame());
-			}*/
 		SpriteIndex.getSprite(sprite).draw(pos.x + offset.x, pos.y + offset.y);
 
 		if(Theater.get().debug) {

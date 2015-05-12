@@ -14,12 +14,8 @@ import core.entities.Backdrop;
 import core.entities.Entity;
 import core.entities.LightSource;
 import core.entities.Player;
-import core.entities.Prop;
 import core.entities.Actor;
-import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
-import core.entities.utils.ai.Personality;
-import core.entities.utils.ai.traits.Minion;
 import core.render.LightMap;
 import core.scene.Map;
 import core.ui.UIElement;
@@ -27,7 +23,6 @@ import core.ui.overlays.EditMenu;
 import core.ui.overlays.GameMenu;
 import core.utilities.Pathfinder;
 import core.utilities.keyboard.Keybinds;
-import core.utilities.scripts.Script;
 
 public class Stage extends GameSetup {
 
@@ -40,25 +35,12 @@ public class Stage extends GameSetup {
 	public Stage() {
 		Camera.get().setFadeTimer(-7.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
-		if(Ensemble.get().getBackground() != null) {
-			Ensemble.get().swapBackground(new Track("CairnArea4"), 5f, 5f);
-		}
+		Ensemble.get().swapBackground(new Track("CairnArea4"), 5f, 5f);
 		
-		//map = new Map();
+		map = new Map();
 		
-		map = Map.deserialize("Map001");
-		map.getScenery().add(new Prop(1705, 990, "Cairn", Camera.ASPECT_RATIO));
-		map.getCast().add(new Enemy(6000, 625, "Acolyte_2", Camera.ASPECT_RATIO));
-		map.getCast().getLast().setMaxSpeed(1.75f);
-		map.getCast().getLast().setDirection(1);
-		((Enemy) map.getCast().getLast()).getStats().getHealth().setCurrent(50f);
-		map.getScenery().add(map.getCast().getLast());
-		map.getCast().add(new Enemy(6180, 630, "Acolyte_2", Camera.ASPECT_RATIO));
-		map.getCast().getLast().setMaxSpeed(1.75f);
-		map.getCast().getLast().setDirection(1);
-		((Enemy) map.getCast().getLast()).getStats().getHealth().setCurrent(50f);
-		map.getScenery().add(map.getCast().getLast());
-
+		//map = Map.deserialize("Map001");
+		
 		for(Entity e : map.getScenery()) {
 			System.out.println(e.getID());
 		}
@@ -68,41 +50,6 @@ public class Stage extends GameSetup {
 		Camera.get().centerOn(this);
 		map.getScenery().add(player);
 				
-		((Ally) findEntity("Ally1")).setDirection(1);
-		((Ally) findEntity("Ally0")).setScript(new Script("<s0.3>Et tu, Skelebones?", 
-				"{event: [{showText: 'Congratulations.;You reached the end.'},{showText: 'Press " + Keybinds.SLOT8.getKey() + " to restart.'}] }"));
-		
-		((Enemy) findEntity("Enemy2")).getIntelligence().addTrait(new Minion(null));
-		((Enemy) findEntity("Enemy3")).getIntelligence().addTrait(new Minion(null));
-		((Enemy) findEntity("Enemy4")).getStats().getHealth().setCurrent(45f);
-		((Enemy) findEntity("Enemy7")).getStats().getHealth().setCurrent(50f);
-		((Actor) findEntity("Enemy7")).setMaxSpeed(1.8f);
-		((Enemy) findEntity("Enemy8")).getStats().getHealth().setCurrent(40f);
-		((Actor) findEntity("Enemy8")).setDirection(0);
-		((Enemy) findEntity("Enemy9")).getStats().getHealth().setCurrent(40f);
-		findEntity("Enemy9").setPosition(5160, 775);
-		
-		for(Actor a : getCast()) {
-			if(a instanceof Intelligent) {
-				if(((Enemy) a).getIntelligence().getPersonality().equals(Personality.NEUTRAL)) {
-					((Enemy) a).getIntelligence().setPersonality(Personality.AGGRESSIVE);
-				}
-			}
-		}
-		
-		/*((Actor) findEntity("Enemy2")).setMaxSpeed(1.75f);
-		ArrayList<Intelligent> tempList = new ArrayList<Intelligent>();
-		tempList.add((Intelligent) findEntity("Enemy3"));
-		tempList.add((Intelligent) findEntity("Enemy4"));
-		tempList.add((Intelligent) findEntity("Enemy5"));
-		((Enemy) findEntity("Enemy2")).getIntelligence().addTrait(new PackLeader(tempList));
-		((Actor) findEntity("Enemy3")).setMaxSpeed(1.2f);
-		((Enemy) findEntity("Enemy3")).getIntelligence().addTrait(new Minion((Intelligent) findEntity("Enemy2")));
-		((Actor) findEntity("Enemy4")).setMaxSpeed(1.2f);
-		((Enemy) findEntity("Enemy4")).getIntelligence().addTrait(new Minion((Intelligent) findEntity("Enemy2")));
-		((Actor) findEntity("Enemy5")).setMaxSpeed(1.6f);
-		((Enemy) findEntity("Enemy5")).getIntelligence().addTrait(new Minion((Intelligent) findEntity("Enemy2")));*/
-
 		//map.getLights().get(0).setParent(player);
 	}
 
@@ -172,8 +119,8 @@ public class Stage extends GameSetup {
 			b.draw();
 		}
 		
-		for(Prop p : map.getProps()) {
-			p.draw();
+		for(Backdrop g : map.getGround()) {
+			g.draw();
 		}
 
 		for(LightSource l : map.getLights()) {
@@ -195,8 +142,8 @@ public class Stage extends GameSetup {
 			e.draw();
 		}
 
-		for(Backdrop b : map.getForeground()) {
-			b.draw();
+		for(Backdrop f : map.getForeground()) {
+			f.draw();
 		}
 
 		if(map.getFog() != null)
@@ -208,7 +155,10 @@ public class Stage extends GameSetup {
 			LightMap.draw();
 			//LightMap.drawNoFBO();
 		}
-		
+	}
+	
+	@Override
+	public void drawUI() {
 		for(UIElement ui : uiElements) {
 			ui.draw();
 		}

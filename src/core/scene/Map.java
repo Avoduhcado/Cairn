@@ -22,6 +22,7 @@ import core.scene.collisions.Collidable;
 import core.scene.collisions.HitMaps;
 import core.scene.collisions.PathPolygon;
 import core.scene.collisions.Slope;
+import core.utilities.keyboard.Keybinds;
 import core.utilities.scripts.Script;
 import core.entities.Actor;
 import core.entities.Ally;
@@ -54,29 +55,30 @@ public class Map implements Serializable {
 	private LinkedList<LightSource> lights = new LinkedList<LightSource>();
 	
 	private LinkedList<Backdrop> background = new LinkedList<Backdrop>();
+	private LinkedList<Backdrop> ground = new LinkedList<Backdrop>();
 	private LinkedList<Backdrop> foreground = new LinkedList<Backdrop>();
 	
 	public Map() {
 		resetEntity();
 
 		loadBackdrop(450, 375, "Parallax", -0.1f);
-		loadBackdrop(190, 480, "Entrance", 0f);
-		loadBackdrop(333, 823, "Graves", 0f);
-		loadBackdrop(782, 518, "Posts", 0f);
+		loadBackdrop(0, 0, "Graveyard", 0f);
+
+		loadProp(190, 480, "Entrance");
+		loadProp(333, 823, "Graves");
+		loadProp(782, 518, "Posts");
+		loadProp(1705, 990, "Cairn");
+		loadProp(7688, 830, "Railing");
 		
-		loadProp("Graveyard");
-		
-		cast.add(new Ally(8450, 710, "The Fool", Camera.ASPECT_RATIO, new Script("<s0.3>She had a cradle...",
-				"{event: [{showText: 'You reached the end.'},{showText: 'Congratulations.'}] }")));
+		scenery.addAll(props);
+
+		cast.add(new Ally(8450, 710, "The Fool", Camera.ASPECT_RATIO, new Script("<s0.3>Et tu, Skelebones?", 
+				"{event: [{showText: 'Congratulations.;You reached the end.'},{showText: 'Press <t+,$key:SLOT8> to restart.'}] }")));
 		cast.add(new Ally(1875, 1000, "Gravedigger", Camera.ASPECT_RATIO, new Script("<s0.3>How curious.", 
 				"{event: [{showText: 'Fair tidings, child.;Good to see you returned unharmed.'},"
 				+ "{showText: 'Might you care for a release date?'}, {choose: [{option: 'YES!!',result: [{showText: 'Neato'}]},"
 				+ "{option: No,result: [{showText: 'Oh'},{showText: 'Ok then...'}]}]},{showText: Goodbye} ] }")));
-		
-		/*cast.add(new Enemy(420, 670, "Shepherd", Camera.ASPECT_RATIO));
-		cast.add(new Enemy(570, 750, "Flock", Camera.ASPECT_RATIO));
-		cast.add(new Enemy(510, 800, "Flock 2", Camera.ASPECT_RATIO));
-		cast.add(new Enemy(720, 770, "Flock 3", Camera.ASPECT_RATIO));*/
+		cast.getLast().setDirection(1);
 		
 		cast.add(new Enemy(700, 705, "Flock", Camera.ASPECT_RATIO));
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion(null));
@@ -87,6 +89,7 @@ public class Map implements Serializable {
 		cast.add(new Enemy(3020, 410, "Shepherd", Camera.ASPECT_RATIO));
 		cast.getLast().setDirection(1);
 		cast.getLast().setMaxSpeed(1.6f);
+		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(45f);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new PackLeader(null));
 		cast.add(new Enemy(2835, 470, "Flock", Camera.ASPECT_RATIO));
 		cast.getLast().setDirection(1);
@@ -99,13 +102,25 @@ public class Map implements Serializable {
 		
 		cast.add(new Enemy(3830, 805, "Acolyte", Camera.ASPECT_RATIO));
 		cast.getLast().setDirection(1);
-		cast.getLast().setMaxSpeed(1.6f);
+		cast.getLast().setMaxSpeed(1.8f);
+		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(50f);
 		
 		cast.add(new Enemy(4900, 750, "Shepherd", Camera.ASPECT_RATIO));
 		cast.getLast().setMaxSpeed(1.6f);
-		cast.add(new Enemy(5160, 800, "Shepherd", Camera.ASPECT_RATIO));
+		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(40f);
+		cast.add(new Enemy(5160, 775, "Shepherd", Camera.ASPECT_RATIO));
 		cast.getLast().setDirection(1);
 		cast.getLast().setMaxSpeed(1.6f);
+		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(40f);
+		
+		cast.add(new Enemy(6000, 625, "Acolyte_2", Camera.ASPECT_RATIO));
+		cast.getLast().setMaxSpeed(1.75f);
+		cast.getLast().setDirection(1);
+		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(50f);
+		cast.add(new Enemy(6180, 630, "Acolyte_2", Camera.ASPECT_RATIO));
+		cast.getLast().setMaxSpeed(1.75f);
+		cast.getLast().setDirection(1);
+		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(50f);
 		
 		scenery.addAll(cast);
 		
@@ -210,7 +225,7 @@ public class Map implements Serializable {
 		HitMaps.populateMap(HitMaps.getCollisionMap(), walls);
 	}
 
-	public void loadProp(String prop) {
+	public void loadProp(int x, int y, String prop) {
 		File propDirectory = new File(System.getProperty("resources") + "/sprites/" + prop);
 		if(propDirectory.exists() && propDirectory.isDirectory()) {
 			String[] propNames = propDirectory.list();
@@ -218,10 +233,14 @@ public class Map implements Serializable {
 				n = n.split(".png")[0];
 				String loc = n.substring(n.lastIndexOf('[') + 1, n.lastIndexOf(']'));
 				Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
-				props.add(new Prop((int) Math.floor((coord.y * SpriteIndex.getSprite(prop + "/" + n).getWidth()) * Camera.ASPECT_RATIO),
-						(int) Math.floor((coord.x * SpriteIndex.getSprite(prop + "/" + n).getHeight()) * Camera.ASPECT_RATIO),
+				props.add(new Prop(
+						(int) Math.floor(((coord.y * SpriteIndex.getSprite(prop + "/" + n).getWidth()) * Camera.ASPECT_RATIO) + x),
+						(int) Math.floor(((coord.x * SpriteIndex.getSprite(prop + "/" + n).getHeight()) * Camera.ASPECT_RATIO) + y),
 						prop + "/" + n, Camera.ASPECT_RATIO));
 			}
+		} else {
+			System.out.println(prop + " needs to be converted to a directory!");
+			props.add(new Prop(x, y, prop, Camera.ASPECT_RATIO));
 		}
 	}
 
@@ -257,7 +276,7 @@ public class Map implements Serializable {
 					return;
 				}
 			}
-		} else {
+		} else if(backdrop.getDepth() > 0f){
 			if(foreground.isEmpty()) {
 				foreground.add(backdrop);
 				return;
@@ -268,6 +287,8 @@ public class Map implements Serializable {
 					return;
 				}
 			}
+		} else {
+			ground.add(backdrop);
 		}
 	}
 	
@@ -288,6 +309,10 @@ public class Map implements Serializable {
 
 	public LinkedList<Backdrop> getBackground() {
 		return background;
+	}
+	
+	public LinkedList<Backdrop> getGround() {
+		return ground;
 	}
 	
 	public LinkedList<Backdrop> getForeground() {

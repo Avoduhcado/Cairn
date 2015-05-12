@@ -22,16 +22,21 @@ public enum CharState {
 	
 	public boolean canAct() {
 		switch(this) {
-		case ATTACK:
-		case DEFEND:
-		case DEATH:
-		case DEAD:
-		case HIT:
-		case RECOIL:
-		case REVIVE:
-			return false;
-		default:
+		case WALK:
+		case IDLE:
 			return true;
+		default:
+			return false;	
+		}
+	}
+	
+	public boolean canWalk() {
+		switch(this) {
+		case WALK:
+		case IDLE:
+			return true;
+		default:
+			return false;	
 		}
 	}
 	
@@ -39,17 +44,20 @@ public enum CharState {
 	 * @return -1 for Hit/Dying, 1 for defending, 2 for recoiling, 3 for dodging
 	 */
 	public int getHitState() {
-		if(this == HIT || this == DEATH || this == DEAD) {
+		switch(this) {
+		case HIT:
+		case DEATH:
+		case DEAD:
 			return -1;
-		} else if(this == DEFEND) {
+		case DEFEND:
 			return 1;
-		} else if(this == RECOIL) {
+		case RECOIL:
 			return 2;
-		} else if(this == QUICKSTEP) {
+		case QUICKSTEP:
 			return 3;
+		default:
+			return 0;
 		}
-		
-		return 0;
 	}
 	
 	@Override

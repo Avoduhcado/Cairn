@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 
 /** Provides information about, and access to, a single field of a class or interface.
  * @author nexsoftware */
+@SuppressWarnings("rawtypes")
 public final class Field {
 
 	private final java.lang.reflect.Field field;

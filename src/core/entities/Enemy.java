@@ -4,8 +4,6 @@ import java.awt.Polygon;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RectangularShape;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import org.lwjgl.util.vector.Vector2f;
@@ -280,17 +278,15 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		Weapon weapon = new Weapon(attackName, AttackType.UNARMED, 10f);
 		for(Timeline t : attack.getTimelines()) {
 			if(t instanceof EventTimeline) {
-				Region region = null;
-				Bone bone = null;
 				for(int i = 0; i<((EventTimeline) t).getFrameCount(); i++) {
 					if(((EventTimeline) t).getEvents()[i].getData().getName().matches("Damage")) {
 						// Apply animation transform to receive proper positioning
 						attack.apply(skeleton, 0, ((EventTimeline) t).getFrames()[i], false, null);
 						skeleton.updateWorldTransform();
-						if(region == null) {
-							region = (Region) skeleton.findSlot(((EventTimeline) t).getEvents()[i].getString()).getAttachment();
-							bone = skeleton.findBone(((EventTimeline) t).getEvents()[i].getString());
-						}
+						
+						Region region = (Region) skeleton.findSlot(((EventTimeline) t).getEvents()[i].getString()).getAttachment();
+						Bone bone = skeleton.findBone(((EventTimeline) t).getEvents()[i].getString());
+						
 						weapon.setAttackRange(new Rectangle2D.Double(bone.getWorldX() + region.getOffsetX(),
 								bone.getWorldY(), region.getBox().getWidth(), region.getBox().getHeight()));
 						
@@ -364,7 +360,6 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			switch(state) {
 			case ATTACK:
 				animState.setAnimation(0, equipment.getEquippedWeapon().getAttackAnim(), false);
-				//animState.setAnimation(0, "Attack2", false);
 				break;
 			case DEFEND:
 				animState.setAnimation(0, "Defend", false);

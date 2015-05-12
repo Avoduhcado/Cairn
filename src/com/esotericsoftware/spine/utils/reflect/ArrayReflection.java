@@ -21,6 +21,7 @@ package com.esotericsoftware.spine.utils.reflect;
 public final class ArrayReflection {
 
 	/** Creates a new array with the specified component type and length. */
+	@SuppressWarnings("rawtypes")
 	static public Object newInstance (Class c, int size) {
 		return java.lang.reflect.Array.newInstance(c, size);
 	}

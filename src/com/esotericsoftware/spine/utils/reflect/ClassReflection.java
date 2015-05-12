@@ -20,6 +20,7 @@ import java.lang.reflect.Modifier;
 
 /** Utilities for Class reflection.
  * @author nexsoftware */
+@SuppressWarnings("rawtypes")
 public final class ClassReflection {
 
 	/** Returns the Class object associated with the class or interface with the supplied string name. */
@@ -43,6 +44,7 @@ public final class ClassReflection {
 
 	/** Determines if the class or interface represented by first Class parameter is either the same as, or is a superclass or
 	 * superinterface of, the class or interface represented by the second Class parameter. */
+	@SuppressWarnings("unchecked")
 	static public boolean isAssignableFrom (Class c1, Class c2) {
 		return c1.isAssignableFrom(c2);
 	}
@@ -85,6 +87,7 @@ public final class ClassReflection {
 
 	/** Returns a {@link Constructor} that represents the public constructor for the supplied class which takes the supplied
 	 * parameter types. */
+	@SuppressWarnings("unchecked")
 	static public Constructor getConstructor (Class c, Class... parameterTypes) throws ReflectionException {
 		try {
 			return new Constructor(c.getConstructor(parameterTypes));
@@ -98,6 +101,7 @@ public final class ClassReflection {
 
 	/** Returns a {@link Constructor} that represents the constructor for the supplied class which takes the supplied parameter
 	 * types. */
+	@SuppressWarnings("unchecked")
 	static public Constructor getDeclaredConstructor (Class c, Class... parameterTypes) throws ReflectionException {
 		try {
 			return new Constructor(c.getDeclaredConstructor(parameterTypes));
@@ -120,6 +124,7 @@ public final class ClassReflection {
 
 	/** Returns a {@link Method} that represents the public member method for the supplied class which takes the supplied parameter
 	 * types. */
+	@SuppressWarnings("unchecked")
 	static public Method getMethod (Class c, String name, Class... parameterTypes) throws ReflectionException {
 		try {
 			return new Method(c.getMethod(name, parameterTypes));
@@ -141,6 +146,7 @@ public final class ClassReflection {
 	}
 
 	/** Returns a {@link Method} that represents the method declared by the supplied class which takes the supplied parameter types. */
+	@SuppressWarnings("unchecked")
 	static public Method getDeclaredMethod (Class c, String name, Class... parameterTypes) throws ReflectionException {
 		try {
 			return new Method(c.getDeclaredMethod(name, parameterTypes));
@@ -194,6 +200,7 @@ public final class ClassReflection {
 	}
 
 	/** Returns true if the supplied class includes an annotation of the given class type. */
+	@SuppressWarnings("unchecked")
 	static public boolean isAnnotationPresent (Class c, Class<? extends java.lang.annotation.Annotation> annotationType) {
 		return c.isAnnotationPresent(annotationType);
 	}

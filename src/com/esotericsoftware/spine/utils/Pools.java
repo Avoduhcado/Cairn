@@ -21,11 +21,13 @@ import java.util.HashMap;
 
 /** Stores a map of {@link Pool}s (usually {@link ReflectionPool}s) by type for convenient static access.
  * @author Nathan Sweet */
+@SuppressWarnings("rawtypes")
 public class Pools {
 	static private final HashMap<Class, Pool> typePools = new HashMap<Class, Pool>();
 
 	/** Returns a new or existing pool for the specified type, stored in a Class to {@link Pool} map. Note the max size is ignored
 	 * if this is not the first time this pool has been requested. */
+	@SuppressWarnings("unchecked")
 	static public <T> Pool<T> get (Class<T> type, int max) {
 		Pool pool = typePools.get(type);
 		if (pool == null) {
@@ -52,6 +54,7 @@ public class Pools {
 	}
 
 	/** Frees an object from the {@link #get(Class) pool}. */
+	@SuppressWarnings("unchecked")
 	static public void free (Object object) {
 		if (object == null) throw new IllegalArgumentException("Object cannot be null.");
 		Pool pool = typePools.get(object.getClass());
@@ -67,6 +70,7 @@ public class Pools {
 
 	/** Frees the specified objects from the {@link #get(Class) pool}. Null objects within the array are silently ignored.
 	 * @param samePool If true, objects don't need to be from the same pool but the pool must be looked up for each object. */
+	@SuppressWarnings("unchecked")
 	static public void freeAll (ArrayList objects, boolean samePool) {
 		if (objects == null) throw new IllegalArgumentException("Objects cannot be null.");
 		Pool pool = null;

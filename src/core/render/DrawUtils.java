@@ -1,7 +1,6 @@
 package core.render;
 
 import java.awt.Polygon;
-import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;

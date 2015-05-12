@@ -77,7 +77,7 @@ public class Input {
 				//((Actor) ((Stage) setup).getPlayer()).setState(CharState.RUN);
 			}
 
-			if(((Stage) setup).getPlayer().canWalk()) {
+			if(((Stage) setup).getPlayer().getState().canWalk()) {
 				if(Keybinds.DODGE.clicked()) {
 					((Stage) setup).getPlayer().dodge(null);
 				}
@@ -105,21 +105,23 @@ public class Input {
 				}
 			}
 			
-			if(Keybinds.ATTACK.clicked()) {
-				((Player) ((Stage) setup).getPlayer()).attack();
-			} else if(Keybinds.DEFEND.clicked()) {
-				((Player) ((Stage) setup).getPlayer()).defend();
+			if(((Stage) setup).getPlayer().getState().canAct()) {
+				if(Keybinds.ATTACK.clicked()) {
+					((Player) ((Stage) setup).getPlayer()).attack();
+				} else if(Keybinds.DEFEND.clicked()) {
+					((Player) ((Stage) setup).getPlayer()).defend();
+				}
+				
+				if(Keybinds.SLOT1.clicked()) {
+					((Stage) setup).getPlayer().changeWeapon(Equipment.lightMace);
+				} else if(Keybinds.SLOT2.clicked()) {
+					((Stage) setup).getPlayer().changeWeapon(Equipment.heavyMace);
+				} else if(Keybinds.SLOT3.clicked()) {
+					((Stage) setup).getPlayer().changeWeapon(Equipment.polearm);
+				}
 			}
 			
-			if(Keybinds.SLOT1.clicked()) {
-				((Stage) setup).getPlayer().changeWeapon(Equipment.lightMace);
-			} else if(Keybinds.SLOT2.clicked()) {
-				((Stage) setup).getPlayer().changeWeapon(Equipment.heavyMace);
-			} else if(Keybinds.SLOT3.clicked()) {
-				((Stage) setup).getPlayer().changeWeapon(Equipment.polearm);
-			}
-			
-			/*if(Keybinds.SLOT7.clicked()) {
+			if(Keybinds.SLOT7.clicked()) {
 				for(Actor a : ((Stage) setup).getCast()) {
 					if(a instanceof Intelligent) {
 						if(((Enemy) a).getIntelligence().getPersonality().equals(Personality.NEUTRAL)) {
@@ -129,18 +131,18 @@ public class Input {
 						}
 					}
 				}
-			}*/
+			}
 			if(Keybinds.SLOT8.clicked()) {
 				Theater.get().swapSetup(new Stage());
 			}
-			/*if(Keybinds.SLOT9.clicked()) {
+			if(Keybinds.SLOT9.clicked()) {
 				((Stage) setup).getPlayer().setPosition(8000, 700);
 				Camera.get().centerOn((Stage) setup);
 			}
 			if(Keybinds.SLOT0.clicked()) {
 				((Stage) setup).getPlayer().setPosition(900, 800);
 				Camera.get().centerOn((Stage) setup);
-			}*/
+			}
 			
 			if(Keybinds.MENU.clicked()) {
 				Camera.get().setScale(1f);

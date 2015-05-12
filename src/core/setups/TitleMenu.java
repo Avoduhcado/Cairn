@@ -72,12 +72,17 @@ public class TitleMenu extends GameSetup {
 	
 	@Override
 	public void draw() {
+		
+	}
+	
+	@Override
+	public void drawUI() {
 		// Draw logo
 		logo.draw(Float.NaN, Camera.get().getDisplayHeight(0.1667f));
-		
+
 		// Draw buttons
 		buttonGroup.draw();
-		
+
 		// If options menu is open, draw it
 		if(optionsMenu != null)
 			optionsMenu.draw();

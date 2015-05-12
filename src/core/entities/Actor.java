@@ -162,8 +162,11 @@ public class Actor extends Entity implements Mobile {
 		}
 		skeleton.updateWorldTransform();
 				
-		this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
+		/*this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				pos.y - ((skeleton.getData().getHeight() * scale) / 2f), 
+				skeleton.getData().getWidth() * scale, skeleton.getData().getHeight() * scale);*/
+		this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
+				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)), 
 				skeleton.getData().getWidth() * scale, skeleton.getData().getHeight() * scale);
 		
 		animStateData = new AnimationStateData(skeleton.getData());
@@ -236,11 +239,11 @@ public class Actor extends Entity implements Mobile {
 	
 	@Override
 	public void updateBox() {
-		/*this.box.setFrame(pos.x - (box.getWidth() / 2f),
-				pos.y + (skeleton.getData().getCenterY() * scale) - ((skeleton.getData().getHeight() * 0.3f) * scale),
+		/*this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
+				pos.y - ((skeleton.getData().getHeight() * scale) / 2f), 
 				box.getWidth(), box.getHeight());*/
 		this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
-				pos.y - ((skeleton.getData().getHeight() * scale) / 2f), 
+				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)),
 				box.getWidth(), box.getHeight());
 	}
 	
@@ -311,35 +314,26 @@ public class Actor extends Entity implements Mobile {
 		this.velocity.x = velocity.x;
 		this.velocity.y = velocity.y;
 	}
-	
-	public boolean canWalk() {
-		// TODO THE FUCK IS THISSSSS??? Put in CharState
-		if(state != CharState.ATTACK && state != CharState.DEFEND && state != CharState.HIT && state != CharState.REVIVE) {
-			return true;
-		}
-		
-		return false;
-	}
 
 	public void moveRight() {
 		velocity.x += Theater.getDeltaSpeed(0.5f);
-		if(velocity.length() > (state == CharState.RUN ? maxRunSpeed : maxSpeed)) {
-			velocity = MathFunctions.limitVector(velocity, (state == CharState.RUN ? maxRunSpeed : maxSpeed));
+		if(velocity.length() > getMaxSpeed()) {
+			velocity = MathFunctions.limitVector(velocity, getMaxSpeed());
 		}
 	}
 	
 	public void moveLeft() {
 		velocity.x -= Theater.getDeltaSpeed(0.5f);
-		if(velocity.length() > (state == CharState.RUN ? maxRunSpeed : maxSpeed)) {
-			velocity = MathFunctions.limitVector(velocity, (state == CharState.RUN ? maxRunSpeed : maxSpeed));
+		if(velocity.length() > getMaxSpeed()) {
+			velocity = MathFunctions.limitVector(velocity, getMaxSpeed());
 		}
 	}
 	
 	public void moveUp() {
 		if(velocity.x != 0f) {
 			velocity.y -= Theater.getDeltaSpeed(0.45f);
-			if(velocity.length() > (state == CharState.RUN ? maxRunSpeed : maxSpeed)) {
-				velocity = MathFunctions.limitVector(velocity, (state == CharState.RUN ? maxRunSpeed : maxSpeed));
+			if(velocity.length() > getMaxSpeed()) {
+				velocity = MathFunctions.limitVector(velocity, getMaxSpeed());
 			}
 		}
 	}
@@ -347,8 +341,8 @@ public class Actor extends Entity implements Mobile {
 	public void moveDown() {
 		if(velocity.x != 0f) {			
 			velocity.y += Theater.getDeltaSpeed(0.45f);
-			if(velocity.length() > (state == CharState.RUN ? maxRunSpeed : maxSpeed)) {
-				velocity = MathFunctions.limitVector(velocity, (state == CharState.RUN ? maxRunSpeed : maxSpeed));
+			if(velocity.length() > getMaxSpeed()) {
+				velocity = MathFunctions.limitVector(velocity, getMaxSpeed());
 			}
 		}
 	}
@@ -410,6 +404,9 @@ public class Actor extends Entity implements Mobile {
 	}
 
 	public float getMaxSpeed() {
+		if(state == CharState.RUN) {
+			return maxRunSpeed;
+		}
 		return maxSpeed;
 	}
 

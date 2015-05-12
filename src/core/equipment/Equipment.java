@@ -1,11 +1,8 @@
 package core.equipment;
 
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 import java.util.ArrayList;
-
-import core.entities.Entity;
 
 public class Equipment implements Serializable {
 

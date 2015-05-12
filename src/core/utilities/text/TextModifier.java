@@ -3,13 +3,19 @@ package core.utilities.text;
 import java.awt.Color;
 import java.lang.reflect.Field;
 
+import core.utilities.keyboard.Keybinds;
+
 public class TextModifier {
 
+	/** TODO Add delimiter for accessing variables $variable somehow?
+	 */
+	
 	private Color color = Color.white;
 	private Color dropColor = Color.black;
 	private boolean dropShadow = true;
 	private float size = GameFont.defaultSize;
 	private boolean still = false;
+	private String addIn = null;
 	private String fontFace = "DEBUG";
 	
 	public TextModifier(String modifier) {
@@ -52,6 +58,14 @@ public class TextModifier {
 					break;
 				case 'f':
 					fontFace = temp[x].substring(1);
+					break;
+				case '$':
+					String type = temp[x].substring(1).split(":")[0];
+					switch(type) {
+					case "key":
+						addIn = Keybinds.valueOf(temp[x].substring(1).split(":")[1]).getKey();
+						break;
+					}
 					break;
 				}
 			}
@@ -98,6 +112,14 @@ public class TextModifier {
 			case 'f':
 				fontFace = temp[x].substring(1);
 				break;
+			case '$':
+				String type = temp[x].substring(1).split(":")[0];
+				switch(type) {
+				case "key":
+					addIn = Keybinds.valueOf(temp[x].substring(1).split(":")[1]).getKey();
+					break;
+				}
+				break;
 			}
 		}
 	}
@@ -108,6 +130,13 @@ public class TextModifier {
 		Text.getFont(fontFace).setDropColor(dropColor);
 		Text.getFont(fontFace).setSize(size);
 		Text.getFont(fontFace).setStill(still);
+	}
+	
+	public String getAddIn() {
+		if(addIn == null)
+			return "";
+		
+		return addIn;
 	}
 
 	public String getFontFace() {
