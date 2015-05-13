@@ -1,14 +1,16 @@
 package core.render.textured;
 
 import java.awt.Color;
+import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+import org.newdawn.slick.opengl.TextureLoader;
+import org.newdawn.slick.util.ResourceLoader;
 
 import core.Camera;
-import core.render.TextureLoader;
 import core.utilities.text.GameFont;
 
 public class Glyph extends Sprite {
@@ -84,8 +86,10 @@ public class Glyph extends Sprite {
 		textureYHeight = (y * yRatio) + (height * yRatio);
 	}
 	
-	public void setTexture(String ref) {
-		this.texture = TextureLoader.get().getSlickTexture(System.getProperty("resources") + "/fonts/" + ref + ".png");
+	@Override
+	public void setTexture(String ref) throws IOException {
+		this.texture = TextureLoader.getTexture("PNG",
+				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/fonts/" + ref + ".png"));
 	}
 	
 	public void setColor(Color color) {

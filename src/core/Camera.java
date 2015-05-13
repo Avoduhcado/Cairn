@@ -108,6 +108,7 @@ public class Camera {
 			GL11.glLoadIdentity();
 			GL11.glOrtho(0, displayWidth, displayHeight, 0, -1, 1);
 			GL11.glViewport(0, 0, displayWidth, displayHeight);
+			GL11.glClearColor(0f, 0f, 0f, 0f);
 			GL11.glClearStencil(0);
 		} catch (LWJGLException e) {
 			System.err.println("Could not create display.");

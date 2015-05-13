@@ -1,12 +1,14 @@
 package core.render.textured;
 
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import org.newdawn.slick.opengl.TextureLoader;
+import org.newdawn.slick.util.ResourceLoader;
 
 import core.Camera;
-import core.render.TextureLoader;
 
 public class UIFrame extends Sprite {
 
@@ -38,13 +40,13 @@ public class UIFrame extends Sprite {
 			GL11.glTranslatef((int) x, (int) y, 0f);
 		else
 			GL11.glTranslatef((int) (x - Camera.get().frame.getX()), (int) (y - Camera.get().frame.getY()), 0f);
-		/*GL11.glColor4f(1f, 1f, 1f, opacity);
+		GL11.glColor4f(1f, 1f, 1f, opacity);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);*/
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 
 		for(int a = 0; a<3; a++) {
 			for(int b = 0; b<3; b++) {
@@ -156,8 +158,10 @@ public class UIFrame extends Sprite {
 		}
 	}
 	
-	public void setTexture(String ref) {
-		this.texture = TextureLoader.get().getSlickTexture(System.getProperty("resources") + "/ui/" + ref + ".png");
+	@Override
+	public void setTexture(String ref) throws IOException {
+		this.texture = TextureLoader.getTexture("PNG",
+				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/ui/" + ref + ".png"));
 	}
 	
 	public float getOpacity() {

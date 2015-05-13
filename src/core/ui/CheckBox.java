@@ -18,7 +18,7 @@ public class CheckBox extends UIElement {
 		super(x, y, image);
 		
 		this.text = text;
-		box = new Rectangle2D.Double(x, y, Text.getDefault().getWidth(text), Text.getDefault().getHeight(text));
+		box = new Rectangle2D.Double(this.x, this.y, Text.getDefault().getWidth(text), Text.getDefault().getHeight(text));
 	}
 	
 	@Override
@@ -34,7 +34,7 @@ public class CheckBox extends UIElement {
 
 		if(isHovering()) {
 			DrawUtils.setColor(new Vector3f(1f, 1f, 1f));
-			DrawUtils.drawRect(x - 2.5f, y - 2.5f, new Rectangle2D.Double(x, y, box.getWidth() + 5f, box.getHeight() + 5f));
+			DrawUtils.drawRect(0, 0, box);
 		}
 		Text.getDefault().setStill(still);
 		Text.getDefault().setColor(checked ? Color.white : Color.gray);

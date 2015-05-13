@@ -1,15 +1,18 @@
 package core.render.textured;
 
+import java.io.IOException;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.opengl.TextureLoader;
+import org.newdawn.slick.util.ResourceLoader;
 
 import core.Camera;
 import core.Theater;
-import core.render.TextureLoader;
 
 public class Sprite {
 	
@@ -39,7 +42,11 @@ public class Sprite {
 	protected boolean intScale;
 	
 	public Sprite(String ref) {
-		setTexture(ref);
+		try {
+			setTexture(ref);
+		} catch (IOException | RuntimeException e) {
+			setErrorTexture();
+		}
 		
 		if(ref.contains("^")) {
 			String[] temp = ref.split("\\^");
@@ -142,8 +149,17 @@ public class Sprite {
 		textureYHeight = (height * direction) + height;
 	}
 	
-	public void setTexture(String ref) {
-		this.texture = TextureLoader.get().getSlickTexture(System.getProperty("resources") + "/sprites/" + ref + ".png");
+	public void setTexture(String ref) throws IOException {
+		this.texture = TextureLoader.getTexture("PNG",
+				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/sprites/" + ref + ".png"));
+	}
+	
+	private void setErrorTexture() {
+		try {
+			setTexture("Error");
+		} catch (IOException e) {
+			System.err.println("Resources folder may be missing.");
+		}
 	}
 	
 	public void destroy() {
