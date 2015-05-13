@@ -14,12 +14,23 @@ public class MouseInput {
 		return (float) (Input.mouseCurrent.getX() / Camera.get().getFrameXScale());
 	}
 	
+	public static int getScreenMouseX() {
+		float scale = (float) ((Camera.get().frame.getWidth() * Camera.get().getScale()) / Camera.get().frame.getWidth());
+		return (int) ((Input.mouseCurrent.getX() * scale) + Camera.get().frame.getX());
+	}
+	
 	/**
 	 * @return Mouse Y scaled to any screen resizing
 	 */
 	public static float getMouseY() {
-		// Invert Mouse Y for some odd reason
+		// Invert Mouse Y because 0 is the bottom of the window
 		return (float) -(Input.mouseCurrent.getY() - Camera.get().frame.getHeight()) / Camera.get().getFrameYScale();
+	}
+	
+	public static int getScreenMouseY() {
+		return (int) (-((Input.mouseCurrent.getY() / Camera.get().getScale()) - Camera.get().frame.getHeight()) + Camera.get().frame.getY());
+		/*return (int) (-((Input.mouseCurrent.getY() / Camera.get().getScale()) - (Camera.get().frame.getHeight() / Camera.get().getScale()))
+				+ (Camera.get().frame.getY() + (Camera.get().frame.getHeight() * (Camera.get().getScale() - 1))));*/
 	}
 
 	/**

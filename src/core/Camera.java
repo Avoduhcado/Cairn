@@ -168,6 +168,9 @@ public class Camera {
 						
 		// Negate screen shake
 		settle();
+		
+		DrawUtils.setColor(new Vector3f(1f, 0f, 1f));
+		DrawUtils.drawRect((float) frame.getX(), (float) frame.getY(), frame);
 
 		// Reload identity to draw UI
 		GL11.glLoadIdentity();
@@ -206,8 +209,7 @@ public class Camera {
 			
 			Text.getFont("DEBUG").setStill(true);
 			Text.getFont("DEBUG").setColor(Color.lightGray);
-			Text.getFont("DEBUG").drawString((int) (MouseInput.getMouseX() + frame.getX())
-					+ ", " + (int) ((MouseInput.getMouseY()) + frame.getY()),
+			Text.getFont("DEBUG").drawString(MouseInput.getScreenMouseX() + ", " + MouseInput.getScreenMouseY(),
 					(float) MouseInput.getMouseX(), MouseInput.getMouseY() - 32);
 		}
 	}

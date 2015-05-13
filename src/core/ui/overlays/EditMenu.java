@@ -167,8 +167,8 @@ public class EditMenu extends MenuOverlay {
 		for(Polygon p : polys) {
 			
 			DrawUtils.setColor(new Vector3f(0.8f, 0f, 0.4f));
-			DrawUtils.drawShape(0, 0, p.getPathIterator(AffineTransform.getScaleInstance(Camera.get().getScale(), Camera.get().getScale())));
-			//DrawUtils.drawPoly(0, 0, p);
+			DrawUtils.applyCameraScale();
+			DrawUtils.drawPoly(0, 0, p);
 			
 			/*for(int i = 0; i<p.npoints - 1; i++) {
 				Vector2f vec = new Vector2f(p.xpoints[i + 1] - p.xpoints[i], p.ypoints[i + 1] - p.ypoints[i]);
@@ -186,6 +186,7 @@ public class EditMenu extends MenuOverlay {
 			if(editPolyPoints.isChecked()) {
 				for(int i = 0; i<p.npoints; i++) {
 					DrawUtils.setColor(new Vector3f(0f, 0f, 1f));
+					DrawUtils.applyCameraScale();
 					DrawUtils.drawRect(p.xpoints[i] - 10, p.ypoints[i] - 10, new Rectangle2D.Double(0, 0, 20, 20));
 				}
 			}
@@ -196,43 +197,37 @@ public class EditMenu extends MenuOverlay {
 			DrawUtils.drawPoly(0, 0, p);
 			for(PathPolygon p2 : p.getPaths()) {
 				DrawUtils.setColor(new Vector3f(1f, 0f, 1f));
+				DrawUtils.applyCameraScale();
 				DrawUtils.drawLine(new Line2D.Double(p.getCenter(), p2.getCenter()));
 			}
 		}
 		
 		if(currentPoly != null) {
 			DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
-			/*AffineTransform at = AffineTransform.getTranslateInstance(-currentPoly.getBounds2D().getWidth() / 2f,
-					-currentPoly.getBounds2D().getHeight() / 2f);
-			at.scale(Camera.get().getScale(), Camera.get().getScale());
-			at.translate(currentPoly.getBounds2D().getWidth() / 2f, currentPoly.getBounds2D().getHeight() / 2f);*/
+			DrawUtils.applyCameraScale();
+			DrawUtils.drawPoly(0, 0, currentPoly);
 			
-			AffineTransform at = AffineTransform.getScaleInstance(Camera.get().getScale(), Camera.get().getScale());
-			//at.translate(-Camera.get().frame.getWidth() / 2, -Camera.get().frame.getHeight() / 2);
-			
-			/*AffineTransform at = AffineTransform.getTranslateInstance(
-					(currentPoly.getBounds2D().getWidth() * (1 - Camera.get().getScale()) / 2f),
-					(currentPoly.getBounds2D().getHeight() * (1 - Camera.get().getScale()) / 2f));
-			at.scale(Camera.get().getScale(), Camera.get().getScale());*/
-			
-			DrawUtils.drawShape(0, 0, currentPoly.getPathIterator(at));
-			//DrawUtils.drawPoly(0, 0, currentPoly);
 			if(currentPoly.npoints > 0) {
 				DrawUtils.setColor(new Vector3f(0f, 0.2f, 1f));
+				DrawUtils.applyCameraScale();
 				DrawUtils.drawLine(new Line2D.Double(currentPoly.xpoints[currentPoly.npoints - 1],
 						currentPoly.ypoints[currentPoly.npoints - 1],
-						Mouse.getX() + Camera.get().frame.getX(),
-						Camera.get().frame.getY() - (Mouse.getY() - Camera.get().frame.getHeight())));
+						//Mouse.getX() + Camera.get().frame.getX(),
+						MouseInput.getScreenMouseX(),
+						MouseInput.getScreenMouseY()));
+						//Camera.get().frame.getY() - (Mouse.getY() - Camera.get().frame.getHeight())));
 				if(Keybinds.CONTROL.held()) {
 					DrawUtils.setColor(new Vector3f(0f, 0.8f, 0.4f));
 					if(Point.distance(MouseInput.getMouseX() + Camera.get().frame.getX(), 0, currentPoly.xpoints[currentPoly.npoints - 1], 0) < 
 							Point.distance(0, Camera.get().frame.getY() - (Mouse.getY() - Camera.get().frame.getHeight()),
 									0, currentPoly.ypoints[currentPoly.npoints - 1])) {
+						DrawUtils.applyCameraScale();
 						DrawUtils.drawLine(new Line2D.Double(currentPoly.xpoints[currentPoly.npoints - 1],
 								currentPoly.ypoints[currentPoly.npoints - 1],
 								currentPoly.xpoints[currentPoly.npoints - 1],
 								Camera.get().frame.getY() - (Mouse.getY() - Camera.get().frame.getHeight())));
 					} else {
+						DrawUtils.applyCameraScale();
 						DrawUtils.drawLine(new Line2D.Double(currentPoly.xpoints[currentPoly.npoints - 1],
 								currentPoly.ypoints[currentPoly.npoints - 1], MouseInput.getMouseX() + Camera.get().frame.getX(),
 								currentPoly.ypoints[currentPoly.npoints - 1]));
@@ -244,6 +239,7 @@ public class EditMenu extends MenuOverlay {
 		
 		if(editPoint != null) {
 			DrawUtils.setColor(new Vector3f(1f, 0f, 1f));
+			DrawUtils.applyCameraScale();
 			DrawUtils.drawRect(polys.get(editPoint.x).xpoints[editPoint.y] - 10, polys.get(editPoint.x).ypoints[editPoint.y] - 10,
 					new Rectangle2D.Double(0, 0, 20, 20));
 		}
@@ -264,7 +260,10 @@ public class EditMenu extends MenuOverlay {
 	}
 	
 	public void addPolyPoint() {
-		Point polyPoint = new Point((int) (Mouse.getX() + Camera.get().frame.getX()),
+		/*Point polyPoint = new Point((int) (Mouse.getX() + Camera.get().frame.getX()),
+				(int) (Camera.get().frame.getY() - (Mouse.getY() - Camera.get().frame.getHeight())));*/
+		
+		Point polyPoint = new Point(MouseInput.getScreenMouseX(),
 				(int) (Camera.get().frame.getY() - (Mouse.getY() - Camera.get().frame.getHeight())));
 		if(Keybinds.CONTROL.held() && currentPoly.npoints > 0) {
 			if(Point.distance(polyPoint.x, 0, currentPoly.xpoints[currentPoly.npoints - 1], 0) < 

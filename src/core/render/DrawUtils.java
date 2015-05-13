@@ -14,6 +14,7 @@ public class DrawUtils {
 	
 	/** Color of object to be drawn */
 	private static Vector3f color = new Vector3f(0f, 0f, 0f);
+	private static boolean scaled;
 
 	/**
 	 * Set new drawing color.
@@ -22,6 +23,21 @@ public class DrawUtils {
 	 */
 	public static void setColor(Vector3f color) {
 		DrawUtils.color = color;
+	}
+	
+	public static void applyCameraScale() {
+		GL11.glTranslated(Camera.get().frame.getWidth() / 2f, Camera.get().frame.getHeight() / 2f, 0);
+		GL11.glScalef(Camera.get().getScale(), Camera.get().getScale(), 1f);
+		GL11.glTranslated(-Camera.get().frame.getWidth() / 2f, -Camera.get().frame.getHeight() / 2f, 0);
+		scaled = true;
+	}
+	
+	private static void reset() {
+		color.set(0f, 0f, 0f);
+		if(scaled) {
+			GL11.glLoadIdentity();
+			scaled = false;
+		}
 	}
 	
 	/**
@@ -51,7 +67,7 @@ public class DrawUtils {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
 		// Reset color
-		color.set(0f, 0f, 0f);
+		reset();
 	}
 	
 	/**
@@ -82,13 +98,20 @@ public class DrawUtils {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
 		// Reset color
-		color.set(0f, 0f, 0f);
+		reset();
 	}
 	
 	public static void drawPoly(float x, float y, Polygon poly) {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
 		GL11.glPushMatrix();
+		
+		/*if(Float.isNaN(x)) {
+			GL11.glTranslated(Camera.get().frame.getWidth() / 2f, Camera.get().frame.getHeight() / 2f, 0);
+			GL11.glScalef(Camera.get().getScale(), Camera.get().getScale(), 1f);
+			GL11.glTranslated(-Camera.get().frame.getWidth() / 2f, -Camera.get().frame.getHeight() / 2f, 0);
+			GL11.glTranslatef((int) (0 - Camera.get().frame.getX()), (int) (y - Camera.get().frame.getY()), 0);
+		} else {*/
 		GL11.glTranslatef((int) (x - Camera.get().frame.getX()), (int) (y - Camera.get().frame.getY()), 0);
 		GL11.glColor3f(color.x, color.y, color.z);
 		GL11.glLineWidth(1.0f);
@@ -105,7 +128,8 @@ public class DrawUtils {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
 		// Reset color
-		color.set(0f, 0f, 0f);
+		//color.set(0f, 0f, 0f);
+		reset();
 	}
 	
 	public static void drawShape(float x, float y, PathIterator path) {
@@ -131,7 +155,7 @@ public class DrawUtils {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
 		// Reset color
-		color.set(0f, 0f, 0f);
+		reset();
 	}
 	
 	public static void drawGradient(float r, float g, float b, Rectangle2D rect, boolean fadeUp) {
@@ -157,7 +181,7 @@ public class DrawUtils {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
 		// Reset color
-		color.set(0f, 0f, 0f);
+		reset();
 	}
 	
 	/**
