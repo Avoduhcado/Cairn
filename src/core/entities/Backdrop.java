@@ -61,8 +61,8 @@ public class Backdrop extends Entity {
 	
 	public void update() {
 		Vector2f focalVelocity = new Vector2f();
-		focalVelocity.set(Camera.get().getFrameSpeed());
-		focalVelocity.scale(-depth);
+		focalVelocity.set(-Camera.get().getFrameSpeed().x, -Camera.get().getFrameSpeed().y);
+		focalVelocity.scale(depth);
 		if(focalVelocity.length() != 0) {
 			Vector2f.add(focalVelocity, offset, offset);
 		}

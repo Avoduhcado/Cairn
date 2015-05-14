@@ -17,10 +17,10 @@ public class MouseInput {
 	}
 	
 	public static int getScreenMouseX() {
-		//float scale = (float) ((Camera.get().frame.getWidth() * Camera.get().getScale()) / Camera.get().frame.getWidth());
-		//return (int) ((Input.mouseCurrent.getX() * scale) + Camera.get().frame.getX());
-		// TODO We're gettin' somewhere!
-		return (int) ((Camera.get().frame.getWidth() / Camera.get().getScale()) / (Camera.get().frame.getWidth() / Mouse.getX()));
+		// Calculate Screen Space Offset = (Scaled Width - Width) / 2
+		float sso = (float) (((Camera.get().frame.getWidth() / Camera.get().getScale()) - Camera.get().frame.getWidth()) / 2f);
+		return (int) (((Camera.get().frame.getWidth() / Camera.get().getScale()) / (Camera.get().frame.getWidth() / getMouseX()))
+				- (sso - Camera.get().frame.getX()));
 	}
 	
 	/**
@@ -32,9 +32,9 @@ public class MouseInput {
 	}
 	
 	public static int getScreenMouseY() {
-		return (int) (-((Input.mouseCurrent.getY() / Camera.get().getScale()) - Camera.get().frame.getHeight()) + Camera.get().frame.getY());
-		/*return (int) (-((Input.mouseCurrent.getY() / Camera.get().getScale()) - (Camera.get().frame.getHeight() / Camera.get().getScale()))
-				+ (Camera.get().frame.getY() + (Camera.get().frame.getHeight() * (Camera.get().getScale() - 1))));*/
+		float sso = (float) (((Camera.get().frame.getHeight() / Camera.get().getScale()) - Camera.get().frame.getHeight()) / 2f);
+		return (int) (((Camera.get().frame.getHeight() / Camera.get().getScale()) / (Camera.get().frame.getHeight() / getMouseY())
+				- (sso - Camera.get().frame.getY())));
 	}
 
 	/**
