@@ -9,6 +9,7 @@ import org.newdawn.easyogg.OggClip;
 import core.Theater;
 import core.utilities.MathFunctions;
 
+@Deprecated
 public class Track {
 
 	/** .OGG audio clip */

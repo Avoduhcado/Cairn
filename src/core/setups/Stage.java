@@ -3,11 +3,11 @@ package core.setups;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.lwjgl.util.vector.Vector3f;
 import core.Camera;
 import core.Input;
 import core.Theater;
-import core.audio.Ensemble;
-import core.audio.Track;
+import core.audio.AudioSource;
 import core.entities.Ally;
 import core.entities.Enemy;
 import core.entities.Backdrop;
@@ -32,10 +32,12 @@ public class Stage extends GameSetup {
 	private Player player;
 	private Map map;
 	
+	private AudioSource bgm;
+	
 	public Stage() {
 		Camera.get().setFadeTimer(-7.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
-		Ensemble.get().swapBackground(new Track("CairnArea4"), 5f, 5f);
+		bgm = new AudioSource("CairnArea4", "BGM");
 		
 		map = new Map();
 		
@@ -49,6 +51,9 @@ public class Stage extends GameSetup {
 		Camera.get().setFocus(player);
 		Camera.get().centerOn(this);
 		map.getScenery().add(player);
+		
+		//bgm.setPosition(new Vector3f(player.getX(), player.getY(), 5f));
+		bgm.getAudio().playAsMusic(1f, 0, true);
 				
 		//map.getLights().get(0).setParent(player);
 	}
@@ -60,6 +65,8 @@ public class Stage extends GameSetup {
 			if(gameMenu.isCloseRequest())
 				gameMenu = null;
 		} else {
+			bgm.update();
+			
 			for(int i = 0; i<uiElements.size(); i++) {
 				if(uiElements.get(i).isKill()) {
 					uiElements.remove(i);

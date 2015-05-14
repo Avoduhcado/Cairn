@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import org.newdawn.slick.openal.SoundStore;
+
 import core.Camera;
 import core.Theater;
 import core.audio.Ensemble;
@@ -105,8 +107,8 @@ public class SplashScreen extends GameSetup {
 			// Remove current screen
 			splashImages.poll();
 			// Stop any sound effects playing
-			if(Ensemble.get().getSoundEffect("Just Like Make Game") != null)
-				Ensemble.get().getSoundEffect("Just Like Make Game").getClip().stop();
+			//if(Ensemble.get().getSoundEffect("Just Like Make Game") != null)
+				//Ensemble.get().getSoundEffect("Just Like Make Game").getClip().stop();
 			// Restart screen if a new one exists
 			if(!splashImages.isEmpty()) {
 				timer = 5f;

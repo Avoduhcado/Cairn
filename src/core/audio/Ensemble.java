@@ -2,6 +2,7 @@ package core.audio;
 
 import java.util.ArrayList;
 
+@Deprecated
 public class Ensemble {
 
 	/** Array of all loaded sound effects */

@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.newdawn.easyogg.OggClip;
 
+@Deprecated
 public class SoundEffect {
 
 	/** .OGG audio clip */

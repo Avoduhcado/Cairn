@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.newdawn.slick.openal.SoundStore;
+
 import core.audio.Ensemble;
 import core.utilities.keyboard.Keybinds;
 
@@ -21,8 +23,10 @@ public class Config {
 	    		if(line.matches("<AUDIO>")) {
 	    			while((line = reader.readLine()) != null && !line.matches("<END>")) {
 		    			String[] temp = line.split("=");
-		    			if(temp[0].matches("volume"))
-		    				Ensemble.get().setMasterVolume(Float.parseFloat(temp[1]));
+		    			if(temp[0].matches("volume")) {
+		    				SoundStore.get().setMusicVolume(Float.parseFloat(temp[1]));
+		    				//Ensemble.get().setMasterVolume(Float.parseFloat(temp[1]));
+		    			}
 	    			}
 	    		} else if(line.matches("<VIDEO>")) {
 	    			// TODO Custom video settings
@@ -66,7 +70,7 @@ public class Config {
 
 			writer.write("<AUDIO>");
 			writer.newLine();
-			writer.write("volume=" + Ensemble.get().getMasterVolume());
+			writer.write("volume=" + SoundStore.get().getMusicVolume());
 			writer.newLine();
 			writer.write("<END>");
 			writer.newLine();

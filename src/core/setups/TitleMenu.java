@@ -29,7 +29,7 @@ public class TitleMenu extends GameSetup {
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		
 		// Load title logo
-		logo = new Sprite("Avogine Title");
+		//logo = new Sprite("Avogine Title");
 		
 		// Initialize game buttons
 		buttonGroup = new ButtonGroup(Float.NaN, Camera.get().getDisplayHeight(0.575f), "Menu2", true);
@@ -39,7 +39,7 @@ public class TitleMenu extends GameSetup {
 		buttonGroup.setCentered(true);
 		
 		// Play title track
-		Ensemble.get().swapBackground(new Track("TitleTheme2"), 0.75f, 1.75f);
+		//Ensemble.get().swapBackground(new Track("TitleTheme2"), 0.75f, 1.75f);
 	}
 	
 	@Override
@@ -78,7 +78,7 @@ public class TitleMenu extends GameSetup {
 	@Override
 	public void drawUI() {
 		// Draw logo
-		logo.draw(Float.NaN, Camera.get().getDisplayHeight(0.1667f));
+		//logo.draw(Float.NaN, Camera.get().getDisplayHeight(0.1667f));
 
 		// Draw buttons
 		buttonGroup.draw();

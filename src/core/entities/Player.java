@@ -23,7 +23,7 @@ import core.render.DrawUtils;
 import core.setups.Stage;
 import core.utilities.MathFunctions;
 import core.utilities.keyboard.Keybinds;
-import core.audio.Ensemble;
+import core.audio.AudioSource;
 import core.entities.interfaces.Combatant;
 import core.entities.utils.CharState;
 import core.entities.utils.stats.Stats;
@@ -176,11 +176,12 @@ public class Player extends Actor implements Combatant {
 					break;
 				case "Footstep":
 					String step = event.getString() + ((int)(Math.random() * 6) + 1);
-					Ensemble.get().playSoundEffect(step);
+					AudioSource footstep = new AudioSource(step, "SFX");
+					footstep.getAudio().playAsSoundEffect(1f, 1f, false);
 					break;
 				case "SFX":
-					// TODO Stereoscopic sounds
-					//Ensemble.get().playSoundEffect(event.getString());
+					//AudioSource soundeffect = new AudioSource(event.getString(), AudioType.SFX);
+					//soundeffect.getAudio().playAsSoundEffect(1f, 1f, false);
 					break;
 				case "Damage":
 					equipment.getEquippedWeapon().setDamaging(event.getInt() == 1);
@@ -258,9 +259,6 @@ public class Player extends Actor implements Combatant {
 	
 	@Override
 	public void updateBox() {
-		/*this.box.setFrame(pos.x - (box.getWidth() / 2f),
-				pos.y + (skeleton.getData().getCenterY() * scale) - ((skeleton.getData().getHeight() * 0.15f) * scale),
-				box.getWidth(), box.getHeight());*/
 		this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)),
 				box.getWidth(), box.getHeight());
@@ -346,6 +344,8 @@ public class Player extends Actor implements Combatant {
 	
 	@Override
 	public void endCombat() {
+		looking = 0;
+		
 		switch(getState()) {
 		case ATTACK:
 			setDadArmRight(false);
@@ -392,7 +392,9 @@ public class Player extends Actor implements Combatant {
 		case 1:
 			if(equipment.isBlock() 
 					&& (getDirection() == 0 ? ((Entity) attacker).getX() >= getX() : getX() >= ((Entity) attacker).getX())) {
-				Ensemble.get().playSoundEffect("Parried");
+				AudioSource parry = new AudioSource("Parried", "SFX");
+				parry.getAudio().playAsSoundEffect(1f, 1f, false);
+				
 				attacker.endCombat();
 				((Actor) attacker).setState(CharState.RECOIL);
 				Vector2f.sub(((Entity) attacker).getPosition(), getPosition(), ((Actor) attacker).velocity);

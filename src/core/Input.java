@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
 
+import core.audio.AudioSource;
 import core.entities.Actor;
 import core.entities.Enemy;
 import core.entities.Player;
@@ -121,6 +122,14 @@ public class Input {
 				}
 			}
 			
+			if(Keybinds.SLOT5.clicked()) {
+				AudioSource x = new AudioSource("LightMace1", "SFX");
+				x.getAudio().playAsSoundEffect(1f, 1f, false, 1f, 1f, 0);
+			}
+			if(Keybinds.SLOT6.clicked()) {
+				AudioSource x = new AudioSource("LightMace1", "SFX");
+				x.getAudio().playAsSoundEffect(1f, 1f, false, 0f, 0, 0);
+			}
 			if(Keybinds.SLOT7.clicked()) {
 				for(Actor a : ((Stage) setup).getCast()) {
 					if(a instanceof Intelligent) {

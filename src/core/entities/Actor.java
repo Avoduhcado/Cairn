@@ -9,7 +9,6 @@ import java.io.ObjectInputStream;
 
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
-
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationState.AnimationStateAdapter;
 import com.esotericsoftware.spine.AnimationStateData;
@@ -21,7 +20,6 @@ import com.esotericsoftware.spine.attachments.Region;
 
 import core.Camera;
 import core.Theater;
-import core.audio.Ensemble;
 import core.entities.interfaces.Mobile;
 import core.entities.utils.CharState;
 import core.render.DrawUtils;
@@ -205,7 +203,7 @@ public class Actor extends Entity implements Mobile {
 					setMaxSpeed(event.getFloat());
 					break;
 				case "Footstep":
-					Ensemble.get().playSoundEffect(event.getString());
+					// TODO
 					break;
 				default:
 					System.out.println("Unhandled event: " + event.getData());

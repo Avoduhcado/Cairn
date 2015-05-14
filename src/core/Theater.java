@@ -1,5 +1,8 @@
 package core;
 
+import org.lwjgl.openal.AL;
+import org.newdawn.slick.openal.SoundStore;
+
 import core.audio.Ensemble;
 import core.setups.GameSetup;
 import core.setups.SplashScreen;
@@ -63,7 +66,7 @@ public class Theater {
 		Camera.init();
 		Text.loadFont("SYSTEM", "Calibri");
 		Text.loadFont("DEBUG", "Alagard");
-		Ensemble.init();
+		//Ensemble.init();
 		Config.loadConfig();
 	
 		setup = new SplashScreen();
@@ -79,7 +82,8 @@ public class Theater {
 		Camera.get().draw(getSetup());
 		Camera.get().update();
 
-		Ensemble.get().update();
+		SoundStore.get().poll(0);
+		//Ensemble.get().update();
 
 		if(!paused)
 			getSetup().update();
@@ -116,8 +120,9 @@ public class Theater {
 	 */
 	public void close() {
 		Config.createConfig();
-		Ensemble.get().close();
+		//Ensemble.get().close();
 		Camera.get().close();
+		AL.destroy();
 		System.exit(0);
 	}
 

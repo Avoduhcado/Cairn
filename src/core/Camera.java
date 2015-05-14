@@ -170,8 +170,8 @@ public class Camera {
 		// Negate screen shake
 		settle();
 		
-		DrawUtils.setColor(new Vector3f(1f, 0f, 1f));
-		DrawUtils.drawRect((float) frame.getX(), (float) frame.getY(), frame);
+		//DrawUtils.setColor(new Vector3f(1f, 0f, 1f));
+		//DrawUtils.drawRect((float) frame.getX(), (float) frame.getY(), frame);
 
 		// Reload identity to draw UI
 		GL11.glLoadIdentity();

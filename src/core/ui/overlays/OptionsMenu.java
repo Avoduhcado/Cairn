@@ -1,7 +1,9 @@
 package core.ui.overlays;
 
 import java.awt.geom.Rectangle2D;
+
 import org.lwjgl.input.Keyboard;
+import org.newdawn.slick.openal.SoundStore;
 
 import core.Camera;
 import core.audio.Ensemble;
@@ -22,7 +24,6 @@ public class OptionsMenu extends MenuOverlay {
 	
 	public OptionsMenu(float x, float y, String image) {
 		super(x, y, image);
-		System.out.println("We have options");
 		
 		setStill(true);
 		this.box = new Rectangle2D.Double(x, y, Camera.get().getDisplayWidth() - (this.frame.getWidth() * 0.667f),
@@ -36,7 +37,7 @@ public class OptionsMenu extends MenuOverlay {
 			e.printStackTrace();
 		}*/
 		
-		volumeSlider = new Slider(Camera.get().getDisplayWidth(0.5f), Camera.get().getDisplayHeight(0.1667f), 1f, Ensemble.get().getMasterVolume(), "SliderBG", "SliderValue");
+		volumeSlider = new Slider(Camera.get().getDisplayWidth(0.5f), Camera.get().getDisplayHeight(0.1667f), 1f, SoundStore.get().getMusicVolume(), "SliderBG", "SliderValue");
 		volumeSlider.setPosition((float) (volumeSlider.getX() - (volumeSlider.getBox().getWidth() * 0.5f)), volumeSlider.getY());
 		volumeSlider.setStill(true);
 		
@@ -75,9 +76,12 @@ public class OptionsMenu extends MenuOverlay {
 		}
 		
 		volumeSlider.update();
-		if(Ensemble.get().getMasterVolume() != volumeSlider.getValue()) {
-			Ensemble.get().setMasterVolume(volumeSlider.getValue());
+		if(SoundStore.get().getMusicVolume() != volumeSlider.getValue()) {
+			SoundStore.get().setMusicVolume(volumeSlider.getValue());
 		}
+		/*if(Ensemble.get().getMasterVolume() != volumeSlider.getValue()) {
+			Ensemble.get().setMasterVolume(volumeSlider.getValue());
+		}*/
 	}
 	
 	@Override

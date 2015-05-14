@@ -2,6 +2,8 @@ package core.utilities.mouse;
 
 import java.awt.geom.Point2D;
 
+import org.lwjgl.input.Mouse;
+
 import core.Camera;
 import core.Input;
 
@@ -15,8 +17,10 @@ public class MouseInput {
 	}
 	
 	public static int getScreenMouseX() {
-		float scale = (float) ((Camera.get().frame.getWidth() * Camera.get().getScale()) / Camera.get().frame.getWidth());
-		return (int) ((Input.mouseCurrent.getX() * scale) + Camera.get().frame.getX());
+		//float scale = (float) ((Camera.get().frame.getWidth() * Camera.get().getScale()) / Camera.get().frame.getWidth());
+		//return (int) ((Input.mouseCurrent.getX() * scale) + Camera.get().frame.getX());
+		// TODO We're gettin' somewhere!
+		return (int) ((Camera.get().frame.getWidth() / Camera.get().getScale()) / (Camera.get().frame.getWidth() / Mouse.getX()));
 	}
 	
 	/**

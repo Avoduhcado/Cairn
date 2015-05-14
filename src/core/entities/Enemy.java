@@ -7,7 +7,6 @@ import java.awt.geom.RectangularShape;
 import java.util.ArrayList;
 
 import org.lwjgl.util.vector.Vector2f;
-
 import com.esotericsoftware.spine.Animation;
 import com.esotericsoftware.spine.Animation.EventTimeline;
 import com.esotericsoftware.spine.Animation.Timeline;
@@ -19,7 +18,7 @@ import com.esotericsoftware.spine.attachments.Region;
 
 import core.Camera;
 import core.Theater;
-import core.audio.Ensemble;
+import core.audio.AudioSource;
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
@@ -115,11 +114,11 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 					break;
 				case "Speed":
 					setMaxSpeed(getMaxSpeed() * event.getFloat());
-					//setMaxSpeed(event.getFloat());
 					break;
 				case "Footstep":
 					String step = event.getString() + ((int)(Math.random() * 6) + 1);
-					Ensemble.get().playSoundEffect(step);
+					AudioSource footstep = new AudioSource(step, "SFX");
+					footstep.getAudio().playAsSoundEffect(1f, 1f, false, Enemy.this.getX(), Enemy.this.getY(), 0);
 					break;
 				case "Damage":
 					equipment.getEquippedWeapon().setDamaging(event.getInt() == 1);
@@ -218,7 +217,9 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		case 1:
 			if(equipment.isBlock()
 					&& (getDirection() == 0 ? ((Entity) attacker).getX() >= getX() : getX() >= ((Entity) attacker).getX())) {
-				Ensemble.get().playSoundEffect("Parried");
+				AudioSource parry = new AudioSource("Parried", "SFX");
+				parry.getAudio().playAsSoundEffect(1f, 1f, false, this.getX(), this.getY(), 0);
+				
 				attacker.endCombat();
 				((Actor) attacker).setState(CharState.RECOIL);
 				Vector2f.sub(((Entity) attacker).getPosition(), getPosition(), ((Actor) attacker).velocity);
