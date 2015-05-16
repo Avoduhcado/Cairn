@@ -22,7 +22,6 @@ import core.scene.collisions.Collidable;
 import core.scene.collisions.HitMaps;
 import core.scene.collisions.PathPolygon;
 import core.scene.collisions.Slope;
-import core.utilities.keyboard.Keybinds;
 import core.utilities.scripts.Script;
 import core.entities.Actor;
 import core.entities.Ally;
@@ -91,6 +90,7 @@ public class Map implements Serializable {
 		cast.getLast().setMaxSpeed(1.6f);
 		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(45f);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new PackLeader(null));
+		((PackLeader) ((Enemy) cast.getLast()).getIntelligence().getTraits().get(0)).setRallyPoint(cast.getLast().getPositionAsPoint(), 1);
 		cast.add(new Enemy(2835, 470, "Flock", Camera.ASPECT_RATIO));
 		cast.getLast().setDirection(1);
 		cast.getLast().setMaxSpeed(1.4f);

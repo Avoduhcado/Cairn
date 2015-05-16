@@ -9,11 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import org.newdawn.slick.openal.SoundStore;
-
 import core.Camera;
 import core.Theater;
-import core.audio.Ensemble;
 import core.render.textured.Sprite;
 import core.utilities.keyboard.Keybinds;
 

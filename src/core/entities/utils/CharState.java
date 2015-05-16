@@ -23,6 +23,7 @@ public enum CharState {
 	public boolean canAct() {
 		switch(this) {
 		case WALK:
+		case RUN:
 		case IDLE:
 			return true;
 		default:
@@ -33,6 +34,7 @@ public enum CharState {
 	public boolean canWalk() {
 		switch(this) {
 		case WALK:
+		case RUN:
 		case IDLE:
 			return true;
 		default:

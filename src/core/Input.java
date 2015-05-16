@@ -5,11 +5,11 @@ import java.awt.geom.Point2D;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
 
-import core.audio.AudioSource;
 import core.entities.Actor;
 import core.entities.Enemy;
 import core.entities.Player;
 import core.entities.interfaces.Intelligent;
+import core.entities.utils.CharState;
 import core.entities.utils.ai.Personality;
 import core.equipment.Equipment;
 import core.setups.GameSetup;
@@ -74,11 +74,17 @@ public class Input {
 		
 		// Setup specific processing
 		if(setup instanceof Stage) {
-			if(Keybinds.RUN.held()) {
-				//((Actor) ((Stage) setup).getPlayer()).setState(CharState.RUN);
-			}
-
 			if(((Stage) setup).getPlayer().getState().canWalk()) {
+				if(Keybinds.RUN.held()) {
+					((Actor) ((Stage) setup).getPlayer()).setState(CharState.RUN);
+				} else if(Keybinds.RUN.released()) {
+					if(((Actor) ((Stage) setup).getPlayer()).getVelocity().length() != 0) {
+						((Actor) ((Stage) setup).getPlayer()).setState(CharState.WALK);
+					} else {
+						((Actor) ((Stage) setup).getPlayer()).setState(CharState.IDLE);
+					}
+				}
+				
 				if(Keybinds.DODGE.clicked()) {
 					((Stage) setup).getPlayer().dodge(null);
 				}
@@ -122,14 +128,6 @@ public class Input {
 				}
 			}
 			
-			if(Keybinds.SLOT5.clicked()) {
-				AudioSource x = new AudioSource("LightMace1", "SFX");
-				x.getAudio().playAsSoundEffect(1f, 1f, false, 1f, 1f, 0);
-			}
-			if(Keybinds.SLOT6.clicked()) {
-				AudioSource x = new AudioSource("LightMace1", "SFX");
-				x.getAudio().playAsSoundEffect(1f, 1f, false, 0f, 0, 0);
-			}
 			if(Keybinds.SLOT7.clicked()) {
 				for(Actor a : ((Stage) setup).getCast()) {
 					if(a instanceof Intelligent) {

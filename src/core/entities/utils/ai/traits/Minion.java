@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import core.entities.Actor;
 import core.entities.Enemy;
 import core.entities.Entity;
+import core.entities.interfaces.Combatant;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
 import core.entities.utils.ai.Personality;
@@ -45,16 +46,14 @@ public class Minion extends Trait {
 	@Override
 	public void process() {
 		if(leader != null && ((Actor) host).getState().canAct()) {
-			if(((Enemy) host).getIntelligence().isChasing()) {
-				leader.getIntelligence().alert();
-			}
-			
 			if(!((Enemy) host).getIntelligence().isChasing() && Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(),
 					((Entity) host).getX(), ((Entity) host).getY()) > wanderRange) {
-				host.getIntelligence().approach(null, (Entity) leader);
+				host.getIntelligence().approach(((Entity) leader).getPositionAsPoint());
 			} else if(Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(), 
 					((Entity) host).getX(), ((Entity) host).getY()) <= wanderRange && host.getIntelligence().isApproaching()) {
 				host.getIntelligence().setApproachVector(0, 0);
+			} else {
+				((Actor) host).setDirection(((Actor) leader).getDirection());
 			}
 			
 			if(((Actor) leader).getState() == CharState.DEAD) {
@@ -68,6 +67,15 @@ public class Minion extends Trait {
 			}
 		} else if(!((Actor) host).getState().canAct()) {
 			host.getIntelligence().setApproachVector(0, 0);
+		}
+	}
+
+	@Override
+	public void alert(Combatant target) {
+		if(leader != null) {
+			host.getIntelligence().setTarget(target);
+			
+			leader.getIntelligence().alert(target);
 		}
 	}
 

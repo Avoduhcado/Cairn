@@ -26,6 +26,8 @@ import core.utilities.keyboard.Keybinds;
 import core.audio.AudioSource;
 import core.entities.interfaces.Combatant;
 import core.entities.utils.CharState;
+import core.entities.utils.Faction;
+import core.entities.utils.Reputation;
 import core.entities.utils.stats.Stats;
 import core.equipment.Equipment;
 import core.equipment.Weapon;
@@ -39,6 +41,7 @@ public class Player extends Actor implements Combatant {
 	
 	private Equipment equipment;
 	private Stats stats;
+	private Reputation reputation;
 	
 	private transient AnimationState animStateOverlay;
 	private transient float overlayDelay;
@@ -58,10 +61,11 @@ public class Player extends Actor implements Combatant {
 		this.equipment.addWeapon(Equipment.heavyMace);
 		this.equipment.addWeapon(Equipment.polearm);
 		this.changeWeapon(Equipment.lightMace);
-		
+		this.reputation = new Reputation(Faction.PLAYER, Faction.MONSTER);
+
 		setState(CharState.REVIVE);
 	}
-	
+
 	@Override
 	public void update() {
 		super.update();
@@ -180,8 +184,8 @@ public class Player extends Actor implements Combatant {
 					footstep.getAudio().playAsSoundEffect(1f, 1f, false);
 					break;
 				case "SFX":
-					//AudioSource soundeffect = new AudioSource(event.getString(), AudioType.SFX);
-					//soundeffect.getAudio().playAsSoundEffect(1f, 1f, false);
+					AudioSource soundeffect = new AudioSource(event.getString(), "SFX");
+					soundeffect.getAudio().playAsSoundEffect(1f, 1f, false);
 					break;
 				case "Damage":
 					equipment.getEquippedWeapon().setDamaging(event.getInt() == 1);
@@ -448,14 +452,6 @@ public class Player extends Actor implements Combatant {
 	}
 
 	@Override
-	public void setUpCombatData(String attackName) {}
-
-	@Override
-	public Rectangle2D getAttackBox() {
-		return null;
-	}
-
-	@Override
 	public ArrayList<Rectangle2D> getHitBoxes(Combatant attacker) {
 		ArrayList<Rectangle2D> hitboxes = new ArrayList<Rectangle2D>();
 		for(Slot s : skeleton.getSlots()) {
@@ -469,6 +465,11 @@ public class Player extends Actor implements Combatant {
 		}
 		
 		return hitboxes;
+	}
+	
+	@Override
+	public Reputation getReputation() {
+		return reputation;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package core.entities.utils.ai.traits;
 
 import java.io.Serializable;
 
+import core.entities.interfaces.Combatant;
 import core.entities.interfaces.Intelligent;
 
 public abstract class Trait implements Serializable {
@@ -14,6 +15,7 @@ public abstract class Trait implements Serializable {
 	protected Intelligent host;
 	
 	public abstract void process();
+	public abstract void alert(Combatant target);
 
 	public Intelligent getHost() {
 		return host;

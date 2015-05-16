@@ -64,7 +64,7 @@ public class Slider extends UIElement {
 		this.x = x;
 		this.y = y;
 		valueBox.setFrame(x + (float) (this.box.getWidth() * value) - (float) (valueBox.getWidth() / 2f),
-				valueBox.getY(), valueBox.getWidth(), valueBox.getHeight());
+				y, valueBox.getWidth(), valueBox.getHeight());
 		updateBox();
 	}
 	

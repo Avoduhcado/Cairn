@@ -82,6 +82,7 @@ public class Theater {
 		Camera.get().draw(getSetup());
 		Camera.get().update();
 
+		// TODO Unplugging audio source crashes audio. Look into it
 		SoundStore.get().poll(0);
 		//Ensemble.get().update();
 

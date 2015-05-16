@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.lwjgl.util.vector.Vector3f;
+
 import core.Camera;
 import core.Input;
 import core.Theater;
@@ -52,7 +53,7 @@ public class Stage extends GameSetup {
 		Camera.get().centerOn(this);
 		map.getScenery().add(player);
 		
-		//bgm.setPosition(new Vector3f(player.getX(), player.getY(), 5f));
+		bgm.setPosition(new Vector3f(0, 0, -5f));
 		bgm.getAudio().playAsMusic(1f, 0, true);
 				
 		//map.getLights().get(0).setParent(player);

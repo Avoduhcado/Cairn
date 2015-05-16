@@ -15,6 +15,7 @@ import com.esotericsoftware.spine.AnimationState;
 import core.Theater;
 import core.entities.Actor;
 import core.entities.Entity;
+import core.entities.Enemy;
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
@@ -29,7 +30,6 @@ public class Intelligence implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Intelligent host;
-	// TODO Factions/Alliances to determine who to attack
 	private Combatant target;
 	
 	private Personality personality;
@@ -52,13 +52,65 @@ public class Intelligence implements Serializable {
 		setApproachVector(new Vector2f());
 	}
 	
-	public void approach(Stage stage, Entity target) {
-		if(target.getPosition().getX() > ((Entity) host).getPosition().getX()) {
-			approachVector.set(target.getPosition().getX() - (float) ((Combatant) host).getAttackBox().getX()
-					- ((Entity) host).getPosition().getX(), target.getYPlane() - ((Entity) host).getYPlane());
+	public void update(Stage stage) {
+		switch(personality) {
+		case DOCILE:
+		case NEUTRAL:
+			if(isChasing()) {
+				setChase(false);
+			}
+			if(getApproachVector().length() != 0) {
+				getApproachVector().set(0, 0);
+			}
+			break;
+		case AGGRESSIVE:
+			if(target == null) {
+				searchForTarget(stage);
+			} else if(((Actor) host).getState().canAct()) {
+				// TODO Devise timing for attacks and dodging
+				if(((Enemy) host).canReach((Entity) target)) {
+					((Enemy) host).lookAt((Entity) target);
+					((Enemy) host).attack();
+					getApproachVector().set(0, 0);
+				} else {
+					if(getSight().intersects(((Entity) target).getBox())) {
+						alert(target);
+						approach(((Actor) target).getPositionAsPoint());
+					} else {
+						approach(((Actor) target).getPositionAsPoint());
+						chase();
+					}
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public void searchForTarget(Stage stage) {
+		if(((Combatant) host).getReputation().isEnemy(stage.getPlayer().getReputation()) 
+				&& getSight().intersects(stage.getPlayer().getBox())) {
+			alert(stage.getPlayer());
+			return;
+		}
+		
+		for(Actor a : stage.getCast()) {
+			if(a instanceof Combatant && host != a && ((Combatant) host).getReputation().isEnemy(((Combatant) a).getReputation())
+					&& getSight().intersects(a.getBox())) {
+				alert((Combatant) a);
+				break;
+			}
+		}
+	}
+	
+	public void approach(Point2D target) {
+		if(target.getX() > ((Entity) host).getPosition().getX()) {
+			approachVector.set((float) (target.getX() - ((Enemy) host).getAttackBox().getX()
+					- ((Entity) host).getPosition().getX()), (float) (target.getY() - ((Entity) host).getYPlane()));
 		} else {
-			approachVector.set(target.getPosition().getX() + (float) ((Combatant) host).getAttackBox().getX()
-					- ((Entity) host).getPosition().getX(), target.getYPlane() - ((Entity) host).getYPlane());
+			approachVector.set((float) (target.getX() +  ((Enemy) host).getAttackBox().getX()
+					- ((Entity) host).getPosition().getX()), (float) (target.getY() - ((Entity) host).getYPlane()));
 		}
 		
 		approachVector.normalise();
@@ -67,14 +119,25 @@ public class Intelligence implements Serializable {
 	public void chase() {
 		setChaseTimer(getChaseTimer() + Theater.getDeltaSpeed(0.025f));
 		if(getChaseTimer() >= 1.25f) {
-			setChase(false);
-			approachVector.set(0, 0);
+			setTarget(null);
 		}	
 	}
 	
-	// TODO Pass in a target to alert this Enemy of
-	public void alert() {
-		setChase(true);
+	public void alert(Combatant target) {
+		setTarget(target);
+		
+		for(Trait t : traits) {
+			t.alert(target);
+		}
+	}
+
+	public Combatant getTarget() {
+		return target;
+	}
+	
+	public void setTarget(Combatant target) {
+		this.target = target;
+		setChase(target != null);
 	}
 	
 	public void attacked(Combatant attacker) {
@@ -83,8 +146,7 @@ public class Intelligence implements Serializable {
 		case DOCILE:
 			break;
 		case AGGRESSIVE:
-			this.target = attacker;
-			setChase(true);
+			alert(attacker);
 			break;
 		default:
 			break;
@@ -137,11 +199,13 @@ public class Intelligence implements Serializable {
 	public void setChase(boolean chase) {
 		this.chase = chase;
 		this.chaseTimer = 0f;
+		
 		if(chase && sight instanceof Arc2D) {
 			sight = new Ellipse2D.Double(((RectangularShape) sight).getX(), ((RectangularShape) sight).getY(),
 					((RectangularShape) sight).getWidth(), ((RectangularShape) sight).getHeight());
 		} else if(!chase && sight instanceof Ellipse2D) {
 			buildSight();
+			approachVector.set(0, 0);
 			if(((Actor) host).getDirection() != 0) {
 				flipSight();
 			}
@@ -201,7 +265,5 @@ public class Intelligence implements Serializable {
 	public void setApproachVector(float x, float y) {
 		this.approachVector.set(x, y);
 	}
-	
-	
 	
 }

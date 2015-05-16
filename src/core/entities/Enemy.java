@@ -7,6 +7,7 @@ import java.awt.geom.RectangularShape;
 import java.util.ArrayList;
 
 import org.lwjgl.util.vector.Vector2f;
+
 import com.esotericsoftware.spine.Animation;
 import com.esotericsoftware.spine.Animation.EventTimeline;
 import com.esotericsoftware.spine.Animation.Timeline;
@@ -22,6 +23,8 @@ import core.audio.AudioSource;
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
+import core.entities.utils.Faction;
+import core.entities.utils.Reputation;
 import core.entities.utils.ai.Intelligence;
 import core.entities.utils.ai.traits.Trait;
 import core.entities.utils.stats.Stats;
@@ -42,6 +45,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	private Equipment equipment;
 	private Intelligence intelligence;
 	private Stats stats;
+	private Reputation reputation;
 	
 	private float animationSpeed = 1f;
 	
@@ -52,6 +56,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		this.stats.getHealth().setCurrent(20f);
 		this.intelligence = new Intelligence(this);
 		this.equipment = new Equipment();
+		this.reputation = new Reputation(Faction.MONSTER, Faction.PLAYER);
 		
 		int index = 1;
 		while(skeleton.getData().findAnimation("Attack" + index) != null) {
@@ -190,14 +195,14 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	
 	@Override
 	public void attack() {
-		if(getState() == CharState.IDLE || getVelocity().length() <= getMaxSpeed() / 2f) {
+		if(getState() == CharState.IDLE || velocity.length() <= getMaxSpeed() / 2f) {
 			setState(CharState.ATTACK);
 		}
 	}
 
 	@Override
 	public void defend() {
-		if(getState() == CharState.IDLE || getVelocity().length() <= getMaxSpeed() / 2f) {
+		if(getState() == CharState.IDLE || velocity.length() <= getMaxSpeed() / 2f) {
 			setState(CharState.DEFEND);
 		}
 	}
@@ -273,7 +278,6 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		}
 	}
 
-	@Override
 	public void setUpCombatData(String attackName) {
 		Animation attack = skeleton.getData().findAnimation(attackName);
 		Weapon weapon = new Weapon(attackName, AttackType.UNARMED, 10f);
@@ -299,7 +303,6 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		}
 	}
 
-	@Override
 	public Rectangle2D getAttackBox() {
 		return equipment.getEquippedWeapon().getAttackRange();
 	}
@@ -318,6 +321,11 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		}
 		
 		return hitboxes;
+	}
+	
+	@Override
+	public Reputation getReputation() {
+		return reputation;
 	}
 	
 	public boolean canReach(Entity target) {
@@ -379,7 +387,8 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 
 	@Override
 	public void think(Stage stage) {
-		switch(intelligence.getPersonality()) {
+		intelligence.update(stage);
+		/*switch(intelligence.getPersonality()) {
 		case DOCILE:
 			//setState(CharState.IDLE);
 		case NEUTRAL:
@@ -399,16 +408,16 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			} else if(getState().canAct()) {
 				if(intelligence.getSight().intersects(stage.getPlayer().getBox())) {
 					intelligence.setChase(true);
-					intelligence.approach(stage, stage.getPlayer());
+					intelligence.approach(stage, stage.getPlayer().getPositionAsPoint());
 				} else if(intelligence.isChasing()) {
-					intelligence.approach(stage, stage.getPlayer());
+					intelligence.approach(stage, stage.getPlayer().getPositionAsPoint());
 					intelligence.chase();
 				}
 			}
 			break;
 		default:
 			break;
-		}
+		}*/
 	}
 	
 	@Override

@@ -212,10 +212,8 @@ public class EditMenu extends MenuOverlay {
 				DrawUtils.applyCameraScale();
 				DrawUtils.drawLine(new Line2D.Double(currentPoly.xpoints[currentPoly.npoints - 1],
 						currentPoly.ypoints[currentPoly.npoints - 1],
-						//Mouse.getX() + Camera.get().frame.getX(),
 						MouseInput.getScreenMouseX(),
 						MouseInput.getScreenMouseY()));
-						//Camera.get().frame.getY() - (Mouse.getY() - Camera.get().frame.getHeight())));
 				if(Keybinds.CONTROL.held()) {
 					DrawUtils.setColor(new Vector3f(0f, 0.8f, 0.4f));
 					if(Point.distance(MouseInput.getMouseX() + Camera.get().frame.getX(), 0, currentPoly.xpoints[currentPoly.npoints - 1], 0) < 
@@ -260,11 +258,7 @@ public class EditMenu extends MenuOverlay {
 	}
 	
 	public void addPolyPoint() {
-		/*Point polyPoint = new Point((int) (Mouse.getX() + Camera.get().frame.getX()),
-				(int) (Camera.get().frame.getY() - (Mouse.getY() - Camera.get().frame.getHeight())));*/
-		
-		Point polyPoint = new Point(MouseInput.getScreenMouseX(),
-				(int) (Camera.get().frame.getY() - (Mouse.getY() - Camera.get().frame.getHeight())));
+		Point polyPoint = new Point(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY());
 		if(Keybinds.CONTROL.held() && currentPoly.npoints > 0) {
 			if(Point.distance(polyPoint.x, 0, currentPoly.xpoints[currentPoly.npoints - 1], 0) < 
 					Point.distance(0, polyPoint.y, 0, currentPoly.ypoints[currentPoly.npoints - 1])) {

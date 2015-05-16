@@ -1,5 +1,6 @@
 package core.entities;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 
@@ -56,6 +57,10 @@ public abstract class Entity implements Serializable {
 	
 	public Vector2f getPosition() {
 		return pos;
+	}
+	
+	public Point2D getPositionAsPoint() {
+		return new Point2D.Double(pos.x, pos.y);
 	}
 	
 	public void setPosition(float x, float y) {

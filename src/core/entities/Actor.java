@@ -60,7 +60,7 @@ public class Actor extends Entity implements Mobile {
 		
 		this.velocity = new Vector2f(0, 0);
 		this.maxSpeed = 3.5f;
-		this.maxRunSpeed = 8.5f;
+		this.maxRunSpeed = 5.25f;
 		state = CharState.IDLE;		
 	}
 	
@@ -160,9 +160,6 @@ public class Actor extends Entity implements Mobile {
 		}
 		skeleton.updateWorldTransform();
 				
-		/*this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
-				pos.y - ((skeleton.getData().getHeight() * scale) / 2f), 
-				skeleton.getData().getWidth() * scale, skeleton.getData().getHeight() * scale);*/
 		this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)), 
 				skeleton.getData().getWidth() * scale, skeleton.getData().getHeight() * scale);
@@ -410,6 +407,10 @@ public class Actor extends Entity implements Mobile {
 
 	public void setMaxSpeed(float maxSpeed) {
 		this.maxSpeed = maxSpeed;
+	}
+	
+	public Point2D getPositionAsPoint() {
+		return new Point2D.Double(pos.x, getYPlane());
 	}
 	
 	public float getYPlane() {

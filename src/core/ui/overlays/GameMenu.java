@@ -61,7 +61,7 @@ public class GameMenu extends MenuOverlay {
 
 	@Override
 	public boolean isCloseRequest() {
-		return buttons.getButton(0).isClicked() || Keybinds.EXIT.clicked();
+		return (buttons.getButton(0).isClicked() || Keybinds.EXIT.clicked()) && options == null;
 	}
 
 }
