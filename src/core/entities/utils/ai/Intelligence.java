@@ -67,6 +67,10 @@ public class Intelligence implements Serializable {
 			if(target == null) {
 				searchForTarget(stage);
 			} else if(((Actor) host).getState().canAct()) {
+				if(((Actor) target).getState() == CharState.ATTACK) {
+					((Enemy) host).dodge(new Vector2f(0, (((Actor) target).getYPlane() > ((Actor) host).getYPlane() ? -5f : 5f)));
+				}
+				
 				// TODO Devise timing for attacks and dodging
 				if(((Enemy) host).canReach((Entity) target)) {
 					((Enemy) host).lookAt((Entity) target);
@@ -89,15 +93,15 @@ public class Intelligence implements Serializable {
 	}
 	
 	public void searchForTarget(Stage stage) {
-		if(((Combatant) host).getReputation().isEnemy(stage.getPlayer().getReputation()) 
-				&& getSight().intersects(stage.getPlayer().getBox())) {
+		if(((Combatant) host).getReputation().isEnemy(stage.getPlayer().getReputation())  && getSight().intersects(stage.getPlayer().getBox())
+				&& !((Combatant) host).getReputation().isAlly(stage.getPlayer().getReputation())) {
 			alert(stage.getPlayer());
 			return;
 		}
 		
 		for(Actor a : stage.getCast()) {
 			if(a instanceof Combatant && host != a && ((Combatant) host).getReputation().isEnemy(((Combatant) a).getReputation())
-					&& getSight().intersects(a.getBox())) {
+					&& getSight().intersects(a.getBox()) && !((Combatant) host).getReputation().isAlly(stage.getPlayer().getReputation())) {
 				alert((Combatant) a);
 				break;
 			}

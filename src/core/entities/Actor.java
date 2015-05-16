@@ -95,7 +95,7 @@ public class Actor extends Entity implements Mobile {
 			}
 			move();
 			
-			if(velocity.x != 0 && state == CharState.WALK) {
+			if(velocity.x != 0 && state.canWalk()) {
 				setDirection(velocity.x > 0 ? 0 : 1);
 			}
 		}
@@ -342,14 +342,19 @@ public class Actor extends Entity implements Mobile {
 		}
 	}
 
-	public void dodge(Vector2f direction) {
-		if(direction == null && state != CharState.WALK) {
+	// TODO Remove boolean and tag stamina drain to state change?
+	public boolean dodge(Vector2f direction) {
+		if(direction == null && state == CharState.IDLE) {
 			this.velocity.setX(getDirection() == 0 ? -5f : 5f);
 			this.setState(CharState.QUICKSTEP);
+			return true;
 		} else if(direction != null) {
 			this.velocity.set(direction);
 			this.setState(CharState.QUICKSTEP);
+			return true;
 		}
+		
+		return false;
 	}
 	
 	public Skeleton getSkeleton() {
@@ -382,7 +387,8 @@ public class Actor extends Entity implements Mobile {
 				animState.setAnimation(0, "Walk", true);
 				break;
 			case QUICKSTEP:
-				animState.setAnimation(0, "QuickStep", false);
+				if(animStateData.getSkeletonData().findAnimation("QuickStep") != null)
+					animState.setAnimation(0, "QuickStep", false);
 				break;
 			case HIT:
 				animState.setAnimation(0, "Hit", false);

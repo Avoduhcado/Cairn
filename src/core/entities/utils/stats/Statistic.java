@@ -2,6 +2,8 @@ package core.entities.utils.stats;
 
 import java.io.Serializable;
 
+import core.utilities.MathFunctions;
+
 public abstract class Statistic implements Serializable {
 
 	/**
@@ -20,7 +22,7 @@ public abstract class Statistic implements Serializable {
 	public abstract void update();
 	
 	public void addCurrent(float toCurrent) {
-		this.current += toCurrent;
+		this.current = MathFunctions.clamp(this.current + toCurrent, 0, this.max);
 	}
 	
 	public void setCurrent(float current) {

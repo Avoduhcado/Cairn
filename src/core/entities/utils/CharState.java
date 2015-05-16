@@ -7,9 +7,11 @@ public enum CharState {
 	RUN ("Run"),
 	QUICKSTEP ("QuickStep"),
 	ATTACK ("Attack"),
+	CAST ("Castspell"),
 	DEFEND ("Defend"),
 	RECOIL ("Recoil"),
 	HIT ("Hit"),
+	HEAL ("Heal"),
 	REVIVE ("Revive"),
 	DEATH ("Death"),
 	DEAD ("Dead");

@@ -28,6 +28,8 @@ import core.entities.interfaces.Combatant;
 import core.entities.utils.CharState;
 import core.entities.utils.Faction;
 import core.entities.utils.Reputation;
+import core.entities.utils.stats.Health;
+import core.entities.utils.stats.Stamina;
 import core.entities.utils.stats.Stats;
 import core.equipment.Equipment;
 import core.equipment.Weapon;
@@ -55,7 +57,9 @@ public class Player extends Actor implements Combatant {
 		setDadArmLeft(false);
 				
 		this.stats = new Stats();
-		this.stats.getHealth().setCurrent(30f);
+		this.stats.setHealth(new Health(30f, 30f));
+		this.stats.setStamina(new Stamina(20f, 20f));
+		this.stats.getStamina().setRegainSpeed(3.5f);
 		this.equipment = new Equipment();
 		this.equipment.addWeapon(Equipment.lightMace);
 		this.equipment.addWeapon(Equipment.heavyMace);
@@ -63,7 +67,7 @@ public class Player extends Actor implements Combatant {
 		this.changeWeapon(Equipment.lightMace);
 		this.reputation = new Reputation(Faction.PLAYER, Faction.MONSTER);
 
-		setState(CharState.REVIVE);
+		//setState(CharState.REVIVE);
 	}
 
 	@Override
@@ -108,6 +112,8 @@ public class Player extends Actor implements Combatant {
 				}
 			}
 		}
+		
+		stats.update();
 	}
 	
 	@Override
@@ -347,6 +353,18 @@ public class Player extends Actor implements Combatant {
 	}
 	
 	@Override
+	public boolean dodge(Vector2f direction) {
+		if(stats.getStamina().getCurrent() > 0f) {
+			if(super.dodge(direction)) {
+				stats.getStamina().addCurrent(-4f);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	@Override
 	public void endCombat() {
 		looking = 0;
 		
@@ -368,17 +386,19 @@ public class Player extends Actor implements Combatant {
 	@Override
 	public void attack() {
 		// TODO Check if Dad skull is enabled
-		if(getState() == CharState.IDLE || (velocity.length() <= getMaxSpeed() / 2f)) {
+		if((getState() == CharState.IDLE || velocity.length() <= getMaxSpeed() / 2f) && stats.getStamina().getCurrent() > 0f) {
 			setDadArmRight(true);
 			setState(CharState.ATTACK);
+			stats.getStamina().addCurrent(-5f);
 		}
 	}
 
 	@Override
 	public void defend() {
-		if(getState() == CharState.IDLE || (velocity.length() <= getMaxSpeed() / 2f)) {
+		if((getState() == CharState.IDLE || velocity.length() <= getMaxSpeed() / 2f) && stats.getStamina().getCurrent() > 0f) {
 			setDadArmLeft(true);
 			setState(CharState.DEFEND);
+			stats.getStamina().addCurrent(-3.5f);
 		}
 	}
 
@@ -481,8 +501,12 @@ public class Player extends Actor implements Combatant {
 			case ATTACK:
 				animState.setAnimation(0, equipment.getEquippedWeapon().getAttackAnim(), false);
 				break;
+			case CAST:
+				break;
 			case DEFEND:
 				animState.setAnimation(0, "Defend", false);
+				break;
+			case HEAL:
 				break;
 			case REVIVE:
 				animState.setAnimation(0, "Revive", false);
@@ -503,6 +527,10 @@ public class Player extends Actor implements Combatant {
 		equipment.equipWeapon(weapon);
 		skeleton.setAttachment("WEAPON", weapon.getName());
 		animStateOverlay.setAnimation(0, "ChangeWeapon", false);
+	}
+	
+	public Stats getStats() {
+		return stats;
 	}
 	
 	public void setLooking(int looking) {

@@ -18,6 +18,7 @@ import core.entities.Player;
 import core.entities.Actor;
 import core.entities.utils.CharState;
 import core.render.LightMap;
+import core.scene.HUD;
 import core.scene.Map;
 import core.ui.UIElement;
 import core.ui.overlays.EditMenu;
@@ -170,6 +171,8 @@ public class Stage extends GameSetup {
 		for(UIElement ui : uiElements) {
 			ui.draw();
 		}
+		
+		HUD.draw(this);
 
 		if(editMenu != null) {
 			editMenu.draw();

@@ -57,6 +57,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		this.intelligence = new Intelligence(this);
 		this.equipment = new Equipment();
 		this.reputation = new Reputation(Faction.MONSTER, Faction.PLAYER);
+		this.reputation.addAlly(Faction.FLOCK);
 		
 		int index = 1;
 		while(skeleton.getData().findAnimation("Attack" + index) != null) {
@@ -93,6 +94,8 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		for(Trait t : intelligence.getTraits()) {
 			t.process();
 		}
+		
+		stats.update();
 	}
 	
 	@Override

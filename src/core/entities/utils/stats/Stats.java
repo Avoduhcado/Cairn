@@ -19,6 +19,12 @@ public class Stats implements Serializable {
 		this.magic = new Magic(100, 100);
 	}
 	
+	public void update() {
+		this.health.update();
+		this.stamina.update();
+		this.magic.update();
+	}
+	
 	public Health getHealth() {
 		return health;
 	}

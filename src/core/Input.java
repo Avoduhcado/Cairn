@@ -10,6 +10,7 @@ import core.entities.Enemy;
 import core.entities.Player;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
+import core.entities.utils.Faction;
 import core.entities.utils.ai.Personality;
 import core.equipment.Equipment;
 import core.setups.GameSetup;
