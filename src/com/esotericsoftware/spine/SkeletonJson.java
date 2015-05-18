@@ -57,6 +57,7 @@ import com.esotericsoftware.spine.attachments.AttachmentType;
 import com.esotericsoftware.spine.attachments.Region;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
@@ -378,7 +379,8 @@ public class SkeletonJson {
 						for(int i = 0; i<timelineMap.getValue().getAsJsonArray().size(); i++) {
 							JsonObject valueMap = timelineMap.getValue().getAsJsonArray().get(i).getAsJsonObject();
 						//for (JsonValue valueMap = timelineMap.child; valueMap != null; valueMap = valueMap.next)
-							timeline.setFrame(frameIndex++, valueMap.get("time").getAsFloat(), valueMap.get("name").getAsString());
+							timeline.setFrame(frameIndex++, valueMap.get("time").getAsFloat(),
+									valueMap.get("name") instanceof JsonNull ? null : valueMap.get("name").getAsString());
 						}
 						timelines.add(timeline);
 						duration = Math.max(duration, timeline.getFrames()[timeline.getFrameCount() - 1]);

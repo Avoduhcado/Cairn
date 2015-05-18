@@ -611,6 +611,7 @@ public class Animation {
 			drawOrders[frameIndex] = drawOrder;
 		}
 
+		@SuppressWarnings("unchecked")
 		public void apply (Skeleton skeleton, float lastTime, float time, ArrayList<Event> firedEvents, float alpha) {
 			float[] frames = this.frames;
 			if (time < frames[0]) return; // Time is before first frame.
@@ -621,14 +622,15 @@ public class Animation {
 			else
 				frameIndex = binarySearch(frames, time) - 1;
 
-			ArrayList<Slot> drawOrder = skeleton.drawOrder;
-			ArrayList<Slot> slots = skeleton.slots;
+			//ArrayList<Slot> drawOrder = skeleton.drawOrder;
+			//ArrayList<Slot> slots = skeleton.slots;
 			int[] drawOrderToSetupIndex = drawOrders[frameIndex];
-			if (drawOrderToSetupIndex == null)
-				System.arraycopy(slots, 0, drawOrder, 0, slots.size());
-			else {
+			if (drawOrderToSetupIndex == null) {
+				skeleton.drawOrder = (ArrayList<Slot>) skeleton.slots.clone();
+				//System.arraycopy(slots, 0, drawOrder, 0, slots.size());
+			} else {
 				for (int i = 0, n = drawOrderToSetupIndex.length; i < n; i++)
-					drawOrder.set(i, slots.get(drawOrderToSetupIndex[i]));
+					skeleton.drawOrder.set(i, skeleton.slots.get(drawOrderToSetupIndex[i]));
 			}
 		}
 	}

@@ -18,8 +18,8 @@ import core.entities.Player;
 import core.entities.Actor;
 import core.entities.utils.CharState;
 import core.render.LightMap;
-import core.scene.HUD;
 import core.scene.Map;
+import core.scene.hud.HUD;
 import core.ui.UIElement;
 import core.ui.overlays.EditMenu;
 import core.ui.overlays.GameMenu;
@@ -31,6 +31,7 @@ public class Stage extends GameSetup {
 	/** Stage relevant */
 	private GameMenu gameMenu;
 	private EditMenu editMenu;
+	private HUD hud;
 	private Player player;
 	private Map map;
 	
@@ -53,6 +54,8 @@ public class Stage extends GameSetup {
 		Camera.get().setFocus(player);
 		Camera.get().centerOn(this);
 		map.getScenery().add(player);
+		
+		hud = new HUD();
 		
 		bgm.setPosition(new Vector3f(0, 0, -5f));
 		bgm.getAudio().playAsMusic(1f, 0, true);
@@ -172,7 +175,7 @@ public class Stage extends GameSetup {
 			ui.draw();
 		}
 		
-		HUD.draw(this);
+		hud.draw(this);
 
 		if(editMenu != null) {
 			editMenu.draw();

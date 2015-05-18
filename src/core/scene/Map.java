@@ -71,9 +71,9 @@ public class Map implements Serializable {
 		
 		scenery.addAll(props);
 
-		cast.add(new Ally(8450, 710, "The Fool", Camera.ASPECT_RATIO, new Script("<s0.3>Et tu, Skelebones?", 
+		cast.add(new Ally(8450, 710, "The Fool", Camera.ASPECT_RATIO, new Script("Et tu, Skelebones?", 
 				"{event: [{showText: 'Congratulations.;You reached the end.'},{showText: 'Press <t+,$key:SLOT8> to restart.'}] }")));
-		cast.add(new Ally(1875, 1000, "Gravedigger", Camera.ASPECT_RATIO, new Script("<s0.3>How curious.", 
+		cast.add(new Ally(1875, 1000, "Gravedigger", Camera.ASPECT_RATIO, new Script("How curious.", 
 				"{event: [{showText: 'Fair tidings, child.;Good to see you returned unharmed.'},"
 				+ "{showText: 'Might you care for a release date?'}, {choose: [{option: 'YES!!',result: [{showText: 'Neato'}]},"
 				+ "{option: No,result: [{showText: 'Oh'},{showText: 'Ok then...'}]}]},{showText: Goodbye} ] }")));

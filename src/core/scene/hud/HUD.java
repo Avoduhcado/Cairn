@@ -1,0 +1,39 @@
+package core.scene.hud;
+
+import org.lwjgl.util.vector.Vector2f;
+
+import core.Camera;
+import core.render.textured.Sprite;
+import core.setups.Stage;
+
+public class HUD {
+
+	private Sprite meroSkull;
+	
+	private HUDBar healthBar;
+	private HUDBar staminaBar;
+	
+	private Sprite staminaCap;
+	private Sprite staminaUnder;
+	private Sprite staminaOver;
+	
+	public HUD() {
+		meroSkull = new Sprite("HUD/Mero");
+		
+		healthBar = new HUDBar("Health", new Vector2f(103, 37), new Vector2f(meroSkull.getWidth() * Camera.ASPECT_RATIO, 33.5f), Camera.ASPECT_RATIO);
+		staminaBar = new HUDBar("Stamina", new Vector2f(95, 71), new Vector2f(meroSkull.getWidth() * Camera.ASPECT_RATIO, 67.5f), Camera.ASPECT_RATIO);
+	}
+	
+	public void draw(Stage stage) {
+		healthBar.drawBar(stage.getPlayer().getStats().getHealth().getCurrent() / stage.getPlayer().getStats().getHealth().getMax());
+		staminaBar.drawBar(stage.getPlayer().getStats().getStamina().getCurrent() / stage.getPlayer().getStats().getStamina().getMax());
+		
+		meroSkull.setStill(true);
+		meroSkull.set2DScale(Camera.ASPECT_RATIO);
+		meroSkull.draw(0, 0);
+		
+		healthBar.drawCase(1f);
+		staminaBar.drawCase(1f);
+	}
+
+}

@@ -13,7 +13,7 @@ public class GameFont {
 	private HashMap<Character, Glyph> glyphs = new HashMap<Character, Glyph>();
 	private String fontName;
 	
-	public static final float defaultSize = 0.4f;
+	public static final float defaultSize = 0.5f;
 	private static final Color defaultColor = Color.white;
 	
 	private float size;

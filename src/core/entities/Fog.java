@@ -103,9 +103,19 @@ public class Fog extends Prop implements Mobile {
 		Vector2f.add(direction, pos, pos);
 		updateBox();
 	}
+	
+	@Override
+	public boolean canRun() {
+		return false;
+	}
 
 	@Override
 	public Vector2f getVelocity() {
+		return direction;
+	}
+	
+	@Override
+	public Vector2f getSpeed() {
 		return direction;
 	}
 	

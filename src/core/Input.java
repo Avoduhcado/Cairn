@@ -1,6 +1,7 @@
 package core;
 
 import java.awt.geom.Point2D;
+import java.io.File;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
@@ -10,11 +11,11 @@ import core.entities.Enemy;
 import core.entities.Player;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
-import core.entities.utils.Faction;
 import core.entities.utils.ai.Personality;
 import core.equipment.Equipment;
 import core.setups.GameSetup;
 import core.setups.Stage;
+import core.utilities.Screenshot;
 import core.utilities.keyboard.Keybinds;
 
 public class Input {
@@ -76,9 +77,9 @@ public class Input {
 		// Setup specific processing
 		if(setup instanceof Stage) {
 			if(((Stage) setup).getPlayer().getState().canWalk()) {
-				if(Keybinds.RUN.held()) {
+				if(Keybinds.RUN.held() && ((Stage) setup).getPlayer().canRun()) {
 					((Actor) ((Stage) setup).getPlayer()).setState(CharState.RUN);
-				} else if(Keybinds.RUN.released()) {
+				} else if(Keybinds.RUN.released() || !((Stage) setup).getPlayer().canRun()) {
 					if(((Actor) ((Stage) setup).getPlayer()).getVelocity().length() != 0) {
 						((Actor) ((Stage) setup).getPlayer()).setState(CharState.WALK);
 					} else {
@@ -118,6 +119,12 @@ public class Input {
 					((Player) ((Stage) setup).getPlayer()).attack();
 				} else if(Keybinds.DEFEND.clicked()) {
 					((Player) ((Stage) setup).getPlayer()).defend();
+				} else if(Keybinds.MENU_RIGHT.clicked()) {
+					((Player) ((Stage) setup).getPlayer()).cast();
+				}
+				
+				if(Keybinds.MENU_UP.clicked()) {
+					((Stage) setup).getPlayer().heal(false);
 				}
 				
 				if(Keybinds.SLOT1.clicked()) {
@@ -126,6 +133,10 @@ public class Input {
 					((Stage) setup).getPlayer().changeWeapon(Equipment.heavyMace);
 				} else if(Keybinds.SLOT3.clicked()) {
 					((Stage) setup).getPlayer().changeWeapon(Equipment.polearm);
+				}
+			} else if(((Stage) setup).getPlayer().canHeal()) {
+				if(Keybinds.MENU_UP.clicked()) {
+					((Stage) setup).getPlayer().heal(true);
 				}
 			}
 			
@@ -158,6 +169,10 @@ public class Input {
 			
 			if(Keybinds.PAUSE.clicked()) {
 				Theater.get().pause();
+			}
+			
+			if(Keybinds.CANCELTEXT.clicked()) {
+				Screenshot.saveScreenshot(new File(System.getProperty("user.dir")), Camera.get().displayWidth, Camera.get().displayHeight);
 			}
 		}
 	}

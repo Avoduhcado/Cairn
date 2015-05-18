@@ -64,8 +64,8 @@ public class Theater {
 	 */
 	public Theater() {
 		Camera.init();
-		Text.loadFont("SYSTEM", "Calibri");
-		Text.loadFont("DEBUG", "Alagard");
+		Text.loadFont("SYSTEM", "Benegraphic");
+		Text.loadFont("DEBUG", "Benegraphic");
 		//Ensemble.init();
 		Config.loadConfig();
 	

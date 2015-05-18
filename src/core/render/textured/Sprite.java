@@ -1,9 +1,11 @@
 package core.render.textured;
 
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
@@ -39,6 +41,7 @@ public class Sprite {
 	protected boolean still;
 	protected boolean flipped;
 	protected Vector2f fixedSize;
+	protected Rectangle2D subRegion;
 	protected boolean intScale;
 	
 	public Sprite(String ref) {
@@ -143,10 +146,17 @@ public class Sprite {
 	}
 	
 	public void updateTextureOffsets() {
-		textureX = width * frame;
-		textureY = height * direction;
-		textureXWidth = (width * frame) + width;
-		textureYHeight = (height * direction) + height;
+		if(subRegion == null) {
+			textureX = width * frame;
+			textureY = height * direction;
+			textureXWidth = (width * frame) + width;
+			textureYHeight = (height * direction) + height;
+		} else {
+			textureX = (float) (width * subRegion.getX());
+			textureY = (float) (height * subRegion.getY());
+			textureXWidth = (float) (width * subRegion.getWidth());
+			textureYHeight = (float) (height * subRegion.getHeight());
+		}
 	}
 	
 	public void setTexture(String ref) throws IOException {
@@ -213,8 +223,11 @@ public class Sprite {
 	 * @return Width of image to draw
 	 */
 	public float getDrawWidth() {
-		if(fixedSize == null)
+		if(subRegion != null) {
+			return (float) (texture.getImageWidth() * subRegion.getWidth());
+		} else if(fixedSize == null) {
 			return texture.getImageWidth() / maxFrame;
+		}
 	
 		return fixedSize.x;
 	}
@@ -224,8 +237,11 @@ public class Sprite {
 	 * @return Height of image to draw
 	 */
 	public float getDrawHeight() {
-		if(fixedSize == null)
+		if(subRegion != null) {
+			return (float) (texture.getImageHeight() * subRegion.getHeight());
+		} else if(fixedSize == null) {
 			return texture.getImageHeight() / maxDirection;
+		} 
 		
 		return fixedSize.y;
 	}
@@ -244,6 +260,10 @@ public class Sprite {
 	
 	public void setFixedSize(float width, float height) {
 		this.fixedSize = new Vector2f(width, height);
+	}
+	
+	public void setSubRegion(float x, float y, float width, float height) {
+		this.subRegion = new Rectangle2D.Float(x, y, width, height);
 	}
 	
 	public Vector4f getColor() {

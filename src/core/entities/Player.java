@@ -65,6 +65,7 @@ public class Player extends Actor implements Combatant {
 		this.equipment.addWeapon(Equipment.heavyMace);
 		this.equipment.addWeapon(Equipment.polearm);
 		this.changeWeapon(Equipment.lightMace);
+		this.equipment.equipBell(true);
 		this.reputation = new Reputation(Faction.PLAYER, Faction.MONSTER);
 
 		//setState(CharState.REVIVE);
@@ -72,6 +73,10 @@ public class Player extends Actor implements Combatant {
 
 	@Override
 	public void update() {
+		if(getVelocity().length() > 0 && state == CharState.RUN) {
+			stats.getStamina().addCurrent(-Theater.getDeltaSpeed(0.15f));
+		}
+		
 		super.update();
 		
 		if(looking == 1) {
@@ -204,6 +209,9 @@ public class Player extends Actor implements Combatant {
 				case "Parry":
 					equipment.setBlock(event.getInt() == 1);
 					break;
+				case "Chug":
+					equipment.setChugDrink(event.getInt() == 1);
+					break;
 				default:
 					System.out.println("Unhandled event: " + event.getData());
 				}
@@ -232,10 +240,19 @@ public class Player extends Actor implements Combatant {
 			break;
 		case ATTACK:
 		case DEFEND:
+		case CAST:
 			// TODO Animation listener
 			if(animState.getCurrent(0).isComplete()) {
 				endCombat();
 				setState(CharState.IDLE);
+			}
+			break;
+		case HEAL:
+			if(animState.getCurrent(0).isComplete()) {
+				setState(CharState.IDLE);
+				if(equipment.hasBell()) {
+					this.skeleton.setAttachment("ITEM", "BELL");
+				}
 			}
 			break;
 		case HIT:
@@ -312,8 +329,10 @@ public class Player extends Actor implements Combatant {
 			skeleton.setAttachment("LEFT ARM STRING", "LEFT ARM STRING");
 			skeleton.setAttachment("LEFT FOREARM F", "LEFT FOREARM F");
 			skeleton.setAttachment("LEFT FOREARM STRING", "LEFT FOREARM STRING");
-			skeleton.setAttachment("LEFT HAND F", "LEFT HAND F");
-			skeleton.setAttachment("SHIELD F", "SHIELD F");
+			skeleton.setAttachment("LEFT HAND F", (state == CharState.CAST ? "LEFT HAND OPEN F" : "LEFT HAND F"));
+			if(state == CharState.DEFEND) {
+				skeleton.setAttachment("SHIELD F", "SHIELD F");
+			}
 		} else {
 			skeleton.setAttachment("LEFT ARM F", null);
 			skeleton.setAttachment("LEFT ARM STRING", null);
@@ -322,6 +341,19 @@ public class Player extends Actor implements Combatant {
 			skeleton.setAttachment("LEFT HAND F", null);
 			skeleton.setAttachment("SHIELD F", null);
 		}
+	}
+	
+	@Override
+	public boolean canRun() {
+		if(getVelocity().length() >= 1f) {
+			if(state == CharState.RUN && stats.getStamina().getCurrent() > 0) {
+				return true;
+			} else if(stats.getStamina().getCurrent() >= (stats.getStamina().getMax() * 0.15f)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	@Override
@@ -378,6 +410,9 @@ public class Player extends Actor implements Combatant {
 			setDadArmLeft(false);
 			equipment.setBlock(false);
 			break;
+		case CAST:
+			setDadArmLeft(false);
+			break;
 		default:
 			break;
 		}
@@ -387,8 +422,8 @@ public class Player extends Actor implements Combatant {
 	public void attack() {
 		// TODO Check if Dad skull is enabled
 		if((getState() == CharState.IDLE || velocity.length() <= getMaxSpeed() / 2f) && stats.getStamina().getCurrent() > 0f) {
-			setDadArmRight(true);
 			setState(CharState.ATTACK);
+			setDadArmRight(true);
 			stats.getStamina().addCurrent(-5f);
 		}
 	}
@@ -396,8 +431,8 @@ public class Player extends Actor implements Combatant {
 	@Override
 	public void defend() {
 		if((getState() == CharState.IDLE || velocity.length() <= getMaxSpeed() / 2f) && stats.getStamina().getCurrent() > 0f) {
-			setDadArmLeft(true);
 			setState(CharState.DEFEND);
+			setDadArmLeft(true);
 			stats.getStamina().addCurrent(-3.5f);
 		}
 	}
@@ -491,7 +526,27 @@ public class Player extends Actor implements Combatant {
 	public Reputation getReputation() {
 		return reputation;
 	}
+	
+	public boolean canHeal() {
+		return (getState() == CharState.HEAL && getEquipment().canChugDrink());
+	}
+	
+	public void heal(boolean chug) {
+		if(chug) {
+			animState.setAnimation(0, "Drinkmilk", false);
+		} else {
+			setState(CharState.HEAL);
+		}
+		equipment.setChugDrink(false);
+		stats.getHealth().addCurrent(5f);
+	}
 
+	public void cast() {
+		// TODO Magic
+		setState(CharState.CAST);
+		setDadArmLeft(true);
+	}
+	
 	@Override
 	public void setState(CharState state) {
 		super.setState(state);
@@ -502,11 +557,13 @@ public class Player extends Actor implements Combatant {
 				animState.setAnimation(0, equipment.getEquippedWeapon().getAttackAnim(), false);
 				break;
 			case CAST:
+				animState.setAnimation(0, "Castspell", false);
 				break;
 			case DEFEND:
 				animState.setAnimation(0, "Defend", false);
 				break;
 			case HEAL:
+				animState.setAnimation(0, "Drinkmilk", false);
 				break;
 			case REVIVE:
 				animState.setAnimation(0, "Revive", false);

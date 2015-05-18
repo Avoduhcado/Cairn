@@ -13,6 +13,7 @@ hs_err_pid*
 # Superfluous files/folders
 /bin
 /resources
+/screenshots
 /.git
 /.settings
 .classpath

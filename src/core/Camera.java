@@ -197,15 +197,15 @@ public class Camera {
 			}
 			
 			Text.getFont("DEBUG").setStill(true);
-			Text.getFont("DEBUG").setSize(0.3f);
+			//Text.getFont("DEBUG").setSize(0.3f);
 			Text.getFont("DEBUG").drawString("Current Setup: " + Theater.get().getSetup().getClass().getName(), 15, 15);
 			
 			Text.getFont("DEBUG").setStill(true);
-			Text.getFont("DEBUG").setSize(0.3f);
+			//Text.getFont("DEBUG").setSize(0.3f);
 			Text.getFont("DEBUG").drawString("Avogine v" + Theater.AVOGINE_VERSION, 15, 45);
 			
 			Text.getFont("DEBUG").setStill(true);
-			Text.getFont("DEBUG").setSize(0.3f);
+			//Text.getFont("DEBUG").setSize(0.3f);
 			Text.getFont("DEBUG").drawString("Scene scale: " + scale, 15, 75);
 			
 			Text.getFont("DEBUG").setStill(true);
@@ -290,21 +290,21 @@ public class Camera {
 			frame.setFrame(frame.getX() + focus.getVelocity().x, frame.getY() + focus.getVelocity().y, frame.getWidth(), frame.getHeight());
 		}*/
 		// Frame border movement
-		if(focus.getVelocity().length() != 0) {
+		if(focus.getSpeed().length() != 0) {
 			Line2D border = new Line2D.Double(0,0,0,0);
 			//Vector2f velocity = new Vector2f();
 
 			// TODO Broken in different screen sizes due to frame scaling
 			// Scroll camera down
-			if(focus.getVelocity().y > 0) {
+			if(focus.getSpeed().y > 0) {
 				border = new Line2D.Double(frame.getX(), frame.getY() + (fixedFrame.getHeight() * 0.7f),
 						frame.getMaxX(), frame.getY() + (fixedFrame.getHeight() * 0.7f));
-				frameSpeed.setY(focus.getVelocity().y);
-			} else if(focus.getVelocity().y < 0) {
+				frameSpeed.setY(focus.getSpeed().y);
+			} else if(focus.getSpeed().y < 0) {
 				// Scroll camera up
 				border = new Line2D.Double(frame.getX(), frame.getY() + (fixedFrame.getHeight() * 0.45f),
 						frame.getMaxX(), frame.getY() + (fixedFrame.getHeight() * 0.45f));
-				frameSpeed.setY(focus.getVelocity().y);
+				frameSpeed.setY(focus.getSpeed().y);
 			}
 
 			if(!((Entity) focus).getBox().intersectsLine(border)) {
@@ -313,15 +313,15 @@ public class Camera {
 			}
 
 			// Scroll camera right
-			if(focus.getVelocity().x > 0) {
+			if(focus.getSpeed().x > 0) {
 				border = new Line2D.Double(frame.getX() + (fixedFrame.getWidth() * 0.55f), frame.getY(),
 						frame.getX() + (fixedFrame.getWidth() * 0.55f), frame.getMaxY());
-				frameSpeed.setX(focus.getVelocity().x);
-			} else if(focus.getVelocity().x < 0) {
+				frameSpeed.setX(focus.getSpeed().x);
+			} else if(focus.getSpeed().x < 0) {
 				// Scroll camera left
 				border = new Line2D.Double(frame.getX() + (fixedFrame.getWidth() * 0.45f), frame.getY(),
 						frame.getX() + (fixedFrame.getWidth() * 0.45f), frame.getMaxY());
-				frameSpeed.setX(focus.getVelocity().x);
+				frameSpeed.setX(focus.getSpeed().x);
 			}
 
 			if(!((Entity) focus).getBox().intersectsLine(border)) {

@@ -293,10 +293,19 @@ public class Actor extends Entity implements Mobile {
 		Vector2f.add(speed, pos, pos);
 		updateBox();
 	}
+	
+	@Override
+	public boolean canRun() {
+		return false;
+	}
 
 	@Override
-	// TODO THIS IS STTUUUUUUPID
 	public Vector2f getVelocity() {
+		return velocity;
+	}
+	
+	@Override
+	public Vector2f getSpeed() {
 		return speed;
 	}
 	
@@ -382,8 +391,10 @@ public class Actor extends Entity implements Mobile {
 			case IDLE:
 				animState.setAnimation(0, "Idle", true);
 				break;
-			case WALK:
 			case RUN:
+				animState.setAnimation(0, "Run", true);
+				break;
+			case WALK:
 				animState.setAnimation(0, "Walk", true);
 				break;
 			case QUICKSTEP:

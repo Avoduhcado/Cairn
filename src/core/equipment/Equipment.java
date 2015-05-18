@@ -13,6 +13,7 @@ public class Equipment implements Serializable {
 	
 	private int equipped;
 	private ArrayList<Weapon> weapons = new ArrayList<Weapon>();
+	private boolean bell;
 	public static final Weapon lightMace = new Weapon("LIGHT MACE", AttackType.LIGHT, 10f);
 	public static final Weapon heavyMace = new Weapon("HEAVY MACE", AttackType.HEAVY, 15f);
 	public static final Weapon polearm = new Weapon("POLEARM", AttackType.THRUST, 7.5f);
@@ -27,6 +28,10 @@ public class Equipment implements Serializable {
 	private boolean superArmor;
 	private boolean superInvulnerable;
 	private boolean invulnerable;
+	
+	private boolean chugDrink;
+	private int totalMilk = 10;
+	private int currentMilk;
 	
 	public Equipment() {
 		
@@ -71,6 +76,14 @@ public class Equipment implements Serializable {
 	public void addWeapon(Weapon weapon) {
 		this.weapons.add(weapon);
 	}
+	
+	public boolean hasBell() {
+		return bell;
+	}
+	
+	public void equipBell(boolean bell) {
+		this.bell = bell;
+	}
 
 	public boolean isBlock() {
 		return block;
@@ -105,6 +118,31 @@ public class Equipment implements Serializable {
 
 	public void setInvulnerable(boolean invulnerable) {
 		this.invulnerable = invulnerable;
+	}
+
+	public boolean canChugDrink() {
+		return chugDrink;
+	}
+
+	public void setChugDrink(boolean chugDrink) {
+		this.chugDrink = chugDrink;
+	}
+
+	public int getTotalMilk() {
+		return totalMilk;
+	}
+
+	public void setTotalMilk(int totalMilk) {
+		this.totalMilk = totalMilk;
+	}
+
+	public int getCurrentMilk() {
+		return currentMilk;
+	}
+
+	public void setCurrentMilk(int currentMilk) {
+		// TODO Make sure this doesn't exceed total Milk
+		this.currentMilk = currentMilk;
 	}
 
 	
