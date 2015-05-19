@@ -2,8 +2,6 @@ package core.utilities.mouse;
 
 import java.awt.geom.Point2D;
 
-import org.lwjgl.input.Mouse;
-
 import core.Camera;
 import core.Input;
 

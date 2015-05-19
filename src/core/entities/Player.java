@@ -29,6 +29,7 @@ import core.entities.utils.CharState;
 import core.entities.utils.Faction;
 import core.entities.utils.Reputation;
 import core.entities.utils.stats.Health;
+import core.entities.utils.stats.Magic;
 import core.entities.utils.stats.Stamina;
 import core.entities.utils.stats.Stats;
 import core.equipment.Equipment;
@@ -59,13 +60,15 @@ public class Player extends Actor implements Combatant {
 		this.stats = new Stats();
 		this.stats.setHealth(new Health(30f, 30f));
 		this.stats.setStamina(new Stamina(20f, 20f));
-		this.stats.getStamina().setRegainSpeed(3.5f);
+		this.stats.getStamina().setRegainSpeed(4.5f);
+		this.stats.setMagic(new Magic(30f, 30f));
 		this.equipment = new Equipment();
 		this.equipment.addWeapon(Equipment.lightMace);
 		this.equipment.addWeapon(Equipment.heavyMace);
 		this.equipment.addWeapon(Equipment.polearm);
 		this.changeWeapon(Equipment.lightMace);
 		this.equipment.equipBell(true);
+		this.equipment.setCurrentMilk(10);
 		this.reputation = new Reputation(Faction.PLAYER, Faction.MONSTER);
 
 		//setState(CharState.REVIVE);
@@ -366,7 +369,7 @@ public class Player extends Actor implements Combatant {
 				velocity = MathFunctions.limitVector(velocity, getMaxSpeed());
 			}
 		} else {
-			looking = 1;
+			//looking = 1;
 		}
 	}
 	
@@ -380,7 +383,7 @@ public class Player extends Actor implements Combatant {
 				velocity = MathFunctions.limitVector(velocity, getMaxSpeed());
 			}
 		} else {
-			looking = -1;
+			//looking = -1;
 		}
 	}
 	
@@ -532,19 +535,25 @@ public class Player extends Actor implements Combatant {
 	}
 	
 	public void heal(boolean chug) {
-		if(chug) {
-			animState.setAnimation(0, "Drinkmilk", false);
-		} else {
-			setState(CharState.HEAL);
+		if(equipment.getCurrentMilk() > 0) {
+			if(chug) {
+				animState.setAnimation(0, "Drinkmilk", false);
+			} else {
+				setState(CharState.HEAL);
+			}
+			equipment.setChugDrink(false);
+			stats.getHealth().addCurrent(5f);
+			equipment.setCurrentMilk(equipment.getCurrentMilk() - 1);
 		}
-		equipment.setChugDrink(false);
-		stats.getHealth().addCurrent(5f);
 	}
 
 	public void cast() {
 		// TODO Magic
-		setState(CharState.CAST);
-		setDadArmLeft(true);
+		if(stats.getMagic().getCurrent() > 0) {
+			setState(CharState.CAST);
+			setDadArmLeft(true);
+			stats.getMagic().addCurrent(-5f);
+		}
 	}
 	
 	@Override
@@ -584,6 +593,20 @@ public class Player extends Actor implements Combatant {
 		equipment.equipWeapon(weapon);
 		skeleton.setAttachment("WEAPON", weapon.getName());
 		animStateOverlay.setAnimation(0, "ChangeWeapon", false);
+	}
+	
+	public void changeEquipment(boolean on) {
+		if(on) {
+			skeleton.setAttachment("ARMOR CHEST", "ARMOR FLOCK CHEST");
+			skeleton.setAttachment("ARMOR SPINE", "ARMOR FLOCK SPINE");
+			skeleton.setAttachment("ARMOR GROIN", "ARMOR FLOCK GROIN");
+			skeleton.setAttachment("ARMOR HEAD", "ARMOR FLOCK HEAD");
+		} else {
+			skeleton.setAttachment("ARMOR CHEST", null);
+			skeleton.setAttachment("ARMOR SPINE", null);
+			skeleton.setAttachment("ARMOR GROIN", null);
+			skeleton.setAttachment("ARMOR HEAD", null);
+		}
 	}
 	
 	public Stats getStats() {

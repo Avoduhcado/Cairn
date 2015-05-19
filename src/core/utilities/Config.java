@@ -10,7 +10,6 @@ import java.io.IOException;
 
 import org.newdawn.slick.openal.SoundStore;
 
-import core.audio.Ensemble;
 import core.utilities.keyboard.Keybinds;
 
 public class Config {
@@ -23,9 +22,10 @@ public class Config {
 	    		if(line.matches("<AUDIO>")) {
 	    			while((line = reader.readLine()) != null && !line.matches("<END>")) {
 		    			String[] temp = line.split("=");
-		    			if(temp[0].matches("volume")) {
+		    			if(temp[0].matches("music")) {
 		    				SoundStore.get().setMusicVolume(Float.parseFloat(temp[1]));
-		    				//Ensemble.get().setMasterVolume(Float.parseFloat(temp[1]));
+		    			} else if(temp[0].matches("sfx")) {
+		    				SoundStore.get().setSoundVolume(Float.parseFloat(temp[1]));
 		    			}
 	    			}
 	    		} else if(line.matches("<VIDEO>")) {
@@ -70,7 +70,9 @@ public class Config {
 
 			writer.write("<AUDIO>");
 			writer.newLine();
-			writer.write("volume=" + SoundStore.get().getMusicVolume());
+			writer.write("music=" + SoundStore.get().getMusicVolume());
+			writer.newLine();
+			writer.write("sfx=" + SoundStore.get().getSoundVolume());
 			writer.newLine();
 			writer.write("<END>");
 			writer.newLine();

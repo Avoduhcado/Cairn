@@ -50,7 +50,7 @@ public class Stage extends GameSetup {
 			System.out.println(e.getID());
 		}
 		
-		player = new Player(550, 390, "MC and Familiar", Camera.ASPECT_RATIO);
+		player = new Player(1600, 1030, "MC and Familiar", Camera.ASPECT_RATIO);
 		Camera.get().setFocus(player);
 		Camera.get().centerOn(this);
 		map.getScenery().add(player);
@@ -71,6 +71,7 @@ public class Stage extends GameSetup {
 				gameMenu = null;
 		} else {
 			bgm.update();
+			hud.update();
 			
 			for(int i = 0; i<uiElements.size(); i++) {
 				if(uiElements.get(i).isKill()) {

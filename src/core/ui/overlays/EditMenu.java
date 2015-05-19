@@ -2,13 +2,11 @@ package core.ui.overlays;
 
 import java.awt.Point;
 import java.awt.Polygon;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import org.lwjgl.input.Mouse;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Camera;

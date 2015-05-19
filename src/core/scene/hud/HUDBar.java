@@ -45,7 +45,7 @@ public class HUDBar {
 		
 		cap.setStill(true);
 		cap.set2DScale(scale);
-		cap.draw(casePosition.x + (bar.getWidth() * width) * scale, casePosition.y + 1.5f);
+		cap.draw(casePosition.x + (bar.getWidth() * width) * scale, casePosition.y);
 	}
 	
 }

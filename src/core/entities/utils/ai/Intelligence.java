@@ -68,7 +68,7 @@ public class Intelligence implements Serializable {
 				searchForTarget(stage);
 			} else if(((Actor) host).getState().canAct()) {
 				if(((Actor) target).getState() == CharState.ATTACK) {
-					((Enemy) host).dodge(new Vector2f(0, (((Actor) target).getYPlane() > ((Actor) host).getYPlane() ? -5f : 5f)));
+					//((Enemy) host).dodge(new Vector2f(0, (((Actor) target).getYPlane() > ((Actor) host).getYPlane() ? -5f : 5f)));
 				}
 				
 				// TODO Devise timing for attacks and dodging

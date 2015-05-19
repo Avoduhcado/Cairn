@@ -3,7 +3,6 @@ package core;
 import org.lwjgl.openal.AL;
 import org.newdawn.slick.openal.SoundStore;
 
-import core.audio.Ensemble;
 import core.setups.GameSetup;
 import core.setups.SplashScreen;
 import core.utilities.Config;

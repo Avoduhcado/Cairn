@@ -133,6 +133,10 @@ public class Input {
 					((Stage) setup).getPlayer().changeWeapon(Equipment.heavyMace);
 				} else if(Keybinds.SLOT3.clicked()) {
 					((Stage) setup).getPlayer().changeWeapon(Equipment.polearm);
+				} else if(Keybinds.SLOT4.clicked()) {
+					((Stage) setup).getPlayer().changeEquipment(true);
+				} else if(Keybinds.SLOT5.clicked()) {
+					((Stage) setup).getPlayer().changeEquipment(false);
 				}
 			} else if(((Stage) setup).getPlayer().canHeal()) {
 				if(Keybinds.MENU_UP.clicked()) {
