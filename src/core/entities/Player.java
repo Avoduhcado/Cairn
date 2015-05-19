@@ -553,6 +553,8 @@ public class Player extends Actor implements Combatant {
 			setState(CharState.CAST);
 			setDadArmLeft(true);
 			stats.getMagic().addCurrent(-5f);
+		} else {
+			stats.getMagic().setCurrent(stats.getMagic().getMax());
 		}
 	}
 	

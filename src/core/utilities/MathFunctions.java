@@ -21,6 +21,23 @@ public class MathFunctions {
 		return value;
 	}
 	
+	public static float linearTween(float time, float begin, float change, float duration) {
+		return change * time / duration + begin;
+	}
+	
+	public static float easeIn(float t,float b , float c, float d) {
+		return c*(t/=d)*t + b;
+	}
+	
+	public static float easeOut(float t,float b , float c, float d) {
+		return -c *(t/=d)*(t-2) + b;
+	}
+	
+	public static float easeInOut(float t,float b , float c, float d) {
+		if ((t/=d/2) < 1) return c/2*t*t + b;
+		return -c/2 * ((--t)*(t-2) - 1) + b;
+	}
+	
 	public static float lerp(float startValue, float endValue, float time) {
 		  return (1 - time) * startValue + time * endValue;
 	}

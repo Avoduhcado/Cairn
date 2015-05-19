@@ -29,9 +29,9 @@ public class HUD {
 		magicBar = new HUDMagicBar("Magic", new Vector2f(meroSkull.getWidth() * Camera.ASPECT_RATIO, 91f), Camera.ASPECT_RATIO);
 	}
 	
-	public void update() {
+	public void update(Stage stage) {
 		// TODO Tween movements and adjust animations on bell
-		magicBar.update();
+		magicBar.update(stage.getPlayer().getStats().getMagic().getCurrent() / stage.getPlayer().getStats().getMagic().getMax());
 	}
 	
 	public void draw(Stage stage) {
@@ -46,7 +46,7 @@ public class HUD {
 		staminaBar.drawCase(1f);
 		magicBar.drawCase(1f);
 		
-		magicBar.drawBell(stage.getPlayer().getStats().getMagic().getCurrent() / stage.getPlayer().getStats().getMagic().getMax());
+		magicBar.drawBell();
 		
 		Text.getDefault().setStill(true);
 		Text.getDefault().setColor(Color.BLACK);

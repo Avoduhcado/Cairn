@@ -71,7 +71,7 @@ public class Stage extends GameSetup {
 				gameMenu = null;
 		} else {
 			bgm.update();
-			hud.update();
+			hud.update(this);
 			
 			for(int i = 0; i<uiElements.size(); i++) {
 				if(uiElements.get(i).isKill()) {
