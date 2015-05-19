@@ -46,7 +46,7 @@ public class HUDMagicBar {
 		magicBell = new Skeleton(json.readSkeletonData("HUD"));
 		magicBell.updateWorldTransform();
 		animStateData = new AnimationStateData(magicBell.getData());
-		animStateData.setDefaultMix(0.2f);
+		animStateData.setDefaultMix(0.1f);
 		animState = new AnimationState(animStateData);
 		animState.setAnimation(0, "Idle", true);
 	}
@@ -138,6 +138,8 @@ public class HUDMagicBar {
 				animState.setAnimation(0, "Idle", true);
 				break;
 			}
+			
+			this.state = state;
 		}
 	}
 	
