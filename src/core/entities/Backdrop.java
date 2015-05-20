@@ -43,7 +43,7 @@ public class Backdrop extends Entity {
 
 	@Override
 	public void draw() {
-		//SpriteIndex.getSprite(sprite).setStill(true);
+		SpriteIndex.getSprite(sprite).setStill(true);
 		//SpriteIndex.getSprite(sprite).setIntScale(true);
 		if(depth == -1f) {
 			SpriteIndex.getSprite(sprite).setFixedSize(Camera.get().displayWidth, Camera.get().displayHeight);
@@ -51,21 +51,20 @@ public class Backdrop extends Entity {
 			SpriteIndex.getSprite(sprite).setFixedSize((int) Math.ceil(box.getWidth()), (int) Math.ceil(box.getHeight()));
 			//SpriteIndex.getSprite(sprite).setFixedSize((int) box.getWidth(), (int) box.getHeight());
 		}
-		SpriteIndex.getSprite(sprite).draw(pos.x + offset.x, pos.y + offset.y);
+		//SpriteIndex.getSprite(sprite).draw(pos.x + offset.x, pos.y + offset.y);
+		SpriteIndex.getSprite(sprite).draw((float) (pos.x - Camera.get().frame.getX() - (Camera.get().frame.getX() * depth)),
+				(float)  (pos.y - Camera.get().frame.getY() - (Camera.get().frame.getY() * depth)));
 
 		if(Theater.get().debug) {
-			DrawUtils.setColor(new Vector3f(1f, 0, 0.25f));
-			DrawUtils.drawRect(pos.x + offset.x, pos.y + offset.y, getBox());
+			//DrawUtils.setColor(new Vector3f(1f, 0, 0.25f));
+			//DrawUtils.drawRect(pos.x + offset.x, pos.y + offset.y, getBox());
+			//DrawUtils.drawRect((float) (pos.x + (Camera.get().frame.getX() * depth)),
+				//	(float)  (pos.y + (Camera.get().frame.getY() * depth)), getBox());
 		}
 	}
 	
 	public void update() {
-		Vector2f focalVelocity = new Vector2f();
-		focalVelocity.set(-Camera.get().getFrameSpeed().x, -Camera.get().getFrameSpeed().y);
-		focalVelocity.scale(depth);
-		if(focalVelocity.length() != 0) {
-			Vector2f.add(focalVelocity, offset, offset);
-		}
+		
 	}
 	
 	public float getDepth() {

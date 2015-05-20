@@ -128,7 +128,7 @@ public class SplashScreen extends GameSetup {
 			}
 
 			// Start fading out
-			if(timer <= 1f && Camera.get().getFadeTimer() == 0f) {
+			if(timer <= 1f && !Camera.get().isFading()) {
 				Camera.get().setFadeTimer(1f);
 			}
 		} else {

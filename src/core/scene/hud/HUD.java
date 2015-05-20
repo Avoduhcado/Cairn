@@ -32,6 +32,8 @@ public class HUD {
 	public void update(Stage stage) {
 		// TODO Tween movements and adjust animations on bell
 		magicBar.update(stage.getPlayer().getStats().getMagic().getCurrent() / stage.getPlayer().getStats().getMagic().getMax());
+		
+		healthBar.update(1f);
 	}
 	
 	public void draw(Stage stage) {
@@ -42,8 +44,8 @@ public class HUD {
 		meroSkull.set2DScale(Camera.ASPECT_RATIO);
 		meroSkull.draw(0, 0);
 		
-		healthBar.drawCase(1f);
-		staminaBar.drawCase(1f);
+		healthBar.drawCase();
+		staminaBar.drawCase();
 		magicBar.drawCase(1f);
 		
 		magicBar.drawBell();

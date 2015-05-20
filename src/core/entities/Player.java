@@ -46,6 +46,8 @@ public class Player extends Actor implements Combatant {
 	private Stats stats;
 	private Reputation reputation;
 	
+	private Spell spell;
+	
 	private transient AnimationState animStateOverlay;
 	private transient float overlayDelay;
 	private transient int looking;
@@ -71,13 +73,20 @@ public class Player extends Actor implements Combatant {
 		this.equipment.setCurrentMilk(10);
 		this.reputation = new Reputation(Faction.PLAYER, Faction.MONSTER);
 
-		//setState(CharState.REVIVE);
+		setState(CharState.REVIVE);
 	}
 
 	@Override
 	public void update() {
 		if(getVelocity().length() > 0 && state == CharState.RUN) {
 			stats.getStamina().addCurrent(-Theater.getDeltaSpeed(0.15f));
+		}
+		
+		if(spell != null) {
+			spell.update();
+			if(spell.isFinished()) {
+				spell = null;
+			}
 		}
 		
 		super.update();
@@ -128,6 +137,10 @@ public class Player extends Actor implements Combatant {
 	public void draw() {
 		super.draw();
 		
+		if(spell != null) {
+			spell.draw();
+		}
+			
 		if(Theater.get().debug) {
 			if(equipment.getEquippedWeapon().isDamaging()) {
 				Slot weapon = skeleton.findSlot("WEAPON F");
@@ -241,9 +254,13 @@ public class Player extends Actor implements Combatant {
 				setState(CharState.WALK);
 			}
 			break;
+		case CAST:
+			if(animState.getCurrent(0).getTime() >= 0.4f && spell == null) {
+				spell = new Spell("Spell 1",
+						new Vector2f(this.getX() + (300 * (getDirection() == 0 ? 1 : -1)), this.getYPlane()), Camera.ASPECT_RATIO);
+			}
 		case ATTACK:
 		case DEFEND:
-		case CAST:
 			// TODO Animation listener
 			if(animState.getCurrent(0).isComplete()) {
 				endCombat();
@@ -369,7 +386,7 @@ public class Player extends Actor implements Combatant {
 				velocity = MathFunctions.limitVector(velocity, getMaxSpeed());
 			}
 		} else {
-			//looking = 1;
+			looking = 1;
 		}
 	}
 	
@@ -383,7 +400,7 @@ public class Player extends Actor implements Combatant {
 				velocity = MathFunctions.limitVector(velocity, getMaxSpeed());
 			}
 		} else {
-			//looking = -1;
+			looking = -1;
 		}
 	}
 	

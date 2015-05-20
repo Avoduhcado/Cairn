@@ -55,12 +55,12 @@ public class Camera {
 	
 	private Mobile focus;
 	
-	/** Total time to fade over */
-	private float fadeTotal;
-	/** Current fading time */
-	private float fadeTimer;
-	/** Screen fade value */
-	private float fade = 0f;
+	/** Current duration of fade effect */
+	private float fadeTime;
+	/** Total duration of fade effect */
+	private float fadeDuration;
+	/** Current fade alpha value */
+	private float fadeValue;
 	
 	/** Panning settings */
 	private Vector3f pan = new Vector3f(0,0,0);
@@ -178,14 +178,14 @@ public class Camera {
 		
 		setup.drawUI();
 		
+		// Process fading
+		fade();
+		
 		if(Theater.get().paused) {
 			Text.getDefault().setStill(true);
 			Text.getDefault().setCentered(true);
 			Text.getDefault().drawString("Paused", getDisplayWidth(0.5f), getDisplayHeight(0.5f));
 		}
-		
-		// Process fading
-		fade();
 		
 		// Draw debug info
 		if(Theater.get().debug) {
@@ -428,40 +428,32 @@ public class Camera {
 			frame.setFrame(frame.getX() - panCurrent.x, frame.getY() - panCurrent.y, frame.getWidth(), frame.getHeight());
 		}
 	}
-	
-	public float getFadeTimer() {
-		return fadeTimer;
+
+	public boolean isFading() {
+		return fadeValue != 0 && fadeValue != 1;
 	}
-	
+
 	/**
 	 * Set the screen to fade in or out over a specified time.
 	 * 
-	 * @param fadeTimer Time to fade, positive to fade out, negative to fade in, 0 for no fade
+	 * @param fadeDuration Time to fade, positive to fade out, negative to fade in, 0 for no fade
 	 */
-	public void setFadeTimer(float fadeTimer) {
-		this.fadeTimer = 0;
-		this.fadeTotal = fadeTimer;
-		
-		if(fadeTotal >= 0f)
-			fade = 0f;
-		else
-			fade = 1f;
+	public void setFadeTimer(float fadeDuration) {
+		this.fadeDuration = fadeDuration;
+		this.fadeTime = 0f;
 	}
 	
 	public void fade() {
-		if(Math.abs(fadeTimer) < Math.abs(fadeTotal)) {
-			// Adjust fade value
-			fadeTimer += Theater.getDeltaSpeed(0.025f) * (fadeTotal > 0 ? 1f : -1f);
-			// Adjust volume
-			fade = MathFunctions.clamp(fadeTotal > 0 ? (fadeTimer / fadeTotal) : 1 - (fadeTimer / fadeTotal), 0, 1);
-			// Check if fading has ended
-			if(Math.abs(fadeTimer) >= Math.abs(fadeTotal)) {
-				fadeTimer = 0;
-				fadeTotal = 0;
+		if(fadeTime < Math.abs(fadeDuration)) {
+			fadeTime = MathFunctions.clamp(fadeTime + Theater.getDeltaSpeed(0.025f), 0, Math.abs(fadeDuration));
+			if(fadeDuration < 0) {
+				fadeValue = MathFunctions.easeIn(fadeTime, 1, -1, Math.abs(fadeDuration));
+			} else {
+				fadeValue = MathFunctions.easeIn(fadeTime, 0, 1, Math.abs(fadeDuration));
 			}
 		}
 		
-		DrawUtils.fillColor(0f, 0f, 0f, fade);
+		DrawUtils.fillColor(0f, 0f, 0f, fadeValue);
 	}
 
 	public float getFrameXScale() {
