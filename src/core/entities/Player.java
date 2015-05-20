@@ -73,7 +73,7 @@ public class Player extends Actor implements Combatant {
 		this.equipment.setCurrentMilk(10);
 		this.reputation = new Reputation(Faction.PLAYER, Faction.MONSTER);
 
-		setState(CharState.REVIVE);
+		//setState(CharState.REVIVE);
 	}
 
 	@Override
@@ -92,7 +92,10 @@ public class Player extends Actor implements Combatant {
 		super.update();
 		
 		if(looking == 1) {
-			Camera.get().setPanning(0, -1, 4.5f);
+			if(!Camera.get().isPanning()) {
+				Camera.get().setPan(new Vector2f(0f, -200), 1.25f, 0.85f);
+			}
+			//Camera.get().setPanning(0, -1, 4.5f);
 			if(animStateOverlay.getCurrent(0) == null) {
 				if(overlayDelay < 0.35f) {
 					overlayDelay += Theater.getDeltaSpeed(0.025f);
@@ -101,9 +104,15 @@ public class Player extends Actor implements Combatant {
 				}
 			}
 		} else if(looking == -1) {
-			Camera.get().setPanning(0, 1, 4.5f);
+			if(!Camera.get().isPanning()) {
+				Camera.get().setPan(new Vector2f(0f, 200), 1.25f, 0.85f);
+			}
+			//Camera.get().setPanning(0, 1, 4.5f);
 		} else {
-			Camera.get().setPanning(0, 0, 0);
+			if(Camera.get().isPanning()) {
+				Camera.get().setPan(new Vector2f(0, 0), 0, 0);
+			}
+			//Camera.get().setPanning(0, 0, 0);
 			if(animStateOverlay.getCurrent(0) != null && animStateOverlay.getCurrent(0).getAnimation().getName().matches("LookUp")) {
 				animStateOverlay.clearTrack(0);
 				overlayDelay = 0f;

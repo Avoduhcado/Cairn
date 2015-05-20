@@ -25,10 +25,16 @@ public class MathFunctions {
 		return change * time / duration + begin;
 	}
 	
-	public static float easeIn(float t,float b, float c, float d) {
+	/**
+	 * Start slow then move quickly
+	 */
+	public static float easeIn(float t, float b, float c, float d) {
 		return c*(t/=d)*t + b;
 	}
 	
+	/**
+	 * Start fast then slow down
+	 */
 	public static float easeOut(float t, float b, float c, float d) {
 		return -c *(t/=d)*(t-2) + b;
 	}

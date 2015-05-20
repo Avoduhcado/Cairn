@@ -13,7 +13,6 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.util.ResourceLoader;
 
 import core.entities.Entity;
@@ -61,14 +60,16 @@ public class Camera {
 	private float fadeDuration;
 	/** Current fade alpha value */
 	private float fadeValue;
-	
-	/** Panning settings */
-	private Vector3f pan = new Vector3f(0,0,0);
-	private Vector2f panCurrent = new Vector2f(0,0);
-	private Vector2f panLimit = new Vector2f(WIDTH * 0.15f, HEIGHT * 0.25f);
+
+	/** Pan variables */
+	private float panTime;
+	private float panDuration;
+	private Vector2f panValue = new Vector2f(0, 0);
+	private Vector2f panLimit = new Vector2f(0, 0);
 	private float panDelay;
 	
-	/** Shake timer */
+	
+	/** Shake variables */
 	private float shakeTotal;
 	private float shakeTime;
 	private float shakePower;
@@ -115,7 +116,7 @@ public class Camera {
 		}
 		
 		frame = new Rectangle2D.Double(0, 0, WIDTH, HEIGHT);
-		setFadeTimer(-1f);
+		setFade(-1f);
 	}
 	
 	public static ByteBuffer[] loadIcon(String ref) throws IOException {
@@ -353,40 +354,46 @@ public class Camera {
 		}
 	}
 	
-	public void setPanning(int horizontal, int vertical, float speed) {
-		pan.set(horizontal, vertical, speed);
-		if(speed == 0) {
-			panDelay = 0f;
-		}
+	public boolean isPanning() {
+		return this.panDuration > 0;
+	}
+	
+	public void setPan(Vector2f panLimit, float panDuration, float panDelay) {
+		this.panDuration = panDuration;
+		panTime = 0;
+		this.panLimit = panLimit;
+		this.panDelay = panDelay;
 	}
 	
 	public void pan() {
-		// TODO this is a mess
-		if(pan.z != 0) {
-			if(panDelay < 0.45f) {
-				panDelay += Theater.getDeltaSpeed(0.025f);
+		if(isPanning()) {
+			if(panDelay > 0) {
+				panDelay = MathFunctions.clamp(panDelay - Theater.getDeltaSpeed(0.025f), 0, panDelay);
 			} else {
-				if(pan.x != 0 && Math.abs(panCurrent.x) < Math.abs(panLimit.x)) {
-					panCurrent.x = MathFunctions.clamp(panCurrent.x + (Theater.getDeltaSpeed(pan.z) * pan.x),
-							-panLimit.x, panLimit.x);
-				}
-				if(pan.y != 0 && Math.abs(panCurrent.y) < Math.abs(panLimit.y)) {
-					panCurrent.y = MathFunctions.clamp(panCurrent.y + (Theater.getDeltaSpeed(pan.z) * pan.y),
-							-panLimit.y, panLimit.y);
+				if(panTime < panDuration) {
+					panTime = MathFunctions.clamp(panTime + Theater.getDeltaSpeed(0.025f), 0, panDuration);
+					if(panLimit.x != 0) {
+						panValue.setX(MathFunctions.easeOut(panTime, 0, panLimit.x, panDuration));
+					}
+					if(panLimit.y != 0) {
+						panValue.setY(MathFunctions.easeOut(panTime, 0, panLimit.y, panDuration));
+					}
 				}
 			}
-		} else if(panCurrent.x != 0 || panCurrent.y != 0) {
-			if(panCurrent.x != 0) {
-				panCurrent.x = MathFunctions.clamp(panCurrent.x - (Theater.getDeltaSpeed(7.5f) * (panCurrent.x / Math.abs(panCurrent.x))),
-						panCurrent.x < 0 ? -panLimit.x : 0, panCurrent.x < 0 ? 0 : -panLimit.x);
+		} else if(panValue.length() != 0) {
+			if(panLimit.length() == 0) {
+				panLimit.set(panValue);
 			}
-			if(panCurrent.y != 0) {
-				panCurrent.y = MathFunctions.clamp(panCurrent.y - (Theater.getDeltaSpeed(7.5f) * (panCurrent.y / Math.abs(panCurrent.y))),
-						panCurrent.y < 0 ? -panLimit.y : 0, panCurrent.y < 0 ? 0 : panLimit.y);
+			panTime = MathFunctions.clamp(panTime + Theater.getDeltaSpeed(0.025f), 0, 1);
+			if(panLimit.x != 0) {
+				panValue.setX(MathFunctions.easeIn(panTime, panLimit.x, -panLimit.x, 1f));
+			}
+			if(panLimit.y != 0) {
+				panValue.setY(MathFunctions.easeIn(panTime, panLimit.y, -panLimit.y, 1f));
 			}
 		}
 		
-		frame.setFrame(frame.getX() + panCurrent.x, frame.getY() + panCurrent.y, frame.getWidth(), frame.getHeight());
+		frame.setFrame(frame.getX() + panValue.x, frame.getY() + panValue.y, frame.getWidth(), frame.getHeight());
 	}
 	
 	public boolean isShaking() {
@@ -424,8 +431,8 @@ public class Camera {
 			frame.setFrame(frame.getX() + shakeOffset.x, frame.getY() + shakeOffset.y, frame.getWidth(), frame.getHeight());
 		}
 		
-		if(panCurrent.length() != 0) {
-			frame.setFrame(frame.getX() - panCurrent.x, frame.getY() - panCurrent.y, frame.getWidth(), frame.getHeight());
+		if(panValue.length() != 0) {
+			frame.setFrame(frame.getX() - panValue.x, frame.getY() - panValue.y, frame.getWidth(), frame.getHeight());
 		}
 	}
 
@@ -438,7 +445,7 @@ public class Camera {
 	 * 
 	 * @param fadeDuration Time to fade, positive to fade out, negative to fade in, 0 for no fade
 	 */
-	public void setFadeTimer(float fadeDuration) {
+	public void setFade(float fadeDuration) {
 		this.fadeDuration = fadeDuration;
 		this.fadeTime = 0f;
 	}

@@ -38,7 +38,7 @@ public class Stage extends GameSetup {
 	private AudioSource bgm;
 	
 	public Stage() {
-		Camera.get().setFadeTimer(-5f);
+		Camera.get().setFade(-5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		bgm = new AudioSource("CairnArea4", "BGM");
 		

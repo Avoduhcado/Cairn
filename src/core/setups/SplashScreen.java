@@ -109,7 +109,7 @@ public class SplashScreen extends GameSetup {
 			// Restart screen if a new one exists
 			if(!splashImages.isEmpty()) {
 				timer = 5f;
-				Camera.get().setFadeTimer(-1f);
+				Camera.get().setFade(-1f);
 			// Proceed with setup swap
 			} else {
 				//Theater.get().swapSetup(new TitleMenu());
@@ -129,7 +129,7 @@ public class SplashScreen extends GameSetup {
 
 			// Start fading out
 			if(timer <= 1f && !Camera.get().isFading()) {
-				Camera.get().setFadeTimer(1f);
+				Camera.get().setFade(1f);
 			}
 		} else {
 			// Remove current screen
@@ -137,7 +137,7 @@ public class SplashScreen extends GameSetup {
 			// Restart screen if a new one exists
 			if(!splashImages.isEmpty()) {
 				timer = 5f;
-				Camera.get().setFadeTimer(-1f);
+				Camera.get().setFade(-1f);
 			// Proceed with setup swap
 			} else {
 				//Theater.get().swapSetup(new TitleMenu());

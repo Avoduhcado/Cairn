@@ -58,7 +58,7 @@ public class HUDMagicBar {
 		if(width < lastBellPosition) {
 			setState(BellState.CAST);
 			tweenTimer = MathFunctions.clamp(tweenTimer + Theater.getDeltaSpeed(0.025f), 0, 1);
-			tweenPosition = MathFunctions.easeOut(tweenTimer, lastBellPosition, width - lastBellPosition, 1f);
+			tweenPosition = MathFunctions.easeOut(tweenTimer, lastBellPosition, width - lastBellPosition, 0.75f);
 			if(tweenPosition <= width) {
 				tweenPosition = width;
 				lastBellPosition = width;

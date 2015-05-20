@@ -60,7 +60,7 @@ public class Map implements Serializable {
 	public Map() {
 		resetEntity();
 
-		loadBackdrop(400, 300, "Parallax", -0.1f);
+		loadBackdrop(400, 335, "Parallax", -0.1f);
 		loadBackdrop(0, 0, "Graveyard", 0f);
 
 		loadProp(190, 480, "Entrance");

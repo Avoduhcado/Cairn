@@ -22,7 +22,7 @@ public class TitleMenu extends GameSetup {
 	 */
 	public TitleMenu() {
 		// Ensure fading has reset
-		Camera.get().setFadeTimer(-0.5f);
+		Camera.get().setFade(-0.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		
 		// Load title logo
