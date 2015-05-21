@@ -129,8 +129,9 @@ public class Player extends Actor implements Combatant {
 			for(Actor e : ((Stage) Theater.get().getSetup()).getCast()) {
 				if(e instanceof Combatant) {
 					for(Rectangle2D r : ((Enemy) e).getHitBoxes(this)) {
-						if(box.intersects(r) && Point2D.distance(0, this.getYPlane(), 0, ((Actor) e).getYPlane()) 
-								< (((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getHeight() * 0.65f)) {
+						if(box.intersects(r) && Point2D.distance(0, this.getYPlane(), 0, ((Actor) e).getYPlane()) <= 25) {
+						//if(box.intersects(r) && Point2D.distance(0, this.getYPlane(), 0, ((Actor) e).getYPlane()) 
+							//	< (((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getHeight() * 0.65f)) {
 							((Combatant) e).hit(this);
 							break;
 						}

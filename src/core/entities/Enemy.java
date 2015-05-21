@@ -81,10 +81,10 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			box.translate((int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldX(),
 					(int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldY());
 
+			// TODO Check hits against all available targets
 			for(Rectangle2D r : ((Stage) Theater.get().getSetup()).getPlayer().getHitBoxes(this)) {
 				if(box.intersects(r)
-						&& Point2D.distance(0, this.getYPlane(), 0, ((Actor) ((Stage) Theater.get().getSetup()).getPlayer()).getYPlane())
-						< (((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getHeight() / 2f)) {
+						&& Point2D.distance(0, this.getYPlane(), 0, ((Actor) ((Stage) Theater.get().getSetup()).getPlayer()).getYPlane()) < 30) {
 					((Stage) Theater.get().getSetup()).getPlayer().hit(this);
 					break;
 				}

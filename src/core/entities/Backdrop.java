@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
-
 import core.Camera;
 import core.Theater;
-import core.render.DrawUtils;
 import core.render.SpriteIndex;
 
 public class Backdrop extends Entity {
@@ -22,7 +19,6 @@ public class Backdrop extends Entity {
 	private static transient int count = 0;
 	
 	private float depth;
-	private transient Vector2f offset;
 	
 	public Backdrop(float x, float y, String ref, float scale, float depth) {
 		this.pos = new Vector2f(x, y);
@@ -33,12 +29,10 @@ public class Backdrop extends Entity {
 				SpriteIndex.getSprite(sprite).getWidth() * scale, SpriteIndex.getSprite(sprite).getHeight() * scale);
 		
 		this.depth = depth;
-		this.offset = new Vector2f();
 	}
 	
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
-		this.offset = new Vector2f();
 	}
 
 	@Override
