@@ -65,7 +65,7 @@ public class UIFrame extends Sprite {
 			}
 		}
 		
-		GL11.glEnd();
+		//GL11.glEnd();
 		GL11.glPopMatrix();
 	}
 	
@@ -112,6 +112,7 @@ public class UIFrame extends Sprite {
 		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
 		    GL11.glVertex2d(verWidth, verHeight);
 		}
+		GL11.glEnd();
 	}
 	
 	public void setHorizQuads(int x, int y, Rectangle2D box) {
@@ -134,6 +135,7 @@ public class UIFrame extends Sprite {
 		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
 		    GL11.glVertex2d(width, verHeight + height);
 		}
+		GL11.glEnd();
 	}
 	
 	public void setInnerQuads(int x, int y, Rectangle2D box) {
@@ -156,6 +158,7 @@ public class UIFrame extends Sprite {
 		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
 		    GL11.glVertex2d(width, verHeight);
 		}
+		GL11.glEnd();
 	}
 	
 	@Override

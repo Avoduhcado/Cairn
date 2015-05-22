@@ -13,11 +13,9 @@ import core.entities.Ally;
 import core.entities.Enemy;
 import core.entities.Backdrop;
 import core.entities.Entity;
-import core.entities.LightSource;
 import core.entities.Player;
 import core.entities.Actor;
 import core.entities.utils.CharState;
-import core.render.LightMap;
 import core.scene.Map;
 import core.scene.hud.HUD;
 import core.ui.UIElement;
@@ -136,9 +134,9 @@ public class Stage extends GameSetup {
 			g.draw();
 		}
 
-		for(LightSource l : map.getLights()) {
+		/*for(LightSource l : map.getLights()) {
 			l.draw();
-		}
+		}*/
 
 		for(int x = 0; x<map.getScenery().size(); x++) {
 			for(int i = x; i>=0 && i>x-5; i--) {
@@ -162,12 +160,12 @@ public class Stage extends GameSetup {
 		if(map.getFog() != null)
 			map.getFog().draw();
 
-		if(!LightMap.lights.isEmpty()) {
+		/*if(!LightMap.lights.isEmpty()) {
 			// Remember to re-init LightMap before using these
 			//LightMap.drawFBOMax();
 			LightMap.draw();
 			//LightMap.drawNoFBO();
-		}
+		}*/
 	}
 	
 	@Override

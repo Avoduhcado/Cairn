@@ -13,10 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import org.lwjgl.util.vector.Vector4f;
-
 import core.Camera;
-import core.render.LightMap;
 import core.render.SpriteIndex;
 import core.scene.collisions.Collidable;
 import core.scene.collisions.HitMaps;
@@ -130,9 +127,9 @@ public class Map implements Serializable {
 		//lights.add(new LightSource(1580, 1580, null, 1f, new Vector2f(250, 205), new Vector3f(1f, 1f, 1f)));
 		//lights.add(new LightSource(415, 630, null, 1f, new Vector2f(150, 120), new Vector3f(1f, 0.225f, 0.1f)));
 		
-		LightMap.init();
+		/*LightMap.init();
 		LightMap.lights = lights;
-		LightMap.background = new Vector4f(0f,0f,0f,1f);
+		LightMap.background = new Vector4f(0f,0f,0f,1f);*/
 	}
 	
 	public void serialize() {
@@ -165,9 +162,9 @@ public class Map implements Serializable {
 		
 		fillScenery();
 		
-		LightMap.init();
+		/*LightMap.init();
 		LightMap.lights = lights;
-		LightMap.background = new Vector4f(0f,0f,0f,1f);
+		LightMap.background = new Vector4f(0f,0f,0f,1f);*/
 		
 		buildCollisions();
 		//HitMaps.populateMap(HitMaps.getCollisionMap(), platforms);
@@ -178,9 +175,9 @@ public class Map implements Serializable {
 			fog.update();
 		}
 		
-		for(LightSource l : lights) {
+		/*for(LightSource l : lights) {
 			l.update();
-		}
+		}*/
 		
 		for(Backdrop b : background) {
 			b.update();
