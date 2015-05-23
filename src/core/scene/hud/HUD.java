@@ -1,13 +1,10 @@
 package core.scene.hud;
 
-import java.awt.Color;
-
 import org.lwjgl.util.vector.Vector2f;
 
 import core.Camera;
 import core.render.textured.Sprite;
 import core.setups.Stage;
-import core.utilities.text.Text;
 
 public class HUD {
 
@@ -18,6 +15,10 @@ public class HUD {
 	
 	private HUDMagicBar magicBar;
 	
+	private HUDIcon weaponIcon;
+	private HUDIcon itemIcon;
+	private HUDIcon spellIcon;
+	
 	public HUD() {
 		meroSkull = new Sprite("HUD/Mero");
 		
@@ -27,13 +28,19 @@ public class HUD {
 				new Vector2f(meroSkull.getWidth() * Camera.ASPECT_RATIO, 67.5f), Camera.ASPECT_RATIO);
 		
 		magicBar = new HUDMagicBar("Magic", new Vector2f(meroSkull.getWidth() * Camera.ASPECT_RATIO, 91f), Camera.ASPECT_RATIO);
+		
+		weaponIcon = new HUDIcon(IconType.WEAPON);
+		itemIcon = new HUDIcon(IconType.ITEM);
+		spellIcon = new HUDIcon(IconType.SPELL);
 	}
 	
 	public void update(Stage stage) {
-		// TODO Tween movements and adjust animations on bell
 		magicBar.update(stage.getPlayer().getStats().getMagic().getCurrent() / stage.getPlayer().getStats().getMagic().getMax());
-		
 		healthBar.update(1f);
+		
+		weaponIcon.update(stage);
+		itemIcon.update(stage);
+		spellIcon.update(stage);
 	}
 	
 	public void draw(Stage stage) {
@@ -50,11 +57,9 @@ public class HUD {
 		
 		magicBar.drawBell();
 		
-		Text.getDefault().setStill(true);
-		Text.getDefault().setColor(Color.BLACK);
-		Text.getDefault().setDropColor(Color.WHITE);
-		Text.getDefault().drawString(stage.getPlayer().getEquipment().getCurrentMilk() + "", 110,
-				(meroSkull.getHeight() * 0.7f) * Camera.ASPECT_RATIO);
+		weaponIcon.draw();
+		itemIcon.draw();
+		spellIcon.draw();
 	}
 
 }

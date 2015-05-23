@@ -14,6 +14,7 @@ public class Equipment implements Serializable {
 	private int equipped;
 	private ArrayList<Weapon> weapons = new ArrayList<Weapon>();
 	private boolean bell;
+	
 	public static final Weapon lightMace = new Weapon("LIGHT MACE", AttackType.LIGHT, 10f);
 	public static final Weapon heavyMace = new Weapon("HEAVY MACE", AttackType.HEAVY, 15f);
 	public static final Weapon polearm = new Weapon("POLEARM", AttackType.THRUST, 7.5f);
@@ -39,6 +40,14 @@ public class Equipment implements Serializable {
 	
 	public Weapon getEquippedWeapon() {
 		return weapons.get(equipped);
+	}
+	
+	public void cycleWeapon() {
+		if(equipped < weapons.size() - 1) {
+			equipped++;
+		} else {
+			equipped = 0;
+		}
 	}
 	
 	public void equipWeapon(Weapon weapon) {

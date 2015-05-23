@@ -451,10 +451,12 @@ public class Player extends Actor implements Combatant {
 	@Override
 	public void attack() {
 		// TODO Check if Dad skull is enabled
-		if((getState() == CharState.IDLE || velocity.length() <= getMaxSpeed() / 2f) && stats.getStamina().getCurrent() > 0f) {
+		if((getState() == CharState.IDLE /*|| velocity.length() <= getMaxSpeed() / 2f*/) && stats.getStamina().getCurrent() > 0f) {
 			setState(CharState.ATTACK);
 			setDadArmRight(true);
 			stats.getStamina().addCurrent(-5f);
+		} else if(getState() == CharState.ATTACK) {
+			animState.addAnimation(0, "HeavyAttack", false, -0.25f);
 		}
 	}
 
@@ -621,6 +623,13 @@ public class Player extends Actor implements Combatant {
 	public void changeWeapon(Weapon weapon) {
 		equipment.equipWeapon(weapon);
 		skeleton.setAttachment("WEAPON", weapon.getName());
+		animStateOverlay.setAnimation(0, "ChangeWeapon", false);
+	}
+	
+	public void changeWeapon() {
+		equipment.cycleWeapon();
+		skeleton.setAttachment("WEAPON", equipment.getEquippedWeapon().getName());
+		skeleton.setAttachment("WEAPON F", equipment.getEquippedWeapon().getName() + " F");
 		animStateOverlay.setAnimation(0, "ChangeWeapon", false);
 	}
 	

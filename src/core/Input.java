@@ -128,19 +128,26 @@ public class Input {
 				}
 				
 				if(Keybinds.SLOT1.clicked()) {
-					((Stage) setup).getPlayer().changeWeapon(Equipment.lightMace);
+					((Stage) setup).getPlayer().changeWeapon();
+					//((Stage) setup).getPlayer().changeWeapon(Equipment.lightMace);
 				} else if(Keybinds.SLOT2.clicked()) {
-					((Stage) setup).getPlayer().changeWeapon(Equipment.heavyMace);
+					//((Stage) setup).getPlayer().changeWeapon(Equipment.heavyMace);
 				} else if(Keybinds.SLOT3.clicked()) {
-					((Stage) setup).getPlayer().changeWeapon(Equipment.polearm);
+					//((Stage) setup).getPlayer().changeWeapon(Equipment.polearm);
 				} else if(Keybinds.SLOT4.clicked()) {
 					((Stage) setup).getPlayer().changeEquipment(true);
 				} else if(Keybinds.SLOT5.clicked()) {
 					((Stage) setup).getPlayer().changeEquipment(false);
 				}
-			} else if(((Stage) setup).getPlayer().canHeal()) {
+			} else if(((Stage) setup).getPlayer().canHeal() || ((Stage) setup).getPlayer().getState() == CharState.ATTACK) {
 				if(Keybinds.MENU_UP.clicked()) {
 					((Stage) setup).getPlayer().heal(true);
+				}
+				
+				if(Keybinds.SLOT1.clicked()) {
+					((Stage) setup).getPlayer().changeWeapon();
+				} else if(Keybinds.ATTACK.clicked()) {
+					((Player) ((Stage) setup).getPlayer()).attack();
 				}
 			}
 			
