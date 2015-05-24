@@ -46,6 +46,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	private Intelligence intelligence;
 	private Stats stats;
 	private Reputation reputation;
+	private String lastHit;
 	
 	private float animationSpeed = 1f;
 	
@@ -174,6 +175,8 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			if(animState.getCurrent(0).isComplete()) {
 				if(state == CharState.ATTACK) {
 					equipment.equipRandomWeapon();
+				} else if(state == CharState.HIT) {
+					lastHit = "";
 				}
 				setState(CharState.IDLE);
 			}
@@ -215,7 +218,17 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		this.intelligence.attacked(attacker);
 		
 		switch(state.getHitState()) {
+		case -1:
+			if(state == CharState.HIT) {
+				if(((Player) attacker).animState.getCurrent(0).getAnimation().getName().matches(lastHit)) {
+					break;
+				}
+			} else {
+				break;
+			}
 		case 0:
+			lastHit = ((Player) attacker).animState.getCurrent(0).getAnimation().getName();
+			System.out.println("DAMAGEDDDD " + lastHit);
 			if(!equipment.isSuperArmor()) {
 				takeDamage(attacker, 1f, true);
 			} else if(equipment.isSuperArmor() && !equipment.isSuperInvulnerable()) {
@@ -257,7 +270,11 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		
 		if(knockBack) {
 			endCombat();
-			setState(CharState.HIT);
+			if(state == CharState.HIT) {
+				animState.setAnimation(0, "Hit", false);
+			} else {
+				setState(CharState.HIT);
+			}
 			intelligence.setApproachVector(0, 0);
 			if(attacker.getEquipment().getEquippedWeapon().isReversedKnockback()) {
 				Vector2f.sub(new Vector2f(((Entity) attacker).getX(), ((Actor) attacker).getYPlane()),

@@ -8,11 +8,9 @@ import org.lwjgl.util.vector.Vector2f;
 
 import core.entities.Actor;
 import core.entities.Enemy;
-import core.entities.Player;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
 import core.entities.utils.ai.Personality;
-import core.equipment.Equipment;
 import core.setups.GameSetup;
 import core.setups.Stage;
 import core.utilities.Screenshot;
@@ -78,12 +76,12 @@ public class Input {
 		if(setup instanceof Stage) {
 			if(((Stage) setup).getPlayer().getState().canWalk()) {
 				if(Keybinds.RUN.held() && ((Stage) setup).getPlayer().canRun()) {
-					((Actor) ((Stage) setup).getPlayer()).setState(CharState.RUN);
+					((Stage) setup).getPlayer().setState(CharState.RUN);
 				} else if(Keybinds.RUN.released() || !((Stage) setup).getPlayer().canRun()) {
-					if(((Actor) ((Stage) setup).getPlayer()).getVelocity().length() != 0) {
-						((Actor) ((Stage) setup).getPlayer()).setState(CharState.WALK);
+					if(((Stage) setup).getPlayer().getVelocity().length() != 0) {
+						((Stage) setup).getPlayer().setState(CharState.WALK);
 					} else {
-						((Actor) ((Stage) setup).getPlayer()).setState(CharState.IDLE);
+						((Stage) setup).getPlayer().setState(CharState.IDLE);
 					}
 				}
 				
@@ -114,40 +112,30 @@ public class Input {
 				}
 			}
 			
-			if(((Stage) setup).getPlayer().getState().canAct()) {
+			if(((Stage) setup).getPlayer().canAct()) {
 				if(Keybinds.ATTACK.clicked()) {
-					((Player) ((Stage) setup).getPlayer()).attack();
+					((Stage) setup).getPlayer().attack();
 				} else if(Keybinds.DEFEND.clicked()) {
-					((Player) ((Stage) setup).getPlayer()).defend();
+					((Stage) setup).getPlayer().defend();
 				} else if(Keybinds.MENU_RIGHT.clicked()) {
-					((Player) ((Stage) setup).getPlayer()).cast();
+					((Stage) setup).getPlayer().cast();
 				}
 				
 				if(Keybinds.MENU_UP.clicked()) {
-					((Stage) setup).getPlayer().heal(false);
+					((Stage) setup).getPlayer().heal();
 				}
 				
 				if(Keybinds.SLOT1.clicked()) {
 					((Stage) setup).getPlayer().changeWeapon();
-					//((Stage) setup).getPlayer().changeWeapon(Equipment.lightMace);
 				} else if(Keybinds.SLOT2.clicked()) {
-					//((Stage) setup).getPlayer().changeWeapon(Equipment.heavyMace);
+					
 				} else if(Keybinds.SLOT3.clicked()) {
-					//((Stage) setup).getPlayer().changeWeapon(Equipment.polearm);
+					((Stage) setup).getPlayer().changeArmor(0);
 				} else if(Keybinds.SLOT4.clicked()) {
-					((Stage) setup).getPlayer().changeEquipment(true);
+					((Stage) setup).getPlayer().changeArmor(0);
+					((Stage) setup).getPlayer().changeArmor(1);
 				} else if(Keybinds.SLOT5.clicked()) {
-					((Stage) setup).getPlayer().changeEquipment(false);
-				}
-			} else if(((Stage) setup).getPlayer().canHeal() || ((Stage) setup).getPlayer().getState() == CharState.ATTACK) {
-				if(Keybinds.MENU_UP.clicked()) {
-					((Stage) setup).getPlayer().heal(true);
-				}
-				
-				if(Keybinds.SLOT1.clicked()) {
-					((Stage) setup).getPlayer().changeWeapon();
-				} else if(Keybinds.ATTACK.clicked()) {
-					((Player) ((Stage) setup).getPlayer()).attack();
+					((Stage) setup).getPlayer().changeArmor(2);
 				}
 			}
 			

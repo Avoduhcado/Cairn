@@ -45,6 +45,7 @@ public class Player extends Actor implements Combatant {
 	private Equipment equipment;
 	private Stats stats;
 	private Reputation reputation;
+	private boolean familiar;
 	
 	private Spell spell;
 	
@@ -55,21 +56,27 @@ public class Player extends Actor implements Combatant {
 	public Player(float x, float y, String ref, float scale) {
 		super(x, y, ref, scale);
 		
-		//setDadSkull(false);
+		familiar = true;
+		setDadSkull(familiar);
 		setDadArmRight(false);
 		setDadArmLeft(false);
 				
 		this.stats = new Stats();
 		this.stats.setHealth(new Health(30f, 30f));
 		this.stats.setStamina(new Stamina(20f, 20f));
-		this.stats.getStamina().setRegainSpeed(4.5f);
+		if(!familiar) {
+			this.stats.getStamina().setCurrent(0);
+			this.stats.getStamina().setRegainSpeed(0);
+		} else {
+			this.stats.getStamina().setRegainSpeed(7.5f);
+		}
 		this.stats.setMagic(new Magic(30f, 30f));
 		this.equipment = new Equipment();
 		this.equipment.addWeapon(Equipment.lightMace);
 		this.equipment.addWeapon(Equipment.heavyMace);
 		this.equipment.addWeapon(Equipment.polearm);
 		this.changeWeapon(Equipment.lightMace);
-		this.equipment.equipBell(true);
+		this.changeItem();
 		this.equipment.setCurrentMilk(10);
 		this.reputation = new Reputation(Faction.PLAYER, Faction.MONSTER);
 
@@ -95,7 +102,6 @@ public class Player extends Actor implements Combatant {
 			if(!Camera.get().isPanning()) {
 				Camera.get().setPan(new Vector2f(0f, -200), 1.25f, 0.85f);
 			}
-			//Camera.get().setPanning(0, -1, 4.5f);
 			if(animStateOverlay.getCurrent(0) == null) {
 				if(overlayDelay < 0.35f) {
 					overlayDelay += Theater.getDeltaSpeed(0.025f);
@@ -107,12 +113,10 @@ public class Player extends Actor implements Combatant {
 			if(!Camera.get().isPanning()) {
 				Camera.get().setPan(new Vector2f(0f, 200), 1.25f, 0.85f);
 			}
-			//Camera.get().setPanning(0, 1, 4.5f);
 		} else {
 			if(Camera.get().isPanning()) {
 				Camera.get().setPan(new Vector2f(0, 0), 0, 0);
 			}
-			//Camera.get().setPanning(0, 0, 0);
 			if(animStateOverlay.getCurrent(0) != null && animStateOverlay.getCurrent(0).getAnimation().getName().matches("LookUp")) {
 				animStateOverlay.clearTrack(0);
 				overlayDelay = 0f;
@@ -125,13 +129,10 @@ public class Player extends Actor implements Combatant {
 			box.translate((int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldX(),
 					(int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldY());
 			
-			// TODO Change damage based on location of hit/Which segment got hit and how far from center it is
 			for(Actor e : ((Stage) Theater.get().getSetup()).getCast()) {
 				if(e instanceof Combatant) {
 					for(Rectangle2D r : ((Enemy) e).getHitBoxes(this)) {
 						if(box.intersects(r) && Point2D.distance(0, this.getYPlane(), 0, ((Actor) e).getYPlane()) <= 25) {
-						//if(box.intersects(r) && Point2D.distance(0, this.getYPlane(), 0, ((Actor) e).getYPlane()) 
-							//	< (((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getHeight() * 0.65f)) {
 							((Combatant) e).hit(this);
 							break;
 						}
@@ -238,6 +239,9 @@ public class Player extends Actor implements Combatant {
 				case "Chug":
 					equipment.setChugDrink(event.getInt() == 1);
 					break;
+				case "Combo":
+					equipment.setCombo(event.getInt(), event.getString());
+					break;
 				default:
 					System.out.println("Unhandled event: " + event.getData());
 				}
@@ -281,7 +285,7 @@ public class Player extends Actor implements Combatant {
 			if(animState.getCurrent(0).isComplete()) {
 				setState(CharState.IDLE);
 				if(equipment.hasBell()) {
-					this.skeleton.setAttachment("ITEM", "BELL");
+					skeleton.setAttachment("ITEM", "BELL");
 				}
 			}
 			break;
@@ -435,6 +439,7 @@ public class Player extends Actor implements Combatant {
 			setDadArmRight(false);
 			equipment.setSuperArmor(false);
 			equipment.getEquippedWeapon().setDamaging(false);
+			equipment.setCombo(-1, null);
 			break;
 		case DEFEND:
 			setDadArmLeft(false);
@@ -451,18 +456,25 @@ public class Player extends Actor implements Combatant {
 	@Override
 	public void attack() {
 		// TODO Check if Dad skull is enabled
-		if((getState() == CharState.IDLE /*|| velocity.length() <= getMaxSpeed() / 2f*/) && stats.getStamina().getCurrent() > 0f) {
-			setState(CharState.ATTACK);
-			setDadArmRight(true);
-			stats.getStamina().addCurrent(-5f);
-		} else if(getState() == CharState.ATTACK) {
-			animState.addAnimation(0, "HeavyAttack", false, -0.25f);
+		if(stats.getStamina().getCurrent() > 0f) {
+			if(getState() != CharState.ATTACK) {
+				setState(CharState.ATTACK);
+				setDadArmRight(familiar);
+				stats.getStamina().addCurrent(-5f);
+			} else if(getState() == CharState.ATTACK && equipment.canCombo()) {
+				animState.setAnimation(0, equipment.getEquippedWeapon().getAttackAnim() 
+						+ (equipment.getStep() > 0 ? equipment.getStep() : ""), false);
+				equipment.setSuperArmor(false);
+				equipment.getEquippedWeapon().setDamaging(false);
+				equipment.setCombo(-1, null);
+				stats.getStamina().addCurrent(-2.5f);
+			}
 		}
 	}
 
 	@Override
 	public void defend() {
-		if((getState() == CharState.IDLE || velocity.length() <= getMaxSpeed() / 2f) && stats.getStamina().getCurrent() > 0f) {
+		if(stats.getStamina().getCurrent() > 0f) {
 			setState(CharState.DEFEND);
 			setDadArmLeft(true);
 			stats.getStamina().addCurrent(-3.5f);
@@ -542,7 +554,7 @@ public class Player extends Actor implements Combatant {
 	public ArrayList<Rectangle2D> getHitBoxes(Combatant attacker) {
 		ArrayList<Rectangle2D> hitboxes = new ArrayList<Rectangle2D>();
 		for(Slot s : skeleton.getSlots()) {
-			if(s.getAttachment() != null && !s.getData().getName().matches("WEAPON")) {
+			if(s.getAttachment() != null && !s.getData().getName().matches("WEAPON") && !s.getData().getName().endsWith(" F")) {
 				Region region = (Region) s.getAttachment();
 				Polygon p = region.getRotatedBox(s, null);
 				p.translate((int) region.getWorldX(), (int) region.getWorldY());
@@ -559,13 +571,9 @@ public class Player extends Actor implements Combatant {
 		return reputation;
 	}
 	
-	public boolean canHeal() {
-		return (getState() == CharState.HEAL && getEquipment().canChugDrink());
-	}
-	
-	public void heal(boolean chug) {
+	public void heal() {
 		if(equipment.getCurrentMilk() > 0) {
-			if(chug) {
+			if(getEquipment().canChugDrink()) {
 				animState.setAnimation(0, "Drinkmilk", false);
 			} else {
 				setState(CharState.HEAL);
@@ -578,12 +586,23 @@ public class Player extends Actor implements Combatant {
 
 	public void cast() {
 		// TODO Magic
-		if(stats.getMagic().getCurrent() > 0) {
+		if(stats.getMagic().getCurrent() > 0 && equipment.hasBell()) {
 			setState(CharState.CAST);
 			setDadArmLeft(true);
 			stats.getMagic().addCurrent(-5f);
 		} else {
 			stats.getMagic().setCurrent(stats.getMagic().getMax());
+		}
+	}
+	
+	public boolean canAct() {
+		switch(getState()) {
+		case HEAL:
+			return getEquipment().canChugDrink();
+		case ATTACK:
+			return getEquipment().canCombo();
+		default:
+			return getState().canAct();
 		}
 	}
 	
@@ -629,26 +648,59 @@ public class Player extends Actor implements Combatant {
 	public void changeWeapon() {
 		equipment.cycleWeapon();
 		skeleton.setAttachment("WEAPON", equipment.getEquippedWeapon().getName());
-		skeleton.setAttachment("WEAPON F", equipment.getEquippedWeapon().getName() + " F");
+		if(getState() == CharState.ATTACK) {
+			skeleton.setAttachment("WEAPON F", equipment.getEquippedWeapon().getName() + " F");
+		}
 		animStateOverlay.setAnimation(0, "ChangeWeapon", false);
 	}
 	
-	public void changeEquipment(boolean on) {
-		if(on) {
+	// TODO Add items
+	public void changeItem() {
+		equipment.equipBell(true);
+		skeleton.setAttachment("ITEM", "BELL");
+	}
+	
+	public void changeArmor(int type) {
+		switch(type) {
+		case 0:
+			skeleton.setAttachment("ARMOR CHEST", null);
+			skeleton.setAttachment("ARMOR CHEST 2", null);
+			skeleton.setAttachment("ARMOR SPINE", null);
+			skeleton.setAttachment("ARMOR RIGHT ARM", null);
+			skeleton.setAttachment("ARMOR LEFT ARM", null);
+			skeleton.setAttachment("ARMOR GROIN", null);
+			skeleton.setAttachment("ARMOR GROIN 2", null);
+			skeleton.setAttachment("ARMOR RIGHT THIGH", null);
+			skeleton.setAttachment("ARMOR LEFT THIGH", null);
+			skeleton.setAttachment("ARMOR HEAD", null);
+			skeleton.setAttachment("ARMOR HEAD 2", null);
+			break;
+		case 1:
 			skeleton.setAttachment("ARMOR CHEST", "ARMOR FLOCK CHEST");
 			skeleton.setAttachment("ARMOR SPINE", "ARMOR FLOCK SPINE");
 			skeleton.setAttachment("ARMOR GROIN", "ARMOR FLOCK GROIN");
 			skeleton.setAttachment("ARMOR HEAD", "ARMOR FLOCK HEAD");
-		} else {
-			skeleton.setAttachment("ARMOR CHEST", null);
-			skeleton.setAttachment("ARMOR SPINE", null);
-			skeleton.setAttachment("ARMOR GROIN", null);
-			skeleton.setAttachment("ARMOR HEAD", null);
+			break;
+		case 2:
+			skeleton.setAttachment("ARMOR CHEST", "ARMOR PILGRIM CHEST");
+			skeleton.setAttachment("ARMOR SPINE", "ARMOR PILGRIM SPINE");
+			skeleton.setAttachment("ARMOR RIGHT ARM", "ARMOR PILGRIM RIGHT ARM");
+			skeleton.setAttachment("ARMOR LEFT ARM", "ARMOR PILGRIM LEFT ARM");
+			skeleton.setAttachment("ARMOR GROIN", "ARMOR PILGRIM GROIN");
+			skeleton.setAttachment("ARMOR GROIN 2", "ARMOR PILGRIM GROIN CLOTH");
+			skeleton.setAttachment("ARMOR RIGHT THIGH", "ARMOR PILGRIM RIGHT THIGH");
+			skeleton.setAttachment("ARMOR LEFT THIGH", "ARMOR PILGRIM LEFT THIGH");
+			skeleton.setAttachment("ARMOR CHEST 2", "ARMOR PILGRIM HOOD");
+			break;
 		}
 	}
 	
 	public Stats getStats() {
 		return stats;
+	}
+	
+	public void setFamiliar(boolean familiar) {
+		this.familiar = familiar;
 	}
 	
 	public void setLooking(int looking) {

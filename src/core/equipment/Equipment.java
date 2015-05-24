@@ -15,6 +15,9 @@ public class Equipment implements Serializable {
 	private ArrayList<Weapon> weapons = new ArrayList<Weapon>();
 	private boolean bell;
 	
+	private boolean combo;
+	private int step;
+	
 	public static final Weapon lightMace = new Weapon("LIGHT MACE", AttackType.LIGHT, 10f);
 	public static final Weapon heavyMace = new Weapon("HEAVY MACE", AttackType.HEAVY, 15f);
 	public static final Weapon polearm = new Weapon("POLEARM", AttackType.THRUST, 7.5f);
@@ -154,5 +157,17 @@ public class Equipment implements Serializable {
 		this.currentMilk = currentMilk;
 	}
 
+	public void setCombo(int step, String animation) {
+		this.combo = (step >= 0);
+		this.step = step;
+	}
+	
+	public boolean canCombo() {
+		return combo;
+	}
+
+	public int getStep() {
+		return step;
+	}
 	
 }
