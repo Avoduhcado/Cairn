@@ -573,7 +573,7 @@ public class Player extends Actor implements Combatant {
 	
 	public void heal() {
 		if(equipment.getCurrentMilk() > 0) {
-			if(getEquipment().canChugDrink()) {
+			if(state == CharState.HEAL && getEquipment().canChugDrink()) {
 				animState.setAnimation(0, "Drinkmilk", false);
 			} else {
 				setState(CharState.HEAL);

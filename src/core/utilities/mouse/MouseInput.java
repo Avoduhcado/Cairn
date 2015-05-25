@@ -11,7 +11,7 @@ public class MouseInput {
 	 * @return Mouse X scaled to any screen resizing
 	 */
 	public static float getMouseX() {
-		return (float) (Input.mouseCurrent.getX() / Camera.get().getFrameXScale());
+		return (float) (Input.mouseCurrent.getX() / Camera.get().getWindowXScale());
 	}
 	
 	public static int getScreenMouseX() {
@@ -26,7 +26,7 @@ public class MouseInput {
 	 */
 	public static float getMouseY() {
 		// Invert Mouse Y because 0 is the bottom of the window
-		return (float) -(Input.mouseCurrent.getY() - Camera.get().frame.getHeight()) / Camera.get().getFrameYScale();
+		return (float) -(Input.mouseCurrent.getY() - Camera.get().displayHeight) / Camera.get().getWindowYScale();
 	}
 	
 	public static int getScreenMouseY() {

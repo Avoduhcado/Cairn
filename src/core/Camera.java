@@ -41,10 +41,8 @@ public class Camera {
 	/** Target FPS for application to run at */
 	public static final int TARGET_FPS = 60;
 	/** Window aspect ratio */
-	public static final float ASPECT_RATIO = 720f / 1080f;
-		
-	/** View frame fixed to default size */
-	public final Rectangle2D fixedFrame = new Rectangle2D.Double(0, 0, WIDTH, HEIGHT);
+	public static final float ASPECT_RATIO = 0.667f;
+
 	/** Current Camera frame */
 	public Rectangle2D frame = new Rectangle2D.Double(0, 0, WIDTH, HEIGHT);
 	private Vector2f frameSpeed = new Vector2f();
@@ -212,7 +210,7 @@ public class Camera {
 			Text.getFont("DEBUG").setStill(true);
 			Text.getFont("DEBUG").setColor(Color.lightGray);
 			Text.getFont("DEBUG").drawString(MouseInput.getScreenMouseX() + ", " + MouseInput.getScreenMouseY(),
-					(float) MouseInput.getMouseX(), MouseInput.getMouseY() - 32);
+					MouseInput.getMouseX(), MouseInput.getMouseY() - 32);
 		}
 	}
 	
@@ -233,7 +231,6 @@ public class Camera {
 	}
 	
 	public void zoom() {
-		// TODO Frame scale
 		GL11.glTranslated(frame.getWidth() / 2f, frame.getHeight() / 2f, 0);
 		GL11.glScalef(scale, scale, 1f);
 		GL11.glTranslated(-frame.getWidth() / 2f, -frame.getHeight() / 2f, 0);
@@ -259,7 +256,7 @@ public class Camera {
 			frame = new Rectangle2D.Double(frame.getX(), frame.getY(), displayWidth, displayHeight);
 		}*/
 		GL11.glViewport(0, 0, displayWidth, displayHeight);
-		frame = new Rectangle2D.Double(frame.getX(), frame.getY(), displayWidth, displayHeight);
+		//frame = new Rectangle2D.Double(frame.getX(), frame.getY(), displayWidth, displayHeight);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		
@@ -298,13 +295,13 @@ public class Camera {
 			// TODO Broken in different screen sizes due to frame scaling
 			// Scroll camera down
 			if(focus.getSpeed().y > 0) {
-				border = new Line2D.Double(frame.getX(), frame.getY() + (fixedFrame.getHeight() * 0.7f),
-						frame.getMaxX(), frame.getY() + (fixedFrame.getHeight() * 0.7f));
+				border = new Line2D.Double(frame.getX(), frame.getY() + (frame.getHeight() * 0.7f),
+						frame.getMaxX(), frame.getY() + (frame.getHeight() * 0.7f));
 				frameSpeed.setY(focus.getSpeed().y);
 			} else if(focus.getSpeed().y < 0) {
 				// Scroll camera up
-				border = new Line2D.Double(frame.getX(), frame.getY() + (fixedFrame.getHeight() * 0.45f),
-						frame.getMaxX(), frame.getY() + (fixedFrame.getHeight() * 0.45f));
+				border = new Line2D.Double(frame.getX(), frame.getY() + (frame.getHeight() * 0.45f),
+						frame.getMaxX(), frame.getY() + (frame.getHeight() * 0.45f));
 				frameSpeed.setY(focus.getSpeed().y);
 			}
 
@@ -315,13 +312,13 @@ public class Camera {
 
 			// Scroll camera right
 			if(focus.getSpeed().x > 0) {
-				border = new Line2D.Double(frame.getX() + (fixedFrame.getWidth() * 0.55f), frame.getY(),
-						frame.getX() + (fixedFrame.getWidth() * 0.55f), frame.getMaxY());
+				border = new Line2D.Double(frame.getX() + (frame.getWidth() * 0.55f), frame.getY(),
+						frame.getX() + (frame.getWidth() * 0.55f), frame.getMaxY());
 				frameSpeed.setX(focus.getSpeed().x);
 			} else if(focus.getSpeed().x < 0) {
 				// Scroll camera left
-				border = new Line2D.Double(frame.getX() + (fixedFrame.getWidth() * 0.45f), frame.getY(),
-						frame.getX() + (fixedFrame.getWidth() * 0.45f), frame.getMaxY());
+				border = new Line2D.Double(frame.getX() + (frame.getWidth() * 0.45f), frame.getY(),
+						frame.getX() + (frame.getWidth() * 0.45f), frame.getMaxY());
 				frameSpeed.setX(focus.getSpeed().x);
 			}
 
@@ -465,34 +462,48 @@ public class Camera {
 
 	public float getFrameXScale() {
 		if(upscale) {
-			return (float) (frame.getWidth() / fixedFrame.getWidth());
+			return (float) (WIDTH / frame.getWidth());
+			//return (float) (frame.getWidth() / fixedFrame.getWidth());
 		} else {
 			return 1f;
 		}
+	}
+	
+	public float getWindowXScale() {
+		return (float) (frame.getWidth() / WIDTH);
 	}
 	
 	public float getFrameYScale() {
 		if(upscale) {
-			return (float) (frame.getHeight() / fixedFrame.getHeight());
+			return (float) (HEIGHT / frame.getHeight());
+			//return (float) (frame.getHeight() / fixedFrame.getHeight());
 		} else {
 			return 1f;
 		}
 	}
 	
+	public float getWindowYScale() {
+		return (float) (HEIGHT / frame.getHeight());
+	}
+	
 	public float getDisplayWidth() {
-		return displayWidth / getFrameXScale();
+		//return displayWidth / getFrameXScale();
+		return (float) (frame.getWidth() * getFrameXScale());
 	}
 	
 	public float getDisplayHeight() {
-		return displayHeight / getFrameYScale();
+		//return displayHeight / getFrameYScale();
+		return (float) (frame.getHeight() * getFrameYScale());
 	}
 	
 	public float getDisplayWidth(float mod) {
-		return (displayWidth * mod) / getFrameXScale();
+		//return (displayWidth * mod) / getFrameXScale();
+		return (float) ((frame.getWidth() * mod) * getFrameXScale());
 	}
 	
 	public float getDisplayHeight(float mod) {
-		return (displayHeight * mod) / getFrameYScale();
+		//return (displayHeight * mod) / getFrameYScale();
+		return (float) ((frame.getHeight() * mod) * getFrameYScale());
 	}
 	
 	public boolean isFocus() {
