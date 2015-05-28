@@ -4,7 +4,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import core.entities.Actor;
-import core.entities.Enemy;
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
@@ -34,12 +33,12 @@ public class PackLeader extends Trait {
 			}
 		}
 		
-		if(rallyPoint != null && !((Enemy) host).getIntelligence().isChasing()
+		if(rallyPoint != null && !host.getIntelligence().isChasing()
 				&& Point2D.distance(rallyPoint.getX(), rallyPoint.getY(), ((Actor) host).getX(), ((Actor) host).getYPlane()) > wanderRange) {
-			host.getIntelligence().approach(rallyPoint);
-		} else if(rallyPoint != null && !((Enemy) host).getIntelligence().isChasing()
+			host.approach(rallyPoint);
+		} else if(rallyPoint != null && !host.getIntelligence().isChasing()
 				&& Point2D.distance(rallyPoint.getX(), rallyPoint.getY(), ((Actor) host).getX(), ((Actor) host).getYPlane()) <= 50) {
-			host.getIntelligence().setApproachVector(0, 0);
+			//host.getIntelligence().setApproachVector(0, 0);
 			((Actor) host).setDirection(defaultFacing);
 		}
 	}

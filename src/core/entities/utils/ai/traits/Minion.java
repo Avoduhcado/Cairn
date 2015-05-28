@@ -48,10 +48,10 @@ public class Minion extends Trait {
 		if(leader != null && ((Actor) host).getState().canAct()) {
 			if(!((Enemy) host).getIntelligence().isChasing() && Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(),
 					((Entity) host).getX(), ((Entity) host).getY()) > wanderRange) {
-				host.getIntelligence().approach(((Entity) leader).getPositionAsPoint());
+				host.approach(((Entity) leader).getPositionAsPoint());
 			} else if(Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(), 
-					((Entity) host).getX(), ((Entity) host).getY()) <= wanderRange && host.getIntelligence().isApproaching()) {
-				host.getIntelligence().setApproachVector(0, 0);
+					((Entity) host).getX(), ((Entity) host).getY()) <= wanderRange) {
+				//host.getIntelligence().setApproachVector(0, 0);
 			} else {
 				((Actor) host).setDirection(((Actor) leader).getDirection());
 			}
@@ -65,8 +65,6 @@ public class Minion extends Trait {
 				}
 				leader = null;
 			}
-		} else if(!((Actor) host).getState().canAct()) {
-			host.getIntelligence().setApproachVector(0, 0);
 		}
 	}
 

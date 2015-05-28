@@ -29,6 +29,7 @@ import core.entities.Fog;
 import core.entities.LightSource;
 import core.entities.Prop;
 import core.entities.interfaces.Intelligent;
+import core.entities.utils.Faction;
 import core.entities.utils.ai.traits.Minion;
 import core.entities.utils.ai.traits.PackLeader;
 
@@ -77,9 +78,11 @@ public class Map implements Serializable {
 		cast.getLast().setDirection(1);
 		
 		cast.add(new Enemy(700, 705, "Flock", Camera.ASPECT_RATIO));
+		((Enemy) cast.getLast()).getReputation().addAlly(Faction.FLOCK);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion(null));
 		cast.add(new Enemy(1850, 570, "Flock 3", Camera.ASPECT_RATIO));
 		cast.getLast().setDirection(1);
+		((Enemy) cast.getLast()).getReputation().addAlly(Faction.FLOCK);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion(null));
 		
 		cast.add(new Enemy(3020, 410, "Shepherd", Camera.ASPECT_RATIO));
@@ -91,10 +94,12 @@ public class Map implements Serializable {
 		cast.add(new Enemy(2835, 470, "Flock", Camera.ASPECT_RATIO));
 		cast.getLast().setDirection(1);
 		cast.getLast().setMaxSpeed(1.4f);
+		((Enemy) cast.getLast()).getReputation().addAlly(Faction.FLOCK);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion((Intelligent) cast.get(cast.size() - 2)));
 		cast.add(new Enemy(2905, 625, "Flock 2", Camera.ASPECT_RATIO));
 		cast.getLast().setDirection(1);
 		cast.getLast().setMaxSpeed(1.4f);
+		((Enemy) cast.getLast()).getReputation().addAlly(Faction.FLOCK);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion((Intelligent) cast.get(cast.size() - 3)));
 		
 		cast.add(new Enemy(3830, 805, "Acolyte", Camera.ASPECT_RATIO));

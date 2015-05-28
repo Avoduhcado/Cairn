@@ -123,23 +123,7 @@ public class Player extends Actor implements Combatant {
 			}
 		}
 		
-		if(getState() == CharState.ATTACK && equipment.getEquippedWeapon().isDamaging()) {
-			Polygon box = ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment())
-					.getRotatedBox(skeleton.findSlot(equipment.getEquippedWeapon().getSlot()), equipment.getEquippedWeapon().getDamageHitbox());
-			box.translate((int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldX(),
-					(int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldY());
-			
-			for(Actor e : ((Stage) Theater.get().getSetup()).getCast()) {
-				if(e instanceof Combatant) {
-					for(Rectangle2D r : ((Enemy) e).getHitBoxes(this)) {
-						if(box.intersects(r) && Point2D.distance(0, this.getYPlane(), 0, ((Actor) e).getYPlane()) <= 25) {
-							((Combatant) e).hit(this);
-							break;
-						}
-					}
-				}
-			}
-		}
+		
 		
 		stats.update();
 	}
@@ -269,11 +253,26 @@ public class Player extends Actor implements Combatant {
 			}
 			break;
 		case CAST:
+			// TODO Wait how am I going to handle spells? Oh right, total rework with charging and stuff
 			if(animState.getCurrent(0).getTime() >= 0.4f && spell == null) {
 				spell = new Spell("Spell 1",
 						new Vector2f(this.getX() + (300 * (getDirection() == 0 ? 1 : -1)), this.getYPlane()), Camera.ASPECT_RATIO);
 			}
 		case ATTACK:
+			if(equipment.getEquippedWeapon().isDamaging()) {
+				Polygon box = getDamageBox();
+				
+				for(Actor e : ((Stage) Theater.get().getSetup()).getCast()) {
+					if(e instanceof Combatant && e != this) {
+						for(Rectangle2D r : ((Enemy) e).getHitBoxes(this)) {
+							if(box.intersects(r) && Point2D.distance(0, this.getYPlane(), 0, ((Actor) e).getYPlane()) <= 25) {
+								((Combatant) e).hit(this);
+								break;
+							}
+						}
+					}
+				}
+			}
 		case DEFEND:
 			// TODO Animation listener
 			if(animState.getCurrent(0).isComplete()) {
@@ -549,7 +548,16 @@ public class Player extends Actor implements Combatant {
 			System.out.println("YOU DIED " + ID + " HP: " + stats.getHealth().getCurrent());
 		}
 	}
-
+	
+	public Polygon getDamageBox() {
+		Polygon box = ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment())
+				.getRotatedBox(skeleton.findSlot(equipment.getEquippedWeapon().getSlot()), equipment.getEquippedWeapon().getDamageHitbox());
+		box.translate((int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldX(),
+				(int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldY());
+		
+		return box;
+	}
+	
 	@Override
 	public ArrayList<Rectangle2D> getHitBoxes(Combatant attacker) {
 		ArrayList<Rectangle2D> hitboxes = new ArrayList<Rectangle2D>();

@@ -46,8 +46,8 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	private Intelligence intelligence;
 	private Stats stats;
 	private Reputation reputation;
-	private String lastHit;
 	
+	private String lastHit;	
 	private float animationSpeed = 1f;
 	
 	public Enemy(float x, float y, String ref, float scale) {
@@ -58,7 +58,6 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		this.intelligence = new Intelligence(this);
 		this.equipment = new Equipment();
 		this.reputation = new Reputation(Faction.MONSTER, Faction.PLAYER);
-		this.reputation.addAlly(Faction.FLOCK);
 		
 		int index = 1;
 		while(skeleton.getData().findAnimation("Attack" + index) != null) {
@@ -69,32 +68,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	
 	@Override
 	public void update() {
-		if(intelligence.getApproachVector().length() != 0) {
-			velocity = MathFunctions.limitVector(Vector2f.add(velocity,
-					intelligence.getApproachVector(), intelligence.getApproachVector()), getMaxSpeed());
-		}
-		
 		super.update();
-		
-		if(getState() == CharState.ATTACK && equipment.getEquippedWeapon().isDamaging()) {
-			Polygon box = ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment())
-					.getRotatedBox(skeleton.findSlot(equipment.getEquippedWeapon().getSlot()), equipment.getEquippedWeapon().getDamageHitbox());
-			box.translate((int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldX(),
-					(int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldY());
-
-			// TODO Check hits against all available targets
-			for(Rectangle2D r : ((Stage) Theater.get().getSetup()).getPlayer().getHitBoxes(this)) {
-				if(box.intersects(r)
-						&& Point2D.distance(0, this.getYPlane(), 0, ((Actor) ((Stage) Theater.get().getSetup()).getPlayer()).getYPlane()) < 30) {
-					((Stage) Theater.get().getSetup()).getPlayer().hit(this);
-					break;
-				}
-			}
-		}
-		
-		for(Trait t : intelligence.getTraits()) {
-			t.process();
-		}
 		
 		stats.update();
 	}
@@ -168,6 +142,20 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			}
 			break;
 		case ATTACK:
+			if(equipment.getEquippedWeapon().isDamaging()) {
+				Polygon damageBox = getDamageBox();
+
+				for(Actor e : ((Stage) Theater.get().getSetup()).getCast()) {
+					if(e instanceof Combatant && e != this && getReputation().isEnemy(((Combatant) e).getReputation())) {
+						for(Rectangle2D r : ((Combatant) e).getHitBoxes(this)) {
+							if(damageBox.intersects(r) && Point2D.distance(0, this.getYPlane(), 0, ((Actor) e).getYPlane()) <= 25) {
+								((Combatant) e).hit(this);
+								break;
+							}
+						}
+					}
+				}
+			}
 		case DEFEND:
 		case RECOIL:
 		case HIT:
@@ -215,7 +203,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 
 	@Override
 	public void hit(Combatant attacker) {
-		this.intelligence.attacked(attacker);
+		alert(attacker);
 		
 		switch(state.getHitState()) {
 		case -1:
@@ -228,7 +216,6 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			}
 		case 0:
 			lastHit = ((Player) attacker).animState.getCurrent(0).getAnimation().getName();
-			System.out.println("DAMAGEDDDD " + lastHit);
 			if(!equipment.isSuperArmor()) {
 				takeDamage(attacker, 1f, true);
 			} else if(equipment.isSuperArmor() && !equipment.isSuperInvulnerable()) {
@@ -275,7 +262,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			} else {
 				setState(CharState.HIT);
 			}
-			intelligence.setApproachVector(0, 0);
+			//intelligence.setApproachVector(0, 0);
 			if(attacker.getEquipment().getEquippedWeapon().isReversedKnockback()) {
 				Vector2f.sub(new Vector2f(((Entity) attacker).getX(), ((Actor) attacker).getYPlane()),
 						new Vector2f(getX(), getYPlane()), this.velocity);
@@ -325,6 +312,15 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 
 	public Rectangle2D getAttackBox() {
 		return equipment.getEquippedWeapon().getAttackRange();
+	}
+	
+	public Polygon getDamageBox() {
+		Polygon box = ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment())
+				.getRotatedBox(skeleton.findSlot(equipment.getEquippedWeapon().getSlot()), equipment.getEquippedWeapon().getDamageHitbox());
+		box.translate((int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldX(),
+				(int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldY());
+		
+		return box;
 	}
 
 	@Override
@@ -404,41 +400,6 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			this.state = state;
 		}
 	}
-
-	@Override
-	public void think(Stage stage) {
-		intelligence.update(stage);
-		/*switch(intelligence.getPersonality()) {
-		case DOCILE:
-			//setState(CharState.IDLE);
-		case NEUTRAL:
-			if(intelligence.isChasing()) {
-				intelligence.setChase(false);
-			}
-			if(intelligence.getApproachVector().length() != 0) {
-				intelligence.getApproachVector().set(0, 0);
-			}
-			break;
-		case AGGRESSIVE:
-			if(getState().canAct() && canReach(stage.getPlayer()) && getState() != CharState.ATTACK && intelligence.isChasing()) {
-				lookAt(stage.getPlayer());
-				velocity.scale(0.25f);
-				attack();
-				intelligence.getApproachVector().set(0, 0);
-			} else if(getState().canAct()) {
-				if(intelligence.getSight().intersects(stage.getPlayer().getBox())) {
-					intelligence.setChase(true);
-					intelligence.approach(stage, stage.getPlayer().getPositionAsPoint());
-				} else if(intelligence.isChasing()) {
-					intelligence.approach(stage, stage.getPlayer().getPositionAsPoint());
-					intelligence.chase();
-				}
-			}
-			break;
-		default:
-			break;
-		}*/
-	}
 	
 	@Override
 	public Intelligence getIntelligence() {
@@ -461,6 +422,42 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 				//animStateOverlay.setAnimation(0, "ChangeWeapon", false);
 			}
 		}
+	}
+
+	@Override
+	public void alert(Combatant target) {
+		switch(intelligence.getPersonality()) {
+		case AGGRESSIVE:
+			intelligence.setTarget(target);
+			
+			for(Trait t : intelligence.getTraits()) {
+				t.alert(target);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	@Override
+	public void approach(Point2D target) {
+		// TODO Pathfinding
+		Vector2f approach = new Vector2f();
+		if(target.getX() > getPosition().getX()) {
+			approach.set((float) (target.getX() - getAttackBox().getX()
+					- getPosition().getX()), (float) (target.getY() - getYPlane()));
+		} else {
+			approach.set((float) (target.getX() +  getAttackBox().getX()
+					- getPosition().getX()), (float) (target.getY() - getYPlane()));
+		}
+		approach.normalise();
+		
+		velocity = MathFunctions.limitVector(Vector2f.add(approach, velocity, null), getMaxSpeed());
+	}
+
+	@Override
+	public void think(Stage stage) {
+		intelligence.update();
 	}
 
 }

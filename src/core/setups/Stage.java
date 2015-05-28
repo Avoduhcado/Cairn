@@ -192,8 +192,14 @@ public class Stage extends GameSetup {
 		return player;
 	}
 
+	/**
+	 * @return Cast from map including the player.
+	 */
 	public LinkedList<Actor> getCast() {
-		return map.getCast();
+		LinkedList<Actor> cast = new LinkedList<Actor>();
+		cast.add(getPlayer());
+		cast.addAll(map.getCast());
+		return cast;
 	}
 	
 	public Entity findEntity(String ID) {
