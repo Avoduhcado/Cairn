@@ -26,7 +26,6 @@ import core.entities.utils.CharState;
 import core.entities.utils.Faction;
 import core.entities.utils.Reputation;
 import core.entities.utils.ai.Intelligence;
-import core.entities.utils.ai.traits.Trait;
 import core.entities.utils.stats.Stats;
 import core.equipment.AttackType;
 import core.equipment.Equipment;
@@ -50,12 +49,13 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	private String lastHit;	
 	private float animationSpeed = 1f;
 	
-	public Enemy(float x, float y, String ref, float scale) {
+	public Enemy(float x, float y, String ref, float scale, Intelligence intelligence) {
 		super(x, y, ref, scale);
 		
 		this.stats = new Stats();
 		this.stats.getHealth().setCurrent(20f);
-		this.intelligence = new Intelligence(this);
+		this.intelligence = intelligence;
+		this.intelligence.setHost(this);
 		this.equipment = new Equipment();
 		this.reputation = new Reputation(Faction.MONSTER, Faction.PLAYER);
 		
@@ -78,7 +78,8 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		super.draw();
 		
 		if(Theater.get().debug) {
-			DrawUtils.drawShape(0, 0, intelligence.getSight().getPathIterator(null, 10));
+			if(intelligence.getSight() != null)
+				DrawUtils.drawShape(0, 0, intelligence.getSight().getPathIterator(null, 10));
 			//DrawUtils.setColor(new Vector3f(0f, 0f, 1f));
 			//DrawUtils.drawShape(0, 0, intelligence.getHearing().getPathIterator(null, 10));
 		}
@@ -203,7 +204,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 
 	@Override
 	public void hit(Combatant attacker) {
-		alert(attacker);
+		intelligence.alert(attacker);
 		
 		switch(state.getHitState()) {
 		case -1:
@@ -370,7 +371,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	@Override
 	public void setDirection(int direction) {
 		if(direction != this.direction) {
-			intelligence.flipSight();
+			intelligence.flipSight(direction);
 		}
 		this.direction = direction;
 	}
@@ -406,6 +407,11 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		return intelligence;
 	}
 
+	public void changeIntelligence(Intelligence intelligence) {
+		intelligence.setHost(this);
+		this.intelligence = intelligence;
+	}
+	
 	public Equipment getEquipment() {
 		return equipment;
 	}
@@ -421,21 +427,6 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 				skeleton.setAttachment("WEAPON", weapon.getName());
 				//animStateOverlay.setAnimation(0, "ChangeWeapon", false);
 			}
-		}
-	}
-
-	@Override
-	public void alert(Combatant target) {
-		switch(intelligence.getPersonality()) {
-		case AGGRESSIVE:
-			intelligence.setTarget(target);
-			
-			for(Trait t : intelligence.getTraits()) {
-				t.alert(target);
-			}
-			break;
-		default:
-			break;
 		}
 	}
 

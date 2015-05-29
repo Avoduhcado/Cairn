@@ -7,10 +7,10 @@ import core.setups.Stage;
 
 public interface Intelligent {
 
-	public void alert(Combatant target);
 	public void approach(Point2D target);
 	public void think(Stage stage);
 	
 	public Intelligence getIntelligence();
+	public void changeIntelligence(Intelligence intelligence);
 	
 }

@@ -17,7 +17,7 @@ public class PackLeader extends Trait {
 	private ArrayList<Intelligent> minions = new ArrayList<Intelligent>();
 	private Point2D rallyPoint;
 	private int defaultFacing;
-	private int wanderRange = 300;
+	private int wanderRange = 150;
 	
 	public PackLeader(ArrayList<Intelligent> minions) {
 		if(minions != null)
@@ -37,8 +37,7 @@ public class PackLeader extends Trait {
 				&& Point2D.distance(rallyPoint.getX(), rallyPoint.getY(), ((Actor) host).getX(), ((Actor) host).getYPlane()) > wanderRange) {
 			host.approach(rallyPoint);
 		} else if(rallyPoint != null && !host.getIntelligence().isChasing()
-				&& Point2D.distance(rallyPoint.getX(), rallyPoint.getY(), ((Actor) host).getX(), ((Actor) host).getYPlane()) <= 50) {
-			//host.getIntelligence().setApproachVector(0, 0);
+				&& Point2D.distance(rallyPoint.getX(), rallyPoint.getY(), ((Actor) host).getX(), ((Actor) host).getYPlane()) <= wanderRange) {
 			((Actor) host).setDirection(defaultFacing);
 		}
 	}

@@ -30,7 +30,10 @@ import core.entities.LightSource;
 import core.entities.Prop;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.Faction;
+import core.entities.utils.ai.AggressiveAI;
+import core.entities.utils.ai.DocileAI;
 import core.entities.utils.ai.traits.Minion;
+import core.entities.utils.ai.traits.Opportunist;
 import core.entities.utils.ai.traits.PackLeader;
 
 public class Map implements Serializable {
@@ -77,49 +80,50 @@ public class Map implements Serializable {
 				+ "{option: No,result: [{showText: 'Oh'},{showText: 'Ok then...'}]}]},{showText: Goodbye} ] }")));
 		cast.getLast().setDirection(1);
 		
-		cast.add(new Enemy(700, 705, "Flock", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(700, 705, "Flock", Camera.ASPECT_RATIO, new DocileAI()));
 		((Enemy) cast.getLast()).getReputation().addAlly(Faction.FLOCK);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion(null));
-		cast.add(new Enemy(1850, 570, "Flock 3", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(1850, 570, "Flock 3", Camera.ASPECT_RATIO, new DocileAI()));
 		cast.getLast().setDirection(1);
 		((Enemy) cast.getLast()).getReputation().addAlly(Faction.FLOCK);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion(null));
 		
-		cast.add(new Enemy(3020, 410, "Shepherd", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(3020, 410, "Shepherd", Camera.ASPECT_RATIO, new AggressiveAI()));
 		cast.getLast().setDirection(1);
 		cast.getLast().setMaxSpeed(1.6f);
 		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(45f);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new PackLeader(null));
 		((PackLeader) ((Enemy) cast.getLast()).getIntelligence().getTraits().get(0)).setRallyPoint(cast.getLast().getPositionAsPoint(), 1);
-		cast.add(new Enemy(2835, 470, "Flock", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(2835, 470, "Flock", Camera.ASPECT_RATIO, new AggressiveAI()));
 		cast.getLast().setDirection(1);
 		cast.getLast().setMaxSpeed(1.4f);
 		((Enemy) cast.getLast()).getReputation().addAlly(Faction.FLOCK);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion((Intelligent) cast.get(cast.size() - 2)));
-		cast.add(new Enemy(2905, 625, "Flock 2", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(2905, 625, "Flock 2", Camera.ASPECT_RATIO, new AggressiveAI()));
 		cast.getLast().setDirection(1);
 		cast.getLast().setMaxSpeed(1.4f);
 		((Enemy) cast.getLast()).getReputation().addAlly(Faction.FLOCK);
 		((Enemy) cast.getLast()).getIntelligence().addTrait(new Minion((Intelligent) cast.get(cast.size() - 3)));
 		
-		cast.add(new Enemy(3830, 805, "Acolyte", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(3830, 805, "Acolyte", Camera.ASPECT_RATIO, new AggressiveAI()));
 		cast.getLast().setDirection(1);
 		cast.getLast().setMaxSpeed(1.8f);
 		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(50f);
+		((Enemy) cast.getLast()).getIntelligence().addTrait(new Opportunist(0.5f));
 		
-		cast.add(new Enemy(4900, 750, "Shepherd", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(4900, 750, "Shepherd", Camera.ASPECT_RATIO, new AggressiveAI()));
 		cast.getLast().setMaxSpeed(1.6f);
 		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(40f);
-		cast.add(new Enemy(5160, 775, "Shepherd", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(5160, 775, "Shepherd", Camera.ASPECT_RATIO, new AggressiveAI()));
 		cast.getLast().setDirection(1);
 		cast.getLast().setMaxSpeed(1.6f);
 		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(40f);
 		
-		cast.add(new Enemy(6000, 625, "Acolyte_2", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(6000, 625, "Acolyte_2", Camera.ASPECT_RATIO, new AggressiveAI()));
 		cast.getLast().setMaxSpeed(1.75f);
 		cast.getLast().setDirection(1);
 		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(50f);
-		cast.add(new Enemy(6180, 630, "Acolyte_2", Camera.ASPECT_RATIO));
+		cast.add(new Enemy(6180, 630, "Acolyte_2", Camera.ASPECT_RATIO, new AggressiveAI()));
 		cast.getLast().setMaxSpeed(1.75f);
 		cast.getLast().setDirection(1);
 		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(50f);

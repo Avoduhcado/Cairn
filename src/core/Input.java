@@ -7,10 +7,8 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
 
 import core.entities.Actor;
-import core.entities.Enemy;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
-import core.entities.utils.ai.Personality;
 import core.setups.GameSetup;
 import core.setups.Stage;
 import core.utilities.Screenshot;
@@ -142,11 +140,11 @@ public class Input {
 			if(Keybinds.SLOT7.clicked()) {
 				for(Actor a : ((Stage) setup).getCast()) {
 					if(a instanceof Intelligent) {
-						if(((Enemy) a).getIntelligence().getPersonality().equals(Personality.NEUTRAL)) {
+						/*if(((Enemy) a).getIntelligence().getPersonality().equals(Personality.NEUTRAL)) {
 							((Enemy) a).getIntelligence().setPersonality(Personality.AGGRESSIVE);
 						} else {
 							((Enemy) a).getIntelligence().setPersonality(Personality.NEUTRAL);
-						}
+						}*/
 					}
 				}
 			}
