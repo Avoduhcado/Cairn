@@ -26,6 +26,7 @@ import core.entities.utils.CharState;
 import core.entities.utils.Faction;
 import core.entities.utils.Reputation;
 import core.entities.utils.ai.Intelligence;
+import core.entities.utils.stats.Stamina;
 import core.entities.utils.stats.Stats;
 import core.equipment.AttackType;
 import core.equipment.Equipment;
@@ -46,7 +47,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	private Stats stats;
 	private Reputation reputation;
 	
-	private String lastHit;	
+	private String lastHit;
 	private float animationSpeed = 1f;
 	
 	public Enemy(float x, float y, String ref, float scale, Intelligence intelligence) {
@@ -54,6 +55,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		
 		this.stats = new Stats();
 		this.stats.getHealth().setCurrent(20f);
+		this.stats.setStamina(new Stamina(20f, 20f));
 		this.intelligence = intelligence;
 		this.intelligence.setHost(this);
 		this.equipment = new Equipment();
@@ -78,8 +80,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		super.draw();
 		
 		if(Theater.get().debug) {
-			if(intelligence.getSight() != null)
-				DrawUtils.drawShape(0, 0, intelligence.getSight().getPathIterator(null, 10));
+			DrawUtils.drawShape(0, 0, intelligence.getSight().getPathIterator(null, 10));
 			//DrawUtils.setColor(new Vector3f(0f, 0f, 1f));
 			//DrawUtils.drawShape(0, 0, intelligence.getHearing().getPathIterator(null, 10));
 		}
@@ -164,6 +165,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			if(animState.getCurrent(0).isComplete()) {
 				if(state == CharState.ATTACK) {
 					equipment.equipRandomWeapon();
+					System.out.println(ID + " equipped: " + equipment.getEquippedWeapon().getName());
 				} else if(state == CharState.HIT) {
 					lastHit = "";
 				}
@@ -190,8 +192,10 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	
 	@Override
 	public void attack() {
-		if(getState() == CharState.IDLE || velocity.length() <= getMaxSpeed() / 2f) {
-			setState(CharState.ATTACK);
+		if(stats.getStamina().getCurrent() > 0f) {
+			if(getState() != CharState.ATTACK) {
+				setState(CharState.ATTACK);
+			}
 		}
 	}
 
@@ -209,14 +213,14 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		switch(state.getHitState()) {
 		case -1:
 			if(state == CharState.HIT) {
-				if(((Player) attacker).animState.getCurrent(0).getAnimation().getName().matches(lastHit)) {
+				if(((Actor) attacker).animState.getCurrent(0).getAnimation().getName().matches(lastHit)) {
 					break;
 				}
 			} else {
 				break;
 			}
 		case 0:
-			lastHit = ((Player) attacker).animState.getCurrent(0).getAnimation().getName();
+			lastHit = ((Actor) attacker).animState.getCurrent(0).getAnimation().getName();
 			if(!equipment.isSuperArmor()) {
 				takeDamage(attacker, 1f, true);
 			} else if(equipment.isSuperArmor() && !equipment.isSuperInvulnerable()) {
@@ -291,18 +295,28 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		Weapon weapon = new Weapon(attackName, AttackType.UNARMED, 10f);
 		for(Timeline t : attack.getTimelines()) {
 			if(t instanceof EventTimeline) {
+				Rectangle2D start = null, end = null;
+				Region region = null;
+				Bone bone = null;
+				
 				for(int i = 0; i<((EventTimeline) t).getFrameCount(); i++) {
 					if(((EventTimeline) t).getEvents()[i].getData().getName().matches("Damage")) {
 						// Apply animation transform to receive proper positioning
 						attack.apply(skeleton, 0, ((EventTimeline) t).getFrames()[i], false, null);
 						skeleton.updateWorldTransform();
 						
-						Region region = (Region) skeleton.findSlot(((EventTimeline) t).getEvents()[i].getString()).getAttachment();
-						Bone bone = skeleton.findBone(((EventTimeline) t).getEvents()[i].getString());
-						
-						weapon.setAttackRange(new Rectangle2D.Double(bone.getWorldX() + region.getOffsetX(),
-								bone.getWorldY(), region.getBox().getWidth(), region.getBox().getHeight()));
-						
+						if(start == null) {
+							region = (Region) skeleton.findSlot(((EventTimeline) t).getEvents()[i].getString()).getAttachment();
+							bone = skeleton.findBone(((EventTimeline) t).getEvents()[i].getString());
+							start = new Rectangle2D.Double(bone.getWorldX() + region.getOffsetX(),
+									bone.getWorldY(), region.getBox().getWidth(), region.getBox().getHeight());
+						} else {
+							end = new Rectangle2D.Double(bone.getWorldX() + region.getOffsetX(),
+									bone.getWorldY(), region.getBox().getWidth(), region.getBox().getHeight());
+						}
+					}
+					if(end != null) {
+						weapon.setAttackRange(start.createUnion(end));
 						equipment.addWeapon(weapon);
 						break;
 					}
@@ -339,7 +353,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		
 		return hitboxes;
 	}
-	
+
 	@Override
 	public Reputation getReputation() {
 		return reputation;
@@ -349,8 +363,8 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		Rectangle2D hitBox = new Rectangle2D.Double((target.getX() > this.getX() ?
 				this.pos.x + getAttackBox().getX() : this.pos.x - getAttackBox().getMaxX()),
 				this.pos.y + getAttackBox().getY(), getAttackBox().getWidth(), getAttackBox().getHeight());
-		if(hitBox.intersectsLine(target.getX(), target.getYPlane(), target.getX(), target.getYPlane() - target.getBox().getHeight()) 
-				&& Point2D.distance(0, this.getYPlane(), 0, ((Actor) target).getYPlane()) < getAttackBox().getHeight() / 2f) {
+		if(hitBox.intersectsLine(target.getX(), target.getBox().getY(), target.getX(), target.getBox().getMaxY()) 
+				&& Point2D.distance(0, this.getYPlane(), 0, ((Actor) target).getYPlane()) <= 25) {
 			return true;
 		}
 		
@@ -366,6 +380,19 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		super.updateBox();
 
 		((RectangularShape) intelligence.getSight()).setFrameFromCenter(box.getCenterX(), box.getCenterY(), pos.x - 400, pos.y - 200);
+	}
+	
+	@Override
+	public boolean canRun() {
+		if(getVelocity().length() >= 1f) {
+			if(state == CharState.RUN && stats.getStamina().getCurrent() > 0) {
+				return true;
+			} else if(stats.getStamina().getCurrent() >= (stats.getStamina().getMax() * 0.15f)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	@Override

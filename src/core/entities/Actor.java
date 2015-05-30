@@ -60,7 +60,8 @@ public class Actor extends Entity implements Mobile {
 		
 		this.velocity = new Vector2f(0, 0);
 		this.maxSpeed = 3.5f;
-		this.maxRunSpeed = 5.25f;
+		this.maxRunSpeed = this.maxSpeed * 1.5f;
+		//this.maxRunSpeed = 5.25f;
 		state = CharState.IDLE;		
 	}
 	
@@ -424,6 +425,7 @@ public class Actor extends Entity implements Mobile {
 
 	public void setMaxSpeed(float maxSpeed) {
 		this.maxSpeed = maxSpeed;
+		//this.maxRunSpeed = this.maxSpeed * 1.5f;
 	}
 	
 	public Point2D getPositionAsPoint() {
