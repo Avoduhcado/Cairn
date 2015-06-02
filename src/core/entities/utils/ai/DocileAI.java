@@ -14,9 +14,22 @@ public class DocileAI extends Intelligence {
 	private static final long serialVersionUID = 1L;
 
 	public DocileAI() {
-		super();
+		
+	}
+
+	@Override
+	public void alert(Combatant target) {
+		for(Trait t : traits) {
+			t.alert(target);
+		}
 	}
 	
+	@Override
+	public void pickAction() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	@Override
 	public boolean applyTraitStateModifier(CharState state, AnimationState animState) {
 		switch(state) {
@@ -27,15 +40,5 @@ public class DocileAI extends Intelligence {
 			return false;
 		}
 	}
-
-	@Override
-	public void searchForTarget() {}
 	
-	@Override
-	public void alert(Combatant target) {
-		for(Trait t : traits) {
-			t.alert(target);
-		}
-	}
-
 }

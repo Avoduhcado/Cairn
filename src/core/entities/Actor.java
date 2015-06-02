@@ -9,6 +9,7 @@ import java.io.ObjectInputStream;
 
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationState.AnimationStateAdapter;
 import com.esotericsoftware.spine.AnimationStateData;
@@ -235,12 +236,13 @@ public class Actor extends Entity implements Mobile {
 	
 	@Override
 	public void updateBox() {
-		/*this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
-				pos.y - ((skeleton.getData().getHeight() * scale) / 2f), 
-				box.getWidth(), box.getHeight());*/
 		this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)),
 				box.getWidth(), box.getHeight());
+	}
+	
+	public void lookAt(Entity target) {
+		setDirection(target.getX() > this.getX() ? 0 : 1);
 	}
 	
 	@Override

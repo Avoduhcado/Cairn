@@ -6,8 +6,6 @@ import java.io.File;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
 
-import core.entities.Actor;
-import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
 import core.setups.GameSetup;
 import core.setups.Stage;
@@ -138,15 +136,7 @@ public class Input {
 			}
 			
 			if(Keybinds.SLOT7.clicked()) {
-				for(Actor a : ((Stage) setup).getCast()) {
-					if(a instanceof Intelligent) {
-						/*if(((Enemy) a).getIntelligence().getPersonality().equals(Personality.NEUTRAL)) {
-							((Enemy) a).getIntelligence().setPersonality(Personality.AGGRESSIVE);
-						} else {
-							((Enemy) a).getIntelligence().setPersonality(Personality.NEUTRAL);
-						}*/
-					}
-				}
+				((Stage) setup).getHUD().setEnabled(!((Stage) setup).getHUD().isEnabled());
 			}
 			if(Keybinds.SLOT8.clicked()) {
 				Theater.get().swapSetup(new Stage());

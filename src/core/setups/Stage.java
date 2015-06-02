@@ -69,7 +69,9 @@ public class Stage extends GameSetup {
 				gameMenu = null;
 		} else {
 			bgm.update();
-			hud.update(this);
+			if(hud.isEnabled()) {
+				hud.update(this);
+			}
 			
 			for(int i = 0; i<uiElements.size(); i++) {
 				if(uiElements.get(i).isKill()) {
@@ -170,11 +172,13 @@ public class Stage extends GameSetup {
 	
 	@Override
 	public void drawUI() {
+		if(hud.isEnabled()) {
+			hud.draw(this);
+		}
+		
 		for(UIElement ui : uiElements) {
 			ui.draw();
 		}
-		
-		hud.draw(this);
 
 		if(editMenu != null) {
 			editMenu.draw();
@@ -188,6 +192,10 @@ public class Stage extends GameSetup {
 	public void resizeRefresh() {
 	}
 
+	public HUD getHUD() {
+		return hud;
+	}
+	
 	public Player getPlayer() {
 		return player;
 	}

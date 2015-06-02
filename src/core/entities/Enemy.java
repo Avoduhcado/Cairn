@@ -72,6 +72,10 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	public void update() {
 		super.update();
 		
+		if(getVelocity().length() > 0 && state == CharState.RUN) {
+			stats.getStamina().addCurrent(-Theater.getDeltaSpeed(0.15f));
+		}
+		
 		stats.update();
 	}
 	
@@ -169,6 +173,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 				} else if(state == CharState.HIT) {
 					lastHit = "";
 				}
+				endCombat();
 				setState(CharState.IDLE);
 			}
 			break;
@@ -188,6 +193,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		equipment.setInvulnerable(false);
 		equipment.setBlock(false);
 		equipment.getEquippedWeapon().setDamaging(false);
+		getIntelligence().setAction(null);
 	}
 	
 	@Override
@@ -371,10 +377,6 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		return false;
 	}
 	
-	public void lookAt(Entity target) {
-		setDirection(target.getX() > this.getX() ? 0 : 1);
-	}
-	
 	@Override
 	public void updateBox() {
 		super.updateBox();
@@ -443,6 +445,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		return equipment;
 	}
 	
+	@Override
 	public Stats getStats() {
 		return stats;
 	}

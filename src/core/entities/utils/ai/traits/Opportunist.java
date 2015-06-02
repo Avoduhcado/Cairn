@@ -20,7 +20,8 @@ public class Opportunist extends Trait {
 	@Override
 	public void process() {
 		if(((Actor) host).getState().canAct() && host.getIntelligence().getTarget() != null) {
-			if(((Actor) host).canRun() && ((Actor) host).getVelocity().length() > 0) {
+			if(((Actor) host).canRun() && ((Actor) host).getVelocity().length() > 0
+					&& ((Combatant) host).getStats().getStamina().getCurrentPercent() > 0.5f) {
 				((Actor) host).setState(CharState.RUN);
 			}
 			if(((Actor) host.getIntelligence().getTarget()).getState() == CharState.ATTACK) {

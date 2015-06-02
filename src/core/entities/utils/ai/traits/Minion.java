@@ -8,6 +8,7 @@ import core.entities.Entity;
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
+import core.entities.utils.ai.AIAction;
 import core.entities.utils.ai.DocileAI;
 
 public class Minion extends Trait {
@@ -17,10 +18,11 @@ public class Minion extends Trait {
 	 */
 	private static final long serialVersionUID = 1L;
 	private Intelligent leader;
-	private int wanderRange = 275;
+	private int wanderRange;
 	
 	public Minion(Intelligent leader) {
 		this.leader = leader;
+		setWanderRange(275);
 	}
 	
 	@Override
@@ -35,7 +37,6 @@ public class Minion extends Trait {
 				}
 			}
 		} else {
-			System.out.println("FEARLESS LEADER!");
 			this.host.changeIntelligence(new DocileAI());
 			if(((Actor) this.host).getState().canAct()) {
 				((Actor) this.host).setState(CharState.IDLE);
@@ -48,21 +49,22 @@ public class Minion extends Trait {
 		if(leader != null && ((Actor) host).getState().canAct()) {
 			if(!((Enemy) host).getIntelligence().isChasing() && Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(),
 					((Entity) host).getX(), ((Entity) host).getY()) > wanderRange) {
-				host.approach(((Entity) leader).getPositionAsPoint());
-			} else if(Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(), 
-					((Entity) host).getX(), ((Entity) host).getY()) <= wanderRange) {
-				((Actor) host).setDirection(((Actor) leader).getDirection());
+				host.getIntelligence().setAction(new AIAction() {
+					public void act(Intelligent host, Combatant target) {
+						host.approach(((Entity) leader).getPositionAsPoint());
+						if(Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(), 
+								((Entity) host).getX(), ((Entity) host).getY()) <= wanderRange) {
+							((Actor) host).setDirection(((Actor) leader).getDirection());
+							host.getIntelligence().setAction(null);
+						}
+					}
+				});
 			}
 			
 			if(((Actor) leader).getState() == CharState.DEAD) {
-				System.out.println("FEARLESS LEADER!");
 				((Actor) host).setDirection(((Entity) leader).getX() > ((Entity) host).getX() ? 0 : 1);
 				host.changeIntelligence(new DocileAI());
 				return;
-				/*if(((Actor) host).getState().canAct()) {
-					((Actor) host).setState(CharState.IDLE);
-				}
-				leader = null;*/
 			}
 		}
 	}
@@ -74,6 +76,10 @@ public class Minion extends Trait {
 			
 			leader.getIntelligence().alert(target);
 		}
+	}
+	
+	public void setWanderRange(int range) {
+		this.wanderRange = range;
 	}
 
 }

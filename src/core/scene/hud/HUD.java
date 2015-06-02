@@ -8,6 +8,8 @@ import core.setups.Stage;
 
 public class HUD {
 
+	private boolean enabled;
+	
 	private Sprite meroSkull;
 	
 	private HUDBar healthBar;
@@ -20,6 +22,8 @@ public class HUD {
 	private HUDIcon spellIcon;
 	
 	public HUD() {
+		enabled = true;
+		
 		meroSkull = new Sprite("HUD/Mero");
 		
 		healthBar = new HUDBar("Health", new Vector2f(103, 37),
@@ -60,6 +64,14 @@ public class HUD {
 		weaponIcon.draw();
 		itemIcon.draw();
 		spellIcon.draw();
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 }

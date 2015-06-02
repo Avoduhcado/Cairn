@@ -33,6 +33,10 @@ public abstract class Statistic implements Serializable {
 		return current;
 	}
 	
+	public float getCurrentPercent() {
+		return current / max;
+	}
+	
 	public void addMax(float toMax) {
 		this.max += toMax;
 	}

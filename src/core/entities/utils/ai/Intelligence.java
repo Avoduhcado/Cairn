@@ -9,17 +9,12 @@ import java.util.ArrayList;
 
 import com.esotericsoftware.spine.AnimationState;
 
-import core.Theater;
 import core.entities.Actor;
 import core.entities.Entity;
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.Intelligent;
 import core.entities.utils.CharState;
 import core.entities.utils.ai.traits.Trait;
-
-enum AIState {
-	IDLE, PROVOKED, ENRAGED;
-}
 
 public abstract class Intelligence implements Serializable {
 
@@ -31,39 +26,19 @@ public abstract class Intelligence implements Serializable {
 	protected Intelligent host;
 	protected Combatant target;
 	
-	protected AIState state;
+	protected AIAction action;
 	protected ArrayList<Trait> traits = new ArrayList<Trait>();
 	
 	protected Shape sight;
 	protected Shape hearing;
 	// TODO ViewAngle, ViewDistance parameters
-	protected float chaseTimer = 0f;
-	protected float chaseLimit = 5.25f;
 	
-	public Intelligence() {		
-		state = AIState.IDLE;	
-	}
+	public abstract void pickAction();
+	public abstract void alert(Combatant target);
 	
 	public void update() {
 		for(Trait t : traits) {
 			t.process();
-		}
-	}
-	
-	public abstract void searchForTarget();
-	
-	public void chase() {
-		setChaseTimer(getChaseTimer() + Theater.getDeltaSpeed(0.025f));
-		if(getChaseTimer() >= chaseLimit) {
-			setTarget(null);
-		}	
-	}
-	
-	public void alert(Combatant target) {
-		setTarget(target);
-
-		for(Trait t : traits) {
-			t.alert(target);
 		}
 	}
 	
@@ -81,26 +56,28 @@ public abstract class Intelligence implements Serializable {
 	}
 	
 	public void setTarget(Combatant target) {
-		this.target = target;
-		setChase(target != null);
-		if(target == null) {
-			state = AIState.IDLE;
-		} else {
-			state = AIState.PROVOKED;
+		if(this.target != target) {
+			this.target = target;
+			convertSight(target != null);
+			setAction(null);
 		}
+		if(target == null) {
+			setAction(null);
+		}
+	}
+	
+	public AIAction getAction() {
+		return action;
+	}
+	
+	public void setAction(AIAction action) {
+		this.action = action;
 	}
 	
 	public boolean applyTraitStateModifier(CharState state, AnimationState animState) {
-		switch(state) {
-		default:
-			return false;
-		}
+		return false;
 	}
 
-	public AIState getState() {
-		return state;
-	}
-	
 	public ArrayList<Trait> getTraits() {
 		return traits;
 	}
@@ -118,34 +95,11 @@ public abstract class Intelligence implements Serializable {
 	}
 	
 	public boolean isChasing() {
-		return (state == AIState.PROVOKED || state == AIState.ENRAGED) && target != null;
+		return target != null;
 	}
 	
-	public void setChase(boolean chase) {
-		this.chaseTimer = 0f;
-		
-		if(chase && sight instanceof Arc2D) {
-			sight = new Ellipse2D.Double(((RectangularShape) sight).getX(), ((RectangularShape) sight).getY(),
-					((RectangularShape) sight).getWidth(), ((RectangularShape) sight).getHeight());
-		} else if(!chase && sight instanceof Ellipse2D) {
-			buildSight(((Actor) host).getDirection());
-		}
-	}
-	
-	public float getChaseTimer() {
-		return chaseTimer;
-	}
-	
-	public void setChaseTimer(float chaseTimer) {
-		this.chaseTimer = chaseTimer;
-	}
-	
-	public float getChaseLimit() {
-		return chaseLimit;
-	}
-	
-	public void setChaseLimit(float chaseLimit) {
-		this.chaseLimit = chaseLimit;
+	public Shape getSight() {
+		return sight;
 	}
 
 	public void buildSight(int direction) {
@@ -164,18 +118,23 @@ public abstract class Intelligence implements Serializable {
 				((Entity) host).getPosition().x - 275, ((Entity) host).getPosition().y - 150);
 	}
 	
+	public void convertSight(boolean target) {
+		if(target && sight instanceof Arc2D) {
+			sight = new Ellipse2D.Double(((RectangularShape) sight).getX(), ((RectangularShape) sight).getY(),
+					((RectangularShape) sight).getWidth(), ((RectangularShape) sight).getHeight());
+		} else if(!target && sight instanceof Ellipse2D) {
+			buildSight(((Actor) host).getDirection());
+		}
+	}
+	
 	public void flipSight(int direction) {
 		if(sight instanceof Arc2D) {
 			((Arc2D) sight).setAngleStart(direction == 0 ? 325 : 145);
 		}
 	}
 	
-	public Shape getSight() {
-		return sight;
-	}
-	
 	public Shape getHearing() {
 		return hearing;
 	}
-	
+
 }

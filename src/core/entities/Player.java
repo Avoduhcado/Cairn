@@ -557,7 +557,13 @@ public class Player extends Actor implements Combatant {
 		
 		return box;
 	}
-	
+
+	@Override
+	public boolean canReach(Entity target) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	@Override
 	public ArrayList<Rectangle2D> getHitBoxes(Combatant attacker) {
 		ArrayList<Rectangle2D> hitboxes = new ArrayList<Rectangle2D>();
@@ -650,7 +656,6 @@ public class Player extends Actor implements Combatant {
 	public void changeWeapon(Weapon weapon) {
 		equipment.equipWeapon(weapon);
 		skeleton.setAttachment("WEAPON", weapon.getName());
-		animStateOverlay.setAnimation(0, "ChangeWeapon", false);
 	}
 	
 	public void changeWeapon() {

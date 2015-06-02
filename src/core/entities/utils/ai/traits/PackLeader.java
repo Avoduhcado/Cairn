@@ -17,11 +17,20 @@ public class PackLeader extends Trait {
 	private ArrayList<Intelligent> minions = new ArrayList<Intelligent>();
 	private Point2D rallyPoint;
 	private int defaultFacing;
-	private int wanderRange = 150;
+	private int wanderRange;
 	
 	public PackLeader(ArrayList<Intelligent> minions) {
-		if(minions != null)
+		if(minions != null) {
 			setMinions(minions);
+		}
+		setWanderRange(15);
+	}
+	
+	@Override
+	public void setHost(Intelligent host) {
+		this.host = host;
+		setDefaultFacing(((Actor) host).getDirection());
+		setRallyPoint(((Actor) host).getPositionAsPoint());
 	}
 	
 	@Override
@@ -63,13 +72,16 @@ public class PackLeader extends Trait {
 		this.minions.add(minion);
 	}
 
-	public Point2D getRallyPoint() {
-		return rallyPoint;
-	}
-
-	public void setRallyPoint(Point2D rallyPoint, int defaultFacing) {
+	public void setRallyPoint(Point2D rallyPoint) {
 		this.rallyPoint = rallyPoint;
+	}
+	
+	public void setDefaultFacing(int defaultFacing) {
 		this.defaultFacing = defaultFacing;
 	}
 
+	public void setWanderRange(int range) {
+		this.wanderRange = range;
+	}
+	
 }
