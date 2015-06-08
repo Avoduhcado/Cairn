@@ -11,6 +11,11 @@ import core.utilities.keyboard.Keybinds;
 
 public class EditMenu extends MenuOverlay {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/** Map you're currently editing */
 	private Map map;
 	
@@ -20,7 +25,6 @@ public class EditMenu extends MenuOverlay {
 	private Button saveMap;
 	
 	public EditMenu(Map map) {
-		super(0, 0, null);
 		this.map = map;
 		EditMenu.polys = map.getCollisionPolys();
 

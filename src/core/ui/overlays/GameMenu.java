@@ -5,23 +5,60 @@ import core.Theater;
 import core.render.DrawUtils;
 import core.setups.TitleMenu;
 import core.ui.Button;
-import core.ui.ButtonGroup;
-import core.utilities.keyboard.Keybinds;
+import core.ui.utils.Align;
+import core.ui.utils.ClickEvent;
 
 public class GameMenu extends MenuOverlay {
 
-	private ButtonGroup buttons;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private OptionsMenu options;
 	
-	public GameMenu(float x, float y, String image) {
-		super(x, y, image);
+	public GameMenu(String image) {
+		Button toGame = new Button("Return to Game", Float.NaN, Camera.get().getDisplayHeight(0.2f), 0, null);
+		toGame.setAlign(Align.CENTER);
+		toGame.setStill(true);
+		toGame.addEvent(new ClickEvent(toGame) {
+			public void click() {
+				toClose = true;
+			}
+		});
+		this.add(toGame);
 		
-		buttons = new ButtonGroup(Float.NaN, Camera.get().getDisplayHeight(0.2f), "Menu2", true);
-		buttons.setStill(true);
-		buttons.addButton(new Button("Return to Game"));
-		buttons.addButton(new Button("Options"));
-		buttons.addButton(new Button("Quit to Title"));
-		buttons.addButton(new Button("Quit to Desktop"));
+		Button openOptions = new Button("Options", Float.NaN, (float) toGame.getBounds().getMaxY(), 0, null);
+		openOptions.setAlign(Align.CENTER);
+		openOptions.setStill(true);
+		openOptions.addEvent(new ClickEvent(openOptions) {
+			public void click() {
+				options = new OptionsMenu("Menu2");
+			}
+		});
+		this.add(openOptions);
+		
+		Button toTitle = new Button("Quit to Title", Float.NaN, (float) openOptions.getBounds().getMaxY(), 0, null);
+		toTitle.setAlign(Align.CENTER);
+		toTitle.setStill(true);
+		toTitle.addEvent(new ClickEvent(toTitle) {
+			public void click() {
+				Theater.get().swapSetup(new TitleMenu());
+			}
+		});
+		this.add(toTitle);
+		
+		Button toDesktop = new Button("Quit to Desktop", Float.NaN, (float) toTitle.getBounds().getMaxY(), 0, null);
+		toDesktop.setAlign(Align.CENTER);
+		toDesktop.setStill(true);
+		toDesktop.addEvent(new ClickEvent(toDesktop) {
+			public void click() {
+				Theater.get().close();
+			}
+		});
+		this.add(toDesktop);
+		
+		addFrame(image);
 	}
 	
 	@Override
@@ -31,20 +68,7 @@ public class GameMenu extends MenuOverlay {
 			if(options.isCloseRequest())
 				options = null;
 		} else {
-			buttons.update();
-			switch(buttons.getClicks()) {
-			case 1:
-				options = new OptionsMenu(20, 20, "Menu2");
-				break;
-			case 2:
-				Theater.get().swapSetup(new TitleMenu());
-				break;
-			case 3:
-				Theater.get().close();
-				break;
-			default:
-				break;
-			}
+			super.update();
 		}
 	}
 	
@@ -55,13 +79,13 @@ public class GameMenu extends MenuOverlay {
 		if(options != null) {
 			options.draw();
 		} else {
-			buttons.draw();
+			super.draw();
 		}
 	}
 
 	@Override
 	public boolean isCloseRequest() {
-		return (buttons.getButton(0).isClicked() || Keybinds.EXIT.clicked()) && options == null;
+		return super.isCloseRequest() && options == null;
 	}
 
 }

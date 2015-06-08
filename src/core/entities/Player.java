@@ -181,6 +181,8 @@ public class Player extends Actor implements Combatant {
 		animState.setAnimation(0, "Idle", true);
 		animStateOverlay = new AnimationState(animStateData);
 		
+		skeleton.setBonesToSetupPose();
+		
 		buildAnimationEvents();
 	}
 	

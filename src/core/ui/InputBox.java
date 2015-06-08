@@ -5,22 +5,23 @@ import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 
 import org.lwjgl.input.Keyboard;
 
 import core.Theater;
+import core.ui.utils.Accessible;
 import core.utilities.keyboard.Keybinds;
 import core.utilities.text.Text;
 
-public class InputBox extends UIElement {
+public class InputBox extends UIElement implements Accessible {
 
 	private int style; // 0 = plain text; 1 = Integers; -1 = Keybinds;
 	private String text;
 	private int textLimit = 100;
 	private float flash = 0.0f;
 	private boolean centered = true;
+	private boolean valueChanged;
 	
 	/**
 	 * @param x coordinate of box
@@ -30,9 +31,7 @@ public class InputBox extends UIElement {
 	 * @param text Preset text
 	 * @param textLimit Total number of characters accepted
 	 */
-	public InputBox(float x, float y, String image, int style, String text, int textLimit) {
-		super(x, y, image);
-		
+	public InputBox(float x, float y, String image, int style, String text, int textLimit) {		
 		Keybinds.clear();
 		Keyboard.enableRepeatEvents(true);
 		
@@ -41,12 +40,13 @@ public class InputBox extends UIElement {
 		if(textLimit != 0)
 			this.textLimit = textLimit;
 		
-		this.box = new Rectangle2D.Double(x, y,
-				Text.getDefault().getWidth(this.text), Text.getDefault().getHeight(this.text));
+		setBounds(x, y, Text.getDefault().getWidth(this.text), Text.getDefault().getHeight(this.text));
 	}
 	
 	@Override
 	public void update() {
+		super.update();
+		// TODO
 		if(isClicked()) {
 			enabled = !enabled;
 			Keybinds.clear();
@@ -54,6 +54,13 @@ public class InputBox extends UIElement {
 				flash = 0f;
 		}
 		if(enabled) {
+			// Check for input
+			if(input() != null) {
+				valueChanged = true;
+			} else {
+				valueChanged = false;
+			}
+			
 			// Display flashing cursor
 			if(flash < 1.0f)
 				flash += Theater.getDeltaSpeed(0.025f);
@@ -69,7 +76,7 @@ public class InputBox extends UIElement {
 		Text.getDefault().setStill(still);
 		Text.getDefault().setCentered(centered);
 		Text.getDefault().setColor(enabled ? Color.white : (this.isHovering() ? Color.gray : Color.darkGray));
-		Text.getDefault().drawString(flash > 0.5f ? text + "|" : text, x, y);
+		Text.getDefault().drawString(flash > 0.5f ? text + "|" : text, (float) bounds.getX(), (float) bounds.getY());
 	}
 	
 	/**
@@ -91,7 +98,8 @@ public class InputBox extends UIElement {
 							text = (String)text.subSequence(0, text.length() - 1);
 						} else if(text.length() <= textLimit && Keyboard.getEventKey() != Keyboard.KEY_BACK) {
 							// If the user is pasting text
-							if(Keyboard.getEventKey() == Keyboard.KEY_V && (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))) {
+							if(Keyboard.getEventKey() == Keyboard.KEY_V && (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) 
+									|| Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))) {
 								paste();
 							} else if(Keyboard.getEventCharacter() != Keyboard.CHAR_NONE && Keyboard.getEventKey() != Keyboard.KEY_RETURN) {
 								// Add a regular character
@@ -100,13 +108,13 @@ public class InputBox extends UIElement {
 							// Make sure text is still inside limit
 							trimText();
 						}
-						updateBox();
+						resizeBounds();
 					}
 					break;
 				case -1:
 					text = Keyboard.getKeyName(Keyboard.getEventKey());
 					Keyboard.enableRepeatEvents(false);
-					updateBox();
+					resizeBounds();
 					return text;
 				}
 			}
@@ -160,8 +168,9 @@ public class InputBox extends UIElement {
 	 * Trim the text to fit limit constraints.
 	 */
 	public void trimText() {
-		if(text.length() > textLimit)
+		if(text.length() > textLimit) {
 			text = text.substring(0, textLimit);
+		}
 	}
 	
 	/**
@@ -181,8 +190,10 @@ public class InputBox extends UIElement {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 		Keybinds.clear();
-		if(!enabled)
+		if(!enabled) {
 			flash = 0f;
+			valueChanged = false;
+		}
 	}
 	
 	/**
@@ -200,13 +211,17 @@ public class InputBox extends UIElement {
 		return text;
 	}
 	
-	@Override
-	public void updateBox() {
+	public void resizeBounds() {
 		if(!text.isEmpty()) {
-			box = new Rectangle2D.Double(x, y, Text.getDefault().getWidth(text), Text.getDefault().getHeight(text));
+			bounds.setFrame(bounds.getX(), bounds.getY(), Text.getDefault().getWidth(text), Text.getDefault().getHeight(text));
 		} else {
-			box = new Rectangle2D.Double(x, y, 15f, 15f);
+			bounds.setFrame(bounds.getX(), bounds.getY(), 15f, 15f);
 		}
+	}
+	
+	@Override
+	public boolean isValueChanged() {
+		return valueChanged;
 	}
 	
 }

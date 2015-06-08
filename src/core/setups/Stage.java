@@ -36,7 +36,7 @@ public class Stage extends GameSetup {
 	private AudioSource bgm;
 	
 	public Stage() {
-		Camera.get().setFade(-5f);
+		Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		bgm = new AudioSource("CairnArea4", "BGM");
 		
@@ -74,7 +74,7 @@ public class Stage extends GameSetup {
 			}
 			
 			for(int i = 0; i<uiElements.size(); i++) {
-				if(uiElements.get(i).isKill()) {
+				if(uiElements.get(i).isDead()) {
 					uiElements.remove(i);
 					i--;
 					continue;
@@ -107,7 +107,7 @@ public class Stage extends GameSetup {
 			map.update();
 
 			if(Keybinds.EXIT.clicked()) {
-				gameMenu = new GameMenu(20f, 20f, "Menu2");
+				gameMenu = new GameMenu("Menu2");
 			}
 
 			if(editMenu != null) {
@@ -184,8 +184,9 @@ public class Stage extends GameSetup {
 			editMenu.draw();
 		}
 		
-		if(gameMenu != null)
+		if(gameMenu != null) {
 			gameMenu.draw();
+		}
 	}
 
 	@Override

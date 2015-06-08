@@ -4,15 +4,18 @@ import core.Camera;
 import core.Theater;
 import core.render.textured.Sprite;
 import core.ui.Button;
-import core.ui.ButtonGroup;
+import core.ui.ElementGroup;
+import core.ui.UIElement;
 import core.ui.overlays.OptionsMenu;
+import core.ui.utils.Align;
+import core.ui.utils.ClickEvent;
 
 public class TitleMenu extends GameSetup {
 
 	/** Title logo */
 	private Sprite logo;
 	/** A button group contain New Game, Options, and Exit */
-	private ButtonGroup buttonGroup;
+	private ElementGroup buttons;
 	/** The options menu */
 	private OptionsMenu optionsMenu;
 	
@@ -28,12 +31,37 @@ public class TitleMenu extends GameSetup {
 		// Load title logo
 		logo = new Sprite("Avogine Title");
 		
+		Button newGame = new Button("New Game", Float.NaN, Camera.get().getDisplayHeight(0.55f), 0, null);
+		newGame.setStill(true);
+		newGame.setAlign(Align.CENTER);
+		newGame.addEvent(new ClickEvent(newGame) {
+			public void click() {
+				Theater.get().swapSetup(new Stage());
+			}
+		});
+		Button options = new Button("Options", Float.NaN, (float) newGame.getBounds().getMaxY(), 0, null);
+		options.setStill(true);
+		options.setAlign(Align.CENTER);
+		options.addEvent(new ClickEvent(options) {
+			public void click() {
+				optionsMenu = new OptionsMenu("Menu2");
+			}
+		});
+		Button exit = new Button("Exit", Float.NaN, (float) options.getBounds().getMaxY(), 0, null);
+		exit.setStill(true);
+		exit.setAlign(Align.CENTER);
+		exit.addEvent(new ClickEvent(exit) {
+			public void click() {
+				Theater.get().close();
+			}
+		});
+		
 		// Initialize game buttons
-		buttonGroup = new ButtonGroup(Float.NaN, Camera.get().getDisplayHeight(0.575f), "Menu2", true);
-		buttonGroup.addButton(new Button("New Game"));
-		buttonGroup.addButton(new Button("Options"));
-		buttonGroup.addButton(new Button("Exit"));
-		buttonGroup.setCentered(true);
+		buttons = new ElementGroup();
+		buttons.add(newGame);
+		buttons.add(options);
+		buttons.add(exit);
+		buttons.addFrame("Menu2");
 		
 		// Play title track
 		//Ensemble.get().swapBackground(new Track("TitleTheme2"), 0.75f, 1.75f);
@@ -49,20 +77,8 @@ public class TitleMenu extends GameSetup {
 				optionsMenu = null;
 		} else {
 			// Update buttons
-			buttonGroup.update();
-			switch(buttonGroup.getClicks()) {
-			case 0:
-				// Start game, proceed with state swap
-				Theater.get().swapSetup(new Stage());
-				break;
-			case 1:
-				// Open options menu
-				optionsMenu = new OptionsMenu(20, 20, "Menu2");
-				break;
-			case 2:
-				// Exit game
-				Theater.get().close();
-				break;
+			for(UIElement b : buttons) {
+				b.update();
 			}
 		}
 	}
@@ -77,18 +93,19 @@ public class TitleMenu extends GameSetup {
 		// Draw logo
 		logo.draw(Float.NaN, Camera.get().getDisplayHeight(0.1667f));
 
-		// Draw buttons
-		buttonGroup.draw();
-
 		// If options menu is open, draw it
-		if(optionsMenu != null)
+		if(optionsMenu != null) {
 			optionsMenu.draw();
+		} else {
+			// Draw buttons
+			for(UIElement b : buttons) {
+				b.draw();
+			}
+		}
 	}
 
 	@Override
 	public void resizeRefresh() {
-		// Reposition and center
-		buttonGroup.setPosition(Float.NaN, Camera.get().getDisplayHeight(0.667f));
 	}
 
 }

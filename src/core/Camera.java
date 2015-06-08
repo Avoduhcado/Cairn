@@ -351,6 +351,15 @@ public class Camera {
 		}
 	}
 	
+	public void setFullscreen() {
+		try {
+			Display.setFullscreen(!Display.isFullscreen());
+			Display.setDisplayMode(Display.getDesktopDisplayMode());
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public boolean isPanning() {
 		return this.panDuration > 0;
 	}
@@ -462,7 +471,7 @@ public class Camera {
 
 	public float getFrameXScale() {
 		if(upscale) {
-			return (float) (WIDTH / frame.getWidth());
+			return (float) ((float) WIDTH / frame.getWidth());
 			//return (float) (frame.getWidth() / fixedFrame.getWidth());
 		} else {
 			return 1f;
@@ -470,7 +479,7 @@ public class Camera {
 	}
 	
 	public float getWindowXScale() {
-		return (float) (frame.getWidth() / WIDTH);
+		return (displayWidth / (float) WIDTH);
 	}
 	
 	public float getFrameYScale() {
@@ -483,7 +492,7 @@ public class Camera {
 	}
 	
 	public float getWindowYScale() {
-		return (float) (HEIGHT / frame.getHeight());
+		return (displayHeight / (float) HEIGHT);
 	}
 	
 	public float getDisplayWidth() {

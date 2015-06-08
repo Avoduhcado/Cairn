@@ -1,17 +1,18 @@
-package core.ui.event;
+package core.ui.screen;
 
 import java.awt.geom.Rectangle2D;
 
 import core.Camera;
 import core.render.DrawUtils;
 import core.ui.TextBox;
+import core.ui.utils.Align;
 
 public class ScreenText extends TextBox {
 		
 	public ScreenText(String text, float x, float y) {
 		super("<t+>" + text, x, y, null, true);
 		
-		center();
+		setAlign(Align.CENTER);
 	}
 	
 	@Override

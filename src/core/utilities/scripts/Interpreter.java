@@ -4,14 +4,14 @@ import com.google.gson.JsonArray;
 
 import core.Camera;
 import core.setups.Stage;
-import core.ui.event.ScreenSelection;
-import core.ui.event.ScreenText;
+import core.ui.screen.ScreenSelection;
+import core.ui.screen.ScreenText;
 
 public class Interpreter {
 	
 	public static void showText(String text, Stage stage, ScriptEvent event) {
 		ScreenText eventText = new ScreenText(text, Camera.get().getDisplayWidth(0.5f), Camera.get().getDisplayHeight(0.8f));
-		eventText.setEvent(event);
+		eventText.setScriptEvent(event);
 		stage.addUI(eventText);
 	}
 	
@@ -23,7 +23,7 @@ public class Interpreter {
 		
 		ScreenSelection eventSelection =
 				new ScreenSelection(options, Camera.get().getDisplayWidth(0.5f), Camera.get().getDisplayHeight(0.8f));
-		eventSelection.setEvent(event);
+		eventSelection.setScriptEvent(event);
 		stage.addUI(eventSelection);
 	}
 	

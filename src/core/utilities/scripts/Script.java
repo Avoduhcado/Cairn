@@ -9,7 +9,7 @@ import core.Theater;
 import core.entities.Entity;
 import core.setups.Stage;
 import core.ui.TextBox;
-import core.ui.event.ScreenText;
+import core.ui.screen.ScreenText;
 
 public class Script implements Serializable, ScriptEvent {
 
@@ -31,8 +31,8 @@ public class Script implements Serializable, ScriptEvent {
 	public Script(String flavorText, String event) {
 		this.flavorText = flavorText;
 		this.prompt = new TextBox(this.flavorText, 0, 0, "Textbox", true);
-		this.prompt.setEvent(this);
-		this.prompt.setOpacity(1f);
+		this.prompt.setScriptEvent(this);
+		//this.prompt.setOpacity(1f);
 		setEvent(event);
 	}
 	
@@ -40,8 +40,8 @@ public class Script implements Serializable, ScriptEvent {
 		in.defaultReadObject();
 		
 		this.prompt = new TextBox(flavorText, 0, 0, "Textbox", true);
-		this.prompt.setEvent(this);
-		this.prompt.setOpacity(1f);
+		this.prompt.setScriptEvent(this);
+		//this.prompt.setOpacity(1f);
 		
 		data = new ScriptData(event);
 	}

@@ -1,14 +1,19 @@
 package core.ui.overlays;
 
-import core.ui.UIElement;
+import core.ui.ElementGroup;
+import core.utilities.keyboard.Keybinds;
 
-public abstract class MenuOverlay extends UIElement {
+public abstract class MenuOverlay extends ElementGroup {
 
-	public MenuOverlay(float x, float y, String image) {
-		super(x, y, image);
-		this.setOpacity(1f);
-	}
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	
-	public abstract boolean isCloseRequest();
+	protected boolean toClose;
+	
+	public boolean isCloseRequest() {
+		return toClose || Keybinds.EXIT.clicked();
+	}
 
 }

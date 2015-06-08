@@ -1,10 +1,11 @@
-package core.ui.event;
+package core.ui.screen;
 
 import java.awt.geom.Rectangle2D;
 
 import core.Camera;
 import core.render.DrawUtils;
 import core.ui.TextBox;
+import core.ui.utils.Align;
 import core.utilities.MathFunctions;
 import core.utilities.keyboard.Keybinds;
 
@@ -15,7 +16,7 @@ public class ScreenSelection extends TextBox {
 	public ScreenSelection(String text, float x, float y) {
 		super("<t+>" + text, x, y, null, false);
 		
-		center();
+		setAlign(Align.CENTER);
 	}
 	
 	@Override
@@ -26,8 +27,8 @@ public class ScreenSelection extends TextBox {
 			selection = MathFunctions.clamp(selection - 1, 0, 1);
 		}
 		
-		if(Keybinds.CONFIRM.clicked() && event != null) {
-			event.processedResult(selection);
+		if(Keybinds.CONFIRM.clicked() && scriptEvent != null) {
+			scriptEvent.processedResult(selection);
 		}
 	}
 
@@ -39,8 +40,8 @@ public class ScreenSelection extends TextBox {
 		lines.get(0).append(selection == 0 ? "cwhite" : "cgray");
 		lines.get(1).append(selection == 1 ? "cwhite" : "cgray");
 		
-		lines.get(0).draw(Camera.get().getDisplayWidth(0.4f) - (lines.get(0).getWidth() / 2f), y, getLength());
-		lines.get(1).draw(Camera.get().getDisplayWidth(0.6f) - (lines.get(1).getWidth() / 2f), y, getLength());
+		lines.get(0).draw(Camera.get().getDisplayWidth(0.4f) - (lines.get(0).getWidth() / 2f), (float) bounds.getY(), getLength());
+		lines.get(1).draw(Camera.get().getDisplayWidth(0.6f) - (lines.get(1).getWidth() / 2f), (float) bounds.getY(), getLength());
 	}
 	
 }

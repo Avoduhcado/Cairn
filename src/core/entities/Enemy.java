@@ -219,7 +219,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		switch(state.getHitState()) {
 		case -1:
 			if(state == CharState.HIT) {
-				if(((Actor) attacker).animState.getCurrent(0).getAnimation().getName().matches(lastHit)) {
+				if(lastHit != null && ((Actor) attacker).animState.getCurrent(0).getAnimation().getName().matches(lastHit)) {
 					break;
 				}
 			} else {

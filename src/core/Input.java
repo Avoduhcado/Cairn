@@ -33,6 +33,9 @@ public class Input {
 			Theater.get().debug = !Theater.get().debug;
 			//Cheats.SPEED_HACK = Theater.get().debug;
 		}
+		if(Keybinds.SLOT6.clicked()) {
+			Camera.get().setFullscreen();
+		}
 		
 		if(mousePress != null && !mouseHeld) {
 			mouseHeld = true;
@@ -48,9 +51,9 @@ public class Input {
 					mouseRelease = new Point2D.Double(Mouse.getX(), Mouse.getY());
 					mouseHeld = false;
 				}
-			} else if(Mouse.getEventButton() == -1){
+			} //else if(Mouse.getEventButton() == -1){
 				mouseCurrent.setLocation(Mouse.getX(), Mouse.getY());
-			}
+			//}
 		}
 		
 		// Camera zooming

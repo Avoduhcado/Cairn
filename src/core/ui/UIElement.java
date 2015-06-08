@@ -1,146 +1,139 @@
 package core.ui;
 
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 
 import core.Camera;
 import core.Input;
 import core.render.textured.UIFrame;
+import core.ui.utils.Align;
+import core.ui.utils.UIAction;
 import core.utilities.mouse.MouseInput;
-import core.utilities.scripts.ScriptEvent;
 
 public abstract class UIElement {
-	
-	// TODO Change box to a Dimension2D, change how still is handled? Also messes up click boxes but OH WELL
 
-	protected float x, y;
+	protected Rectangle2D bounds;
 	protected UIFrame frame;
-	protected Rectangle2D box;
+	protected float xBorder;
+	protected float yBorder;
+	protected Align alignment = Align.RIGHT;
+	
 	protected boolean enabled = true;
 	protected boolean still;
+	protected boolean dead;
 	
-	protected float killTimer = 0f;
-	protected boolean kill;
-	
-	protected ScriptEvent event;
-	
-	public UIElement(float x, float y, String image) {
-		if(image != null) {
-			this.frame = new UIFrame(image);
-		}
-		
-		if(Float.isNaN(x))
-			this.x = Camera.get().getDisplayWidth(0.5f);
-		else
-			this.x = x;
-		this.y = y;
-		
-		box = new Rectangle2D.Double(x, y, 0, 0);
-	}
-	
+	protected ArrayList<UIAction> events = new ArrayList<UIAction>();
+
 	public void update() {
-		// TODO Process events dawg
+		for(UIAction e : events) {
+			e.actionPerformed();
+		}
 	}
 	
 	public void draw() {
 		if(frame != null) {
-			frame.draw(x, y, box);
+			frame.setStill(still);
+			frame.draw((float) bounds.getX(), (float) bounds.getY(), bounds);
 		}
 	}
 	
 	public void draw(float x, float y) {
 		if(frame != null) {
-			frame.draw(x, y, box);
+			frame.setStill(still);
+			frame.draw(x, y, bounds);
 		}
 	}
-	
-	public void updateBox() {
-		box = new Rectangle2D.Double(x, y, box.getWidth(), box.getHeight());
+
+	public void addEvent(UIAction event) {
+		this.events.add(event);
 	}
-	
-	public Rectangle2D getBox() {
-		return box;
-	}
-	
-	public float getOpacity() {
-		if(frame != null)
-			return frame.getOpacity();
-		return 0;
-	}
-	
-	public void setOpacity(float opacity) {
-		if(frame != null)
-			this.frame.setOpacity(opacity);
-	}
-	
-	/**
-	 * @return true if input box is enabled.
-	 */
+
 	public boolean isEnabled() {
 		return enabled;
 	}
-	
-	/**
-	 * Enable or disable this input.
-	 * @param enabled
-	 */
+
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
 	
 	public void setStill(boolean still) {
 		this.still = still;
-		if(frame != null)
-			frame.setStill(still);
-	}
-	
-	public float getKillTimer() {
-		return killTimer;
 	}
 
-	public void setKillTimer(float killTimer) {
-		this.killTimer = killTimer;
+	public boolean isDead() {
+		return dead;
+	}
+	
+	public void setDead(boolean dead) {
+		this.dead = dead;
+	}
+	
+	public Rectangle2D getBounds() {
+		return bounds;
 	}
 
-	public boolean isKill() {
-		return kill;
+	// TODO Introduce border offsets when drawing elements
+	public void setBounds(float x, float y, float width, float height) {
+		bounds = new Rectangle2D.Double((Float.isNaN(x) ? Camera.get().getDisplayWidth(0.5f) : x) - xBorder,
+				(Float.isNaN(y) ? Camera.get().getDisplayHeight(0.5f) : y) - yBorder, width + (xBorder * 2), height + (yBorder * 2));
 	}
 	
-	public void setKill(boolean kill) {
-		this.kill = kill;
+	public float getXBorder() {
+		return xBorder;
 	}
 	
-	public void setPosition(float x, float y) {
-		this.x = x;
-		this.y = y;
-		updateBox();
+	public void setXBorder(float xBorder) {
+		this.xBorder = xBorder;
+		setBounds((float) bounds.getX(), (float) bounds.getY(), (float) bounds.getWidth(), (float) bounds.getHeight());
 	}
 	
-	public float getX() {
-		return x;
+	public float getYBorder() {
+		return yBorder;
 	}
 	
-	public void setX(float x) {
-		this.x = x;
+	public void setYBorder(float yBorder) {
+		this.yBorder = yBorder;
+		setBounds((float) bounds.getX(), (float) bounds.getY(), (float) bounds.getWidth(), (float) bounds.getHeight());
 	}
 	
-	public float getY() {
-		return y;
+	public void setAlign(Align alignment) {
+		if(this.alignment != alignment) {
+			this.alignment = alignment;
+			
+			switch(alignment) {
+			case RIGHT:
+				setBounds((float) bounds.getMaxX(), (float) bounds.getY(), (float) bounds.getWidth(), (float) bounds.getHeight());
+				break;
+			case LEFT:
+				setBounds((float) (bounds.getX() - bounds.getWidth()), (float) bounds.getY(), (float) bounds.getWidth(), (float) bounds.getHeight());
+				break;
+			case CENTER:
+				// TODO Borders
+				bounds.setFrameFromCenter(bounds.getX(), bounds.getY(), 
+						bounds.getX() - (bounds.getWidth() / 2f), bounds.getY() - (bounds.getHeight() / 2f));
+				break;
+			default:
+				break;
+			}
+		}
 	}
 	
-	public void setY(float y) {
-		this.y = y;
+	public void setFrame(String image) {
+		if(image != null) {
+			this.frame = new UIFrame(image);
+		}
 	}
-
+	
 	public boolean isClicked() {
-		return box.contains(MouseInput.getMouse()) && Input.mouseClicked();
+		return bounds.contains(MouseInput.getMouse()) && Input.mouseClicked();
 	}
 	
 	public boolean isHovering() {
-		return box.contains(MouseInput.getMouse());
+		return bounds.contains(MouseInput.getMouse());
 	}
 	
-	public void setEvent(ScriptEvent event) {
-		this.event = event;
+	public boolean isValueChanged() {
+		return false;
 	}
 	
 }

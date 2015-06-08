@@ -1,6 +1,6 @@
 package core.ui.overlays;
 
-import java.awt.geom.Rectangle2D;
+import java.util.LinkedList;
 
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.openal.SoundStore;
@@ -9,26 +9,23 @@ import core.Camera;
 import core.ui.Button;
 import core.ui.ElementGroup;
 import core.ui.InputBox;
+import core.ui.Label;
 import core.ui.Slider;
+import core.ui.utils.Align;
+import core.ui.utils.ClickEvent;
+import core.ui.utils.ValueChangeEvent;
 import core.utilities.keyboard.Keybinds;
-import core.utilities.text.Text;
 
 public class OptionsMenu extends MenuOverlay {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	//private DisplayMode[] displayModes;
 	//private String modes = "";
-	private Slider musicSlider;
-	private Slider sfxSlider;
-	private Button close;
-	private ElementGroup keybinds = new ElementGroup();
-	
-	public OptionsMenu(float x, float y, String image) {
-		super(x, y, image);
 		
-		setStill(true);
-		this.box = new Rectangle2D.Double(x, y, Camera.get().getDisplayWidth() - (this.frame.getWidth() * 0.667f),
-				Camera.get().getDisplayHeight() - (this.frame.getWidth() * 0.667f));
-		
+	public OptionsMenu(String image) {
 		/*try {
 			displayModes = Display.getAvailableDisplayModes();
 			for(DisplayMode d : displayModes)
@@ -37,99 +34,97 @@ public class OptionsMenu extends MenuOverlay {
 			e.printStackTrace();
 		}*/
 		
-		musicSlider = new Slider(Camera.get().getDisplayWidth(0.5f), Camera.get().getDisplayHeight(0.1667f), 1f, SoundStore.get().getMusicVolume(), "SliderBG", "SliderValue");
-		//musicSlider.setPosition((float) (musicSlider.getX() - (musicSlider.getBox().getWidth() * 0.5f)), musicSlider.getY());
+		Label optionsLabel = new Label("Options", Float.NaN, Camera.get().getDisplayHeight(0.1f), null);
+		optionsLabel.setAlign(Align.CENTER);
+		optionsLabel.setStill(true);
+		this.add(optionsLabel);
+
+		final Slider musicSlider = new Slider(Float.NaN, Camera.get().getDisplayHeight(0.1667f),
+				1f, SoundStore.get().getMusicVolume(), "SliderBG", "SliderValue");
 		musicSlider.setStill(true);
-		
-		sfxSlider = new Slider(Camera.get().getDisplayWidth(0.5f), (float) (musicSlider.getBox().getMaxY() + musicSlider.getBox().getHeight()),
+		musicSlider.addEvent(new ValueChangeEvent(musicSlider) {
+			public void changeValue() {
+				if(SoundStore.get().getMusicVolume() != musicSlider.getValue()) {
+					SoundStore.get().setMusicVolume(musicSlider.getValue());
+					SoundStore.get().setCurrentMusicVolume(musicSlider.getValue());
+				}
+			}
+		});
+		this.add(musicSlider);
+
+		Label musicLabel = new Label("Music Volume: ", Float.NaN, 
+				(float) (musicSlider.getBounds().getY() - (musicSlider.getBounds().getHeight() / 2f)), null);
+		musicLabel.setStill(true);
+		musicLabel.setAlign(Align.LEFT);
+		this.add(musicLabel);
+
+		final Slider sfxSlider = new Slider(Float.NaN, (float) (musicSlider.getBounds().getMaxY() + musicSlider.getBounds().getHeight()),
 				1f, SoundStore.get().getSoundVolume(), "SliderBG", "SliderValue");
-		//sfxSlider.setPosition((float) (sfxSlider.getX() - (sfxSlider.getBox().getWidth() * 0.5f)),
-			//	(float) (sfxSlider.getY() + sfxSlider.getBox().getHeight()));
 		sfxSlider.setStill(true);
+		sfxSlider.addEvent(new ValueChangeEvent(sfxSlider) {
+			public void changeValue() {
+				if(SoundStore.get().getSoundVolume() != sfxSlider.getValue()) {
+					SoundStore.get().setSoundVolume(sfxSlider.getValue());
+				}
+			}
+		});
+		this.add(sfxSlider);
 		
+		Label sfxLabel = new Label("Sound Volume: ", Float.NaN, 
+				(float) (sfxSlider.getBounds().getY() - (sfxSlider.getBounds().getHeight() / 2f)), null);
+		sfxLabel.setStill(true);
+		sfxLabel.setAlign(Align.LEFT);
+		this.add(sfxLabel);
+		
+		LinkedList<ElementGroup> keybinds = new LinkedList<ElementGroup>();
 		float keyX = Camera.get().getDisplayWidth(0.25f);
 		float keyY = 0;
 		for(int i = 0; i<Keybinds.values().length; i++) {
-			if(!keybinds.isEmpty())
-				keyY += keybinds.get(keybinds.size() - 1).getBox().getHeight();
-			if(Camera.get().getDisplayHeight(0.285f) + keyY > this.getBox().getHeight() * 0.85f) {
-				keyX *= 3f;
+			ElementGroup key = new ElementGroup();
+			
+			final Label keyLabel = new Label(Keybinds.values()[i].toString() + ": ", keyX, Camera.get().getDisplayHeight(0.285f) + keyY, null);
+			keyLabel.setStill(true);
+			keyLabel.setAlign(Align.LEFT);
+			key.add(keyLabel);
+			
+			final InputBox keyBox = new InputBox(keyX, Camera.get().getDisplayHeight(0.285f) + keyY, null, -1, Keybinds.values()[i].getKey(), 0);
+			keyBox.setEnabled(false);
+			keyBox.setStill(true);
+			keyBox.setCentered(false);
+			keyBox.addEvent(new ClickEvent(keyBox) {
+				public void click() {
+					OptionsMenu.this.setFocus(keyBox);
+				}
+			});
+			keyBox.addEvent(new ValueChangeEvent(keyBox) {
+				public void changeValue() {
+					Keybinds.valueOf(keyLabel.getText().split(":")[0]).setKey(Keyboard.getKeyIndex(keyBox.getText()));
+					keyBox.setEnabled(false);
+				}
+			});
+			key.add(keyBox);
+			
+			keybinds.add(key);
+			this.addAll(keybinds.getLast());
+			
+			keyY += keyLabel.getBounds().getHeight();
+			if(Camera.get().getDisplayHeight(0.285f) + keyY > Camera.get().getDisplayHeight(0.8f)) {
+				keyX += Camera.get().getDisplayWidth(0.25f);
 				keyY = 0;
 			}
-				
-			keybinds.add(new InputBox(keyX, Camera.get().getDisplayHeight(0.285f) + keyY, null, -1, Keybinds.values()[i].getKey(), 0));
-			keybinds.get(keybinds.size() - 1).setEnabled(false);
-			keybinds.get(keybinds.size() - 1).setStill(true);
-			((InputBox) keybinds.get(keybinds.size() - 1)).setCentered(false);
 		}
 		
-		close = new Button("Close", Float.NaN, Camera.get().getDisplayHeight(0.85f), 0, null);
+		Button close = new Button("Close", Float.NaN, Camera.get().getDisplayHeight(0.85f), 0, null);
+		close.setAlign(Align.CENTER);
 		close.setStill(true);
-	}
-	
-	@Override
-	public void update() {
-		close.update();
-		for(int i = 0; i<keybinds.size(); i++) {
-			keybinds.get(i).update();
-			if(keybinds.get(i).isClicked()) {
-				keybinds.setEnabledAllExcept(false, keybinds.get(i));
+		close.addEvent(new ClickEvent(close) {
+			public void click() {
+				toClose = true;
 			}
-			if(keybinds.get(i).isEnabled() && ((InputBox) keybinds.get(i)).input() != null) {
-				Keybinds.values()[i].setKey(Keyboard.getKeyIndex(((InputBox) keybinds.get(i)).getText()));
-				keybinds.get(i).setEnabled(false);
-			}
-		}
+		});
+		this.add(close);
 		
-		musicSlider.update();
-		if(SoundStore.get().getMusicVolume() != musicSlider.getValue()) {
-			SoundStore.get().setMusicVolume(musicSlider.getValue());
-			SoundStore.get().setCurrentMusicVolume(musicSlider.getValue());
-		}
-		
-		sfxSlider.update();
-		if(SoundStore.get().getSoundVolume() != sfxSlider.getValue()) {
-			SoundStore.get().setSoundVolume(sfxSlider.getValue());
-		}
-		/*if(Ensemble.get().getMasterVolume() != volumeSlider.getValue()) {
-			Ensemble.get().setMasterVolume(volumeSlider.getValue());
-		}*/
-	}
-	
-	@Override
-	public void draw() {
-		super.draw();
-		
-		Text.getDefault().setStill(true);
-		Text.getDefault().setCentered(true);
-		Text.getDefault().drawString("Options", Camera.get().getDisplayWidth(0.5f), y);
-		
-		Text.getDefault().setStill(true);
-		//Text.getDefault().setCentered(true);
-		Text.getDefault().drawString("Music Volume: ", (float) musicSlider.getX() - (Text.getDefault().getWidth("Music Volume: ")),
-				musicSlider.getY() - (float) (musicSlider.getBox().getHeight() / 2f));
-		musicSlider.draw();
-		
-		Text.getDefault().setStill(true);
-		//Text.getDefault().setCentered(true);
-		Text.getDefault().drawString("Sound Volume: ", (float) sfxSlider.getX() - (Text.getDefault().getWidth("Sound Volume: ")),
-				sfxSlider.getY() - (float) (sfxSlider.getBox().getHeight() / 2f));
-		sfxSlider.draw();
-		
-		for(int i = 0; i<keybinds.size(); i++) {
-			Text.getDefault().setStill(true);
-			Text.getDefault().drawString(Keybinds.values()[i].toString() + ":", 
-					keybinds.get(i).getX() - Text.getDefault().getWidth(Keybinds.values()[i].toString() + ": "),
-					keybinds.get(i).getY());
-			keybinds.get(i).draw();
-		}
-		
-		close.draw();
-	}
-	
-	@Override
-	public boolean isCloseRequest() {
-		return close.isClicked() || Keybinds.EXIT.clicked();
+		addFrame(image, 50, 30);
 	}
 
 }

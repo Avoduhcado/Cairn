@@ -1,10 +1,11 @@
 package core.ui;
 
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import core.Theater;
+import core.ui.utils.Align;
 import core.utilities.keyboard.Keybinds;
+import core.utilities.scripts.ScriptEvent;
 import core.utilities.text.Text;
 import core.utilities.text.TextModifier;
 
@@ -14,6 +15,8 @@ public class TextBox extends UIElement {
 
 	protected float textFill;
 	private float fillSpeed = 0.5f;
+	private float killTimer;
+	protected ScriptEvent scriptEvent;
 	
 	/**
 	 * A simple box to display a block of text.
@@ -22,9 +25,7 @@ public class TextBox extends UIElement {
 	 * @param y Y position
 	 * @param image The textbox background, or null for no background
 	 */
-	public TextBox(String text, float x, float y, String image, boolean fill) {
-		super(x, y, image);
-		
+	public TextBox(String text, float x, float y, String image, boolean fill) {		
 		parseText(text);
 		
 		if(fill) {
@@ -33,7 +34,8 @@ public class TextBox extends UIElement {
 			textFill = getLength();
 		}
 		
-		this.box = new Rectangle2D.Double(x, y, getWidth(), getHeight());
+		setBounds(x, y, getWidth(), getHeight());
+		setFrame(image);
 	}
 
 	@Override
@@ -42,12 +44,12 @@ public class TextBox extends UIElement {
 			fill();
 		}
 		
-		if(Keybinds.CONFIRM.clicked() && event != null) {
+		if(Keybinds.CONFIRM.clicked() && scriptEvent != null) {
 			if(textFill < getLength()) {
 				textFill = getLength();
-				box.setFrame(x, y, getWidth((int) textFill + 1), getHeight((int) textFill + 1));
+				bounds.setFrame(bounds.getX(), bounds.getY(), getWidth((int) textFill + 1), getHeight((int) textFill + 1));
 			} else {
-				event.processed();
+				scriptEvent.processed();
 			}
 		}
 		
@@ -55,7 +57,7 @@ public class TextBox extends UIElement {
 			killTimer -= Theater.getDeltaSpeed(0.025f);
 			if(killTimer <= 0) {
 				// TODO Extend to all UI classes, maybe add a fancy fade effect
-				setKill(true);
+				setDead(true);
 			}
 		}
 	}
@@ -64,14 +66,14 @@ public class TextBox extends UIElement {
 	public void draw() {
 		if(frame != null) {
 			if(textFill < getLength()) {
-				box.setFrame(x, y, getWidth((int) textFill + 1), getHeight((int) textFill + 1));
+				bounds.setFrame(bounds.getX(), bounds.getY(), getWidth((int) textFill + 1), getHeight((int) textFill + 1));
 			}
-			frame.draw(x, y, box);
+			frame.draw((float) bounds.getX(), (float) bounds.getY(), bounds);
 		}
 
 		if(!lines.isEmpty()) {
 			// Draw first line
-			lines.get(0).draw(x, y, (int) textFill);
+			lines.get(0).draw((float) bounds.getX(), (float) bounds.getY(), (int) textFill);
 			// Text limit for subsequent lines
 			int limit = (int) textFill - lines.get(0).getLength();
 			if(limit > 0) {
@@ -79,7 +81,7 @@ public class TextBox extends UIElement {
 				float yOffset = lines.get(0).getHeight();
 				for(int i = 1; i < lines.size(); i++) {
 					// Draw line
-					lines.get(i).draw(x, y + yOffset, limit);
+					lines.get(i).draw((float) bounds.getX(), (float) (bounds.getY() + yOffset), limit);
 					// Increment y offset
 					yOffset += lines.get(i).getHeight();
 					// Decrement limit
@@ -96,9 +98,9 @@ public class TextBox extends UIElement {
 	public void draw(float x, float y) {
 		if(frame != null) {
 			if(textFill < getLength()) {
-				box.setFrame(x, y, getWidth((int) textFill + 1), getHeight((int) textFill + 1));
+				bounds.setFrame(x, y, getWidth((int) textFill + 1), getHeight((int) textFill + 1));
 			}
-			frame.draw(x, y, box);
+			frame.draw(x, y, bounds);
 		}
 
 		if(!lines.isEmpty()) {
@@ -122,11 +124,6 @@ public class TextBox extends UIElement {
 				}
 			}
 		}
-	}
-
-	@Override
-	public void updateBox() {
-		box.setFrame(x, y, getWidth(), getHeight());
 	}
 	
 	private void parseText(String text) {
@@ -144,10 +141,15 @@ public class TextBox extends UIElement {
 		}
 	}
 
-	public void center() {
+	@Override
+	public void setAlign(Align border) {
 		if(!lines.isEmpty()) {
-			this.x = x - (getWidth() / 2f);
+			super.setAlign(border);
 		}
+	}
+	
+	public void setScriptEvent(ScriptEvent script) {
+		this.scriptEvent = script;
 	}
 	
 	public void fill() {
@@ -168,11 +170,13 @@ public class TextBox extends UIElement {
 	public void setFillSpeed(float fillSpeed) {
 		this.fillSpeed = fillSpeed;
 	}
+	
+	public void setKillTimer(float killTimer) {
+		this.killTimer = killTimer;
+	}
 
 	public void setText(String text) {
-		parseText(text);
-		
-		updateBox();
+		parseText(text);		
 	}
 	
 	// TODO Provide support to add text to the same line, or more than one line
@@ -180,8 +184,6 @@ public class TextBox extends UIElement {
 		if(text.startsWith(";")) {
 			lines.add(new TextLine(text));
 		}
-		
-		updateBox();
 	}
 	
 	public float getWidth() {

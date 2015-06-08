@@ -4,20 +4,14 @@ import java.awt.geom.Rectangle2D;
 
 public class EmptyFrame extends UIElement {
 
-	public EmptyFrame(float x, float y, String image) {
-		super(x, y, image);
+	public EmptyFrame(float x, float y, float width, float height, String image) {
+		setBounds(x, y, width, height);
+		setFrame(image);
 	}
-
-	public void setBox(float x, float y, float width, float height, boolean withBorders) {
-		if(withBorders) {
-			this.x = x - (frame.getWidth() / 3f);
-			this.y = y - (frame.getHeight() / 3f);
-			this.box = new Rectangle2D.Double(x, y,	width + ((frame.getWidth() / 3f) * 2f), height + ((frame.getHeight() / 3f) * 2f));
-		} else {
-			this.x = x;
-			this.y = y;
-			this.box = new Rectangle2D.Double(x, y,	width, height);
-		}
+	
+	public EmptyFrame(Rectangle2D bounds, String image) {
+		setBounds((float) bounds.getX(), (float) bounds.getY(), (float) bounds.getWidth(), (float) bounds.getHeight());
+		setFrame(image);
 	}
 	
 }

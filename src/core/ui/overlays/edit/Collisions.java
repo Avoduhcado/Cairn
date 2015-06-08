@@ -15,7 +15,7 @@ import core.render.DrawUtils;
 import core.scene.collisions.PathPolygon;
 import core.ui.Button;
 import core.ui.CheckBox;
-import core.ui.EmptyFrame;
+import core.ui.ElementGroup;
 import core.utilities.keyboard.Keybinds;
 import core.utilities.mouse.MouseInput;
 
@@ -26,7 +26,7 @@ public class Collisions {
 	private Polygon currentPoly;
 	private Point editPoint;
 	
-	private EmptyFrame emptyFrame;
+	private ElementGroup stuff;
 	
 	private CheckBox buildPoly;
 	private Button addPoly;
@@ -38,21 +38,23 @@ public class Collisions {
 		
 		buildPoly = new CheckBox(20, 20, null, "Build Poly");
 		buildPoly.setStill(true);
-		addPoly = new Button("Save Poly", 20, (float) buildPoly.getBox().getMaxY(), 0, null);
+		addPoly = new Button("Save Poly", 20, (float) buildPoly.getBounds().getMaxY(), 0, null);
 		addPoly.setStill(true);
 		addPoly.setEnabled(false);
 		
-		editPolyPoints = new CheckBox(20, (float) addPoly.getBox().getMaxY(), null, "Edit Points");
+		editPolyPoints = new CheckBox(20, (float) addPoly.getBounds().getMaxY(), null, "Edit Points");
 		editPolyPoints.setStill(true);
 		editPolyPoints.setEnabled(!polys.isEmpty());
-		splitPolyPoint = new Button("Split Point", 20, (float) editPolyPoints.getBox().getMaxY(), 0, null);
+		splitPolyPoint = new Button("Split Point", 20, (float) editPolyPoints.getBounds().getMaxY(), 0, null);
 		splitPolyPoint.setStill(true);
 		splitPolyPoint.setEnabled(false);
 		
-		emptyFrame = new EmptyFrame(0, 0, "Menu2");
-		emptyFrame.setStill(true);
-		emptyFrame.setBox(0, 0, (float) buildPoly.getBox().getMaxX(),
-				(float) splitPolyPoint.getBox().getMaxY(), false);
+		stuff = new ElementGroup();
+		stuff.add(buildPoly);
+		stuff.add(addPoly);
+		stuff.add(editPolyPoints);
+		stuff.add(splitPolyPoint);
+		stuff.addFrame("Menu2");
 	}
 	
 	public void update() {
@@ -61,7 +63,7 @@ public class Collisions {
 			if(currentPoly == null) {
 				currentPoly = new Polygon();
 			} else {
-				if(Mouse.isInsideWindow() && Input.mouseClicked() && !emptyFrame.isClicked()) {
+				if(Mouse.isInsideWindow() && Input.mouseClicked()) {
 					addPolyPoint();
 				}
 			}
@@ -95,7 +97,7 @@ public class Collisions {
 		// Only enable editing points if polygons exist
 		if(editPolyPoints.isEnabled()) {
 			if(editPolyPoints.isChecked()) {
-				if(Mouse.isInsideWindow() && Input.mouseClicked() && !emptyFrame.isClicked()) {
+				if(Mouse.isInsideWindow() && Input.mouseClicked()) {
 					selectPolyPoint();
 					if(editPoint == null) {
 						splitPolyPoint.setEnabled(false);
@@ -118,7 +120,7 @@ public class Collisions {
 		}
 		
 		if(editPoint != null) {
-			if(Mouse.isInsideWindow() && Input.mouseHeld() && !emptyFrame.isClicked()) {
+			if(Mouse.isInsideWindow() && Input.mouseHeld()) {
 				movePoint();
 			}
 			if(Keybinds.CANCEL.clicked()) {
@@ -209,12 +211,7 @@ public class Collisions {
 					new Rectangle2D.Double(0, 0, 20, 20));
 		}
 		
-		emptyFrame.draw();
-		
-		buildPoly.draw();
-		addPoly.draw();
-		editPolyPoints.draw();
-		splitPolyPoint.draw();		
+		stuff.draw();	
 	}
 	
 	public void addPolyPoint() {
