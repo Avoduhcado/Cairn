@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import org.newdawn.slick.openal.SoundStore;
 
+import core.Camera;
 import core.utilities.keyboard.Keybinds;
 
 public class Config {
@@ -29,6 +30,12 @@ public class Config {
 		    			}
 	    			}
 	    		} else if(line.matches("<VIDEO>")) {
+	    			while((line = reader.readLine()) != null && !line.matches("<END>")) {
+	    				String[] temp = line.split("=");
+		    			if(temp[0].matches("fullscreen")) {
+		    				Camera.get().setFullscreen(Boolean.parseBoolean(temp[1]));
+		    			}
+	    			}
 	    			// TODO Custom video settings
 	    		} else if(line.matches("<KEYS>")) {
 	    			while((line = reader.readLine()) != null && !line.matches("<END>")) {
@@ -73,6 +80,14 @@ public class Config {
 			writer.write("music=" + SoundStore.get().getMusicVolume());
 			writer.newLine();
 			writer.write("sfx=" + SoundStore.get().getSoundVolume());
+			writer.newLine();
+			writer.write("<END>");
+			writer.newLine();
+			writer.newLine();
+			
+			writer.write("<VIDEO>");
+			writer.newLine();
+			writer.write("fullscreen=" + Camera.get().isFullscreen());
 			writer.newLine();
 			writer.write("<END>");
 			writer.newLine();

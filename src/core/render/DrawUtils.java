@@ -15,6 +15,7 @@ public class DrawUtils {
 	/** Color of object to be drawn */
 	private static Vector3f color = new Vector3f(0f, 0f, 0f);
 	private static boolean scaled;
+	private static boolean still;
 
 	/**
 	 * Set new drawing color.
@@ -38,6 +39,7 @@ public class DrawUtils {
 			GL11.glLoadIdentity();
 			scaled = false;
 		}
+		still = false;
 	}
 	
 	/**
@@ -81,7 +83,11 @@ public class DrawUtils {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
 		GL11.glPushMatrix();
-		GL11.glTranslatef((int) (x - Camera.get().frame.getX()), (int) (y - Camera.get().frame.getY()), 0);
+		if(still) {
+			GL11.glTranslatef(x, y, 0);
+		} else {
+			GL11.glTranslatef((int) (x - Camera.get().frame.getX()), (int) (y - Camera.get().frame.getY()), 0);
+		}
 		GL11.glColor3f(color.x, color.y, color.z);
 		GL11.glLineWidth(1.0f);
 		
@@ -237,6 +243,10 @@ public class DrawUtils {
 		GL11.glPopMatrix();
 		
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+
+	public static void setStill(boolean still) {
+		DrawUtils.still = still;
 	}
 	
 }

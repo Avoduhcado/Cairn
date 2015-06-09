@@ -350,14 +350,25 @@ public class Camera {
 			//}
 		}
 	}
+
+	public boolean isFullscreen() {
+		return Display.isFullscreen();
+	}
 	
-	public void setFullscreen() {
+	public boolean setFullscreen(boolean fullscreen) {
 		try {
-			Display.setFullscreen(!Display.isFullscreen());
-			Display.setDisplayMode(Display.getDesktopDisplayMode());
+			Display.setFullscreen(fullscreen);
+			if(fullscreen) {
+				Display.setDisplayMode(Display.getDesktopDisplayMode());
+			} else if(!fullscreen && Display.isFullscreen()){
+				Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
+			}
 		} catch (LWJGLException e) {
 			e.printStackTrace();
+			return false;
 		}
+		
+		return true;
 	}
 	
 	public boolean isPanning() {
@@ -526,5 +537,5 @@ public class Camera {
 	public void close() {
 		Display.destroy();
 	}
-	
+
 }

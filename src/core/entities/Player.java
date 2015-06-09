@@ -63,12 +63,12 @@ public class Player extends Actor implements Combatant {
 				
 		this.stats = new Stats();
 		this.stats.setHealth(new Health(30f, 30f));
-		this.stats.setStamina(new Stamina(20f, 20f));
+		this.stats.setStamina(new Stamina(2000000f, 2000000f));
 		if(!familiar) {
 			this.stats.getStamina().setCurrent(0);
 			this.stats.getStamina().setRegainSpeed(0);
 		} else {
-			this.stats.getStamina().setRegainSpeed(7.5f);
+			this.stats.getStamina().setRegainSpeed(70.5f);
 		}
 		this.stats.setMagic(new Magic(30f, 30f));
 		this.equipment = new Equipment();
@@ -434,20 +434,19 @@ public class Player extends Actor implements Combatant {
 	@Override
 	public void endCombat() {
 		looking = 0;
+		setDadArmRight(false);
+		setDadArmLeft(false);
 		
 		switch(getState()) {
 		case ATTACK:
-			setDadArmRight(false);
 			equipment.setSuperArmor(false);
 			equipment.getEquippedWeapon().setDamaging(false);
 			equipment.setCombo(-1, null);
 			break;
 		case DEFEND:
-			setDadArmLeft(false);
 			equipment.setBlock(false);
 			break;
 		case CAST:
-			setDadArmLeft(false);
 			break;
 		default:
 			break;
@@ -458,6 +457,8 @@ public class Player extends Actor implements Combatant {
 	public void attack() {
 		// TODO Check if Dad skull is enabled
 		if(stats.getStamina().getCurrent() > 0f) {
+			setDadArmLeft(false);
+			
 			if(getState() != CharState.ATTACK) {
 				setState(CharState.ATTACK);
 				setDadArmRight(familiar);
@@ -476,6 +477,7 @@ public class Player extends Actor implements Combatant {
 	@Override
 	public void defend() {
 		if(stats.getStamina().getCurrent() > 0f) {
+			setDadArmRight(false);
 			setState(CharState.DEFEND);
 			setDadArmLeft(true);
 			stats.getStamina().addCurrent(-3.5f);

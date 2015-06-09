@@ -33,16 +33,16 @@ public class Input {
 			Theater.get().debug = !Theater.get().debug;
 			//Cheats.SPEED_HACK = Theater.get().debug;
 		}
-		if(Keybinds.SLOT6.clicked()) {
+		/*if(Keybinds.SLOT6.clicked()) {
 			Camera.get().setFullscreen();
-		}
+		}*/
 		
 		if(mousePress != null && !mouseHeld) {
 			mouseHeld = true;
 		}
 		
 		while(Mouse.next()) {
-			if(Mouse.getEventButton() == 0) {
+			if(Mouse.getEventButton() != -1) {
 				if(Mouse.getEventButtonState()) {
 					mousePress = new Point2D.Double(Mouse.getX(), Mouse.getY());
 					mouseRelease = null;
@@ -138,6 +138,13 @@ public class Input {
 				}
 			}
 			
+			if(Keybinds.SLOT6.clicked()) {
+				if(((Stage) setup).getMap().getMapName().matches("Graveyard")) {
+					((Stage) setup).loadMap("Withered Hearthlands", 1000, 1930);
+				} else {
+					((Stage) setup).loadMap("Graveyard", 1600, 1030);
+				}
+			}
 			if(Keybinds.SLOT7.clicked()) {
 				((Stage) setup).getHUD().setEnabled(!((Stage) setup).getHUD().isEnabled());
 			}
@@ -169,6 +176,10 @@ public class Input {
 	
 	public static boolean mouseClicked() {
 		return mousePress != null && !mouseHeld;
+	}
+	
+	public static boolean mouseClicked(int button) {
+		return mouseClicked() && Mouse.isButtonDown(button);
 	}
 	
 	public static boolean mousePressed() {

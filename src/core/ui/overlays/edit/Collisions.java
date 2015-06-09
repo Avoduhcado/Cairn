@@ -16,6 +16,7 @@ import core.scene.collisions.PathPolygon;
 import core.ui.Button;
 import core.ui.CheckBox;
 import core.ui.ElementGroup;
+import core.ui.utils.ClickEvent;
 import core.utilities.keyboard.Keybinds;
 import core.utilities.mouse.MouseInput;
 
@@ -29,74 +30,75 @@ public class Collisions {
 	private ElementGroup stuff;
 	
 	private CheckBox buildPoly;
-	private Button addPoly;
 	private CheckBox editPolyPoints;
 	private Button splitPolyPoint;
-	
+		
 	public Collisions() {
 		//EditMenu.polys = map.getCollisionPolys();
 		
-		buildPoly = new CheckBox(20, 20, null, "Build Poly");
+		buildPoly = new CheckBox("Build Poly", 20, 20, null);
 		buildPoly.setStill(true);
-		addPoly = new Button("Save Poly", 20, (float) buildPoly.getBounds().getMaxY(), 0, null);
-		addPoly.setStill(true);
-		addPoly.setEnabled(false);
+		buildPoly.addEvent(new ClickEvent(buildPoly) {
+			public void click() {
+				if(buildPoly.isChecked()) {
+					currentPoly = new Polygon();
+				} else {
+					if(currentPoly.npoints > 1)
+						polys.add(currentPoly);
+					currentPoly = null;
+				}
+			}
+		});
 		
-		editPolyPoints = new CheckBox(20, (float) addPoly.getBounds().getMaxY(), null, "Edit Points");
+		editPolyPoints = new CheckBox("Edit Points", 20, (float) buildPoly.getBounds().getMaxY(), null);
 		editPolyPoints.setStill(true);
 		editPolyPoints.setEnabled(!polys.isEmpty());
+		editPolyPoints.addEvent(new ClickEvent(editPolyPoints) {
+			public void click() {
+				if(polys.isEmpty()) {
+					editPolyPoints.setChecked(false);
+				}
+			}
+		});
+		
 		splitPolyPoint = new Button("Split Point", 20, (float) editPolyPoints.getBounds().getMaxY(), 0, null);
 		splitPolyPoint.setStill(true);
 		splitPolyPoint.setEnabled(false);
+		splitPolyPoint.addEvent(new ClickEvent(splitPolyPoint) {
+			public void click() {
+				splitPoint();
+				splitPolyPoint.setEnabled(false);
+			}
+		});
 		
 		stuff = new ElementGroup();
 		stuff.add(buildPoly);
-		stuff.add(addPoly);
 		stuff.add(editPolyPoints);
 		stuff.add(splitPolyPoint);
 		stuff.addFrame("Menu2");
 	}
 	
 	public void update() {
-		// Build a new hitmap polygon
-		if(buildPoly.isChecked()) {
-			if(currentPoly == null) {
-				currentPoly = new Polygon();
-			} else {
-				if(Mouse.isInsideWindow() && Input.mouseClicked()) {
+		if(currentPoly != null) {
+			if(Mouse.isInsideWindow() && Input.mouseClicked()) {
+				if(Input.mouseClicked(0)) {
 					addPolyPoint();
+				} else if(Input.mouseClicked(1)) {
+					if(currentPoly.npoints > 1)
+						polys.add(currentPoly);
+					currentPoly = null;
+					buildPoly.setChecked(false);
 				}
 			}
-			
-			// End editing polygon by right clicking
-			if(Mouse.isButtonDown(1)) {
-				buildPoly.setChecked(false);
-				if(currentPoly.npoints > 1)
-					polys.add(currentPoly);
-				currentPoly = null;
-				addPoly.setEnabled(false);
-			}
 		}
-		buildPoly.update();
 		
-		// Only enable adding the polygon if a polygon exists
-		if(currentPoly != null && currentPoly.npoints > 1) {
-			addPoly.setEnabled(true);
-		}
-		if(addPoly.isEnabled()) {
-			addPoly.update();
-			if(addPoly.isClicked()) {
-				buildPoly.setChecked(false);
-				if(currentPoly != null && currentPoly.npoints > 1)
-					polys.add(currentPoly);
-				currentPoly = null;
-				addPoly.setEnabled(false);
-			}
-		}
+		splitPolyPoint.update();
 		
 		// Only enable editing points if polygons exist
-		if(editPolyPoints.isEnabled()) {
-			if(editPolyPoints.isChecked()) {
+		if(editPolyPoints.isChecked()) {
+			if(polys.isEmpty()) {
+				editPolyPoints.setChecked(false);
+			} else {
 				if(Mouse.isInsideWindow() && Input.mouseClicked()) {
 					selectPolyPoint();
 					if(editPoint == null) {
@@ -104,22 +106,10 @@ public class Collisions {
 					}
 				}
 			}
-			editPolyPoints.update();
-		} else {
-			editPolyPoints.setEnabled(!polys.isEmpty());
-		}
-		// Enable splitting points
-		if(splitPolyPoint.isEnabled()) {
-			splitPolyPoint.update();
-			if(splitPolyPoint.isClicked()) {
-				splitPoint();
-				splitPolyPoint.setEnabled(false);
-			}
-		} else {
-			splitPolyPoint.setEnabled(editPolyPoints.isChecked() && editPoint != null);
 		}
 		
 		if(editPoint != null) {
+			splitPolyPoint.setEnabled(true);
 			if(Mouse.isInsideWindow() && Input.mouseHeld()) {
 				movePoint();
 			}
@@ -129,7 +119,12 @@ public class Collisions {
 				editPolyPoints.setEnabled(!polys.isEmpty());
 				splitPolyPoint.setEnabled(false);
 			}
+		} else {
+			splitPolyPoint.setEnabled(false);
 		}
+
+		buildPoly.update();
+		editPolyPoints.update();
 	}
 	
 	public void draw() {
@@ -138,20 +133,7 @@ public class Collisions {
 			DrawUtils.setColor(new Vector3f(0.8f, 0f, 0.4f));
 			DrawUtils.applyCameraScale();
 			DrawUtils.drawPoly(0, 0, p);
-			
-			/*for(int i = 0; i<p.npoints - 1; i++) {
-				Vector2f vec = new Vector2f(p.xpoints[i + 1] - p.xpoints[i], p.ypoints[i + 1] - p.ypoints[i]);
-				float magnitude = (float) Math.sqrt(Math.pow(vec.x, 2) + Math.pow(vec.y, 2));
-				vec.set(vec.x / magnitude, vec.y / magnitude);
-				vec.scale(10f);
-				Line2D line = new Line2D.Double(p.xpoints[i] + ((p.xpoints[i + 1] - p.xpoints[i]) / 2),
-						p.ypoints[i] + ((p.ypoints[i + 1] - p.ypoints[i]) / 2),
-						p.xpoints[i] + ((p.xpoints[i + 1] - p.xpoints[i]) / 2) + vec.y,
-						p.ypoints[i] + ((p.ypoints[i + 1] - p.ypoints[i]) / 2) + (vec.x * -1f));
-				DrawUtils.setColor(new Vector3f(0f, 0f, 1f));
-				DrawUtils.drawLine(line);
-			}*/
-			
+
 			if(editPolyPoints.isChecked()) {
 				for(int i = 0; i<p.npoints; i++) {
 					DrawUtils.setColor(new Vector3f(0f, 0f, 1f));
@@ -232,8 +214,7 @@ public class Collisions {
 		for(int j = 0; j<polys.size(); j++) {
 			for(int i = 0; i<polys.get(j).npoints; i++) {
 				polyPoint.setFrame(polys.get(j).xpoints[i] - 10, polys.get(j).ypoints[i] - 10, 20, 20);
-				if(polyPoint.contains((Mouse.getX() + Camera.get().frame.getX()),
-						(Camera.get().frame.getY() - (Mouse.getY() - Camera.get().frame.getHeight())))) {
+				if(polyPoint.contains(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY())) {
 					editPoint = new Point(j, i);
 					return;
 				}
@@ -244,9 +225,8 @@ public class Collisions {
 	}
 	
 	private void movePoint() {
-		polys.get(editPoint.x).xpoints[editPoint.y] = (int) (Mouse.getX() + Camera.get().frame.getX());
-		polys.get(editPoint.x).ypoints[editPoint.y] = (int) (Camera.get().frame.getY() 
-				- (Mouse.getY() - Camera.get().frame.getHeight()));
+		polys.get(editPoint.x).xpoints[editPoint.y] = MouseInput.getScreenMouseX();
+		polys.get(editPoint.x).ypoints[editPoint.y] = MouseInput.getScreenMouseY();
 	}
 	
 	private void deletePoint() {

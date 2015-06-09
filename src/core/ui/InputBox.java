@@ -24,14 +24,14 @@ public class InputBox extends UIElement implements Accessible {
 	private boolean valueChanged;
 	
 	/**
+	 * @param text Preset text
 	 * @param x coordinate of box
 	 * @param y coordinate of box
 	 * @param image Background frame
 	 * @param style Type of input accepted
-	 * @param text Preset text
 	 * @param textLimit Total number of characters accepted
 	 */
-	public InputBox(float x, float y, String image, int style, String text, int textLimit) {		
+	public InputBox(String text, float x, float y, String image, int style, int textLimit) {		
 		Keybinds.clear();
 		Keyboard.enableRepeatEvents(true);
 		

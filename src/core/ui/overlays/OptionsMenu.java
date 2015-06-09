@@ -7,6 +7,7 @@ import org.newdawn.slick.openal.SoundStore;
 
 import core.Camera;
 import core.ui.Button;
+import core.ui.CheckBox;
 import core.ui.ElementGroup;
 import core.ui.InputBox;
 import core.ui.Label;
@@ -39,7 +40,7 @@ public class OptionsMenu extends MenuOverlay {
 		optionsLabel.setStill(true);
 		this.add(optionsLabel);
 
-		final Slider musicSlider = new Slider(Float.NaN, Camera.get().getDisplayHeight(0.1667f),
+		final Slider musicSlider = new Slider(Camera.get().getDisplayWidth(0.35f), Camera.get().getDisplayHeight(0.1667f),
 				1f, SoundStore.get().getMusicVolume(), "SliderBG", "SliderValue");
 		musicSlider.setStill(true);
 		musicSlider.addEvent(new ValueChangeEvent(musicSlider) {
@@ -52,13 +53,14 @@ public class OptionsMenu extends MenuOverlay {
 		});
 		this.add(musicSlider);
 
-		Label musicLabel = new Label("Music Volume: ", Float.NaN, 
+		Label musicLabel = new Label("Music Volume: ", Camera.get().getDisplayWidth(0.35f), 
 				(float) (musicSlider.getBounds().getY() - (musicSlider.getBounds().getHeight() / 2f)), null);
 		musicLabel.setStill(true);
 		musicLabel.setAlign(Align.LEFT);
 		this.add(musicLabel);
 
-		final Slider sfxSlider = new Slider(Float.NaN, (float) (musicSlider.getBounds().getMaxY() + musicSlider.getBounds().getHeight()),
+		final Slider sfxSlider = new Slider(Camera.get().getDisplayWidth(0.35f),
+				(float) (musicSlider.getBounds().getMaxY() + musicSlider.getBounds().getHeight()),
 				1f, SoundStore.get().getSoundVolume(), "SliderBG", "SliderValue");
 		sfxSlider.setStill(true);
 		sfxSlider.addEvent(new ValueChangeEvent(sfxSlider) {
@@ -70,11 +72,22 @@ public class OptionsMenu extends MenuOverlay {
 		});
 		this.add(sfxSlider);
 		
-		Label sfxLabel = new Label("Sound Volume: ", Float.NaN, 
+		Label sfxLabel = new Label("Sound Volume: ", Camera.get().getDisplayWidth(0.35f), 
 				(float) (sfxSlider.getBounds().getY() - (sfxSlider.getBounds().getHeight() / 2f)), null);
 		sfxLabel.setStill(true);
 		sfxLabel.setAlign(Align.LEFT);
 		this.add(sfxLabel);
+		
+		final CheckBox fullscreenCheck = new CheckBox("Fullscreen", Camera.get().getDisplayWidth(0.6f),
+				Camera.get().getDisplayHeight(0.1667f), null);
+		fullscreenCheck.setStill(true);
+		fullscreenCheck.setChecked(Camera.get().isFullscreen());
+		fullscreenCheck.addEvent(new ClickEvent(fullscreenCheck) {
+			public void click() {
+				Camera.get().setFullscreen(fullscreenCheck.isChecked());
+			}
+		});
+		this.add(fullscreenCheck);
 		
 		LinkedList<ElementGroup> keybinds = new LinkedList<ElementGroup>();
 		float keyX = Camera.get().getDisplayWidth(0.25f);
@@ -87,7 +100,7 @@ public class OptionsMenu extends MenuOverlay {
 			keyLabel.setAlign(Align.LEFT);
 			key.add(keyLabel);
 			
-			final InputBox keyBox = new InputBox(keyX, Camera.get().getDisplayHeight(0.285f) + keyY, null, -1, Keybinds.values()[i].getKey(), 0);
+			final InputBox keyBox = new InputBox(Keybinds.values()[i].getKey(), keyX, Camera.get().getDisplayHeight(0.285f) + keyY, null, -1, 0);
 			keyBox.setEnabled(false);
 			keyBox.setStill(true);
 			keyBox.setCentered(false);

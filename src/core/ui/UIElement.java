@@ -25,8 +25,10 @@ public abstract class UIElement {
 	protected ArrayList<UIAction> events = new ArrayList<UIAction>();
 
 	public void update() {
-		for(UIAction e : events) {
-			e.actionPerformed();
+		if(enabled) {
+			for(UIAction e : events) {
+				e.actionPerformed();
+			}
 		}
 	}
 	

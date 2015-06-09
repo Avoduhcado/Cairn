@@ -61,6 +61,9 @@ public class Map implements Serializable {
 	public Map() {
 		resetEntity();
 
+		//loadBackdrop(0, 0, "Withered Hearthlands", 0f);
+		mapName = "Graveyard";
+		
 		loadBackdrop(400, 335, "Parallax", -0.1f);
 		loadBackdrop(0, 0, "Graveyard", 0f);
 
@@ -301,6 +304,7 @@ public class Map implements Serializable {
 		scenery = new LinkedList<Entity>();
 		
 		scenery.addAll(cast);
+		scenery.addAll(props);
 		// TODO Add the rest of the scenery
 	}
 	

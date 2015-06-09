@@ -1,10 +1,17 @@
 package core.entities.utils.ai;
 
+import java.io.Serializable;
+
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.Intelligent;
 
-public interface AIAction {
+public abstract class AIAction implements Serializable {
 	
-	public void act(Intelligent host, Combatant target);
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public abstract void act(Intelligent host, Combatant target);
 	
 }

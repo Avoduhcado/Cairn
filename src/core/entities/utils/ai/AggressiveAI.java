@@ -62,6 +62,11 @@ public class AggressiveAI extends Intelligence {
 	
 	private void search() {
 		setAction(new AIAction() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			public void act(Intelligent host, Combatant target) {
 				for(Actor a : ((Stage) Theater.get().getSetup()).getCast()) {
 					if(a instanceof Combatant && host != a && ((Combatant) host).getReputation().isEnemy(((Combatant) a).getReputation())
@@ -78,6 +83,10 @@ public class AggressiveAI extends Intelligence {
 	private void planAttack() {
 		if(((Combatant) host).getStats().getStamina().getCurrentPercent() < 0.35f && Math.random() > aggression) {
 			setAction(new AIAction() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
 				float timer = 1.5f;
 				public void act(Intelligent host, Combatant target) {
 					timer -= Theater.getDeltaSpeed(0.025f);
@@ -88,6 +97,11 @@ public class AggressiveAI extends Intelligence {
 			});
 		} else {
 			setAction(new AIAction() {					
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
 				public void act(Intelligent host, Combatant target) {
 					((Actor) host).lookAt((Entity) target);
 					((Combatant) host).attack();
@@ -98,6 +112,10 @@ public class AggressiveAI extends Intelligence {
 	
 	private void rechargeStamina() {
 		setAction(new AIAction() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
 			float timer = 2.5f;
 			public void act(Intelligent host, Combatant target) {
 				timer -= Theater.getDeltaSpeed(0.025f);
@@ -111,6 +129,10 @@ public class AggressiveAI extends Intelligence {
 
 	private void approach() {
 		setAction(new AIAction() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
 			float timer = 5.25f;
 			
 			public void act(Intelligent host, Combatant target) {

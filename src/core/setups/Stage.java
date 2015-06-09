@@ -48,10 +48,13 @@ public class Stage extends GameSetup {
 			System.out.println(e.getID());
 		}
 		
-		player = new Player(1600, 1030, "MC and Familiar", Camera.ASPECT_RATIO);
-		Camera.get().setFocus(player);
+		//player = new Player(1600, 1030, "MC and Familiar", Camera.ASPECT_RATIO);
+		//player = new Player(1000, 1960, "MC and Familiar", Camera.ASPECT_RATIO);
+		player = new Player(0, 0, "MC and Familiar", Camera.ASPECT_RATIO);
+		/*Camera.get().setFocus(player);
 		Camera.get().centerOn(this);
-		map.getScenery().add(player);
+		map.getScenery().add(player);*/
+		loadMap("Graveyard", 1600, 1030);
 		
 		hud = new HUD();
 		
@@ -193,6 +196,19 @@ public class Stage extends GameSetup {
 	public void resizeRefresh() {
 	}
 
+	public Map getMap() {
+		return map;
+	}
+	
+	public void loadMap(String mapName, float x, float y) {
+		map = Map.deserialize(mapName);
+		
+		player.setPosition(x, y);
+		Camera.get().setFocus(player);
+		Camera.get().centerOn(this);
+		map.getScenery().add(player);
+	}
+	
 	public HUD getHUD() {
 		return hud;
 	}
