@@ -140,7 +140,7 @@ public class Input {
 			
 			if(Keybinds.SLOT6.clicked()) {
 				if(((Stage) setup).getMap().getMapName().matches("Graveyard")) {
-					((Stage) setup).loadMap("Withered Hearthlands", 1000, 1930);
+					((Stage) setup).loadMap("Withered Hearthlands", 975, 1300);
 				} else {
 					((Stage) setup).loadMap("Graveyard", 1600, 1030);
 				}

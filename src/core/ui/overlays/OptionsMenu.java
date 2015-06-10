@@ -89,6 +89,17 @@ public class OptionsMenu extends MenuOverlay {
 		});
 		this.add(fullscreenCheck);
 		
+		final CheckBox vsyncCheck = new CheckBox("VSync", Camera.get().getDisplayWidth(0.6f),
+				(float) fullscreenCheck.getBounds().getMaxY(), null);
+		vsyncCheck.setStill(true);
+		vsyncCheck.setChecked(Camera.get().isVSyncEnabled());
+		vsyncCheck.addEvent(new ClickEvent(vsyncCheck) {
+			public void click() {
+				Camera.get().setVSync(vsyncCheck.isChecked());
+			}
+		});
+		this.add(vsyncCheck);
+		
 		LinkedList<ElementGroup> keybinds = new LinkedList<ElementGroup>();
 		float keyX = Camera.get().getDisplayWidth(0.25f);
 		float keyY = 0;

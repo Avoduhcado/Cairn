@@ -11,7 +11,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
 import core.Camera;
 import core.render.SpriteIndex;
@@ -62,9 +65,9 @@ public class Map implements Serializable {
 		resetEntity();
 
 		//loadBackdrop(0, 0, "Withered Hearthlands", 0f);
-		mapName = "Graveyard";
+		//mapName = "Withered Hearthlands";
 		
-		loadBackdrop(400, 335, "Parallax", -0.1f);
+		/*loadBackdrop(400, 335, "Parallax", -0.1f);
 		loadBackdrop(0, 0, "Graveyard", 0f);
 
 		loadProp(190, 480, "Entrance");
@@ -130,7 +133,7 @@ public class Map implements Serializable {
 		cast.getLast().setDirection(1);
 		((Enemy) cast.getLast()).getStats().getHealth().setCurrent(50f);
 		
-		scenery.addAll(cast);
+		scenery.addAll(cast);*/
 		
 		//fog = new Fog("Fog", 0.5f, 0.75f, new Vector2f(-1f, 0f));
 		//fog.setOpacity(0.5f);
@@ -254,6 +257,7 @@ public class Map implements Serializable {
 
 	public void loadBackdrop(int x, int y, String backdrop, float depth) {
 		File backdropDirectory = new File(System.getProperty("resources") + "/sprites/" + backdrop);
+		
 		if(backdropDirectory.exists() && backdropDirectory.isDirectory()) {
 			String[] backdropNames = backdropDirectory.list();
 			for(String n : backdropNames) {
@@ -271,7 +275,7 @@ public class Map implements Serializable {
 			addBackdrop(new Backdrop(x, y, backdrop, Camera.ASPECT_RATIO, depth));
 		}
 	}
-	
+
 	public void addBackdrop(Backdrop backdrop) {
 		if(backdrop.getDepth() < 0f) {
 			if(background.isEmpty()) {

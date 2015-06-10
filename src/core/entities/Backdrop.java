@@ -1,10 +1,12 @@
 package core.entities;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import org.lwjgl.util.vector.Vector2f;
+
 import core.Camera;
 import core.Theater;
 import core.render.SpriteIndex;

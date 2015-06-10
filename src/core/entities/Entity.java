@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 import org.lwjgl.util.vector.Vector2f;
 
+import core.Camera;
 import core.Input;
 import core.render.SpriteIndex;
 import core.utilities.mouse.MouseInput;
@@ -30,6 +31,12 @@ public abstract class Entity implements Serializable {
 	}
 	
 	public abstract void update();
+	
+	public void toDraw() {
+		if(Point2D.distance(getX(), getY(), Camera.get().frame.getCenterX(), Camera.get().frame.getCenterY()) < Camera.DRAW_DISTANCE) {
+			draw();
+		}
+	}
 	
 	public void draw() {
 		SpriteIndex.getSprite(sprite).draw(pos.x, pos.y);

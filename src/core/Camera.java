@@ -42,6 +42,8 @@ public class Camera {
 	public static final int TARGET_FPS = 60;
 	/** Window aspect ratio */
 	public static final float ASPECT_RATIO = 0.667f;
+	/** Maximum draw distance for entities */
+	public static int DRAW_DISTANCE = 5000;
 
 	/** Current Camera frame */
 	public Rectangle2D frame = new Rectangle2D.Double(0, 0, WIDTH, HEIGHT);
@@ -49,6 +51,8 @@ public class Camera {
 	
 	/** World scale variable */
 	private float scale = 1f;
+	/** VSync status */
+	private boolean vsync;
 	
 	private Mobile focus;
 	
@@ -369,6 +373,15 @@ public class Camera {
 		}
 		
 		return true;
+	}
+	
+	public boolean isVSyncEnabled() {
+		return vsync;
+	}
+	
+	public void setVSync(boolean vsync) {
+		this.vsync = vsync;
+		Display.setVSyncEnabled(vsync);
 	}
 	
 	public boolean isPanning() {

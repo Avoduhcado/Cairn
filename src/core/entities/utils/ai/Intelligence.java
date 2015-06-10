@@ -26,7 +26,7 @@ public abstract class Intelligence implements Serializable {
 	protected Intelligent host;
 	protected Combatant target;
 	
-	protected AIAction action;
+	protected transient AIAction action;
 	protected ArrayList<Trait> traits = new ArrayList<Trait>();
 	
 	protected Shape sight;

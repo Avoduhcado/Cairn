@@ -50,11 +50,6 @@ public class Minion extends Trait {
 			if(!((Enemy) host).getIntelligence().isChasing() && Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(),
 					((Entity) host).getX(), ((Entity) host).getY()) > wanderRange) {
 				host.getIntelligence().setAction(new AIAction() {
-					/**
-					 * 
-					 */
-					private static final long serialVersionUID = 1L;
-
 					public void act(Intelligent host, Combatant target) {
 						host.approach(((Entity) leader).getPositionAsPoint());
 						if(Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(), 

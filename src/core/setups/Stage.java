@@ -132,11 +132,11 @@ public class Stage extends GameSetup {
 	@Override
 	public void draw() {
 		for(Backdrop b : map.getBackground()) {
-			b.draw();
+			b.toDraw();
 		}
-		
+
 		for(Backdrop g : map.getGround()) {
-			g.draw();
+			g.toDraw();
 		}
 
 		/*for(LightSource l : map.getLights()) {
@@ -155,15 +155,15 @@ public class Stage extends GameSetup {
 
 		// Draw the scenery
 		for(Entity e : map.getScenery()) {
-			e.draw();
+			e.toDraw();
 		}
 
 		for(Backdrop f : map.getForeground()) {
-			f.draw();
+			f.toDraw();
 		}
 
 		if(map.getFog() != null)
-			map.getFog().draw();
+			map.getFog().toDraw();
 
 		/*if(!LightMap.lights.isEmpty()) {
 			// Remember to re-init LightMap before using these
@@ -207,6 +207,8 @@ public class Stage extends GameSetup {
 		Camera.get().setFocus(player);
 		Camera.get().centerOn(this);
 		map.getScenery().add(player);
+		
+		Camera.get().setFade(-1.2f);
 	}
 	
 	public HUD getHUD() {

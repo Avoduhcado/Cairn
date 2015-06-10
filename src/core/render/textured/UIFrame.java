@@ -12,7 +12,7 @@ import core.Camera;
 
 public class UIFrame extends Sprite {
 
-	private float opacity = 0.8f;
+	private float opacity = 1f;
 	private float width;
 	private float height;
 	
@@ -33,7 +33,7 @@ public class UIFrame extends Sprite {
 		y -= height / 2f;
 		
 		texture.bind();
-				
+
 		GL11.glPushMatrix();
 		
 		if(still)

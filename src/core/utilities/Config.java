@@ -34,6 +34,8 @@ public class Config {
 	    				String[] temp = line.split("=");
 		    			if(temp[0].matches("fullscreen")) {
 		    				Camera.get().setFullscreen(Boolean.parseBoolean(temp[1]));
+		    			} else if(temp[0].matches("vsync")) {
+		    				Camera.get().setVSync(Boolean.parseBoolean(temp[1]));
 		    			}
 	    			}
 	    			// TODO Custom video settings
@@ -88,6 +90,8 @@ public class Config {
 			writer.write("<VIDEO>");
 			writer.newLine();
 			writer.write("fullscreen=" + Camera.get().isFullscreen());
+			writer.newLine();
+			writer.write("vsync=" + Camera.get().isVSyncEnabled());
 			writer.newLine();
 			writer.write("<END>");
 			writer.newLine();
