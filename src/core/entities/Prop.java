@@ -20,6 +20,7 @@ public class Prop extends Entity {
 	public Prop(int x, int y, String ref, float scale) {
 		this.pos = new Vector2f(x, y);
 		this.sprite = ref;
+		this.name = ref;
 		
 		this.scale = scale;
 		this.box = new Rectangle2D.Double(x, y,

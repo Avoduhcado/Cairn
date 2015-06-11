@@ -5,7 +5,6 @@ import core.Theater;
 import core.render.textured.Sprite;
 import core.ui.Button;
 import core.ui.ElementGroup;
-import core.ui.UIElement;
 import core.ui.overlays.OptionsMenu;
 import core.ui.utils.Align;
 import core.ui.utils.ClickEvent;
@@ -39,6 +38,7 @@ public class TitleMenu extends GameSetup {
 				Theater.get().swapSetup(new Stage());
 			}
 		});
+		
 		Button options = new Button("Options", Float.NaN, (float) newGame.getBounds().getMaxY(), 0, null);
 		options.setStill(true);
 		options.setAlign(Align.CENTER);
@@ -47,6 +47,7 @@ public class TitleMenu extends GameSetup {
 				optionsMenu = new OptionsMenu("Menu2");
 			}
 		});
+		
 		Button exit = new Button("Exit", Float.NaN, (float) options.getBounds().getMaxY(), 0, null);
 		exit.setStill(true);
 		exit.setAlign(Align.CENTER);
@@ -57,10 +58,15 @@ public class TitleMenu extends GameSetup {
 		});
 		
 		// Initialize game buttons
+		newGame.setSurrounding(3, options);
+		options.setSurrounding(3, exit);
+		exit.setSurrounding(3, newGame);
+		
 		buttons = new ElementGroup();
 		buttons.add(newGame);
 		buttons.add(options);
 		buttons.add(exit);
+		buttons.setKeyboardNavigable(true);
 		buttons.addFrame("Menu2");
 		
 		// Play title track
@@ -77,9 +83,7 @@ public class TitleMenu extends GameSetup {
 				optionsMenu = null;
 		} else {
 			// Update buttons
-			for(UIElement b : buttons) {
-				b.update();
-			}
+			buttons.update();
 		}
 	}
 	
@@ -98,9 +102,7 @@ public class TitleMenu extends GameSetup {
 			optionsMenu.draw();
 		} else {
 			// Draw buttons
-			for(UIElement b : buttons) {
-				b.draw();
-			}
+			buttons.draw();
 		}
 	}
 

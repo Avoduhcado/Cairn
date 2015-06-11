@@ -118,9 +118,11 @@ public class Stage extends GameSetup {
 				editMenu.update();
 				if(editMenu.isCloseRequest()) {
 					editMenu = null;
+					Keybinds.closeMenu();
 				}
 			} else if(Keybinds.EDIT.clicked()) {
 				editMenu = new EditMenu(map);
+				Keybinds.inMenu();
 			}
 		}
 		

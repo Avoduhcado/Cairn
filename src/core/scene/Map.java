@@ -254,6 +254,11 @@ public class Map implements Serializable {
 			props.add(new Prop(x, y, prop, Camera.ASPECT_RATIO));
 		}
 	}
+	
+	public void addProp(int x, int y, String prop) {
+		loadProp(x, y, prop);
+		scenery.add(props.getLast());
+	}
 
 	public void loadBackdrop(int x, int y, String backdrop, float depth) {
 		File backdropDirectory = new File(System.getProperty("resources") + "/sprites/" + backdrop);

@@ -42,7 +42,7 @@ public class TextModifier {
 					}
 					break;
 				case 't':
-					still = temp[x].charAt(1) == '+' ? true : false;
+					still = temp[x].charAt(1) == '+';
 					break;
 				case 'c':
 					try {
@@ -95,7 +95,7 @@ public class TextModifier {
 				}
 				break;
 			case 't':
-				still = temp[x].charAt(1) == '+' ? true : false;
+				still = temp[x].charAt(1) == '+';
 				break;
 			case 'c':
 				try {

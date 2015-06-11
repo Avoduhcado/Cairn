@@ -41,5 +41,12 @@ public class MouseInput {
 	public static Point2D getMouse() {
 		return new Point2D.Double(getMouseX(), getMouseY());
 	}
+
+	/**
+	 * @return Mouse as a Point2D scaled to screen
+	 */
+	public static Point2D getScreenMouse() {
+		return new Point2D.Double(getScreenMouseX(), getScreenMouseY());
+	}
 	
 }

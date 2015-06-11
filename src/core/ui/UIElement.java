@@ -8,6 +8,7 @@ import core.Input;
 import core.render.textured.UIFrame;
 import core.ui.utils.Align;
 import core.ui.utils.UIAction;
+import core.utilities.keyboard.Keybinds;
 import core.utilities.mouse.MouseInput;
 
 public abstract class UIElement {
@@ -19,8 +20,12 @@ public abstract class UIElement {
 	protected Align alignment = Align.RIGHT;
 	
 	protected boolean enabled = true;
+	protected boolean selected;
 	protected boolean still;
 	protected boolean dead;
+	
+	/** For managing keyboard mapped menus. 0 = up, 1 = down, 2 = right, 3 = left */
+	protected UIElement[] surroundings = new UIElement[4];
 	
 	protected ArrayList<UIAction> events = new ArrayList<UIAction>();
 
@@ -126,12 +131,31 @@ public abstract class UIElement {
 		}
 	}
 	
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+	}
+	
+	/**
+	 *  0 = up, 1 = right, 2 = left, 3 = down 
+	 * @return surroundings
+	 */
+	public UIElement[] getSurroundings() {
+		return surroundings;
+	}
+	
+	public void setSurrounding(int index, UIElement surround) {
+		this.surroundings[index] = surround;
+		if(surround.getSurroundings()[Math.abs(index - 3)] == null) {
+			surround.setSurrounding(Math.abs(index - 3), this);
+		}
+	}
+	
 	public boolean isClicked() {
-		return bounds.contains(MouseInput.getMouse()) && Input.mouseClicked();
+		return (bounds.contains(MouseInput.getMouse()) && Input.mouseClicked()) || (selected && Keybinds.CONFIRM.clicked());
 	}
 	
 	public boolean isHovering() {
-		return bounds.contains(MouseInput.getMouse());
+		return bounds.contains(MouseInput.getMouse()) || selected;
 	}
 	
 	public boolean isValueChanged() {

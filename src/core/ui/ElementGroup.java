@@ -4,20 +4,48 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import core.ui.utils.Accessible;
+import core.utilities.keyboard.Keybinds;
+import core.utilities.mouse.MouseInput;
 
 public class ElementGroup extends ArrayList<UIElement> {
 	
 	private static final long serialVersionUID = 1L;
 	
 	private boolean singleSelection = true;
+	private EmptyFrame frame;
+	private int selection = -1;
 
 	public void update() {
 		for(UIElement e : this) {
 			e.update();
 		}
+		
+		if(selection != -1 && !frame.getBounds().contains(MouseInput.getScreenMouse())) {
+			get(selection).setSelected(true);
+			if(Keybinds.UP.clicked() && get(selection).getSurroundings()[0] != null) {
+				get(selection).setSelected(false);
+				selection = this.indexOf(get(selection).getSurroundings()[0]);
+				get(selection).setSelected(true);
+			} else if(Keybinds.RIGHT.clicked() && get(selection).getSurroundings()[1] != null) {
+				get(selection).setSelected(false);
+				selection = this.indexOf(get(selection).getSurroundings()[1]);
+				get(selection).setSelected(true);
+			} else if(Keybinds.LEFT.clicked() && get(selection).getSurroundings()[2] != null) {
+				get(selection).setSelected(false);
+				selection = this.indexOf(get(selection).getSurroundings()[2]);
+				get(selection).setSelected(true);
+			} else if(Keybinds.DOWN.clicked() && get(selection).getSurroundings()[3] != null) {
+				get(selection).setSelected(false);
+				selection = this.indexOf(get(selection).getSurroundings()[3]);
+				get(selection).setSelected(true);
+			}
+		} else if(selection != -1 && frame.getBounds().contains(MouseInput.getScreenMouse())) {
+			get(selection).setSelected(false);
+		}
 	}
 	
 	public void draw() {
+		frame.draw();
 		for(UIElement e : this) {
 			e.draw();
 		}
@@ -60,6 +88,13 @@ public class ElementGroup extends ArrayList<UIElement> {
 		this.singleSelection = singleSelection;
 	}
 	
+	public void setKeyboardNavigable(boolean enabled) {
+		selection = (enabled ? 0 : -1);
+		if(get(selection) != null) {
+			get(selection).setSelected(true);
+		}
+	}
+	
 	private Rectangle2D getBounds() {
 		if(this.isEmpty()) {
 			return null;
@@ -74,17 +109,15 @@ public class ElementGroup extends ArrayList<UIElement> {
 	}
 	
 	public void addFrame(String image) {
-		EmptyFrame frame = new EmptyFrame(getBounds(), image);
+		frame = new EmptyFrame(getBounds(), image);
 		frame.setStill(true);
-		this.add(0, frame);
 	}
 	
 	public void addFrame(String image, float xBorder, float yBorder) {
-		EmptyFrame frame = new EmptyFrame(getBounds(), image);
+		frame = new EmptyFrame(getBounds(), image);
 		frame.setStill(true);
 		frame.setXBorder(xBorder);
 		frame.setYBorder(yBorder);
-		this.add(0, frame);
 	}
 
 }

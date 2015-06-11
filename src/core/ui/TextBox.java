@@ -68,6 +68,7 @@ public class TextBox extends UIElement {
 			if(textFill < getLength()) {
 				bounds.setFrame(bounds.getX(), bounds.getY(), getWidth((int) textFill + 1), getHeight((int) textFill + 1));
 			}
+			frame.setStill(still);
 			frame.draw((float) bounds.getX(), (float) bounds.getY(), bounds);
 		}
 
@@ -100,6 +101,7 @@ public class TextBox extends UIElement {
 			if(textFill < getLength()) {
 				bounds.setFrame(x, y, getWidth((int) textFill + 1), getHeight((int) textFill + 1));
 			}
+			frame.setStill(still);
 			frame.draw(x, y, bounds);
 		}
 
@@ -182,7 +184,7 @@ public class TextBox extends UIElement {
 	// TODO Provide support to add text to the same line, or more than one line
 	public void addText(String text) {
 		if(text.startsWith(";")) {
-			lines.add(new TextLine(text));
+			lines.add(new TextLine(text.substring(1)));
 		}
 	}
 	
@@ -260,6 +262,9 @@ public class TextBox extends UIElement {
 		public void draw(float x, float y, int limit) {
 			float xOffset = 0;
 			for(int i = 0; i<segments.size(); i++) {
+				if(TextBox.this.still) {
+					segments.get(i).addModifier("t+");
+				}
 				segments.get(i).draw(x + xOffset, y, limit);
 				xOffset += segments.get(i).getWidth();
 				limit -= segments.get(i).getLength();
@@ -345,8 +350,6 @@ public class TextBox extends UIElement {
 						limit > getLength() ? getLength() : limit);
 			}
 			
-			// TODO
-			@SuppressWarnings("unused")
 			public void addModifier(String modifier) {
 				this.modifier.concat(modifier);
 			}

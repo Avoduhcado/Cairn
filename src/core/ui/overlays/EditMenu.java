@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import core.Camera;
 import core.scene.Map;
 import core.ui.Button;
+import core.ui.TextBox;
 import core.ui.overlays.edit.Collisions;
+import core.ui.overlays.edit.Entities;
 import core.utilities.keyboard.Keybinds;
 
 public class EditMenu extends MenuOverlay {
@@ -20,7 +22,9 @@ public class EditMenu extends MenuOverlay {
 	private Map map;
 	
 	private static ArrayList<Polygon> polys = new ArrayList<Polygon>();
+	
 	private Collisions collisions;
+	private Entities entities;
 	
 	private Button saveMap;
 	
@@ -29,7 +33,8 @@ public class EditMenu extends MenuOverlay {
 		EditMenu.polys = map.getCollisionPolys();
 
 		collisions = new Collisions();
-		
+		entities = new Entities(map);
+
 		saveMap = new Button("Save Map", 20, Camera.get().getDisplayHeight(0.5f), 0, null);
 		saveMap.setStill(true);
 	}
@@ -37,6 +42,8 @@ public class EditMenu extends MenuOverlay {
 	@Override
 	public void update() {
 		collisions.update();
+		
+		entities.update();
 		
 		saveMap.update();
 		if(saveMap.isClicked()) {
@@ -60,6 +67,8 @@ public class EditMenu extends MenuOverlay {
 	@Override
 	public void draw() {
 		collisions.draw();
+		
+		entities.draw();
 		
 		saveMap.draw();
 	}

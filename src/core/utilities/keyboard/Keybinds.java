@@ -93,30 +93,28 @@ public enum Keybinds {
 	
 	/** Disable specific keys for menu navigation */
 	public static void inMenu() {
-		Keybinds.MENU.key.setDisabled(true);
-		Keybinds.PAUSE.key.setDisabled(true);
-		Keybinds.SLOT1.key.setDisabled(true);
-		Keybinds.SLOT2.key.setDisabled(true);
-		Keybinds.SLOT3.key.setDisabled(true);
-		Keybinds.SLOT4.key.setDisabled(true);
-		Keybinds.SLOT5.key.setDisabled(true);
-		Keybinds.SLOT6.key.setDisabled(true);
-		Keybinds.SLOT7.key.setDisabled(true);
-		Keybinds.SLOT8.key.setDisabled(true);
+		for(Keybinds k : Keybinds.values()) {
+			switch(k) {
+			case RIGHT:
+			case LEFT:
+			case UP:
+			case DOWN:
+			case RUN:
+			case DEBUG:
+			case EDIT:
+			case CONFIRM:
+				break;
+			default:
+				k.key.setDisabled(true);
+			}
+		}
 	}
 	
 	/** Enable specific keys after closing menu */
 	public static void closeMenu() {
-		Keybinds.MENU.key.setDisabled(false);
-		Keybinds.PAUSE.key.setDisabled(false);
-		Keybinds.SLOT1.key.setDisabled(false);
-		Keybinds.SLOT2.key.setDisabled(false);
-		Keybinds.SLOT3.key.setDisabled(false);
-		Keybinds.SLOT4.key.setDisabled(false);
-		Keybinds.SLOT5.key.setDisabled(false);
-		Keybinds.SLOT6.key.setDisabled(false);
-		Keybinds.SLOT7.key.setDisabled(false);
-		Keybinds.SLOT8.key.setDisabled(false);
+		for(Keybinds k : Keybinds.values()) {
+			k.key.setDisabled(false);
+		}
 	}
 
 	/**
