@@ -1,6 +1,7 @@
 package core.ui;
 
 import java.awt.Color;
+
 import org.lwjgl.util.vector.Vector3f;
 
 import core.render.DrawUtils;
@@ -45,6 +46,10 @@ public class CheckBox extends UIElement {
 
 	public void setChecked(boolean checked) {
 		this.checked = checked;
+	}
+
+	public String getText() {
+		return text;
 	}
 
 }

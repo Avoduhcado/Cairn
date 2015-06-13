@@ -117,10 +117,12 @@ public class Stage extends GameSetup {
 				// TODO Freeze AI and stuff during editing, enable cheats
 				editMenu.update();
 				if(editMenu.isCloseRequest()) {
+					hud.setEnabled(true);
 					editMenu = null;
 					Keybinds.closeMenu();
 				}
 			} else if(Keybinds.EDIT.clicked()) {
+				hud.setEnabled(false);
 				editMenu = new EditMenu(map);
 				Keybinds.inMenu();
 			}

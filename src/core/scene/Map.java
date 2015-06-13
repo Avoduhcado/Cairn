@@ -259,6 +259,26 @@ public class Map implements Serializable {
 		loadProp(x, y, prop);
 		scenery.add(props.getLast());
 	}
+	
+	public Prop getProp(String ID) {
+		for(Prop p : props) {
+			if(p.getID().matches(ID)) {
+				return p;
+			}
+		}
+		
+		return null;
+	}
+	
+	public void removeProp(String ID) {
+		for(Prop p : props) {
+			if(p.getID().matches(ID)) {
+				scenery.remove(p);
+				props.remove(p);
+				break;
+			}
+		}
+	}
 
 	public void loadBackdrop(int x, int y, String backdrop, float depth) {
 		File backdropDirectory = new File(System.getProperty("resources") + "/sprites/" + backdrop);

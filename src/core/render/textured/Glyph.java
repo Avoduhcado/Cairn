@@ -24,8 +24,8 @@ public class Glyph extends Sprite {
 	private Vector3f scale = new Vector3f(GameFont.defaultSize, GameFont.defaultSize, 1f);
 	private Vector4f color = new Vector4f(0f, 0f, 0f, 1f);
 	
-	public Glyph(String ref, int x, int y, int width, int height, int xOffset, int yOffset, int xAdvance, int page) {
-		super(ref + "_" + page);
+	public Glyph(String ref, int x, int y, int width, int height, int xOffset, int yOffset, int xAdvance) {
+		super(ref);
 		
 		setupVertices(x, y, width, height);
 				
@@ -89,7 +89,7 @@ public class Glyph extends Sprite {
 	@Override
 	public void setTexture(String ref) throws IOException {
 		this.texture = TextureLoader.getTexture("PNG",
-				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/fonts/" + ref + ".png"));
+				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/fonts/" + ref));
 	}
 	
 	public void setColor(Color color) {

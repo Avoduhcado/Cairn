@@ -1,8 +1,8 @@
 package core.utilities.text;
 
 import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -28,34 +28,76 @@ public class GameFont {
 		this.size = defaultSize;
 		this.color = defaultColor;
 		this.dropColor = Color.black;
-		
-		try (BufferedReader reader = new BufferedReader(new FileReader(System.getProperty("resources") + "/fonts/" + fontName + ".fnt"))) {
-			String line;
-			String image = null;
-			while((line = reader.readLine()) != null) {
-				//System.out.println(line);
-				String[] temp = line.split(" +");
-				
-				switch(temp[0]) {
-				case "info":
-					break;
-				case "common":
-					break;
-				case "page":
-					image = temp[2].split("=")[1].replaceAll("\"", "").substring(0, temp[2].split("=")[1].lastIndexOf('_') - 1);
-					break;
-				case "char":
-					//for(String t : temp)
-						//System.out.println(t);
-					//System.out.println();
-					glyphs.put((char) Integer.parseInt(temp[1].split("=")[1]), 
-							new Glyph(image, Integer.parseInt(temp[2].split("=")[1]), Integer.parseInt(temp[3].split("=")[1]),
-									Integer.parseInt(temp[4].split("=")[1]), Integer.parseInt(temp[5].split("=")[1]),
-									Integer.parseInt(temp[6].split("=")[1]), Integer.parseInt(temp[7].split("=")[1]),
-									Integer.parseInt(temp[8].split("=")[1]), Integer.parseInt(temp[9].split("=")[1])));
-					break;
+
+		try (FileInputStream fis = new FileInputStream(System.getProperty("resources") + "/fonts/" + fontName + ".fnt")) {
+			byte[] byteArray = new byte[fis.available()];
+			int offset = 0;
+			String[] images = null;
+			
+			offset += fis.read(byteArray, 0, 4);
+			if(byteArray[0] == 66 && byteArray[1] == 77 && byteArray[2] == 70 && byteArray[3] == 3) {
+				byte[] blockData = new byte[5];
+				byte[] block = null;
+				while(offset < byteArray.length) {
+					offset += fis.read(blockData);
+					int length = blockData[4] << 24 | blockData[3] << 16 | blockData[2] << 8 | blockData[1];
+					
+					switch(blockData[0]) {
+					case 1:
+						block = new byte[length];
+						offset += fis.read(block);
+						break;
+					case 2:
+						block = new byte[length];
+						offset += fis.read(block);
+						images = new String[block[8]];
+						break;
+					case 3:
+						block = new byte[length];
+						offset += fis.read(block);
+						int pageIndex = 0;
+						images[0] = "";
+						
+						for(byte bit : block) {
+							if(bit == 0) {
+								if(pageIndex < images.length - 1) {
+									pageIndex++;
+									images[pageIndex] = "";
+								}
+							} else {
+								images[pageIndex] += (char) bit;
+							}
+						}
+						break;
+					case 4:
+						block = new byte[20];
+						for(int c = 0; c<length / block.length; c++) {
+							offset += fis.read(block, 0, 20);
+							
+							char id = (char) (block[3] << 24 | block[2] << 16 | block[1] << 8 | block[0]);
+							int x = block[5] << 8 | block[4];
+							int y = block[7] << 8 | block[6];
+							int width = block[9] << 8 | block[8];
+							int height = block[11] << 8 | block[10];
+							int xOffset = block[13] << 8 | block[12];
+							int yOffset = block[15] << 8 | block[14];
+							int xAdvance = block[17] << 8 | block[16];
+							String page = images[block[18]];
+
+							glyphs.put(id, new Glyph(page, x, y, width, height, xOffset, yOffset, xAdvance));
+						}
+						break;
+					case 5:
+						block = new byte[10];
+						for(int k = 0; k<length / block.length; k++) {
+							offset += fis.read(block);
+						}
+						break;
+					}
 				}
 			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

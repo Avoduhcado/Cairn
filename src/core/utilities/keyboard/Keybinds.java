@@ -103,6 +103,7 @@ public enum Keybinds {
 			case DEBUG:
 			case EDIT:
 			case CONFIRM:
+			case CANCEL:
 				break;
 			default:
 				k.key.setDisabled(true);

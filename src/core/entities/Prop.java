@@ -1,12 +1,14 @@
 package core.entities;
 
 import java.awt.geom.Rectangle2D;
+
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Theater;
 import core.render.DrawUtils;
 import core.render.SpriteIndex;
+import core.utilities.text.Text;
 
 public class Prop extends Entity {
 	
@@ -45,6 +47,7 @@ public class Prop extends Entity {
 			if(Theater.get().debug) {
 				DrawUtils.setColor(new Vector3f(1f, 0, 0));
 				DrawUtils.drawRect(pos.x, pos.y, getBox());
+				Text.getDefault().drawString(getID(), pos.x, pos.y);
 			}
 		//}
 	}

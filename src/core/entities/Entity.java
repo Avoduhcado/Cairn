@@ -75,6 +75,11 @@ public abstract class Entity implements Serializable {
 		updateBox();
 	}
 	
+	public void movePosition(float x, float y) {
+		pos.set(pos.x + x, pos.y + y);
+		updateBox();
+	}
+	
 	public float getX() {
 		return pos.x;
 	}

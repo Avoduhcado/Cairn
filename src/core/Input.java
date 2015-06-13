@@ -18,6 +18,7 @@ public class Input {
 	public static Point2D mousePress;
 	public static Point2D mouseCurrent = new Point2D.Double();
 	public static Point2D mouseRelease;
+	public static Vector2f mouseDelta = new Vector2f();
 	private static int mouseScroll;
 		
 	/**
@@ -33,9 +34,6 @@ public class Input {
 			Theater.get().debug = !Theater.get().debug;
 			//Cheats.SPEED_HACK = Theater.get().debug;
 		}
-		/*if(Keybinds.SLOT6.clicked()) {
-			Camera.get().setFullscreen();
-		}*/
 		
 		if(mousePress != null && !mouseHeld) {
 			mouseHeld = true;
@@ -51,10 +49,10 @@ public class Input {
 					mouseRelease = new Point2D.Double(Mouse.getX(), Mouse.getY());
 					mouseHeld = false;
 				}
-			} //else if(Mouse.getEventButton() == -1){
-				mouseCurrent.setLocation(Mouse.getX(), Mouse.getY());
-			//}
+			}
+			mouseCurrent.setLocation(Mouse.getX(), Mouse.getY());
 		}
+		mouseDelta.set(Mouse.getDX(), -Mouse.getDY());
 		
 		// Camera zooming
 		if(Mouse.hasWheel() && (mouseScroll = Mouse.getDWheel()) != 0) {

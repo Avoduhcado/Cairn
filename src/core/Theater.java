@@ -188,7 +188,7 @@ public class Theater {
 			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/solaris");
 		}
 		System.setProperty("resources", System.getProperty("user.dir") + "/resources");
-		
+				
 		Theater.init();
 		theater.play();
 	}

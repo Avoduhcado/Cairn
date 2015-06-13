@@ -13,6 +13,7 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Vector2f;
+import org.newdawn.slick.opengl.PNGDecoder;
 import org.newdawn.slick.util.ResourceLoader;
 
 import core.entities.Entity;
@@ -26,7 +27,6 @@ import core.setups.Stage;
 import core.utilities.MathFunctions;
 import core.utilities.mouse.MouseInput;
 import core.utilities.text.Text;
-import de.matthiasmann.twl.utils.PNGDecoder;
 
 public class Camera {
 	
@@ -126,7 +126,7 @@ public class Camera {
         try {
             PNGDecoder decoder = new PNGDecoder(fis);
             ByteBuffer bb = ByteBuffer.allocateDirect(decoder.getWidth()*decoder.getHeight()*4);
-            decoder.decode(bb, decoder.getWidth()*4, PNGDecoder.Format.RGBA);
+            decoder.decode(bb, decoder.getWidth()*4, PNGDecoder.RGBA);
             bb.flip();
             ByteBuffer[] buffer = new ByteBuffer[1];
             buffer[0] = bb;

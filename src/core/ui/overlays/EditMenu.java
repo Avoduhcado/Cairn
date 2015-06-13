@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import core.Camera;
 import core.scene.Map;
 import core.ui.Button;
-import core.ui.TextBox;
 import core.ui.overlays.edit.Collisions;
 import core.ui.overlays.edit.Entities;
 import core.utilities.keyboard.Keybinds;
@@ -35,7 +34,7 @@ public class EditMenu extends MenuOverlay {
 		collisions = new Collisions();
 		entities = new Entities(map);
 
-		saveMap = new Button("Save Map", 20, Camera.get().getDisplayHeight(0.5f), 0, null);
+		saveMap = new Button("Save Map", 20, Camera.get().getDisplayHeight(0.5f), 0, "Menu2");
 		saveMap.setStill(true);
 	}
 	
