@@ -148,6 +148,7 @@ public abstract class UIElement {
 		return surroundings;
 	}
 	
+	/** 0 = up, 1 = right, 2 = left, 3 = down */
 	public void setSurrounding(int index, UIElement surround) {
 		this.surroundings[index] = surround;
 		if(surround.getSurroundings()[Math.abs(index - 3)] == null) {

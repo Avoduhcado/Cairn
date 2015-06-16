@@ -59,9 +59,13 @@ public class Stage extends GameSetup {
 		hud = new HUD();
 		
 		bgm.setPosition(new Vector3f(0, 0, -5f));
-		bgm.getAudio().playAsMusic(1f, 0, true);
+		bgm.getAudio().playAsMusic(1f, 1f, true);
+		
+		AudioSource wind = new AudioSource("WindA", "SFX");
+		wind.getAudio().playAsSoundEffect(1f, 1f, true);
 				
 		//map.getLights().get(0).setParent(player);
+		//Camera.get().setRotate(0.25f, 7.5f, 7f);
 	}
 
 	@Override
@@ -118,6 +122,7 @@ public class Stage extends GameSetup {
 				editMenu.update();
 				if(editMenu.isCloseRequest()) {
 					hud.setEnabled(true);
+					editMenu.close();
 					editMenu = null;
 					Keybinds.closeMenu();
 				}

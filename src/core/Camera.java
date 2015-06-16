@@ -13,6 +13,7 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.opengl.PNGDecoder;
 import org.newdawn.slick.util.ResourceLoader;
 
@@ -70,6 +71,10 @@ public class Camera {
 	private Vector2f panLimit = new Vector2f(0, 0);
 	private float panDelay;
 	
+	/** Rotate variables */
+	private float rotateTime;
+	private float rotateDuration;
+	private Vector3f rotation = new Vector3f(0, 0, 0);
 	
 	/** Shake variables */
 	private float shakeTotal;
@@ -166,6 +171,8 @@ public class Camera {
 		shake();
 		// Pan screen
 		pan();
+		// Rotate screen
+		rotate();
 		
 		// Draw current game setup
 		setup.draw();
@@ -424,6 +431,34 @@ public class Camera {
 		}
 		
 		frame.setFrame(frame.getX() + panValue.x, frame.getY() + panValue.y, frame.getWidth(), frame.getHeight());
+	}
+	
+	public void setRotate(float rotateSpeed, float rotateMax, float rotateDuration) {
+		this.rotation.set(0, rotateSpeed, rotateMax);
+		this.rotateTime = 0;
+		this.rotateDuration = rotateDuration;
+	}
+	
+	public void rotate() {
+		rotateTime = MathFunctions.clamp(rotateTime + Theater.getDeltaSpeed(0.025f), 0, rotateDuration);
+		if((rotation.x > 0 && rotation.y < 0) || (rotation.x < 0 && rotation.y > 0)) {
+			rotation.setX(MathFunctions.easeIn(rotateTime, (rotation.y > 0 ? -rotation.z : rotation.z),
+					(rotation.y > 0 ? rotation.z : -rotation.z), rotateDuration));
+		} else {
+			rotation.setX(MathFunctions.easeOut(rotateTime, 0, (rotation.y > 0 ? rotation.z : -rotation.z), rotateDuration));
+		}
+		
+		if(Math.abs(rotation.x) >= Math.abs(rotation.z)) {
+			rotation.y = -rotation.y;
+			rotateTime = 0;
+			//rotateDuration = (float) ((Math.random() * 1.5f) + 2f);
+		} else if(rotation.x == 0) {
+			rotateTime = 0;
+		}
+		
+		GL11.glTranslated(frame.getWidth() / 2f, frame.getHeight() / 2f, 0);
+		GL11.glRotatef(rotation.x, 0, 0, 1f);
+		GL11.glTranslated(-frame.getWidth() / 2f, -frame.getHeight() / 2f, 0);
 	}
 	
 	public boolean isShaking() {

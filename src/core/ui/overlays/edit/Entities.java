@@ -1,21 +1,28 @@
 package core.ui.overlays.edit;
 
+import java.io.File;
+
+import javax.swing.JFileChooser;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import core.Camera;
 import core.Input;
+import core.entities.Entity;
 import core.entities.Prop;
 import core.scene.Map;
 import core.ui.Button;
 import core.ui.CheckBox;
 import core.ui.ElementGroup;
-import core.ui.InputBox;
 import core.ui.Label;
+import core.ui.UIElement;
 import core.ui.utils.Align;
 import core.ui.utils.ClickEvent;
-import core.ui.utils.ValueChangeEvent;
 import core.utilities.keyboard.Keybinds;
 import core.utilities.mouse.MouseInput;
 
-public class Entities extends ElementGroup {
+public class Entities extends ElementGroup<UIElement> {
 
 	/**
 	 * 
@@ -26,9 +33,8 @@ public class Entities extends ElementGroup {
 	
 	private Button addProp;
 	private CheckBox grabProp;
-	private InputBox name;
 	
-	private ElementGroup propList;
+	private ElementGroup<CheckBoxEntity> propList;
 	private Label propLabel;
 	
 	private boolean groupSelect;
@@ -39,12 +45,27 @@ public class Entities extends ElementGroup {
 		addProp = new Button("Add Prop", 20, Camera.get().getDisplayHeight(0.35f), 0, null);
 		addProp.setStill(true);
 		addProp.addEvent(new ClickEvent(addProp) {
-
-			@Override
 			public void click() {
-				name.setEnabled(true);
+				try {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+					e.printStackTrace();
+				}
+				JFileChooser chooser = new JFileChooser();
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG Images", "png");
+				chooser.setFileFilter(filter);
+				chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+				chooser.setAcceptAllFileFilterUsed(false);
+				chooser.setCurrentDirectory(new File(System.getProperty("resources") + "/sprites"));
+				chooser.setDialogTitle("Open a background image");
+				int returnVal = chooser.showOpenDialog(null);
+				
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
+					Entities.this.map.addProp(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY(),
+							chooser.getSelectedFile().getName());
+					setupProps();
+				}
 			}
-			
 		});
 		add(addProp);
 		
@@ -52,51 +73,13 @@ public class Entities extends ElementGroup {
 		grabProp.setStill(true);
 		add(grabProp);
 		
-		name = new InputBox(null, 20, (float) grabProp.getBounds().getMaxY(), null, 0, 0);
-		name.setStill(true);
-		name.setCentered(false);
-		name.setEnabled(false);
-		name.addEvent(new ValueChangeEvent(name) {
-
-			@Override
-			public void changeValue() {
-				Entities.this.map.addProp(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY(), name.getText());
-				propList.add(new CheckBox(Entities.this.map.getProps().getLast().getID(), Camera.get().getDisplayWidth(0.985f),
-						(float) propLabel.getBounds().getMaxY(), null));
-				propList.addFrame("Menu2");
-				name.setEnabled(false);
-			}
-			
-		});
-		add(name);
-		
 		addFrame("Menu2");
 		
-		propList = new ElementGroup();
-		
-		propLabel = new Label("Props:", Camera.get().getDisplayWidth(0.985f), 20, null);
+		propLabel = new Label("Props:", Camera.get().getDisplayWidth(0.985f), 20, "Menu2");
 		propLabel.setStill(true);
 		propLabel.setAlign(Align.LEFT);
-		propList.add(propLabel);
 		
-		for(Prop p : map.getProps()) {
-			CheckBox propCheck = new CheckBox(p.getID(), Camera.get().getDisplayWidth(0.985f),
-					(float) propList.get(propList.size() - 1).getBounds().getMaxY(), null);
-			propCheck.setStill(true);
-			propCheck.setAlign(Align.LEFT);
-			propCheck.addEvent(new ClickEvent(propCheck) {
-
-				@Override
-				public void click() {
-					grabProp.setChecked(false);
-					groupSelect = true;
-				}
-				
-			});
-			propList.add(propCheck);
-		}
-		
-		propList.addFrame("Menu2");
+		setupProps();
 	}
 	
 	@Override
@@ -106,9 +89,9 @@ public class Entities extends ElementGroup {
 		propList.update();
 		
 		if(Keybinds.CANCEL.clicked()) {
-			for(int i = 1; i < propList.size(); i++) {
-				if(((CheckBox) propList.get(i)).isChecked()) {
-					map.removeProp(((CheckBox) propList.get(i)).getText());
+			for(int i = 0; i<propList.size(); i++) {
+				if(propList.get(i).isChecked()) {
+					map.getProps().remove(map.getProps().indexOf(propList.get(i).entity));
 					propList.remove(i);
 					i--;
 					if(i < propList.size()) {
@@ -131,9 +114,10 @@ public class Entities extends ElementGroup {
 				}
 			}
 		} else if(groupSelect && Input.mouseHeld()) {
-			for(int i = 1; i < propList.size(); i++) {
-				if(((CheckBox) propList.get(i)).isChecked()) {
-					map.getProp(((CheckBox) propList.get(i)).getText()).movePosition(Input.mouseDelta.x, Input.mouseDelta.y);
+			for(CheckBoxEntity e : propList) {
+				if(e.isChecked()) {
+					map.getProps().get(map.getProps().indexOf(e.entity)).movePosition(Input.mouseDelta.x / Camera.get().getScale(),
+							Input.mouseDelta.y / Camera.get().getScale());
 				}
 			}
 		}
@@ -143,7 +127,41 @@ public class Entities extends ElementGroup {
 	public void draw() {
 		super.draw();
 		
+		propLabel.draw();
 		propList.draw();
+	}
+	
+	private void setupProps() {
+		propList = new ElementGroup<CheckBoxEntity>();
+				
+		for(Prop p : map.getProps()) {
+			final CheckBoxEntity propCheck = new CheckBoxEntity(p.getID(), Camera.get().getDisplayWidth(0.985f),
+					(float) (propList.isEmpty() ? propLabel.getBounds().getMaxY() : propList.get(propList.size() - 1).getBounds().getMaxY()),
+					null, p);
+			propCheck.setStill(true);
+			propCheck.setAlign(Align.LEFT);
+			propCheck.addEvent(new ClickEvent(propCheck) {
+				public void click() {
+					grabProp.setChecked(false);
+					groupSelect = true;
+					propCheck.entity.setDebug(!propCheck.entity.isDebug());
+				}
+			});
+			propList.add(propCheck);
+		}
+		
+		propList.addFrame("Menu2");
+	}
+	
+}
+
+class CheckBoxEntity extends CheckBox {
+
+	protected Entity entity;
+	
+	public CheckBoxEntity(String text, float x, float y, String image, Entity entity) {
+		super(text, x, y, image);
+		this.entity = entity;
 	}
 	
 }

@@ -48,24 +48,26 @@ public class UIFrame extends Sprite {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 
-		for(int a = 0; a<3; a++) {
-			for(int b = 0; b<3; b++) {
-				if(a % 2 == 0 && b % 2 == 0) {
-					setCornerQuads(a, b, box);
-				} else if((a + 1) % 2 == 0 && (b + 1) % 2 == 0) {
-					if(box.getHeight() > height && box.getWidth() > width)
-						setInnerQuads(a, b, box);
-				} else if ((a + 1) % 2 != 0) {
-					if(box.getHeight() > height)
-						setVertQuads(a, b, box);
-				} else {
-					if(box.getWidth() > width)
-						setHorizQuads(a, b, box);
+		GL11.glBegin(GL11.GL_QUADS);
+		{
+			for(int a = 0; a<3; a++) {
+				for(int b = 0; b<3; b++) {
+					if(a % 2 == 0 && b % 2 == 0) {
+						setCornerQuads(a, b, box);
+					} else if((a + 1) % 2 == 0 && (b + 1) % 2 == 0) {
+						if(box.getHeight() > height && box.getWidth() > width)
+							setInnerQuads(a, b, box);
+					} else if ((a + 1) % 2 != 0) {
+						if(box.getHeight() > height)
+							setVertQuads(a, b, box);
+					} else {
+						if(box.getWidth() > width)
+							setHorizQuads(a, b, box);
+					}
 				}
 			}
 		}
-		
-		//GL11.glEnd();
+		GL11.glEnd();
 		GL11.glPopMatrix();
 	}
 	
@@ -75,8 +77,7 @@ public class UIFrame extends Sprite {
 		double verWidth = box.getWidth() * (x / 2);
 		double verHeight = box.getHeight() * (y / 2);
 				
-		GL11.glBegin(GL11.GL_QUADS);
-		{
+		
 			GL11.glTexCoord2d(x * texWidth, y * texHeight);
 		    GL11.glVertex2d(verWidth, verHeight);
 		    
@@ -88,8 +89,7 @@ public class UIFrame extends Sprite {
 		    
 		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
 		    GL11.glVertex2d(verWidth, verHeight + height);
-		}
-		GL11.glEnd();
+		
 	}
 	
 	public void setVertQuads(int x, int y, Rectangle2D box) {
@@ -98,8 +98,8 @@ public class UIFrame extends Sprite {
 		double verWidth = (box.getWidth()) * x / 2;
 		double verHeight = box.getHeight();
 		
-		GL11.glBegin(GL11.GL_QUADS);
-		{
+		//GL11.glBegin(GL11.GL_QUADS);
+		//{
 			GL11.glTexCoord2d(x * texWidth, y * texHeight);
 		    GL11.glVertex2d(verWidth, height);
 		    
@@ -111,8 +111,8 @@ public class UIFrame extends Sprite {
 		    
 		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
 		    GL11.glVertex2d(verWidth, verHeight);
-		}
-		GL11.glEnd();
+		//}
+		//GL11.glEnd();
 	}
 	
 	public void setHorizQuads(int x, int y, Rectangle2D box) {
@@ -121,8 +121,8 @@ public class UIFrame extends Sprite {
 		double verWidth = box.getWidth();
 		double verHeight = (box.getHeight()) * y / 2;
 		
-		GL11.glBegin(GL11.GL_QUADS);
-		{
+		//GL11.glBegin(GL11.GL_QUADS);
+		//{
 			GL11.glTexCoord2d(texWidth, y * texHeight);
 		    GL11.glVertex2d(width, verHeight);
 		    
@@ -134,8 +134,8 @@ public class UIFrame extends Sprite {
 		    
 		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
 		    GL11.glVertex2d(width, verHeight + height);
-		}
-		GL11.glEnd();
+		//}
+		//GL11.glEnd();
 	}
 	
 	public void setInnerQuads(int x, int y, Rectangle2D box) {
@@ -144,8 +144,8 @@ public class UIFrame extends Sprite {
 		double verWidth = box.getWidth();
 		double verHeight = box.getHeight();
 		
-		GL11.glBegin(GL11.GL_QUADS);
-		{
+		//GL11.glBegin(GL11.GL_QUADS);
+		//{
 			GL11.glTexCoord2d(x * texWidth, y * texHeight);
 			GL11.glVertex2d(width, height);
 		    
@@ -157,8 +157,8 @@ public class UIFrame extends Sprite {
 		    
 		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
 		    GL11.glVertex2d(width, verHeight);
-		}
-		GL11.glEnd();
+		//}
+		//GL11.glEnd();
 	}
 	
 	@Override

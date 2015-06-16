@@ -26,7 +26,6 @@ public class GameMenu extends MenuOverlay {
 				toClose = true;
 			}
 		});
-		this.add(toGame);
 		
 		Button openOptions = new Button("Options", Float.NaN, (float) toGame.getBounds().getMaxY(), 0, null);
 		openOptions.setAlign(Align.CENTER);
@@ -36,7 +35,6 @@ public class GameMenu extends MenuOverlay {
 				options = new OptionsMenu("Menu2");
 			}
 		});
-		this.add(openOptions);
 		
 		Button toTitle = new Button("Quit to Title", Float.NaN, (float) openOptions.getBounds().getMaxY(), 0, null);
 		toTitle.setAlign(Align.CENTER);
@@ -46,7 +44,6 @@ public class GameMenu extends MenuOverlay {
 				Theater.get().swapSetup(new TitleMenu());
 			}
 		});
-		this.add(toTitle);
 		
 		Button toDesktop = new Button("Quit to Desktop", Float.NaN, (float) toTitle.getBounds().getMaxY(), 0, null);
 		toDesktop.setAlign(Align.CENTER);
@@ -56,7 +53,17 @@ public class GameMenu extends MenuOverlay {
 				Theater.get().close();
 			}
 		});
+		
+		toGame.setSurrounding(0, toDesktop);
+		this.add(toGame);
+		openOptions.setSurrounding(0, toGame);
+		this.add(openOptions);
+		toTitle.setSurrounding(0, openOptions);
+		this.add(toTitle);
+		toDesktop.setSurrounding(0, toTitle);
 		this.add(toDesktop);
+		
+		setKeyboardNavigable(true);
 		
 		addFrame(image);
 	}

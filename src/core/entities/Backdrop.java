@@ -7,7 +7,6 @@ import java.io.ObjectInputStream;
 import org.lwjgl.util.vector.Vector2f;
 
 import core.Camera;
-import core.Theater;
 import core.render.SpriteIndex;
 
 public class Backdrop extends Entity {
@@ -16,9 +15,7 @@ public class Backdrop extends Entity {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	private static transient int count = 0;
-	
+		
 	private float depth;
 	
 	public Backdrop(float x, float y, String ref, float scale, float depth) {
@@ -50,12 +47,15 @@ public class Backdrop extends Entity {
 		SpriteIndex.getSprite(sprite).draw((float) (pos.x - Camera.get().frame.getX() - (Camera.get().frame.getX() * depth)),
 				(float)  (pos.y - Camera.get().frame.getY() - (Camera.get().frame.getY() * depth)));
 
-		if(Theater.get().debug) {
-			//DrawUtils.setColor(new Vector3f(1f, 0, 0.25f));
-			//DrawUtils.drawRect(pos.x + offset.x, pos.y + offset.y, getBox());
-			//DrawUtils.drawRect((float) (pos.x + (Camera.get().frame.getX() * depth)),
-				//	(float)  (pos.y + (Camera.get().frame.getY() * depth)), getBox());
-		}
+		drawDebug();
+	}
+	
+	@Override
+	public void drawDebug() {
+		//DrawUtils.setColor(new Vector3f(1f, 0, 0.25f));
+		//DrawUtils.drawRect(pos.x + offset.x, pos.y + offset.y, getBox());
+		//DrawUtils.drawRect((float) (pos.x + (Camera.get().frame.getX() * depth)),
+			//	(float)  (pos.y + (Camera.get().frame.getY() * depth)), getBox());
 	}
 	
 	public void update() {
@@ -69,10 +69,6 @@ public class Backdrop extends Entity {
 	@Override
 	public void setID() {
 		this.ID = this.getClass().getSimpleName() + count++;
-	}
-	
-	public static void reset() {
-		count = 0;
 	}
 	
 }

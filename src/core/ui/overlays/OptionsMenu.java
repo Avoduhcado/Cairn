@@ -12,6 +12,7 @@ import core.ui.ElementGroup;
 import core.ui.InputBox;
 import core.ui.Label;
 import core.ui.Slider;
+import core.ui.UIElement;
 import core.ui.utils.Align;
 import core.ui.utils.ClickEvent;
 import core.ui.utils.ValueChangeEvent;
@@ -100,11 +101,11 @@ public class OptionsMenu extends MenuOverlay {
 		});
 		this.add(vsyncCheck);
 		
-		LinkedList<ElementGroup> keybinds = new LinkedList<ElementGroup>();
+		LinkedList<ElementGroup<UIElement>> keybinds = new LinkedList<ElementGroup<UIElement>>();
 		float keyX = Camera.get().getDisplayWidth(0.25f);
 		float keyY = 0;
 		for(int i = 0; i<Keybinds.values().length; i++) {
-			ElementGroup key = new ElementGroup();
+			ElementGroup<UIElement> key = new ElementGroup<UIElement>();
 			
 			final Label keyLabel = new Label(Keybinds.values()[i].toString() + ": ", keyX, Camera.get().getDisplayHeight(0.285f) + keyY, null);
 			keyLabel.setStill(true);

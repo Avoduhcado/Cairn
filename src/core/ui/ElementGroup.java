@@ -7,7 +7,7 @@ import core.ui.utils.Accessible;
 import core.utilities.keyboard.Keybinds;
 import core.utilities.mouse.MouseInput;
 
-public class ElementGroup extends ArrayList<UIElement> {
+public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 	
 	private static final long serialVersionUID = 1L;
 	

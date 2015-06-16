@@ -135,8 +135,13 @@ public class Player extends Actor implements Combatant {
 		if(spell != null) {
 			spell.draw();
 		}
-			
-		if(Theater.get().debug) {
+	}
+	
+	@Override
+	public void drawDebug() {
+		super.drawDebug();
+		
+		if(Theater.get().debug || debug) {
 			if(equipment.getEquippedWeapon().isDamaging()) {
 				Slot weapon = skeleton.findSlot("WEAPON F");
 				if(weapon.getAttachment() != null) {
@@ -726,7 +731,6 @@ public class Player extends Actor implements Combatant {
 	
 	@Override
 	public void setID() {
-		Actor.reset();
 		this.ID = "PLAYER";
 	}
 

@@ -63,7 +63,7 @@ public class Map implements Serializable {
 	
 	public Map() {
 		resetEntity();
-
+		
 		//loadBackdrop(0, 0, "Withered Hearthlands", 0f);
 		//mapName = "Withered Hearthlands";
 		
@@ -236,7 +236,7 @@ public class Map implements Serializable {
 		HitMaps.populateMap(HitMaps.getCollisionMap(), walls);
 	}
 
-	public void loadProp(int x, int y, String prop) {
+	public void loadProp(int x, int y, String prop, boolean addToScene) {
 		File propDirectory = new File(System.getProperty("resources") + "/sprites/" + prop);
 		if(propDirectory.exists() && propDirectory.isDirectory()) {
 			String[] propNames = propDirectory.list();
@@ -248,16 +248,21 @@ public class Map implements Serializable {
 						(int) Math.floor(((coord.y * SpriteIndex.getSprite(prop + "/" + n).getWidth()) * Camera.ASPECT_RATIO) + x),
 						(int) Math.floor(((coord.x * SpriteIndex.getSprite(prop + "/" + n).getHeight()) * Camera.ASPECT_RATIO) + y),
 						prop + "/" + n, Camera.ASPECT_RATIO));
+				if(addToScene) {
+					scenery.add(props.getLast());
+				}
 			}
 		} else {
 			System.out.println(prop + " needs to be converted to a directory!");
 			props.add(new Prop(x, y, prop, Camera.ASPECT_RATIO));
+			if(addToScene) {
+				scenery.add(props.getLast());
+			}
 		}
 	}
 	
 	public void addProp(int x, int y, String prop) {
-		loadProp(x, y, prop);
-		scenery.add(props.getLast());
+		loadProp(x, y, prop, true);
 	}
 	
 	public Prop getProp(String ID) {
@@ -334,6 +339,9 @@ public class Map implements Serializable {
 		
 		scenery.addAll(cast);
 		scenery.addAll(props);
+		
+		Entity.count = scenery.size();
+		// TODO Set proper Entity ID counts after deserialization
 		// TODO Add the rest of the scenery
 	}
 	
@@ -383,10 +391,7 @@ public class Map implements Serializable {
 	}
 	
 	public void resetEntity() {
-		Actor.reset();
-		Prop.reset();
-		LightSource.reset();
-		Backdrop.reset();
+		Entity.count = 0;
 	}
 	
 }

@@ -5,11 +5,15 @@ import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 
 import core.Camera;
 import core.Input;
+import core.Theater;
+import core.render.DrawUtils;
 import core.render.SpriteIndex;
 import core.utilities.mouse.MouseInput;
+import core.utilities.text.Text;
 
 public abstract class Entity implements Serializable {
 	
@@ -18,6 +22,8 @@ public abstract class Entity implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	public static transient int count;
+		
 	protected Vector2f pos;
 	protected String sprite;
 	protected String name;
@@ -25,6 +31,7 @@ public abstract class Entity implements Serializable {
 	protected float scale;
 	
 	protected String ID;
+	protected transient boolean debug;
 	
 	public Entity() {
 		setID();
@@ -40,10 +47,22 @@ public abstract class Entity implements Serializable {
 	
 	public void draw() {
 		SpriteIndex.getSprite(sprite).draw(pos.x, pos.y);
+		
+		drawDebug();
 	}
 	
 	public void draw(float x, float y) {
 		SpriteIndex.getSprite(sprite).draw(x, y);
+		
+		drawDebug();
+	}
+	
+	public void drawDebug() {
+		if(Theater.get().debug || this.debug) {
+			DrawUtils.setColor(new Vector3f(1f, 0, 0));
+			DrawUtils.drawRect(pos.x, pos.y, getBox());
+			Text.getDefault().drawString(getID(), pos.x, pos.y);
+		}
 	}
 	
 	public void updateBox() {
@@ -112,10 +131,22 @@ public abstract class Entity implements Serializable {
 		return box.contains(MouseInput.getMouse());
 	}
 	
+	public boolean isDebug() {
+		return debug;
+	}
+	
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}
+	
 	public String getID() {
 		return ID;
 	}
 	
 	public abstract void setID();
 	
+	public void setID(String ID) {
+		this.ID = ID;
+	}
+		
 }

@@ -16,6 +16,7 @@ import core.scene.collisions.PathPolygon;
 import core.ui.Button;
 import core.ui.CheckBox;
 import core.ui.ElementGroup;
+import core.ui.UIElement;
 import core.ui.utils.ClickEvent;
 import core.utilities.keyboard.Keybinds;
 import core.utilities.mouse.MouseInput;
@@ -27,7 +28,7 @@ public class Collisions {
 	private Polygon currentPoly;
 	private Point editPoint;
 	
-	private ElementGroup stuff;
+	private ElementGroup<UIElement> stuff = new ElementGroup<UIElement>();
 	
 	private CheckBox buildPoly;
 	private CheckBox editPolyPoints;
@@ -71,7 +72,6 @@ public class Collisions {
 			}
 		});
 		
-		stuff = new ElementGroup();
 		stuff.add(buildPoly);
 		stuff.add(editPolyPoints);
 		stuff.add(splitPolyPoint);

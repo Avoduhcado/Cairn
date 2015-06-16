@@ -80,10 +80,10 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	}
 	
 	@Override
-	public void draw() {
-		super.draw();
+	public void drawDebug() {
+		super.drawDebug();
 		
-		if(Theater.get().debug) {
+		if(Theater.get().debug || debug) {
 			DrawUtils.drawShape(0, 0, intelligence.getSight().getPathIterator(null, 10));
 			//DrawUtils.setColor(new Vector3f(0f, 0f, 1f));
 			//DrawUtils.drawShape(0, 0, intelligence.getHearing().getPathIterator(null, 10));

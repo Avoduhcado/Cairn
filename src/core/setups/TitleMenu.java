@@ -14,7 +14,7 @@ public class TitleMenu extends GameSetup {
 	/** Title logo */
 	private Sprite logo;
 	/** A button group contain New Game, Options, and Exit */
-	private ElementGroup buttons;
+	private ElementGroup<Button> buttons;
 	/** The options menu */
 	private OptionsMenu optionsMenu;
 	
@@ -62,7 +62,7 @@ public class TitleMenu extends GameSetup {
 		options.setSurrounding(3, exit);
 		exit.setSurrounding(3, newGame);
 		
-		buttons = new ElementGroup();
+		buttons = new ElementGroup<Button>();
 		buttons.add(newGame);
 		buttons.add(options);
 		buttons.add(exit);

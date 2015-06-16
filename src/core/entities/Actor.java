@@ -37,9 +37,7 @@ public class Actor extends Entity implements Mobile {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	private static transient int count = 0;
-	
+		
 	protected transient Skeleton skeleton;
 	protected transient AnimationState animState;
 	protected transient AnimationStateData animStateData;
@@ -130,8 +128,13 @@ public class Actor extends Entity implements Mobile {
 				SpriteIndex.getSprite(sprite).draw(region.getWorldX(), region.getWorldY());
 			}
 		}
-		
-		if(Theater.get().debug) {
+
+		drawDebug();
+	}
+	
+	@Override
+	public void drawDebug() {
+		if(Theater.get().debug || this.debug) {
 			for(Slot s : skeleton.drawOrder) {
 				if(s.getAttachment() != null) {
 					Region region = (Region) s.getAttachment();
@@ -141,7 +144,6 @@ public class Actor extends Entity implements Mobile {
 				}
 			}
 			
-			//DrawUtils.drawRect(pos.x, pos.y, getBox());
 			DrawUtils.setColor(new Vector3f(1f, 0f, 1f));
 			DrawUtils.drawRect((float) getBox().getX(), (float) getBox().getY(), getBox());
 			DrawUtils.setColor(new Vector3f(0f, 0f, 1f));
@@ -441,10 +443,6 @@ public class Actor extends Entity implements Mobile {
 	@Override
 	public void setID() {
 		this.ID = this.getClass().getSimpleName() + count++;
-	}
-	
-	public static void reset() {
-		count = 0;
 	}
 
 }

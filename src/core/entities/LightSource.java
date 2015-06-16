@@ -22,9 +22,7 @@ public class LightSource extends Entity {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	private static transient int count = 0;
-	
+		
 	private Vector2f radius;
 	private transient float flicker;
 	private transient float flickerTime;
@@ -118,10 +116,6 @@ public class LightSource extends Entity {
 	@Override
 	public void setID() {
 		this.ID = this.getClass().getSimpleName() + count++;
-	}
-	
-	public static void reset() {
-		count = 0;
 	}
 	
 }
