@@ -1,9 +1,6 @@
 package core.entities;
 
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-
 import org.lwjgl.util.vector.Vector2f;
 
 import core.Camera;
@@ -29,8 +26,14 @@ public class Backdrop extends Entity {
 		this.depth = depth;
 	}
 	
-	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-		in.defaultReadObject();
+	public Backdrop(float x, float y, float width, float height, String ref, float depth) {
+		this.pos = new Vector2f(x, y);
+		this.sprite = ref;
+		
+		this.scale = Camera.ASPECT_RATIO;
+		this.box = new Rectangle2D.Double(x, y, width * scale, height * scale);
+		
+		this.depth = depth;
 	}
 
 	@Override

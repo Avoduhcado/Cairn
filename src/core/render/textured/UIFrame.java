@@ -11,7 +11,7 @@ import org.newdawn.slick.util.ResourceLoader;
 import core.Camera;
 
 public class UIFrame extends Sprite {
-
+	
 	private float opacity = 1f;
 	private float width;
 	private float height;
@@ -165,6 +165,10 @@ public class UIFrame extends Sprite {
 	public void setTexture(String ref) throws IOException {
 		this.texture = TextureLoader.getTexture("PNG",
 				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/ui/" + ref + ".png"));
+		/*this.texture = new DeferredTexture(ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/ui/" + ref + ".png"), 
+				ref, false, 0, null);
+		this.texture.load();
+		LoadingList.get().remove(texture);*/
 	}
 	
 	public float getOpacity() {

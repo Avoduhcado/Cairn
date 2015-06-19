@@ -161,6 +161,8 @@ public class Sprite {
 	public void setTexture(String ref) throws IOException {
 		this.texture = TextureLoader.getTexture("PNG",
 				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/sprites/" + ref + ".png"));
+		//this.texture = new DeferredTexture(ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/sprites/" + ref + ".png"), 
+			//	ref, false, 0, null);
 	}
 	
 	private void setErrorTexture() {

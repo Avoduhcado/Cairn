@@ -55,9 +55,11 @@ public class EditMenu extends MenuOverlay {
 		
 		if(entityList.getPropTree().getSelectionPath() != null && Input.mouseHeld()) {
 			for(TreePath t : entityList.getPropTree().getSelectionPaths()) {
-				Prop prop = (Prop) ((DefaultMutableTreeNode) t.getLastPathComponent()).getUserObject();
-				map.getProps().get(map.getProps().indexOf(prop)).movePosition(Input.mouseDelta.x / Camera.get().getScale(),
-						Input.mouseDelta.y / Camera.get().getScale());
+				if(((DefaultMutableTreeNode) t.getLastPathComponent()).getUserObject() instanceof Prop) {
+					Prop prop = (Prop) ((DefaultMutableTreeNode) t.getLastPathComponent()).getUserObject();
+					map.getProps().get(map.getProps().indexOf(prop)).movePosition(Input.mouseDelta.x / Camera.get().getScale(),
+							Input.mouseDelta.y / Camera.get().getScale());
+				}
 			}
 		}
 		

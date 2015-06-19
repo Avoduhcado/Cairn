@@ -1,15 +1,18 @@
 package core.scene;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -238,18 +241,28 @@ public class Map implements Serializable {
 
 	public void loadProp(int x, int y, String prop, boolean addToScene) {
 		File propDirectory = new File(System.getProperty("resources") + "/sprites/" + prop);
+		Dimension size = new Dimension();
+		
 		if(propDirectory.exists() && propDirectory.isDirectory()) {
+			byte[] data = decodeAVLFile(new File(System.getProperty("resources") + "/sprites/" + prop + "/" + prop + ".avl"));
+			size.width = ByteBuffer.wrap(data, 0, 4).getInt();
+			size.height = ByteBuffer.wrap(data, 4, 4).getInt();
+			
 			String[] propNames = propDirectory.list();
 			for(String n : propNames) {
-				n = n.split(".png")[0];
-				String loc = n.substring(n.lastIndexOf('[') + 1, n.lastIndexOf(']'));
-				Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
-				props.add(new Prop(
-						(int) Math.floor(((coord.y * SpriteIndex.getSprite(prop + "/" + n).getWidth()) * Camera.ASPECT_RATIO) + x),
-						(int) Math.floor(((coord.x * SpriteIndex.getSprite(prop + "/" + n).getHeight()) * Camera.ASPECT_RATIO) + y),
-						prop + "/" + n, Camera.ASPECT_RATIO));
-				if(addToScene) {
-					scenery.add(props.getLast());
+				if(n.endsWith(".png")) {
+					n = n.split(".png")[0];
+					String loc = n.substring(n.lastIndexOf('[') + 1, n.lastIndexOf(']'));
+					Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
+					/*props.add(new Prop(
+							(int) Math.floor(((coord.y * SpriteIndex.getSprite(prop + "/" + n).getWidth()) * Camera.ASPECT_RATIO) + x),
+							(int) Math.floor(((coord.x * SpriteIndex.getSprite(prop + "/" + n).getHeight()) * Camera.ASPECT_RATIO) + y),
+							prop + "/" + n, Camera.ASPECT_RATIO));*/
+					props.add(new Prop((int) Math.floor(((coord.y * size.width) * Camera.ASPECT_RATIO) + x),
+							(int) Math.floor(((coord.x * size.height) * Camera.ASPECT_RATIO) + y), size.width, size.height, prop + "/" + n));
+					if(addToScene) {
+						scenery.add(props.getLast());
+					}
 				}
 			}
 		} else {
@@ -287,18 +300,26 @@ public class Map implements Serializable {
 
 	public void loadBackdrop(int x, int y, String backdrop, float depth) {
 		File backdropDirectory = new File(System.getProperty("resources") + "/sprites/" + backdrop);
+		Dimension size = new Dimension();
 		
 		if(backdropDirectory.exists() && backdropDirectory.isDirectory()) {
+			byte[] data = decodeAVLFile(new File(System.getProperty("resources") + "/sprites/" + backdrop + "/" + backdrop + ".avl"));
+			size.width = ByteBuffer.wrap(data, 0, 4).getInt();
+			size.height = ByteBuffer.wrap(data, 4, 4).getInt();
+			
 			String[] backdropNames = backdropDirectory.list();
 			for(String n : backdropNames) {
 				n = n.split(".png")[0];
 				String loc = n.substring(n.lastIndexOf('[') + 1, n.lastIndexOf(']'));
 				Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
 				
-				addBackdrop(new Backdrop(
+				/*addBackdrop(new Backdrop(
 						(int) Math.floor(((coord.y * SpriteIndex.getSprite(backdrop + "/" + n).getWidth()) * Camera.ASPECT_RATIO) + x),
 						(int) Math.floor(((coord.x * SpriteIndex.getSprite(backdrop + "/" + n).getHeight()) * Camera.ASPECT_RATIO) + y),
-						backdrop + "/" + n, Camera.ASPECT_RATIO, depth));
+						backdrop + "/" + n, Camera.ASPECT_RATIO, depth));*/
+				addBackdrop(new Backdrop((int) Math.floor(((coord.y * size.width) * Camera.ASPECT_RATIO) + x),
+						(int) Math.floor(((coord.x * size.height) * Camera.ASPECT_RATIO) + y), size.width, size.height,
+						backdrop + "/" + n, depth));
 			}
 		} else {
 			System.out.println(backdrop + " needs to be converted to a directory!");
@@ -332,6 +353,20 @@ public class Map implements Serializable {
 		} else {
 			ground.add(backdrop);
 		}
+	}
+	
+	private byte[] decodeAVLFile(File avl) {
+		byte[] byteArray = null;
+		try (FileInputStream fis = new FileInputStream(avl)) {
+			byteArray = new byte[fis.available()];
+			fis.read(byteArray);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return byteArray;
 	}
 	
 	public void fillScenery() {

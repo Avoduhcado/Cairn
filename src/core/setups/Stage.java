@@ -75,11 +75,14 @@ public class Stage extends GameSetup {
 			if(gameMenu.isCloseRequest())
 				gameMenu = null;
 		} else {
-			bgm.update();
+			if(bgm != null) {
+				bgm.update();
+			}
+
 			if(hud.isEnabled()) {
 				hud.update(this);
 			}
-			
+
 			for(int i = 0; i<uiElements.size(); i++) {
 				if(uiElements.get(i).isDead()) {
 					uiElements.remove(i);
@@ -88,7 +91,7 @@ public class Stage extends GameSetup {
 				}
 				uiElements.get(i).update();
 			}
-			
+
 			player.update();
 			if(player.getState() == CharState.DEAD) {
 				Theater.get().swapSetup(new Stage());
@@ -132,7 +135,7 @@ public class Stage extends GameSetup {
 				Keybinds.inMenu();
 			}
 		}
-		
+
 		if(Input.mouseClicked() && !map.getPathPolys().isEmpty()) {
 			Pathfinder.buildPath(Input.mousePress, player);
 		}

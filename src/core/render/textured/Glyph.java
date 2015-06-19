@@ -90,6 +90,10 @@ public class Glyph extends Sprite {
 	public void setTexture(String ref) throws IOException {
 		this.texture = TextureLoader.getTexture("PNG",
 				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/fonts/" + ref));
+		/*this.texture = new DeferredTexture(ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/fonts/" + ref), 
+				ref, false, 0, null);
+		this.texture.load();
+		LoadingList.get().remove(texture);*/
 	}
 	
 	public void setColor(Color color) {

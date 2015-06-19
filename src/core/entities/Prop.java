@@ -3,6 +3,8 @@ package core.entities;
 import java.awt.geom.Rectangle2D;
 
 import org.lwjgl.util.vector.Vector2f;
+
+import core.Camera;
 import core.render.SpriteIndex;
 
 public class Prop extends Entity {
@@ -20,6 +22,15 @@ public class Prop extends Entity {
 		this.scale = scale;
 		this.box = new Rectangle2D.Double(x, y,
 				SpriteIndex.getSprite(sprite).getWidth() * scale, SpriteIndex.getSprite(sprite).getHeight() * scale);
+	}
+	
+	public Prop(int x, int y, float width, float height, String ref) {
+		this.pos = new Vector2f(x, y);
+		this.sprite = ref;
+		this.name = ref;
+		
+		this.scale = Camera.ASPECT_RATIO;
+		this.box = new Rectangle2D.Double(x, y, width * scale, height * scale);
 	}
 	
 	@Override

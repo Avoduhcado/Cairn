@@ -1,6 +1,8 @@
 package core;
 
 import org.lwjgl.openal.AL;
+import org.newdawn.slick.openal.SoundStore;
+
 import core.setups.GameSetup;
 import core.setups.SplashScreen;
 import core.utilities.Config;
@@ -65,7 +67,8 @@ public class Theater {
 		Text.loadFont("DEBUG", "Benegraphic");
 		//Ensemble.init();
 		Config.loadConfig();
-	
+		//LoadingList.setDeferredLoading(true);
+		
 		setup = new SplashScreen();
 		//setup = new Stage();
 	}
@@ -73,13 +76,14 @@ public class Theater {
 	/**
 	 * Core update function to handle FPS, display, ensemble, and input.
 	 */
-	public void update() {
+	public void update() {			
 		getFps();
 
 		Camera.get().draw(getSetup());
 		Camera.get().update();
 
 		// TODO Unplugging audio device crashes audio. Look into it
+		SoundStore.get().poll(0);
 
 		if(!paused)
 			getSetup().update();

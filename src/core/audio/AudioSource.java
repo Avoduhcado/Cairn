@@ -70,6 +70,9 @@ public class AudioSource {
 		this.position = position;
 		if(position.z != 0) {
 			fadeDistance = position.z;
+			if(position.z < 0 && type == AudioType.BGM) {
+				SoundStore.get().setCurrentMusicVolume(0);
+			}
 		}
 	}
 	
