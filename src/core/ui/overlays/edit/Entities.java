@@ -61,8 +61,8 @@ public class Entities extends ElementGroup<UIElement> {
 				int returnVal = chooser.showOpenDialog(null);
 				
 				if(returnVal == JFileChooser.APPROVE_OPTION) {
-					Entities.this.map.addProp(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY(),
-							chooser.getSelectedFile().getName());
+					//Entities.this.map.addProp(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY(),
+						//	chooser.getSelectedFile().getName());
 					setupProps();
 				}
 			}

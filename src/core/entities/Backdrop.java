@@ -1,10 +1,12 @@
 package core.entities;
 
 import java.awt.geom.Rectangle2D;
+
 import org.lwjgl.util.vector.Vector2f;
 
 import core.Camera;
 import core.render.SpriteIndex;
+import core.utilities.MathFunctions;
 
 public class Backdrop extends Entity {
 
@@ -17,7 +19,8 @@ public class Backdrop extends Entity {
 	
 	public Backdrop(float x, float y, String ref, float scale, float depth) {
 		this.pos = new Vector2f(x, y);
-		this.sprite = ref;
+		this.sprite = "backdrops/" + ref;
+		this.name = ref;
 		
 		this.scale = scale;
 		this.box = new Rectangle2D.Double(x, y,
@@ -28,7 +31,8 @@ public class Backdrop extends Entity {
 	
 	public Backdrop(float x, float y, float width, float height, String ref, float depth) {
 		this.pos = new Vector2f(x, y);
-		this.sprite = ref;
+		this.sprite = "backdrops/" + ref;
+		this.name = ref;
 		
 		this.scale = Camera.ASPECT_RATIO;
 		this.box = new Rectangle2D.Double(x, y, width * scale, height * scale);
@@ -68,10 +72,19 @@ public class Backdrop extends Entity {
 	public float getDepth() {
 		return depth;
 	}
+	
+	public void setDepth(float depth) {
+		if(this.depth <= 0) {
+			this.depth = MathFunctions.clamp(depth, -1, -0.1f);
+		} else {
+			this.depth = MathFunctions.clamp(depth, 0.1f, 1);
+		}
+	}
 
 	@Override
 	public void setID() {
-		this.ID = this.getClass().getSimpleName() + count++;
+		this.ID = this.getClass().getSimpleName();
+		//this.ID = this.getClass().getSimpleName() + count++;
 	}
 	
 }

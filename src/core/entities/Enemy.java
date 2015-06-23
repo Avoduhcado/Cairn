@@ -49,9 +49,9 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	
 	private String lastHit;
 	private float animationSpeed = 1f;
-	
-	public Enemy(float x, float y, String ref, float scale, Intelligence intelligence) {
-		super(x, y, ref, scale);
+
+	public Enemy(float x, float y, String ref, Intelligence intelligence) {
+		super(x, y, ref);
 		
 		this.stats = new Stats();
 		this.stats.getHealth().setCurrent(20f);
@@ -67,7 +67,7 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 			index++;
 		}
 	}
-	
+
 	@Override
 	public void update() {
 		super.update();

@@ -167,7 +167,7 @@ public class Sprite {
 	
 	private void setErrorTexture() {
 		try {
-			setTexture("Error");
+			Sprite.this.setTexture("Error");
 		} catch (IOException e) {
 			System.err.println("Resources folder may be missing.");
 		}

@@ -49,4 +49,10 @@ public class Stats implements Serializable {
 		this.magic = magic;
 	}
 	
+	@Override
+	public String toString() {
+		return "[HP: " + health.current + "/" + health.max + "] [ST: "
+				+ stamina.current + "/" + stamina.max + "] [MP: " + magic.current + "/" + magic.max + "]";
+	}
+	
 }

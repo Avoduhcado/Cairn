@@ -50,10 +50,11 @@ public class Actor extends Entity implements Mobile {
 	
 	protected transient CharState state;
 	
-	public Actor(float x, float y, String ref, float scale) {
+	public Actor(float x, float y, String ref) {
 		this.pos = new Vector2f(x, y);
+		this.sprite = "actors/" + ref;
 		this.name = ref;
-		this.scale = scale;
+		this.scale = Camera.ASPECT_RATIO;
 		
 		buildSkeleton();
 		
@@ -115,17 +116,18 @@ public class Actor extends Entity implements Mobile {
 			if(s.getAttachment() != null) {
 				Region region = (Region) s.getAttachment();
 				region.updateWorldVertices(s);
-				sprite = name + "/" + s.getAttachment().getName();
+				String attachment = "/" + s.getAttachment().getName();
+				//sprite = name + "/" + s.getAttachment().getName();
 
-				SpriteIndex.getSprite(sprite).set2DScale(scale);
-				SpriteIndex.getSprite(sprite).setFlipped(skeleton.getFlipX());
+				SpriteIndex.getSprite(sprite + attachment).set2DScale(scale);
+				SpriteIndex.getSprite(sprite + attachment).setFlipped(skeleton.getFlipX());
 				if(skeleton.getFlipX()) {
-					SpriteIndex.getSprite(sprite).set2DRotation(s.getBone().getWorldRotation() + region.getRotation(), 0f);
+					SpriteIndex.getSprite(sprite + attachment).set2DRotation(s.getBone().getWorldRotation() + region.getRotation(), 0f);
 				} else {
-					SpriteIndex.getSprite(sprite).set2DRotation(-s.getBone().getWorldRotation() - region.getRotation(), 0f);
+					SpriteIndex.getSprite(sprite + attachment).set2DRotation(-s.getBone().getWorldRotation() - region.getRotation(), 0f);
 				}
-				SpriteIndex.getSprite(sprite).setColor(s.getColor());
-				SpriteIndex.getSprite(sprite).draw(region.getWorldX(), region.getWorldY());
+				SpriteIndex.getSprite(sprite + attachment).setColor(s.getColor());
+				SpriteIndex.getSprite(sprite + attachment).draw(region.getWorldX(), region.getWorldY());
 			}
 		}
 
@@ -157,10 +159,10 @@ public class Actor extends Entity implements Mobile {
 	public void buildSkeleton() {
 		SkeletonJson json = new SkeletonJson(null);
 		json.setScale(scale);
-		if(name.contains("_")) {
-			skeleton = new Skeleton(json.readSkeletonData(name.split("_")[0]));
+		if(sprite.contains("_")) {
+			skeleton = new Skeleton(json.readSkeletonData(sprite.split("_")[0] + "/" + name));
 		} else {
-			skeleton = new Skeleton(json.readSkeletonData(name));
+			skeleton = new Skeleton(json.readSkeletonData(sprite + "/" + name));
 		}
 		skeleton.updateWorldTransform();
 				

@@ -43,7 +43,7 @@ public class HUDMagicBar {
 		
 		SkeletonJson json = new SkeletonJson(null);
 		json.setScale(scale);
-		magicBell = new Skeleton(json.readSkeletonData("HUD"));
+		magicBell = new Skeleton(json.readSkeletonData("HUD/HUD"));
 		magicBell.updateWorldTransform();
 		animStateData = new AnimationStateData(magicBell.getData());
 		animStateData.setDefaultMix(0.1f);

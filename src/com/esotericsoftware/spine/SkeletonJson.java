@@ -95,7 +95,7 @@ public class SkeletonJson {
 		skeletonData.name = file;
 
 		try (BufferedReader br = new BufferedReader(new FileReader(System.getProperty("resources")
-				+ "/sprites/" + skeletonData.name + "/" + skeletonData.name + ".json"))) {
+				+ "/sprites/" + skeletonData.name + ".json"))) {
 			JsonReader reader = new JsonReader(br);
 			JsonParser parser = new JsonParser();
 			

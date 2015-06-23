@@ -30,18 +30,18 @@ public class Script implements Serializable, ScriptEvent {
 	
 	public Script(String flavorText, String event) {
 		this.flavorText = flavorText;
-		this.prompt = new TextBox(this.flavorText, 0, 0, "Textbox", true);
-		this.prompt.addEvent(null);
-		this.prompt.setScriptEvent(this);
-		//this.prompt.setOpacity(1f);
 		setEvent(event);
+		/*this.prompt = new TextBox(this.flavorText, 0, 0, "Textbox", true);
+		this.prompt.addEvent(null);
+		this.prompt.setScriptEvent(this);*/
+		//this.prompt.setOpacity(1f);
 	}
 	
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		
-		this.prompt = new TextBox(flavorText, 0, 0, "Textbox", true);
-		this.prompt.setScriptEvent(this);
+		/*this.prompt = new TextBox(flavorText, 0, 0, "Textbox", true);
+		this.prompt.setScriptEvent(this);*/
 		//this.prompt.setOpacity(1f);
 		
 		data = new ScriptData(event);
@@ -104,6 +104,10 @@ public class Script implements Serializable, ScriptEvent {
 	public void setActive(boolean active) {
 		this.active = active;
 		if(active) {
+			prompt = new TextBox(this.flavorText, 0, 0, "Textbox", true);
+			prompt.addEvent(null);
+			prompt.setScriptEvent(this);
+			
 			prompt.setTextFill(0f);
 			prompt.setEnabled(true);
 		}

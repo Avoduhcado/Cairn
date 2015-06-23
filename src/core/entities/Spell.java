@@ -31,7 +31,7 @@ public class Spell {
 		
 		SkeletonJson json = new SkeletonJson(null);
 		json.setScale(scale);
-		spell = new Skeleton(json.readSkeletonData(name));
+		spell = new Skeleton(json.readSkeletonData("actors/" + name + "/" + name));
 		spell.updateWorldTransform();
 		animStateData = new AnimationStateData(spell.getData());
 		animStateData.setDefaultMix(0.1f);

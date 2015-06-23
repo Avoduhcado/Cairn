@@ -17,8 +17,8 @@ public class Ally extends Actor implements Scriptable {
 	
 	private Script dialogue;
 	
-	public Ally(float x, float y, String ref, float scale, Script dialogue) {
-		super(x, y, ref, scale);
+	public Ally(float x, float y, String ref, Script dialogue) {
+		super(x, y, ref);
 		
 		this.dialogue = dialogue;
 	}

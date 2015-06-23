@@ -38,6 +38,7 @@ import core.entities.interfaces.Intelligent;
 import core.entities.utils.Faction;
 import core.entities.utils.ai.AggressiveAI;
 import core.entities.utils.ai.DocileAI;
+import core.entities.utils.ai.Intelligence;
 import core.entities.utils.ai.traits.Minion;
 import core.entities.utils.ai.traits.Opportunist;
 import core.entities.utils.ai.traits.PackLeader;
@@ -49,7 +50,7 @@ public class Map implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String mapName = "Map001";
+	private String mapName = null;
 	
 	private ArrayList<Polygon> collisionPolys = new ArrayList<Polygon>();
 	private ArrayList<PathPolygon> paths = new ArrayList<PathPolygon>();
@@ -177,6 +178,10 @@ public class Map implements Serializable {
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		
+		if(mapName.endsWith(".avo")) {
+			mapName = mapName.replace(".avo", "");
+		}
+		
 		fillScenery();
 		
 		/*LightMap.init();
@@ -238,13 +243,56 @@ public class Map implements Serializable {
 		
 		HitMaps.populateMap(HitMaps.getCollisionMap(), walls);
 	}
+	
+	public Entity getEntity(Entity entity) {
+		if(scenery.contains(entity)) {
+			if(entity instanceof Prop) {
+				return props.get(props.indexOf(entity));
+			} else if(entity instanceof Actor) {
+				return cast.get(cast.indexOf(entity));
+			}
+		} else if(entity instanceof Backdrop) {
+			if(background.contains(entity)) {
+				return background.get(background.indexOf(entity));
+			} else if(ground.contains(entity)) {
+				return ground.get(ground.indexOf(entity));
+			} else if(foreground.contains(entity)) {
+				return foreground.get(foreground.indexOf(entity));
+			}
+		}
+		
+		return null;
+	}
+	
+	public boolean removeEntity(Entity entity) {
+		if(scenery.contains(entity)) {
+			scenery.remove(entity);
+			if(entity instanceof Prop) {
+				return props.remove(entity);
+			} else if(entity instanceof Actor) {
+				return cast.remove(entity);
+			}
+		} else if(entity instanceof Backdrop) {
+			if(background.contains(entity)) {
+				return background.remove(entity);
+			} else if(ground.contains(entity)) {
+				return ground.remove(entity);
+			} else if(foreground.contains(entity)) {
+				return foreground.remove(entity);
+			}
+			return false;
+		}
+		
+		return false;
+	}
 
-	public void loadProp(int x, int y, String prop, boolean addToScene) {
-		File propDirectory = new File(System.getProperty("resources") + "/sprites/" + prop);
+	public LinkedList<Prop> loadProp(int x, int y, String prop) {
+		File propDirectory = new File(System.getProperty("resources") + "/sprites/props/" + prop);
 		Dimension size = new Dimension();
+		LinkedList<Prop> loadedProps = new LinkedList<Prop>();
 		
 		if(propDirectory.exists() && propDirectory.isDirectory()) {
-			byte[] data = decodeAVLFile(new File(System.getProperty("resources") + "/sprites/" + prop + "/" + prop + ".avl"));
+			byte[] data = decodeAVLFile(new File(propDirectory.getAbsolutePath() + "/" + prop + ".avl"));
 			size.width = ByteBuffer.wrap(data, 0, 4).getInt();
 			size.height = ByteBuffer.wrap(data, 4, 4).getInt();
 			
@@ -258,76 +306,80 @@ public class Map implements Serializable {
 							(int) Math.floor(((coord.y * SpriteIndex.getSprite(prop + "/" + n).getWidth()) * Camera.ASPECT_RATIO) + x),
 							(int) Math.floor(((coord.x * SpriteIndex.getSprite(prop + "/" + n).getHeight()) * Camera.ASPECT_RATIO) + y),
 							prop + "/" + n, Camera.ASPECT_RATIO));*/
-					props.add(new Prop((int) Math.floor(((coord.y * size.width) * Camera.ASPECT_RATIO) + x),
+					loadedProps.add(new Prop((int) Math.floor(((coord.y * size.width) * Camera.ASPECT_RATIO) + x),
 							(int) Math.floor(((coord.x * size.height) * Camera.ASPECT_RATIO) + y), size.width, size.height, prop + "/" + n));
-					if(addToScene) {
-						scenery.add(props.getLast());
-					}
 				}
 			}
 		} else {
 			System.out.println(prop + " needs to be converted to a directory!");
-			props.add(new Prop(x, y, prop, Camera.ASPECT_RATIO));
-			if(addToScene) {
-				scenery.add(props.getLast());
-			}
-		}
-	}
-	
-	public void addProp(int x, int y, String prop) {
-		loadProp(x, y, prop, true);
-	}
-	
-	public Prop getProp(String ID) {
-		for(Prop p : props) {
-			if(p.getID().matches(ID)) {
-				return p;
-			}
+			loadedProps.add(new Prop(x, y, prop, Camera.ASPECT_RATIO));
 		}
 		
-		return null;
-	}
-	
-	public void removeProp(String ID) {
-		for(Prop p : props) {
-			if(p.getID().matches(ID)) {
-				scenery.remove(p);
-				props.remove(p);
-				break;
-			}
-		}
+		props.addAll(loadedProps);
+		scenery.addAll(loadedProps);
+		
+		return loadedProps;
 	}
 
-	public void loadBackdrop(int x, int y, String backdrop, float depth) {
-		File backdropDirectory = new File(System.getProperty("resources") + "/sprites/" + backdrop);
+	public LinkedList<Actor> loadActor(int x, int y, String actor, int type) {
+		LinkedList<Actor> loadedActors = new LinkedList<Actor>();
+		
+		switch(type) {
+		case 0:
+			loadedActors.add(new Ally(x, y, actor, new Script("Hello", "{event: []}")));
+			break;
+		case 1:
+			loadedActors.add(new Enemy(x, y, actor, new DocileAI()));
+			break;
+		default:
+			break;
+		}
+		
+		cast.addAll(loadedActors);
+		scenery.addAll(loadedActors);
+		
+		return loadedActors;
+	}
+	
+	public LinkedList<Backdrop> loadBackdrop(int x, int y, String backdrop, float depth) {
+		File backdropDirectory = new File(System.getProperty("resources") + "/sprites/backdrops/" + backdrop);
 		Dimension size = new Dimension();
+		LinkedList<Backdrop> backdrops = new LinkedList<Backdrop>();
 		
 		if(backdropDirectory.exists() && backdropDirectory.isDirectory()) {
-			byte[] data = decodeAVLFile(new File(System.getProperty("resources") + "/sprites/" + backdrop + "/" + backdrop + ".avl"));
+			byte[] data = decodeAVLFile(new File(backdropDirectory.getAbsolutePath() + "/" + backdrop + ".avl"));
 			size.width = ByteBuffer.wrap(data, 0, 4).getInt();
 			size.height = ByteBuffer.wrap(data, 4, 4).getInt();
 			
 			String[] backdropNames = backdropDirectory.list();
 			for(String n : backdropNames) {
-				n = n.split(".png")[0];
-				String loc = n.substring(n.lastIndexOf('[') + 1, n.lastIndexOf(']'));
-				Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
-				
-				/*addBackdrop(new Backdrop(
-						(int) Math.floor(((coord.y * SpriteIndex.getSprite(backdrop + "/" + n).getWidth()) * Camera.ASPECT_RATIO) + x),
-						(int) Math.floor(((coord.x * SpriteIndex.getSprite(backdrop + "/" + n).getHeight()) * Camera.ASPECT_RATIO) + y),
-						backdrop + "/" + n, Camera.ASPECT_RATIO, depth));*/
-				addBackdrop(new Backdrop((int) Math.floor(((coord.y * size.width) * Camera.ASPECT_RATIO) + x),
-						(int) Math.floor(((coord.x * size.height) * Camera.ASPECT_RATIO) + y), size.width, size.height,
-						backdrop + "/" + n, depth));
+				if(n.endsWith(".png")) {
+					n = n.split(".png")[0];
+					String loc = n.substring(n.lastIndexOf('[') + 1, n.lastIndexOf(']'));
+					Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
+	
+					/*addBackdrop(new Backdrop((int) Math.floor(((coord.y * size.width) * Camera.ASPECT_RATIO) + x),
+							(int) Math.floor(((coord.x * size.height) * Camera.ASPECT_RATIO) + y), size.width, size.height,
+							backdrop + "/" + n, depth));*/
+					backdrops.add(new Backdrop((int) Math.floor(((coord.y * size.width) * Camera.ASPECT_RATIO) + x),
+							(int) Math.floor(((coord.x * size.height) * Camera.ASPECT_RATIO) + y), size.width, size.height,
+							backdrop + "/" + n, depth));
+				}
 			}
 		} else {
 			System.out.println(backdrop + " needs to be converted to a directory!");
 			addBackdrop(new Backdrop(x, y, backdrop, Camera.ASPECT_RATIO, depth));
 		}
+		
+		for(int i = 0; i<backdrops.size(); i++) {
+			backdrops.get(i).setID(backdrops.get(i).getID() + backdrops.get(i).getName() + i);
+			addBackdrop(backdrops.get(i));
+		}
+		
+		return backdrops;
 	}
 
-	public void addBackdrop(Backdrop backdrop) {
+	private void addBackdrop(Backdrop backdrop) {
 		if(backdrop.getDepth() < 0f) {
 			if(background.isEmpty()) {
 				background.add(backdrop);

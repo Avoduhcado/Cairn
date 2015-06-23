@@ -103,7 +103,7 @@ public class Camera {
 			Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
 			updateHeader();
 			try {
-				Display.setIcon(loadIcon(System.getProperty("resources") + "/ui/Icon.png"));
+				Display.setIcon(loadIcon(System.getProperty("resources") + "/sprites/ui/Icon.png"));
 			} catch (IOException e) {
 				System.out.println("Failed to load icon");
 			}

@@ -53,8 +53,8 @@ public class Player extends Actor implements Combatant {
 	private transient float overlayDelay;
 	private transient int looking;
 	
-	public Player(float x, float y, String ref, float scale) {
-		super(x, y, ref, scale);
+	public Player(float x, float y, String ref) {
+		super(x, y, ref);
 		
 		familiar = true;
 		setDadSkull(familiar);
@@ -160,7 +160,7 @@ public class Player extends Actor implements Combatant {
 	public void buildSkeleton() {
 		SkeletonJson json = new SkeletonJson(null);
 		json.setScale(scale);
-		skeleton = new Skeleton(json.readSkeletonData(this.name));
+		skeleton = new Skeleton(json.readSkeletonData(sprite + "/" + name));
 		skeleton.updateWorldTransform();
 
 		this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),

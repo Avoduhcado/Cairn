@@ -40,21 +40,9 @@ public class Stage extends GameSetup {
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		bgm = new AudioSource("CairnArea4", "BGM");
 		
-		map = new Map();
-		
-		//map = Map.deserialize("Map001");
-		
-		for(Entity e : map.getScenery()) {
-			System.out.println(e.getID());
-		}
-		
-		//player = new Player(1600, 1030, "MC and Familiar", Camera.ASPECT_RATIO);
-		//player = new Player(1000, 1960, "MC and Familiar", Camera.ASPECT_RATIO);
-		player = new Player(0, 0, "MC and Familiar", Camera.ASPECT_RATIO);
-		/*Camera.get().setFocus(player);
-		Camera.get().centerOn(this);
-		map.getScenery().add(player);*/
-		loadMap("Graveyard", 1600, 1030);
+		player = new Player(0, 0, "MC and Familiar");
+		loadMap(null, 0, 0);
+		//loadMap("Graveyard", 1600, 1030);
 		
 		hud = new HUD();
 		
@@ -213,7 +201,11 @@ public class Stage extends GameSetup {
 	}
 	
 	public void loadMap(String mapName, float x, float y) {
-		map = Map.deserialize(mapName);
+		if(mapName != null) {
+			map = Map.deserialize(mapName);
+		} else {
+			map = new Map();
+		}
 		
 		player.setPosition(x, y);
 		Camera.get().setFocus(player);

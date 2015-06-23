@@ -1,6 +1,8 @@
 package core.entities;
 
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 import org.lwjgl.util.vector.Vector2f;
 
@@ -16,8 +18,8 @@ public class Prop extends Entity {
 	
 	public Prop(int x, int y, String ref, float scale) {
 		this.pos = new Vector2f(x, y);
-		this.sprite = ref;
-		this.name = ref;
+		this.sprite = "props/" + ref;
+		this.name = ref.contains("/") ? ref.split("/")[1] : ref;
 		
 		this.scale = scale;
 		this.box = new Rectangle2D.Double(x, y,
@@ -26,11 +28,19 @@ public class Prop extends Entity {
 	
 	public Prop(int x, int y, float width, float height, String ref) {
 		this.pos = new Vector2f(x, y);
-		this.sprite = ref;
-		this.name = ref;
+		this.sprite = "props/" + ref;
+		this.name = ref.contains("/") ? ref.split("/")[1] : ref;
 		
 		this.scale = Camera.ASPECT_RATIO;
 		this.box = new Rectangle2D.Double(x, y, width * scale, height * scale);
+	}
+	
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		
+		if(name == null) {
+			name = sprite.contains("/") ? sprite.split("/")[1] : sprite;
+		}
 	}
 	
 	@Override

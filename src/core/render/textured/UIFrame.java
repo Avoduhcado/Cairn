@@ -17,7 +17,7 @@ public class UIFrame extends Sprite {
 	private float height;
 	
 	public UIFrame(String ref) {
-		super(ref);
+		super("ui/" + ref);
 		
 		width = getWidth() / 3f;
 		height = getHeight() / 3f;
@@ -161,7 +161,7 @@ public class UIFrame extends Sprite {
 		//GL11.glEnd();
 	}
 	
-	@Override
+	/*@Override
 	public void setTexture(String ref) throws IOException {
 		this.texture = TextureLoader.getTexture("PNG",
 				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/ui/" + ref + ".png"));
@@ -169,7 +169,7 @@ public class UIFrame extends Sprite {
 				ref, false, 0, null);
 		this.texture.load();
 		LoadingList.get().remove(texture);*/
-	}
+	//}
 	
 	public float getOpacity() {
 		return opacity;
