@@ -24,6 +24,7 @@ public class EditMenu extends MenuOverlay {
 
 	/** Map you're currently editing */
 	private Map map;
+	private Stage stage;
 	
 	private static ArrayList<Polygon> polys = new ArrayList<Polygon>();
 	
@@ -36,14 +37,15 @@ public class EditMenu extends MenuOverlay {
 	
 	private boolean closed;
 	
-	public EditMenu(Map map) {
-		this.map = map;
+	public EditMenu(Stage stage) {
+		this.stage = stage;
+		this.map = stage.getMap();
 		EditMenu.polys = map.getCollisionPolys();
 
 		collisions = new Collisions();
 
 		editorMain = new EditorMain(this, (Stage) Theater.get().getSetup());
-		entityList = new EntityList(map, this);
+		entityList = new EntityList(stage, this);
 
 		saveMap = new Button("Save Map", 20, Camera.get().getDisplayHeight(0.5f), 0, "Menu2");
 		saveMap.setStill(true);
@@ -100,7 +102,7 @@ public class EditMenu extends MenuOverlay {
 	
 	public void clearEntityList() {
 		entityList.dispose();
-		entityList = new EntityList(map, this);
+		entityList = new EntityList(stage, this);
 	}
 	
 	public void openEntityList() {

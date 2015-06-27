@@ -15,7 +15,7 @@ enum IconType {
 
 public class HUDIcon {
 
-	private final String background = "HUD/Box";
+	private final String background = "HUD/Item Box";
 	private final IconType type;
 	
 	private String icon;
@@ -66,6 +66,11 @@ public class HUDIcon {
 	}
 	
 	public void draw() {
+		/*
+		 * 0.03125 , 0.8
+		 * 0.115 , 0.8
+		 * 0.03125 , 0.615
+		 */
 		SpriteIndex.getSprite(background).setStill(true);
 		SpriteIndex.getSprite(background).set2DScale(Camera.ASPECT_RATIO);
 		if(icon != null) {
@@ -74,42 +79,37 @@ public class HUDIcon {
 		}
 		switch(type) {
 		case WEAPON:
-			SpriteIndex.getSprite(background).draw(Camera.get().getDisplayWidth(0.025f), Camera.get().getDisplayHeight(0.7f));
+			SpriteIndex.getSprite(background).draw(Camera.get().getDisplayWidth(0.115f), Camera.get().getDisplayHeight(0.8f));
 			if(icon != null) {
-				SpriteIndex.getSprite(icon).draw(Camera.get().getDisplayWidth(0.025f), Camera.get().getDisplayHeight(0.7f));
+				SpriteIndex.getSprite(icon).draw(Camera.get().getDisplayWidth(0.115f), Camera.get().getDisplayHeight(0.8f));
 			}
 			if(name != null) {
-				Text.getDefault().setStill(true);
-				Text.getDefault().setSize(0.35f);
-				Text.getDefault().setColor(Color.BLACK);
-				Text.getDefault().setDropColor(Color.WHITE);
-				Text.getDefault().drawString(name, Camera.get().getDisplayWidth(0.075f), Camera.get().getDisplayHeight(0.775f));
+				Text.getDefault().setAll(0.35f, Color.WHITE, true, Color.BLACK, true, false);
+				Text.getDefault().drawString(name, Camera.get().getDisplayWidth(0.12875f),
+						Camera.get().getDisplayHeight(0.8f) + (SpriteIndex.getSprite(background).getHeight() * Camera.ASPECT_RATIO));
 			}
 			break;
 		case ITEM:
-			SpriteIndex.getSprite(background).draw(Camera.get().getDisplayWidth(0.085f), Camera.get().getDisplayHeight(0.775f));
+			SpriteIndex.getSprite(background).draw(Camera.get().getDisplayWidth(0.03125f), Camera.get().getDisplayHeight(0.8f));
 			if(icon != null) {
-				SpriteIndex.getSprite(icon).draw(Camera.get().getDisplayWidth(0.085f), Camera.get().getDisplayHeight(0.775f));
+				SpriteIndex.getSprite(icon).draw(Camera.get().getDisplayWidth(0.03125f), Camera.get().getDisplayHeight(0.8f));
 			}
 			if(name != null) {
-				Text.getDefault().setStill(true);
-				Text.getDefault().setSize(0.35f);
-				Text.getDefault().setColor(Color.BLACK);
-				Text.getDefault().setDropColor(Color.WHITE);
-				Text.getDefault().drawString(name, Camera.get().getDisplayWidth(0.135f), Camera.get().getDisplayHeight(0.85f));
+				Text.getDefault().setAll(0.35f, Color.BLACK, true, Color.WHITE, true, false);
+				Text.getDefault().drawString(name, Camera.get().getDisplayWidth(0.045f), 
+						Camera.get().getDisplayHeight(0.8f) + (SpriteIndex.getSprite(background).getHeight() * Camera.ASPECT_RATIO));
 			}
 			break;
 		case SPELL:
-			SpriteIndex.getSprite(background).draw(Camera.get().getDisplayWidth(0.025f), Camera.get().getDisplayHeight(0.85f));
+			SpriteIndex.getSprite(background).draw(Camera.get().getDisplayWidth(0.07f), Camera.get().getDisplayHeight(0.65f));
 			if(icon != null) {
-				SpriteIndex.getSprite(icon).draw(Camera.get().getDisplayWidth(0.025f), Camera.get().getDisplayHeight(0.85f));
+				SpriteIndex.getSprite(icon).draw(Camera.get().getDisplayWidth(0.075f), Camera.get().getDisplayHeight(0.65f));
 			}
 			if(name != null) {
-				Text.getDefault().setStill(true);
-				Text.getDefault().setSize(0.35f);
-				Text.getDefault().setColor(Color.BLACK);
-				Text.getDefault().setDropColor(Color.WHITE);
-				Text.getDefault().drawString(name, Camera.get().getDisplayWidth(0.075f), Camera.get().getDisplayHeight(0.925f));
+				Text.getDefault().setAll(0.35f, Color.BLACK, true, Color.WHITE, true, false);
+				Text.getDefault().drawString(name, Camera.get().getDisplayWidth(0.07f) +
+						(SpriteIndex.getSprite(background).getWidth() * Camera.ASPECT_RATIO),
+						Camera.get().getDisplayHeight(0.665f));
 			}
 			break;
 		}

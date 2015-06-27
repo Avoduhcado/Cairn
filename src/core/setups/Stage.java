@@ -42,7 +42,7 @@ public class Stage extends GameSetup {
 		
 		player = new Player(0, 0, "MC and Familiar");
 		loadMap(null, 0, 0);
-		//loadMap("Graveyard", 1600, 1030);
+		//loadMap("Withered Hearthlands", 1380, 1275);
 		
 		hud = new HUD();
 		
@@ -119,7 +119,7 @@ public class Stage extends GameSetup {
 				}
 			} else if(Keybinds.EDIT.clicked()) {
 				hud.setEnabled(false);
-				editMenu = new EditMenu(map);
+				editMenu = new EditMenu(this);
 				Keybinds.inMenu();
 			}
 		}
@@ -154,8 +154,10 @@ public class Stage extends GameSetup {
 		}
 
 		// Draw the scenery
-		for(Entity e : map.getScenery()) {
-			e.toDraw();
+		for(int i = 0; i<map.getScenery().size(); i++) {
+			map.getScenery().get(i).toDraw();
+		//for(Entity e : map.getScenery()) {
+			//e.toDraw();
 		}
 
 		for(Backdrop f : map.getForeground()) {

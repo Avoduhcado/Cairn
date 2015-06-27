@@ -192,7 +192,9 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 		equipment.setSuperArmor(false);
 		equipment.setInvulnerable(false);
 		equipment.setBlock(false);
-		equipment.getEquippedWeapon().setDamaging(false);
+		if(!equipment.getWeapons().isEmpty()) {
+			equipment.getEquippedWeapon().setDamaging(false);
+		}
 		getIntelligence().setAction(null);
 	}
 	

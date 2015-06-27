@@ -1,8 +1,15 @@
 package core;
 
+import java.lang.reflect.TypeVariable;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.lwjgl.openal.AL;
 import org.newdawn.slick.openal.SoundStore;
 
+import core.entities.utils.ai.DocileAI;
+import core.entities.utils.ai.Intelligence;
+import core.entities.utils.ai.traits.Minion;
 import core.setups.GameSetup;
 import core.setups.SplashScreen;
 import core.utilities.Config;
@@ -188,7 +195,7 @@ public class Theater {
 			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/solaris");
 		}
 		System.setProperty("resources", System.getProperty("user.dir") + "/resources");
-
+		
 		Theater.init();
 		theater.play();
 	}

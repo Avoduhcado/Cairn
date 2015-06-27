@@ -21,6 +21,7 @@ import core.entities.Enemy;
 import core.entities.Entity;
 import core.entities.Prop;
 import core.scene.Map;
+import core.setups.Stage;
 import core.ui.overlays.EditMenu;
 import core.utilities.mouse.MouseInput;
 
@@ -64,14 +65,14 @@ public class EntityList extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public EntityList(Map map, EditMenu editMenu) {
+	public EntityList(final Stage stage, EditMenu editMenu) {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
 		
-		this.map = map;
+		this.map = stage.getMap();
 		this.editMenu = editMenu;
 		setTitle("Entity List");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -126,6 +127,7 @@ public class EntityList extends JFrame {
 					propTree.setModel(new DefaultTreeModel(addToPropTree((DefaultMutableTreeNode) propTree.getModel().getRoot(),
 							EntityList.this.map.loadProp(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY(),
 									chooser.getSelectedFile().getName()))));
+					tabbedPane.setSelectedIndex(0);
 				}
 			}
 		});
@@ -149,6 +151,7 @@ public class EntityList extends JFrame {
 					actorTree.setModel(new DefaultTreeModel(addToActorTree((DefaultMutableTreeNode) actorTree.getModel().getRoot(),
 							EntityList.this.map.loadActor(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY(),
 									chooser.getSelectedFile().getName(), 0))));
+					tabbedPane.setSelectedIndex(1);
 				}
 			}
 		});
@@ -170,6 +173,7 @@ public class EntityList extends JFrame {
 					actorTree.setModel(new DefaultTreeModel(addToActorTree((DefaultMutableTreeNode) actorTree.getModel().getRoot(),
 							EntityList.this.map.loadActor(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY(),
 									chooser.getSelectedFile().getName(), 1))));
+					tabbedPane.setSelectedIndex(1);
 				}
 			}
 		});
@@ -193,6 +197,7 @@ public class EntityList extends JFrame {
 					backdropTree.setModel(new DefaultTreeModel(addToBackdropTree((DefaultMutableTreeNode) backdropTree.getModel().getRoot(),
 							EntityList.this.map.loadBackdrop(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY(),
 									chooser.getSelectedFile().getName(), -0.1f))));
+					tabbedPane.setSelectedIndex(2);
 				}
 			}
 		});
@@ -214,6 +219,7 @@ public class EntityList extends JFrame {
 					backdropTree.setModel(new DefaultTreeModel(addToBackdropTree((DefaultMutableTreeNode) backdropTree.getModel().getRoot(),
 							EntityList.this.map.loadBackdrop(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY(),
 									chooser.getSelectedFile().getName(), 0.1f))));
+					tabbedPane.setSelectedIndex(2);
 				}
 			}
 		});
@@ -268,7 +274,8 @@ public class EntityList extends JFrame {
 				}
 				
 				if(!entities.isEmpty()) {
-					new EntityDialog(entities);
+					new EntityDialog(entities, stage);
+					// TODO Call initXXXXData after a successful EntityDialog
 				}
 			}
 		});

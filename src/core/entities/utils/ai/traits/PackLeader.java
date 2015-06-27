@@ -16,7 +16,7 @@ public class PackLeader extends Trait {
 	private static final long serialVersionUID = 1L;
 	private ArrayList<Intelligent> minions = new ArrayList<Intelligent>();
 	private Point2D rallyPoint;
-	private int defaultFacing;
+	private int defaultFacing = -1;
 	private int wanderRange;
 	
 	public PackLeader(ArrayList<Intelligent> minions) {
@@ -29,8 +29,12 @@ public class PackLeader extends Trait {
 	@Override
 	public void setHost(Intelligent host) {
 		this.host = host;
-		setDefaultFacing(((Actor) host).getDirection());
-		setRallyPoint(((Actor) host).getPositionAsPoint());
+		if(defaultFacing == -1) {
+			setDefaultFacing(((Actor) host).getDirection());
+		}
+		if(rallyPoint == null) {
+			setRallyPoint(((Actor) host).getPositionAsPoint());
+		}
 	}
 	
 	@Override
@@ -45,7 +49,7 @@ public class PackLeader extends Trait {
 		if(rallyPoint != null && !host.getIntelligence().isChasing()
 				&& Point2D.distance(rallyPoint.getX(), rallyPoint.getY(), ((Actor) host).getX(), ((Actor) host).getYPlane()) > wanderRange) {
 			host.approach(rallyPoint);
-		} else if(rallyPoint != null && !host.getIntelligence().isChasing()
+		} else if(rallyPoint != null && !host.getIntelligence().isChasing() && defaultFacing != -1
 				&& Point2D.distance(rallyPoint.getX(), rallyPoint.getY(), ((Actor) host).getX(), ((Actor) host).getYPlane()) <= wanderRange) {
 			((Actor) host).setDirection(defaultFacing);
 		}

@@ -26,10 +26,13 @@ public abstract class Intelligence implements Serializable {
 	protected Intelligent host;
 	protected Combatant target;
 	
+	protected float intelligenceRating;
 	protected transient AIAction action;
 	protected ArrayList<Trait> traits = new ArrayList<Trait>();
 	
 	protected Shape sight;
+	protected int viewAngle = 70;
+	protected int viewDistance = 400;
 	protected Shape hearing;
 	// TODO ViewAngle, ViewDistance parameters
 	
@@ -74,6 +77,14 @@ public abstract class Intelligence implements Serializable {
 		this.action = action;
 	}
 	
+	public float getRating() {
+		return intelligenceRating;
+	}
+	
+	public void setRating(float rating) {
+		this.intelligenceRating = rating;
+	}
+	
 	public boolean applyTraitStateModifier(CharState state, AnimationState animState) {
 		return false;
 	}
@@ -104,18 +115,18 @@ public abstract class Intelligence implements Serializable {
 
 	public void buildSight(int direction) {
 		sight = new Arc2D.Double();
-		((Arc2D) sight).setAngleStart(direction == 0 ? 325 : 145);
-		((Arc2D) sight).setAngleExtent(70);
+		((Arc2D) sight).setAngleStart(direction == 0 ? 360 - (viewAngle * 0.5f) : 180 - (viewAngle * 0.5f));
+		((Arc2D) sight).setAngleExtent(viewAngle);
 		((Arc2D) sight).setArcType(Arc2D.PIE);
 		((Arc2D) sight).setFrameFromCenter(((Entity) host).getBox().getCenterX(), ((Entity) host).getY(),
-				((Entity) host).getPosition().x - 400, ((Entity) host).getPosition().y - 200);
+				((Entity) host).getX() - viewDistance, ((Entity) host).getY() - (viewDistance * 0.5f));
 
-		hearing = new Arc2D.Double();
+		/*hearing = new Arc2D.Double();
 		((Arc2D) hearing).setAngleStart(210);
 		((Arc2D) hearing).setAngleExtent(300);
 		((Arc2D) hearing).setArcType(Arc2D.CHORD);
 		((Arc2D) hearing).setFrameFromCenter(((Entity) host).getBox().getCenterX() + 175, ((Entity) host).getY(),
-				((Entity) host).getPosition().x - 275, ((Entity) host).getPosition().y - 150);
+				((Entity) host).getPosition().x - 275, ((Entity) host).getPosition().y - 150);*/
 	}
 	
 	public void convertSight(boolean target) {
@@ -129,12 +140,39 @@ public abstract class Intelligence implements Serializable {
 	
 	public void flipSight(int direction) {
 		if(sight instanceof Arc2D) {
-			((Arc2D) sight).setAngleStart(direction == 0 ? 325 : 145);
+			((Arc2D) sight).setAngleStart(direction == 0 ? 360 - (viewAngle * 0.5f) : 180 - (viewAngle * 0.5f));
 		}
+	}
+	
+	public int getViewAngle() {
+		return viewAngle;
+	}
+	
+	public void setViewAngle(int viewAngle) {
+		this.viewAngle = viewAngle;
+		buildSight(((Actor) host).getDirection());
+	}
+	
+	public int getViewDistance() {
+		return viewDistance;
+	}
+	
+	public void setViewDistance(int viewDistance) {
+		this.viewDistance = viewDistance;
+		buildSight(((Actor) host).getDirection());
 	}
 	
 	public Shape getHearing() {
 		return hearing;
+	}
+	
+	@Override
+	public String toString() {
+		String traitInfo = "";
+		for(Trait t : traits) {
+			traitInfo += t.getClass().getSimpleName() + ",";
+		}
+		return getClass().getSimpleName() + "[" + traitInfo + "]";
 	}
 
 }

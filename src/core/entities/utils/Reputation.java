@@ -83,4 +83,19 @@ public class Reputation implements Serializable {
 		return false;
 	}
 	
+	@Override
+	public String toString() {
+		String factions = "Ally [";
+		for(Faction f : allies) {
+			factions += f.name() + ",";
+		}
+		factions += "] Enemy [";
+		for(Faction f : enemies) {
+			factions += f.name() + ",";
+		}
+		factions += "]";
+		
+		return factions;
+	}
+	
 }

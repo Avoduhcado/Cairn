@@ -14,11 +14,9 @@ public class AggressiveAI extends Intelligence {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
-	private float aggression = 0.5f;
 	
 	public AggressiveAI(float aggression) {
-		this.setAggression(aggression);
+		this.setRating(aggression);
 	}
 	
 	@Override
@@ -51,7 +49,7 @@ public class AggressiveAI extends Intelligence {
 			if(((Combatant) host).canReach((Entity) target)) {
 				planAttack();
 			} else {
-				if(((Combatant) host).getStats().getStamina().getCurrentPercent() < 0.65f && Math.random() > aggression) {
+				if(((Combatant) host).getStats().getStamina().getCurrentPercent() < 0.65f && Math.random() > getRating()) {
 					rechargeStamina();
 				} else {
 					approach();
@@ -76,7 +74,7 @@ public class AggressiveAI extends Intelligence {
 	}
 	
 	private void planAttack() {
-		if(((Combatant) host).getStats().getStamina().getCurrentPercent() < 0.35f && Math.random() > aggression) {
+		if(((Combatant) host).getStats().getStamina().getCurrentPercent() < 0.35f && Math.random() > getRating()) {
 			setAction(new AIAction() {
 				float timer = 1.5f;
 				public void act(Intelligent host, Combatant target) {
@@ -130,14 +128,6 @@ public class AggressiveAI extends Intelligence {
 				}
 			}
 		});
-	}
-	
-	public float getAggression() {
-		return aggression;
-	}
-
-	public void setAggression(float aggression) {
-		this.aggression = aggression;
 	}
 	
 }

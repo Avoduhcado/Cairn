@@ -173,6 +173,15 @@ public class GameFont {
 		return height;
 	}
 	
+	public void setAll(float size, Color color, boolean dropShadow, Color dropColor, boolean still, boolean centered) {
+		setSize(size);
+		setColor(color);
+		setDropShadow(dropShadow);
+		setDropColor(dropColor);
+		setStill(still);
+		setCentered(centered);
+	}
+	
 	public String getName() {
 		return fontName;
 	}
@@ -208,7 +217,7 @@ public class GameFont {
 	public void setDropShadow(boolean dropShadow) {
 		this.dropShadow = dropShadow;
 	}
-	
+
 	public void setStill(boolean still) {
 		this.still = still;
 	}
