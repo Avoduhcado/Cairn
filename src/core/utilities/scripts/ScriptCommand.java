@@ -22,6 +22,9 @@ public class ScriptCommand {
 		case 2:
 			Interpreter.choose(element.get("choose").getAsJsonArray(), stage, event);
 			break;
+		case 3:
+			Interpreter.teleport(element.get("teleport").getAsJsonArray(), stage, event);
+			break;
 		}
 	}
 	

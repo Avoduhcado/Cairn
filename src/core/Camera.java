@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 import org.newdawn.slick.opengl.PNGDecoder;
 import org.newdawn.slick.util.ResourceLoader;
 
@@ -68,7 +69,7 @@ public class Camera {
 	private float panTime;
 	private float panDuration;
 	private Vector2f panValue = new Vector2f(0, 0);
-	private Vector2f panLimit = new Vector2f(0, 0);
+	private Vector4f panLimit = new Vector4f(0, 0, 0, 0);
 	private float panDelay;
 	
 	/** Rotate variables */
@@ -398,7 +399,7 @@ public class Camera {
 	public void setPan(Vector2f panLimit, float panDuration, float panDelay) {
 		this.panDuration = panDuration;
 		panTime = 0;
-		this.panLimit = panLimit;
+		this.panLimit = new Vector4f(panLimit.x, panLimit.y, 0, 0);
 		this.panDelay = panDelay;
 	}
 	
@@ -406,20 +407,28 @@ public class Camera {
 		if(isPanning()) {
 			if(panDelay > 0) {
 				panDelay = MathFunctions.clamp(panDelay - Theater.getDeltaSpeed(0.025f), 0, panDelay);
+				if(panValue.x != 0) {
+					panLimit.setX(panLimit.x + panValue.x);
+					panLimit.setZ(panValue.x);
+				}
+				if(panValue.y != 0) {
+					panLimit.setY(panLimit.y + panValue.y);
+					panLimit.setW(panValue.y);
+				}
 			} else {
 				if(panTime < panDuration) {
 					panTime = MathFunctions.clamp(panTime + Theater.getDeltaSpeed(0.025f), 0, panDuration);
 					if(panLimit.x != 0) {
-						panValue.setX(MathFunctions.easeOut(panTime, 0, panLimit.x, panDuration));
+						panValue.setX(MathFunctions.easeOut(panTime, panLimit.z, panLimit.x, panDuration));
 					}
 					if(panLimit.y != 0) {
-						panValue.setY(MathFunctions.easeOut(panTime, 0, panLimit.y, panDuration));
+						panValue.setY(MathFunctions.easeOut(panTime, panLimit.w, panLimit.y, panDuration));
 					}
 				}
 			}
 		} else if(panValue.length() != 0) {
 			if(panLimit.length() == 0) {
-				panLimit.set(panValue);
+				panLimit.set(panValue.x, panValue.y, 0, 0);
 			}
 			panTime = MathFunctions.clamp(panTime + Theater.getDeltaSpeed(0.025f), 0, 1);
 			if(panLimit.x != 0) {
@@ -440,25 +449,27 @@ public class Camera {
 	}
 	
 	public void rotate() {
-		rotateTime = MathFunctions.clamp(rotateTime + Theater.getDeltaSpeed(0.025f), 0, rotateDuration);
-		if((rotation.x > 0 && rotation.y < 0) || (rotation.x < 0 && rotation.y > 0)) {
-			rotation.setX(MathFunctions.easeIn(rotateTime, (rotation.y > 0 ? -rotation.z : rotation.z),
-					(rotation.y > 0 ? rotation.z : -rotation.z), rotateDuration));
-		} else {
-			rotation.setX(MathFunctions.easeOut(rotateTime, 0, (rotation.y > 0 ? rotation.z : -rotation.z), rotateDuration));
+		if(rotation.y != 0) {
+			rotateTime = MathFunctions.clamp(rotateTime + Theater.getDeltaSpeed(0.025f), 0, rotateDuration);
+			if((rotation.x > 0 && rotation.y < 0) || (rotation.x < 0 && rotation.y > 0)) {
+				rotation.setX(MathFunctions.easeIn(rotateTime, (rotation.y > 0 ? -rotation.z : rotation.z),
+						(rotation.y > 0 ? rotation.z : -rotation.z), rotateDuration));
+			} else {
+				rotation.setX(MathFunctions.easeOut(rotateTime, 0, (rotation.y > 0 ? rotation.z : -rotation.z), rotateDuration));
+			}
+			
+			if(Math.abs(rotation.x) >= Math.abs(rotation.z)) {
+				rotation.y = -rotation.y;
+				rotateTime = 0;
+				//rotateDuration = (float) ((Math.random() * 1.5f) + 2f);
+			} else if(rotation.x == 0) {
+				rotateTime = 0;
+			}
+			
+			GL11.glTranslated(frame.getWidth() / 2f, frame.getHeight() / 2f, 0);
+			GL11.glRotatef(rotation.x, 0, 0, 1f);
+			GL11.glTranslated(-frame.getWidth() / 2f, -frame.getHeight() / 2f, 0);
 		}
-		
-		if(Math.abs(rotation.x) >= Math.abs(rotation.z)) {
-			rotation.y = -rotation.y;
-			rotateTime = 0;
-			//rotateDuration = (float) ((Math.random() * 1.5f) + 2f);
-		} else if(rotation.x == 0) {
-			rotateTime = 0;
-		}
-		
-		GL11.glTranslated(frame.getWidth() / 2f, frame.getHeight() / 2f, 0);
-		GL11.glRotatef(rotation.x, 0, 0, 1f);
-		GL11.glTranslated(-frame.getWidth() / 2f, -frame.getHeight() / 2f, 0);
 	}
 	
 	public boolean isShaking() {

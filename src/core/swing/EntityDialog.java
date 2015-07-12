@@ -12,10 +12,12 @@ import core.entities.Actor;
 import core.entities.Backdrop;
 import core.entities.Enemy;
 import core.entities.Entity;
+import core.entities.Prop;
 import core.entities.utils.Faction;
 import core.entities.utils.ai.AggressiveAI;
 import core.entities.utils.ai.DocileAI;
 import core.entities.utils.ai.traits.Minion;
+import core.entities.utils.ai.traits.Opportunist;
 import core.entities.utils.ai.traits.PackLeader;
 import core.entities.utils.ai.traits.Trait;
 import core.entities.utils.stats.Health;
@@ -44,6 +46,9 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class EntityDialog extends JDialog {
 
@@ -90,6 +95,14 @@ public class EntityDialog extends JDialog {
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				setVisible(false);
+				entities = defaultEntities;
+			}
+		});
+		
 		contentPanel.setLayout(null);
 		{
 			JLabel entityName = new JLabel(entities.getFirst().getName());
@@ -158,7 +171,7 @@ public class EntityDialog extends JDialog {
 			contentPanel.add(depthSpinner);
 		}
 
-		//if(entities.getFirst() instanceof Actor) {
+		if(entities.getFirst() instanceof Actor) {
 			JSeparator separator_2 = new JSeparator();
 			separator_2.setBounds(10, 118, 414, 2);
 			contentPanel.add(separator_2);
@@ -176,6 +189,7 @@ public class EntityDialog extends JDialog {
 				}
 			});
 			directionToggle.setBounds(10, 131, 91, 23);
+			directionToggle.setSelected(((Actor) entities.getFirst()).getDirection() == 1);
 			contentPanel.add(directionToggle);
 
 			JLabel lblSpeed = new JLabel("Speed");
@@ -196,7 +210,7 @@ public class EntityDialog extends JDialog {
 			tabbedPane.addTab("Statistics", null, statsPanel, null);
 			statsPanel.setLayout(new BorderLayout(0, 0));
 
-			//if(entities.getFirst() instanceof Enemy) {
+			if(entities.getFirst() instanceof Enemy) {
 				JTabbedPane statsPane = new JTabbedPane(JTabbedPane.TOP);
 				statsPanel.add(statsPane, BorderLayout.CENTER);
 
@@ -313,7 +327,11 @@ public class EntityDialog extends JDialog {
 				traitList = new JList<Trait>();
 				traitList.setVisibleRowCount(12);
 				traitList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-				traitList.setModel(new DefaultListModel<Trait>());
+				DefaultListModel<Trait> traitsModel = new DefaultListModel<Trait>();
+				for(Trait t : ((Enemy) entities.getFirst()).getIntelligence().getTraits()) {
+					traitsModel.addElement(t);
+				}
+				traitList.setModel(traitsModel);
 				scrollPane.setColumnHeaderView(traitList);
 
 				aiCombo = new JComboBox<String>();
@@ -332,6 +350,11 @@ public class EntityDialog extends JDialog {
 					}
 				});
 				aiCombo.setModel(new DefaultComboBoxModel<String>(new String[] {"Docile", "Aggressive"}));
+				if(((Enemy) entities.getFirst()).getIntelligence() instanceof DocileAI) {
+					aiCombo.setSelectedIndex(0);
+				} else if(((Enemy) entities.getFirst()).getIntelligence() instanceof AggressiveAI) {
+					aiCombo.setSelectedIndex(1);
+				}
 
 				JButton btnNewButton = new JButton("Add Trait");
 				btnNewButton.setBounds(282, 9, 77, 23);
@@ -398,6 +421,7 @@ public class EntityDialog extends JDialog {
 						String result = (String) JOptionPane.showInputDialog(EntityDialog.this, "Select a trait", "Trait Builder",
 								JOptionPane.QUESTION_MESSAGE, null, traits, traits[0]);
 						if(result != null) {
+							// TODO Clean this up
 							switch(result) {
 							case "Minion":
 								MinionBuilder mBuilder = new MinionBuilder(stage);
@@ -434,6 +458,21 @@ public class EntityDialog extends JDialog {
 								}
 								break;
 							case "Opportunist":
+								OpportunistBuilder oBuilder = new OpportunistBuilder();
+								Trait opportunist = oBuilder.getOpportunist();
+								if(opportunist != null) {
+									boolean placed = false;
+									for(int i = 0; i<traitList.getModel().getSize(); i++) {
+										if(traitList.getModel().getElementAt(i) instanceof Opportunist) {
+											((DefaultListModel<Trait>) traitList.getModel()).set(i, opportunist);
+											placed = true;
+											break;
+										}
+									}
+									if(!placed) {
+										((DefaultListModel<Trait>) traitList.getModel()).addElement(opportunist);
+									}
+								}
 								break;
 							default:
 								break;
@@ -553,8 +592,8 @@ public class EntityDialog extends JDialog {
 				JPanel equipPanel = new JPanel();
 				tabbedPane.addTab("Equipment", null, equipPanel, null);
 				equipPanel.setLayout(null);
-			//}
-		//}
+			}
+		}
 
 		{
 			JPanel buttonPane = new JPanel();
@@ -588,6 +627,7 @@ public class EntityDialog extends JDialog {
 							}
 						}
 
+						setVisible(false);
 						dispose();
 					}
 				});
@@ -627,6 +667,7 @@ public class EntityDialog extends JDialog {
 							}
 						}
 
+						setVisible(false);
 						dispose();
 					}
 				});
@@ -634,9 +675,17 @@ public class EntityDialog extends JDialog {
 				buttonPane.add(cancelButton);
 			}
 		}
-
-		setVisible(true);
 	}
+	
+	public LinkedList<Entity> showEntityDialog() {
+		setVisible(true);
+		
+		return entities;
+	}
+	
+	/*public static LinkedList<Prop> showPropDialog() {
+		
+	}*/
 
 	public JToggleButton getTglbtnFacing() {
 		return directionToggle;

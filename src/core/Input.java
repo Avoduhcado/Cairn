@@ -57,7 +57,7 @@ public class Input {
 		// Camera zooming
 		if(Mouse.hasWheel() && (mouseScroll = Mouse.getDWheel()) != 0) {
 			float wheel = Theater.getDeltaSpeed(mouseScroll / 12000f);
-			if(Camera.get().getScale() + wheel >= 0.25f && Camera.get().getScale() + wheel <= 3f) {
+			if(Camera.get().getScale() + wheel >= 0.1f && Camera.get().getScale() + wheel <= 3f) {
 				if(Camera.get().getScale() > 1f && Camera.get().getScale() + wheel < 1f)
 					Camera.get().setScale(1f);
 				else
@@ -65,7 +65,7 @@ public class Input {
 			} else if(Camera.get().getScale() + wheel >= 3f) {
 				Camera.get().setScale(3f);
 			} else {
-				Camera.get().setScale(0.25f);
+				Camera.get().setScale(0.1f);
 			}
 		}
 		
@@ -135,13 +135,9 @@ public class Input {
 					((Stage) setup).getPlayer().changeArmor(2);
 				}
 			}
-			
+
 			if(Keybinds.SLOT6.clicked()) {
-				if(((Stage) setup).getMap().getMapName().matches("Graveyard")) {
-					((Stage) setup).loadMap("Withered Hearthlands", 975, 1300);
-				} else {
-					((Stage) setup).loadMap("Graveyard", 1600, 1030);
-				}
+				Camera.get().setRotate(0.025f, 15, 10);
 			}
 			if(Keybinds.SLOT7.clicked()) {
 				((Stage) setup).getHUD().setEnabled(!((Stage) setup).getHUD().isEnabled());

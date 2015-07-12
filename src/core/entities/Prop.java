@@ -7,14 +7,22 @@ import java.io.ObjectInputStream;
 import org.lwjgl.util.vector.Vector2f;
 
 import core.Camera;
+import core.Theater;
+import core.interactions.InteractionListener;
+import core.interactions.Script;
 import core.render.SpriteIndex;
+import core.setups.Stage;
 
-public class Prop extends Entity {
+public class Prop extends Entity implements core.entities.interfaces.Interactable {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	private String interactData;
+	private transient InteractionListener listener;
+	private transient Script script;
 	
 	public Prop(int x, int y, String ref, float scale) {
 		this.pos = new Vector2f(x, y);
@@ -45,16 +53,14 @@ public class Prop extends Entity {
 	
 	@Override
 	public void update() {
+		if(script != null) {
+			script.read();
+		}
 	}
 	
 	@Override
 	public void draw() {
-		//SpriteIndex.getSprite(sprite).set2DScale(scale);
-		//SpriteIndex.getSprite(sprite).setIntScale(true);
 		SpriteIndex.getSprite(sprite).setFixedSize((int) Math.ceil(box.getWidth()), (int) Math.ceil(box.getHeight()));
-		//if(!animations.isEmpty()) {
-		//SpriteIndex.getSprite(sprite).setFrame(animations.get(state.toString()).getFrame());
-		//}
 		SpriteIndex.getSprite(sprite).draw((int) pos.x, (int) pos.y);
 
 		drawDebug();
@@ -63,6 +69,17 @@ public class Prop extends Entity {
 	@Override
 	public void setID() {
 		this.ID = this.getClass().getSimpleName() + count++;
+	}
+
+	@Override
+	public void setInteraction(String interactData) {
+		this.interactData = interactData;
+		buildInteractions();
+	}
+
+	@Override
+	public void buildInteractions() {
+		
 	}
 
 }

@@ -1,6 +1,7 @@
 package core.ui.overlays;
 
 import java.awt.Polygon;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import core.Camera;
@@ -14,6 +15,7 @@ import core.swing.EntityList;
 import core.ui.Button;
 import core.ui.overlays.edit.Collisions;
 import core.utilities.keyboard.Keybinds;
+import core.utilities.mouse.MouseInput;
 
 public class EditMenu extends MenuOverlay {
 	
@@ -36,6 +38,7 @@ public class EditMenu extends MenuOverlay {
 	private Button saveMap;
 	
 	private boolean closed;
+	private boolean followMouse;
 	
 	public EditMenu(Stage stage) {
 		this.stage = stage;
@@ -59,6 +62,11 @@ public class EditMenu extends MenuOverlay {
 			for(Entity e : entityList.getSelection()) {
 				map.getEntity(e).movePosition(Input.mouseDelta.x / Camera.get().getScale(),	Input.mouseDelta.y / Camera.get().getScale());
 			}
+		} else if(!entityList.hasSelection() && followMouse && Input.mouseClicked()) {
+			Camera.get().frame.setFrameFromCenter(MouseInput.getScreenMouse(), 
+					new Point2D.Double(MouseInput.getScreenMouseX() - (Camera.get().frame.getWidth() / 2f),
+							MouseInput.getScreenMouseY() - (Camera.get().frame.getHeight() / 2f)));
+			stage.getPlayer().setPosition((float) Camera.get().frame.getCenterX(), (float) Camera.get().frame.getCenterY());
 		}
 				
 		saveMap.update();
@@ -91,7 +99,11 @@ public class EditMenu extends MenuOverlay {
 		this.map = map;
 		entityList.setMap(map);
 	}
-	
+
+	public void setFollowMouse(boolean selected) {
+		this.followMouse = selected;
+	}
+
 	public void close() {
 		closeEntityList();
 		

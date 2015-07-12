@@ -1,15 +1,8 @@
 package core;
 
-import java.lang.reflect.TypeVariable;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.lwjgl.openal.AL;
 import org.newdawn.slick.openal.SoundStore;
 
-import core.entities.utils.ai.DocileAI;
-import core.entities.utils.ai.Intelligence;
-import core.entities.utils.ai.traits.Minion;
 import core.setups.GameSetup;
 import core.setups.SplashScreen;
 import core.utilities.Config;
@@ -46,7 +39,7 @@ public class Theater {
 	/** Second-by-second FPS */
 	private int currentfps = Camera.TARGET_FPS;
 	/** Game version, appears in Window Title */
-	public static String version = "v0.2.9.02";
+	public static String version = "v0.2.9.05";
 	/** Game name, appears in Window Title */
 	public static String title = "The Cairn";
 	/** Current engine framework version */

@@ -14,13 +14,9 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeSet;
 
 import core.Camera;
-import core.render.SpriteIndex;
 import core.scene.collisions.Collidable;
 import core.scene.collisions.HitMaps;
 import core.scene.collisions.PathPolygon;
@@ -32,16 +28,10 @@ import core.entities.Backdrop;
 import core.entities.Enemy;
 import core.entities.Entity;
 import core.entities.Fog;
+import core.entities.Interactable;
 import core.entities.LightSource;
 import core.entities.Prop;
-import core.entities.interfaces.Intelligent;
-import core.entities.utils.Faction;
-import core.entities.utils.ai.AggressiveAI;
 import core.entities.utils.ai.DocileAI;
-import core.entities.utils.ai.Intelligence;
-import core.entities.utils.ai.traits.Minion;
-import core.entities.utils.ai.traits.Opportunist;
-import core.entities.utils.ai.traits.PackLeader;
 
 public class Map implements Serializable {
 
@@ -57,6 +47,7 @@ public class Map implements Serializable {
 	private transient LinkedList<Entity> scenery = new LinkedList<Entity>();
 	private LinkedList<Actor> cast = new LinkedList<Actor>();
 	private LinkedList<Prop> props = new LinkedList<Prop>();
+	private LinkedList<Interactable> interactions = new LinkedList<Interactable>();
 	
 	private Fog fog;
 	private LinkedList<LightSource> lights = new LinkedList<LightSource>();
@@ -161,7 +152,7 @@ public class Map implements Serializable {
 	}
 	
 	public static Map deserialize(String mapName) {
-		Map map = null;
+		Map map = new Map();
 		try(FileInputStream fileIn = new FileInputStream(System.getProperty("resources") + "/maps/" + mapName + ".avo");
 				ObjectInputStream in = new ObjectInputStream(fileIn)) {
 			map = (Map) in.readObject();
@@ -207,6 +198,12 @@ public class Map implements Serializable {
 		for(Backdrop b : foreground) {
 			b.update();
 		}
+		
+		if(interactions != null) {
+			for(Interactable i : interactions) {
+				i.update();
+			}
+		}
 	}
 	
 	public ArrayList<Polygon> getCollisionPolys() {
@@ -250,6 +247,8 @@ public class Map implements Serializable {
 				return props.get(props.indexOf(entity));
 			} else if(entity instanceof Actor) {
 				return cast.get(cast.indexOf(entity));
+			} else if(entity instanceof Interactable) {
+				return interactions.get(interactions.indexOf(entity));
 			}
 		} else if(entity instanceof Backdrop) {
 			if(background.contains(entity)) {
@@ -259,6 +258,8 @@ public class Map implements Serializable {
 			} else if(foreground.contains(entity)) {
 				return foreground.get(foreground.indexOf(entity));
 			}
+		} else if(entity instanceof Interactable) {
+			return interactions.get(interactions.indexOf(entity));
 		}
 		
 		return null;
@@ -426,6 +427,11 @@ public class Map implements Serializable {
 		
 		scenery.addAll(cast);
 		scenery.addAll(props);
+		if(interactions == null) {
+			interactions = new LinkedList<Interactable>();
+		} else {
+			//scenery.addAll(interactions);
+		}
 		
 		Entity.count = scenery.size();
 		// TODO Set proper Entity ID counts after deserialization
@@ -479,6 +485,22 @@ public class Map implements Serializable {
 	
 	public void resetEntity() {
 		Entity.count = 0;
+	}
+
+	public void addEntity(Entity entity) {
+		if(entity instanceof Prop) {
+			props.add((Prop) entity);
+		} else if(entity instanceof Actor) {
+			cast.add((Actor) entity);
+		} else if(entity instanceof Interactable) {
+			interactions.add((Interactable) entity);
+		}
+		
+		scenery.add(entity);
+	}
+
+	public LinkedList<Interactable> getInteractions() {
+		return interactions;
 	}
 	
 }

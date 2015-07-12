@@ -39,18 +39,18 @@ public class EditorMain extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public EditorMain(EditMenu editMenu, Stage stage) {
+	public EditorMain(EditMenu parentMenu, Stage stage) {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
 		
-		this.editMenu = editMenu;
+		this.editMenu = parentMenu;
 		this.stage = stage;
 		setTitle("Editor");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(600, 100, 455, 80);
+		setBounds(600, 100, 455, 105);
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -154,6 +154,14 @@ public class EditorMain extends JFrame {
 		});
 		chckbxmntmEntityList.setSelected(true);
 		mnView.add(chckbxmntmEntityList);
+		
+		final JCheckBoxMenuItem chckbxmntmFollowMouse = new JCheckBoxMenuItem("Follow Mouse");
+		chckbxmntmFollowMouse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				editMenu.setFollowMouse(chckbxmntmFollowMouse.isSelected());
+			}
+		});
+		mnView.add(chckbxmntmFollowMouse);
 		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));

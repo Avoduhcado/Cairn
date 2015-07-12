@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 
 import core.Camera;
 import core.entities.interfaces.Scriptable;
+import core.interactions.InteractionListener;
 import core.setups.Stage;
 import core.utilities.scripts.Script;
 
@@ -40,7 +41,7 @@ public class Ally extends Actor implements Scriptable {
 			dialogue.draw(this, this.getX() > Camera.get().frame.getCenterX());
 		}
 	}
-
+	
 	@Override
 	public Script getScript() {
 		return dialogue;

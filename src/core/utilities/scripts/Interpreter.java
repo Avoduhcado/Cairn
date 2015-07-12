@@ -27,8 +27,8 @@ public class Interpreter {
 		stage.addUI(eventSelection);
 	}
 	
-	public static void teleport(String mapName, float x, float y, Stage stage, ScriptEvent event) {
-		stage.loadMap(mapName, x, y);
+	public static void teleport(JsonArray parameters, Stage stage, ScriptEvent event) {
+		stage.loadMap(parameters.get(0).getAsString(), parameters.get(1).getAsInt(), parameters.get(2).getAsInt());
 	}
 	
 }

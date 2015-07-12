@@ -1,6 +1,5 @@
 package core.setups;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.lwjgl.util.vector.Vector3f;
@@ -13,14 +12,17 @@ import core.entities.Ally;
 import core.entities.Enemy;
 import core.entities.Backdrop;
 import core.entities.Entity;
+import core.entities.Interactable;
 import core.entities.Player;
 import core.entities.Actor;
 import core.entities.utils.CharState;
+import core.interactions.InteractionAdapter;
 import core.scene.Map;
 import core.scene.hud.HUD;
 import core.ui.UIElement;
 import core.ui.overlays.EditMenu;
 import core.ui.overlays.GameMenu;
+import core.ui.overlays.Inventory;
 import core.utilities.Pathfinder;
 import core.utilities.keyboard.Keybinds;
 
@@ -28,6 +30,7 @@ public class Stage extends GameSetup {
 
 	/** Stage relevant */
 	private GameMenu gameMenu;
+	private Inventory inventory;
 	private EditMenu editMenu;
 	private HUD hud;
 	private Player player;
@@ -43,6 +46,14 @@ public class Stage extends GameSetup {
 		player = new Player(0, 0, "MC and Familiar");
 		loadMap(null, 0, 0);
 		//loadMap("Withered Hearthlands", 1380, 1275);
+		/*Interactable interactable = new Interactable(100, 0, null);
+		interactable.setInteraction(new InteractionAdapter() {
+			@Override
+			public void playerCollide() {
+				Stage.this.loadMap("Withered Hearthlands", 1380, 1275);
+			}
+		});
+		map.addEntity(interactable);*/
 		
 		hud = new HUD();
 		
@@ -63,6 +74,10 @@ public class Stage extends GameSetup {
 			if(gameMenu.isCloseRequest())
 				gameMenu = null;
 		} else {
+			if(inventory != null) {
+				inventory.update();
+			}
+			
 			if(bgm != null) {
 				bgm.update();
 			}
@@ -85,15 +100,16 @@ public class Stage extends GameSetup {
 				Theater.get().swapSetup(new Stage());
 			}
 
-			for(Iterator<Actor> i = map.getCast().iterator(); i.hasNext();) {
-				Actor a = i.next();
+			for(int i = 0; i<map.getCast().size(); i++) {
+				Actor a = map.getCast().get(i);
 				a.update();
 				if(a instanceof Ally) {
 					((Ally) a).activateScript(player, this);
 				} else {
 					if(a.getState() == CharState.DEAD) {
-						i.remove();
+						//i.remove();
 						removeEntity(a);
+						i--;
 						continue;
 					}
 					if(a instanceof Enemy) {
@@ -103,9 +119,15 @@ public class Stage extends GameSetup {
 			}
 
 			map.update();
-
+			
 			if(Keybinds.EXIT.clicked()) {
 				gameMenu = new GameMenu("Menu2");
+			} else if(Keybinds.MENU.clicked()) {
+				if(inventory == null) {
+					inventory = new Inventory();
+				} else {
+					inventory = null;
+				}
 			}
 
 			if(editMenu != null) {
@@ -187,6 +209,10 @@ public class Stage extends GameSetup {
 
 		if(editMenu != null) {
 			editMenu.draw();
+		}
+		
+		if(inventory != null) {
+			inventory.draw();
 		}
 		
 		if(gameMenu != null) {

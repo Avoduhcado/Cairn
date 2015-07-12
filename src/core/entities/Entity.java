@@ -14,6 +14,7 @@ import org.lwjgl.util.vector.Vector3f;
 import core.Camera;
 import core.Input;
 import core.Theater;
+import core.interactions.InteractionListener;
 import core.render.DrawUtils;
 import core.render.SpriteIndex;
 import core.utilities.mouse.MouseInput;
@@ -33,6 +34,9 @@ public abstract class Entity implements Serializable, Cloneable {
 	protected String name;
 	protected Rectangle2D box;
 	protected float scale;
+	
+	protected transient InteractionListener interaction;
+	protected String interactData;
 	
 	protected String ID;
 	protected transient boolean debug;

@@ -53,7 +53,7 @@ public class Actor extends Entity implements Mobile {
 	public Actor(float x, float y, String ref) {
 		this.pos = new Vector2f(x, y);
 		this.sprite = "actors/" + ref;
-		this.name = ref;
+		this.name = ref.split("_")[0];
 		this.scale = Camera.ASPECT_RATIO;
 		
 		buildSkeleton();

@@ -63,7 +63,7 @@ public class GameMenu extends MenuOverlay {
 		toDesktop.setSurrounding(0, toTitle);
 		this.add(toDesktop);
 		
-		setKeyboardNavigable(true);
+		setKeyboardNavigable(true, toGame);
 		
 		addFrame(image);
 	}

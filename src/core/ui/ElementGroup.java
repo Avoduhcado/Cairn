@@ -13,14 +13,14 @@ public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 	
 	private boolean singleSelection = true;
 	private EmptyFrame frame;
-	private int selection = -1;
+	protected int selection = -1;
 
 	public void update() {
 		for(UIElement e : this) {
 			e.update();
 		}
 		
-		if(selection != -1 && !frame.getBounds().contains(MouseInput.getScreenMouse())) {
+		if(selection != -1 && (frame != null ? !frame.getBounds().contains(MouseInput.getScreenMouse()) : true)) {
 			get(selection).setSelected(true);
 			if(Keybinds.UP.clicked() && get(selection).getSurroundings()[0] != null) {
 				get(selection).setSelected(false);
@@ -45,7 +45,10 @@ public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 	}
 	
 	public void draw() {
-		frame.draw();
+		if(frame != null) {
+			frame.draw();
+		}
+		
 		for(UIElement e : this) {
 			e.draw();
 		}
@@ -88,8 +91,8 @@ public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 		this.singleSelection = singleSelection;
 	}
 	
-	public void setKeyboardNavigable(boolean enabled) {
-		selection = (enabled ? 0 : -1);
+	public void setKeyboardNavigable(boolean enabled, UIElement startIndex) {
+		selection = (enabled ? indexOf(startIndex) : -1);
 		if(get(selection) != null) {
 			get(selection).setSelected(true);
 		}

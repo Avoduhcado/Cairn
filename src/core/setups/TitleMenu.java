@@ -66,7 +66,7 @@ public class TitleMenu extends GameSetup {
 		buttons.add(newGame);
 		buttons.add(options);
 		buttons.add(exit);
-		buttons.setKeyboardNavigable(true);
+		buttons.setKeyboardNavigable(true, newGame);
 		buttons.addFrame("Menu2");
 		
 		// Play title track

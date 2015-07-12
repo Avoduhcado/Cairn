@@ -383,7 +383,9 @@ public class Enemy extends Actor implements Combatant, Intelligent {
 	public void updateBox() {
 		super.updateBox();
 
-		((RectangularShape) intelligence.getSight()).setFrameFromCenter(box.getCenterX(), box.getCenterY(), pos.x - 400, pos.y - 200);
+		((RectangularShape) intelligence.getSight()).setFrameFromCenter(getBox().getCenterX(), getY(),
+				getX() - intelligence.getViewDistance(), getY() - (intelligence.getViewDistance() * 0.5f));
+		//((RectangularShape) intelligence.getSight()).setFrameFromCenter(box.getCenterX(), box.getCenterY(), pos.x - 400, pos.y - 200);
 	}
 	
 	@Override

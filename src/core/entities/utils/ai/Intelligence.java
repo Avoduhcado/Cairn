@@ -34,7 +34,6 @@ public abstract class Intelligence implements Serializable {
 	protected int viewAngle = 70;
 	protected int viewDistance = 400;
 	protected Shape hearing;
-	// TODO ViewAngle, ViewDistance parameters
 	
 	public abstract void pickAction();
 	public abstract void alert(Combatant target);
@@ -131,8 +130,8 @@ public abstract class Intelligence implements Serializable {
 	
 	public void convertSight(boolean target) {
 		if(target && sight instanceof Arc2D) {
-			sight = new Ellipse2D.Double(((RectangularShape) sight).getX(), ((RectangularShape) sight).getY(),
-					((RectangularShape) sight).getWidth(), ((RectangularShape) sight).getHeight());
+			sight = new Ellipse2D.Double(((Entity) host).getX() - viewDistance, ((Entity) host).getY() - (viewDistance * 0.5f),
+					viewDistance, viewDistance * 0.5f);
 		} else if(!target && sight instanceof Ellipse2D) {
 			buildSight(((Actor) host).getDirection());
 		}

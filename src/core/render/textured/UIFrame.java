@@ -1,13 +1,8 @@
 package core.render.textured;
 
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
-import org.newdawn.slick.opengl.TextureLoader;
-import org.newdawn.slick.util.ResourceLoader;
-
 import core.Camera;
 
 public class UIFrame extends Sprite {

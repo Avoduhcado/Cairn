@@ -47,13 +47,13 @@ public class Minion extends Trait {
 	@Override
 	public void process() {
 		if(leader != null && ((Actor) host).getState().canAct()) {
-			if(!((Enemy) host).getIntelligence().isChasing() && Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(),
-					((Entity) host).getX(), ((Entity) host).getY()) > wanderRange) {
+			if(!((Enemy) host).getIntelligence().isChasing() && Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getYPlane(),
+					((Entity) host).getX(), ((Entity) host).getYPlane()) > wanderRange) {
 				host.getIntelligence().setAction(new AIAction() {
 					public void act(Intelligent host, Combatant target) {
-						host.approach(((Entity) leader).getPositionAsPoint());
-						if(Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getY(), 
-								((Entity) host).getX(), ((Entity) host).getY()) <= wanderRange) {
+						host.approach(new Point2D.Double((float) ((Entity) leader).getX(), (float) ((Entity) leader).getYPlane()));
+						if(Point2D.distance(((Entity) leader).getX(), ((Entity) leader).getYPlane(), 
+								((Entity) host).getX(), ((Entity) host).getYPlane()) <= wanderRange) {
 							((Actor) host).setDirection(((Actor) leader).getDirection());
 							host.getIntelligence().setAction(null);
 						}

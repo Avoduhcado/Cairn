@@ -1,6 +1,7 @@
 package core.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.io.File;
 import java.util.LinkedList;
 
@@ -11,6 +12,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.JTabbedPane;
 
@@ -19,7 +21,9 @@ import core.entities.Ally;
 import core.entities.Backdrop;
 import core.entities.Enemy;
 import core.entities.Entity;
+import core.entities.Interactable;
 import core.entities.Prop;
+import core.interactions.InteractionAdapter;
 import core.scene.Map;
 import core.setups.Stage;
 import core.ui.overlays.EditMenu;
@@ -61,6 +65,7 @@ public class EntityList extends JFrame {
 	private Map map;
 	private EditMenu editMenu;
 	private JTabbedPane tabbedPane;
+	private JTree interactTree;
 
 	/**
 	 * Create the frame.
@@ -225,6 +230,19 @@ public class EntityList extends JFrame {
 		});
 		mnLoad.add(mntmLoadForeground);
 		
+		mnLoad.addSeparator();
+		
+		JMenuItem mntmInteractable = new JMenuItem("Interactable...");
+		mntmInteractable.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Interactable i = new Interactable(MouseInput.getScreenMouseX(), MouseInput.getScreenMouseY(), null);
+				((DefaultTreeModel) interactTree.getModel()).insertNodeInto(new DefaultMutableTreeNode(new NodeInfo(i.getID(), i)),
+						(MutableTreeNode) interactTree.getModel().getRoot(), 0);
+				map.addEntity(i);
+			}
+		});
+		mnLoad.add(mntmInteractable);
+		
 		JMenu mnEdit = new JMenu("Edit");
 		menuBar.add(mnEdit);
 		
@@ -256,13 +274,18 @@ public class EntityList extends JFrame {
 						node = ((DefaultMutableTreeNode) backdropTree.getSelectionPath().getLastPathComponent());
 					}
 					break;
+				case 3:
+					if(interactTree.getSelectionPath() != null) {
+						node = ((DefaultMutableTreeNode) interactTree.getSelectionPath().getLastPathComponent());
+					}
+					break;
 				}
 				
 				if(node == null) {
 					return;
 				}
 				
-				if(node.isLeaf()) {
+				if(node.isLeaf() && tabbedPane.getSelectedIndex() != 3) {
 					node = (DefaultMutableTreeNode) node.getParent();
 				}
 				
@@ -274,8 +297,33 @@ public class EntityList extends JFrame {
 				}
 				
 				if(!entities.isEmpty()) {
-					new EntityDialog(entities, stage);
-					// TODO Call initXXXXData after a successful EntityDialog
+					EntityDialog entityDialog = new EntityDialog(entities, stage);
+					LinkedList<?> editedEntities = entityDialog.showEntityDialog();
+					if(editedEntities.getFirst() instanceof Prop) {
+						((DefaultTreeModel) propTree.getModel()).insertNodeInto(
+								(MutableTreeNode) addToPropTree(new DefaultMutableTreeNode(), (LinkedList<Prop>) editedEntities).getFirstChild(),
+								(MutableTreeNode) propTree.getModel().getRoot(),
+								propTree.getModel().getIndexOfChild(propTree.getModel().getRoot(), node));
+						((DefaultTreeModel) propTree.getModel()).removeNodeFromParent(node);
+					} else if(editedEntities.getFirst() instanceof Actor) {
+						((DefaultTreeModel) actorTree.getModel()).insertNodeInto(
+								initActorData(new DefaultMutableTreeNode(), (Actor) editedEntities.getFirst()),
+								(MutableTreeNode) actorTree.getModel().getRoot(),
+								actorTree.getModel().getIndexOfChild(actorTree.getModel().getRoot(), node));
+						((DefaultTreeModel) actorTree.getModel()).removeNodeFromParent(node);
+					} else if(editedEntities.getFirst() instanceof Backdrop) {
+						((DefaultTreeModel) backdropTree.getModel()).insertNodeInto(
+								(MutableTreeNode) addToBackdropTree(new DefaultMutableTreeNode(), (LinkedList<Backdrop>) editedEntities).getFirstChild(),
+								(MutableTreeNode) backdropTree.getModel().getRoot(),
+								backdropTree.getModel().getIndexOfChild(backdropTree.getModel().getRoot(), node));
+						((DefaultTreeModel) backdropTree.getModel()).removeNodeFromParent(node);
+					} else if(editedEntities.getFirst() instanceof Interactable) {
+						((Interactable) editedEntities.getFirst()).setInteraction(new InteractionAdapter() {
+							public void playerCollide() {
+								stage.loadMap("House", 770, 770);
+							}
+						});
+					}
 				}
 			}
 		});
@@ -461,6 +509,15 @@ public class EntityList extends JFrame {
 		backdropTree.setShowsRootHandles(true);
 		backdropTab.add(backdropTree, BorderLayout.CENTER);
 		
+		JPanel interactPanel = new JPanel();
+		tabbedPane.addTab("New tab", null, interactPanel, null);
+		interactPanel.setLayout(new BorderLayout(0, 0));
+		
+		interactTree = new JTree();
+		interactTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode(new NodeInfo("Interactables", map.getInteractions()))));
+		interactTree.setShowsRootHandles(true);
+		interactPanel.add(interactTree);
+		
 		//setModalityType(ModalityType.APPLICATION_MODAL);
 		setVisible(true);
 	}
@@ -616,6 +673,8 @@ public class EntityList extends JFrame {
 			return actorTree.getSelectionPath() != null;
 		case 2:
 			return backdropTree.getSelectionPath() != null;
+		case 3:
+			return interactTree.getSelectionPath() != null;
 		}
 		
 		return false;
@@ -635,13 +694,16 @@ public class EntityList extends JFrame {
 			case 2:
 				node = (DefaultMutableTreeNode) backdropTree.getLastSelectedPathComponent();
 				break;
+			case 3:
+				node = (DefaultMutableTreeNode) interactTree.getLastSelectedPathComponent();
+				break;
 			}
 			
 			if(node != null) {
 				LinkedList<Entity> selection = new LinkedList<Entity>();
 				NodeInfo nodeInfo = (NodeInfo) node.getUserObject();
 				
-				if(node.isLeaf()) {
+				if(node.isLeaf() && tabbedPane.getSelectedIndex() != 3) {
 					nodeInfo = (NodeInfo) ((DefaultMutableTreeNode) node.getParent()).getUserObject();
 				}
 				
@@ -676,5 +738,8 @@ public class EntityList extends JFrame {
 	}
 	public JTabbedPane getTabbedPane() {
 		return tabbedPane;
+	}
+	public JTree getInteractTree() {
+		return interactTree;
 	}
 }

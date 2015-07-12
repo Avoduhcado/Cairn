@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import core.Camera;
 import core.Input;
+import core.render.SpriteIndex;
 import core.render.textured.UIFrame;
 import core.ui.utils.Align;
 import core.ui.utils.UIAction;
@@ -15,6 +16,7 @@ public abstract class UIElement {
 
 	protected Rectangle2D bounds;
 	protected UIFrame frame;
+	protected String background;
 	protected float xBorder;
 	protected float yBorder;
 	protected Align alignment = Align.RIGHT;
@@ -42,12 +44,24 @@ public abstract class UIElement {
 			frame.setStill(still);
 			frame.draw((float) bounds.getX(), (float) bounds.getY(), bounds);
 		}
+		
+		if(background != null) {
+			SpriteIndex.getSprite(background).setStill(still);
+			SpriteIndex.getSprite(background).setFixedSize((float) bounds.getWidth(), (float) bounds.getHeight());
+			SpriteIndex.getSprite(background).draw((float) bounds.getX(), (float) bounds.getY());
+		}
 	}
 	
 	public void draw(float x, float y) {
 		if(frame != null) {
 			frame.setStill(still);
 			frame.draw(x, y, bounds);
+		}
+
+		if(background != null) {
+			SpriteIndex.getSprite(background).setStill(still);
+			SpriteIndex.getSprite(background).setFixedSize((float) bounds.getWidth(), (float) bounds.getHeight());
+			SpriteIndex.getSprite(background).draw(x, y);
 		}
 	}
 
@@ -134,6 +148,10 @@ public abstract class UIElement {
 		if(image != null) {
 			this.frame = new UIFrame(image);
 		}
+	}
+	
+	public void setBackground(String background) {
+		this.background = background;
 	}
 	
 	public void setSelected(boolean selected) {
