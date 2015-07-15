@@ -71,8 +71,10 @@ public class Stage extends GameSetup {
 	public void update() {
 		if(gameMenu != null) {
 			gameMenu.update();
-			if(gameMenu.isCloseRequest())
+			if(gameMenu.isCloseRequest()) {
+				Keybinds.closeMenu();
 				gameMenu = null;
+			}
 		} else {
 			if(inventory != null) {
 				inventory.update();
@@ -121,11 +123,14 @@ public class Stage extends GameSetup {
 			map.update();
 			
 			if(Keybinds.EXIT.clicked()) {
+				Keybinds.inMenu();
 				gameMenu = new GameMenu("Menu2");
 			} else if(Keybinds.MENU.clicked()) {
 				if(inventory == null) {
+					Keybinds.inMenu();
 					inventory = new Inventory();
 				} else {
+					Keybinds.closeMenu();
 					inventory = null;
 				}
 			}
@@ -135,14 +140,14 @@ public class Stage extends GameSetup {
 				editMenu.update();
 				if(editMenu.isCloseRequest()) {
 					hud.setEnabled(true);
+					Keybinds.closeMenu();
 					editMenu.close();
 					editMenu = null;
-					Keybinds.closeMenu();
 				}
 			} else if(Keybinds.EDIT.clicked()) {
 				hud.setEnabled(false);
-				editMenu = new EditMenu(this);
 				Keybinds.inMenu();
+				editMenu = new EditMenu(this);
 			}
 		}
 

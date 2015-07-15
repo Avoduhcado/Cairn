@@ -114,12 +114,8 @@ public class Input {
 					((Stage) setup).getPlayer().attack();
 				} else if(Keybinds.DEFEND.clicked()) {
 					((Stage) setup).getPlayer().defend();
-				} else if(Keybinds.MENU_RIGHT.clicked()) {
+				} else if(Keybinds.OFFHAND.clicked()) {
 					((Stage) setup).getPlayer().cast();
-				}
-				
-				if(Keybinds.MENU_UP.clicked()) {
-					((Stage) setup).getPlayer().heal();
 				}
 				
 				if(Keybinds.SLOT1.clicked()) {

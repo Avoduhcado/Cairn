@@ -460,6 +460,7 @@ public class Player extends Actor implements Combatant {
 	
 	@Override
 	public void attack() {
+		// TODO Spamming attack after defend will still progress a combo
 		// TODO Check if Dad skull is enabled
 		if(stats.getStamina().getCurrent() > 0f) {
 			setDadArmLeft(false);
@@ -559,6 +560,7 @@ public class Player extends Actor implements Combatant {
 	}
 	
 	public Polygon getDamageBox() {
+		// TODO NullPointer after defending and then trying to cast a spell?
 		Polygon box = ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment())
 				.getRotatedBox(skeleton.findSlot(equipment.getEquippedWeapon().getSlot()), equipment.getEquippedWeapon().getDamageHitbox());
 		box.translate((int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldX(),

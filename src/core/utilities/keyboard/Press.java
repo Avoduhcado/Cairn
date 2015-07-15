@@ -43,7 +43,7 @@ public class Press {
 			setPressed(false);
 			setHeld(false);
 		}
-		
+
 		if(pressDelay >= 0f) {
 			pressDelay += Theater.getDeltaSpeed(0.025f);
 			if(pressDelay > 0.3f) {

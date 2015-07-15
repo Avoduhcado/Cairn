@@ -14,13 +14,14 @@ public enum Keybinds {
 	LEFT (Keyboard.KEY_LEFT),
 	UP (Keyboard.KEY_UP),
 	DOWN (Keyboard.KEY_DOWN),
+	RUN (Keyboard.KEY_LSHIFT),
 	MENU_RIGHT (Keyboard.KEY_D),
 	MENU_LEFT (Keyboard.KEY_A),
 	MENU_DOWN (Keyboard.KEY_S),
 	MENU_UP (Keyboard.KEY_W),
-	RUN (Keyboard.KEY_LSHIFT),
-	ATTACK (Keyboard.KEY_E),
-	DEFEND (Keyboard.KEY_Q),
+	ATTACK (Keyboard.KEY_D),
+	DEFEND (Keyboard.KEY_W),
+	OFFHAND (Keyboard.KEY_A),
 	DODGE (Keyboard.KEY_S),
 	MENU (Keyboard.KEY_M),
 	PAUSE (Keyboard.KEY_P),
@@ -99,11 +100,16 @@ public enum Keybinds {
 			case LEFT:
 			case UP:
 			case DOWN:
+			case MENU_UP:
+			case MENU_DOWN:
+			case MENU_LEFT:
+			case MENU_RIGHT:
 			case RUN:
 			case DEBUG:
 			case EDIT:
 			case CONFIRM:
 			case CANCEL:
+			case MENU:
 				break;
 			default:
 				k.key.setDisabled(true);
