@@ -5,19 +5,19 @@ import core.entities.Entity;
 public class InteractionAdapter implements InteractionListener {
 
 	@Override
-	public void keyPress() {
+	public void keyPress(Script Script) {
 	}
 
 	@Override
-	public void playerCollide() {
+	public void playerCollide(Script Script) {
 	}
 
 	@Override
-	public void entityCollide(Entity entity) {
+	public void entityCollide(Script Script, Entity entity) {
 	}
 
 	@Override
-	public void autorun() {
+	public void autorun(Script Script) {
 	}
 
 }

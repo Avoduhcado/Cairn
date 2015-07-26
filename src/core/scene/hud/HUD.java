@@ -3,6 +3,7 @@ package core.scene.hud;
 import org.lwjgl.util.vector.Vector2f;
 
 import core.Camera;
+import core.entities.Player;
 import core.render.textured.Sprite;
 import core.setups.Stage;
 
@@ -18,10 +19,13 @@ public class HUD {
 	private HUDMagicBar magicBar;
 	
 	private HUDIcon weaponIcon;
-	private HUDIcon itemIcon;
-	private HUDIcon spellIcon;
+	private HUDIcon offhandIcon;
 	
-	public HUD() {
+	/*private HUDIcon weaponIcon;
+	private HUDIcon itemIcon;
+	private HUDIcon spellIcon;*/
+	
+	public HUD(Player player) {
 		enabled = true;
 		
 		meroSkull = new Sprite("HUD/Mero");
@@ -33,18 +37,23 @@ public class HUD {
 		
 		magicBar = new HUDMagicBar("Magic", new Vector2f(meroSkull.getWidth() * Camera.ASPECT_RATIO, 91f), Camera.ASPECT_RATIO);
 		
-		weaponIcon = new HUDIcon(IconType.WEAPON);
+		weaponIcon = HUDIcon.weaponBox(player);
+		offhandIcon = HUDIcon.offhandBox(player);
+		/*weaponIcon = new HUDIcon(IconType.WEAPON);
 		itemIcon = new HUDIcon(IconType.ITEM);
-		spellIcon = new HUDIcon(IconType.SPELL);
+		spellIcon = new HUDIcon(IconType.SPELL);*/
 	}
 	
 	public void update(Stage stage) {
 		magicBar.update(stage.getPlayer().getStats().getMagic().getCurrent() / stage.getPlayer().getStats().getMagic().getMax());
 		healthBar.update(1f);
 		
-		weaponIcon.update(stage);
+		weaponIcon.update();
+		offhandIcon.update();
+		
+		/*weaponIcon.update(stage);
 		itemIcon.update(stage);
-		spellIcon.update(stage);
+		spellIcon.update(stage);*/
 	}
 	
 	public void draw(Stage stage) {
@@ -62,8 +71,11 @@ public class HUD {
 		magicBar.drawBell();
 		
 		weaponIcon.draw();
+		offhandIcon.draw();
+		
+		/*weaponIcon.draw();
 		itemIcon.draw();
-		spellIcon.draw();
+		spellIcon.draw();*/
 	}
 
 	public boolean isEnabled() {

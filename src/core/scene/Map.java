@@ -1,22 +1,16 @@
 package core.scene;
 
-import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import core.Camera;
 import core.scene.collisions.Collidable;
 import core.scene.collisions.HitMaps;
 import core.scene.collisions.PathPolygon;
@@ -28,7 +22,6 @@ import core.entities.Backdrop;
 import core.entities.Enemy;
 import core.entities.Entity;
 import core.entities.Fog;
-import core.entities.Interactable;
 import core.entities.LightSource;
 import core.entities.Prop;
 import core.entities.utils.ai.DocileAI;
@@ -47,7 +40,6 @@ public class Map implements Serializable {
 	private transient LinkedList<Entity> scenery = new LinkedList<Entity>();
 	private LinkedList<Actor> cast = new LinkedList<Actor>();
 	private LinkedList<Prop> props = new LinkedList<Prop>();
-	private LinkedList<Interactable> interactions = new LinkedList<Interactable>();
 	
 	private Fog fog;
 	private LinkedList<LightSource> lights = new LinkedList<LightSource>();
@@ -198,12 +190,6 @@ public class Map implements Serializable {
 		for(Backdrop b : foreground) {
 			b.update();
 		}
-		
-		if(interactions != null) {
-			for(Interactable i : interactions) {
-				i.update();
-			}
-		}
 	}
 	
 	public ArrayList<Polygon> getCollisionPolys() {
@@ -247,8 +233,6 @@ public class Map implements Serializable {
 				return props.get(props.indexOf(entity));
 			} else if(entity instanceof Actor) {
 				return cast.get(cast.indexOf(entity));
-			} else if(entity instanceof Interactable) {
-				return interactions.get(interactions.indexOf(entity));
 			}
 		} else if(entity instanceof Backdrop) {
 			if(background.contains(entity)) {
@@ -258,8 +242,6 @@ public class Map implements Serializable {
 			} else if(foreground.contains(entity)) {
 				return foreground.get(foreground.indexOf(entity));
 			}
-		} else if(entity instanceof Interactable) {
-			return interactions.get(interactions.indexOf(entity));
 		}
 		
 		return null;
@@ -287,139 +269,50 @@ public class Map implements Serializable {
 		return false;
 	}
 
-	public LinkedList<Prop> loadProp(int x, int y, String prop) {
-		File propDirectory = new File(System.getProperty("resources") + "/sprites/props/" + prop);
-		Dimension size = new Dimension();
-		LinkedList<Prop> loadedProps = new LinkedList<Prop>();
-		
-		if(propDirectory.exists() && propDirectory.isDirectory()) {
-			byte[] data = decodeAVLFile(new File(propDirectory.getAbsolutePath() + "/" + prop + ".avl"));
-			size.width = ByteBuffer.wrap(data, 0, 4).getInt();
-			size.height = ByteBuffer.wrap(data, 4, 4).getInt();
-			
-			String[] propNames = propDirectory.list();
-			for(String n : propNames) {
-				if(n.endsWith(".png")) {
-					n = n.split(".png")[0];
-					String loc = n.substring(n.lastIndexOf('[') + 1, n.lastIndexOf(']'));
-					Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
-					/*props.add(new Prop(
-							(int) Math.floor(((coord.y * SpriteIndex.getSprite(prop + "/" + n).getWidth()) * Camera.ASPECT_RATIO) + x),
-							(int) Math.floor(((coord.x * SpriteIndex.getSprite(prop + "/" + n).getHeight()) * Camera.ASPECT_RATIO) + y),
-							prop + "/" + n, Camera.ASPECT_RATIO));*/
-					loadedProps.add(new Prop((int) Math.floor(((coord.y * size.width) * Camera.ASPECT_RATIO) + x),
-							(int) Math.floor(((coord.x * size.height) * Camera.ASPECT_RATIO) + y), size.width, size.height, prop + "/" + n));
-				}
-			}
-		} else {
-			System.out.println(prop + " needs to be converted to a directory!");
-			loadedProps.add(new Prop(x, y, prop, Camera.ASPECT_RATIO));
-		}
-		
-		props.addAll(loadedProps);
-		scenery.addAll(loadedProps);
-		
-		return loadedProps;
-	}
-
-	public LinkedList<Actor> loadActor(int x, int y, String actor, int type) {
-		LinkedList<Actor> loadedActors = new LinkedList<Actor>();
+	public Actor loadActor(int x, int y, String actor, int type) {
+		Actor loadedActor = null;
 		
 		switch(type) {
 		case 0:
-			loadedActors.add(new Ally(x, y, actor, new Script("Hello", "{event: []}")));
+			loadedActor = new Ally(x, y, actor, new Script("Hello", "{event: []}"));
 			break;
 		case 1:
-			loadedActors.add(new Enemy(x, y, actor, new DocileAI()));
-			break;
-		default:
+			loadedActor = new Enemy(x, y, actor, new DocileAI());
 			break;
 		}
 		
-		cast.addAll(loadedActors);
-		scenery.addAll(loadedActors);
+		cast.add(loadedActor);
+		scenery.add(loadedActor);
 		
-		return loadedActors;
-	}
-	
-	public LinkedList<Backdrop> loadBackdrop(int x, int y, String backdrop, float depth) {
-		File backdropDirectory = new File(System.getProperty("resources") + "/sprites/backdrops/" + backdrop);
-		Dimension size = new Dimension();
-		LinkedList<Backdrop> backdrops = new LinkedList<Backdrop>();
-		
-		if(backdropDirectory.exists() && backdropDirectory.isDirectory()) {
-			byte[] data = decodeAVLFile(new File(backdropDirectory.getAbsolutePath() + "/" + backdrop + ".avl"));
-			size.width = ByteBuffer.wrap(data, 0, 4).getInt();
-			size.height = ByteBuffer.wrap(data, 4, 4).getInt();
-			
-			String[] backdropNames = backdropDirectory.list();
-			for(String n : backdropNames) {
-				if(n.endsWith(".png")) {
-					n = n.split(".png")[0];
-					String loc = n.substring(n.lastIndexOf('[') + 1, n.lastIndexOf(']'));
-					Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
-	
-					/*addBackdrop(new Backdrop((int) Math.floor(((coord.y * size.width) * Camera.ASPECT_RATIO) + x),
-							(int) Math.floor(((coord.x * size.height) * Camera.ASPECT_RATIO) + y), size.width, size.height,
-							backdrop + "/" + n, depth));*/
-					backdrops.add(new Backdrop((int) Math.floor(((coord.y * size.width) * Camera.ASPECT_RATIO) + x),
-							(int) Math.floor(((coord.x * size.height) * Camera.ASPECT_RATIO) + y), size.width, size.height,
-							backdrop + "/" + n, depth));
-				}
-			}
-		} else {
-			System.out.println(backdrop + " needs to be converted to a directory!");
-			addBackdrop(new Backdrop(x, y, backdrop, Camera.ASPECT_RATIO, depth));
-		}
-		
-		for(int i = 0; i<backdrops.size(); i++) {
-			backdrops.get(i).setID(backdrops.get(i).getID() + backdrops.get(i).getName() + i);
-			addBackdrop(backdrops.get(i));
-		}
-		
-		return backdrops;
+		return loadedActor;
 	}
 
-	private void addBackdrop(Backdrop backdrop) {
+	public Backdrop addBackdrop(Backdrop backdrop) {
 		if(backdrop.getDepth() < 0f) {
 			if(background.isEmpty()) {
 				background.add(backdrop);
-				return;
-			}
-			for(int x = 0; x<background.size(); x++) {
-				if(backdrop.getDepth() <= background.get(x).getDepth()) {
-					background.add(x, backdrop);
-					return;
+			} else {
+				for(int x = 0; x<background.size(); x++) {
+					if(backdrop.getDepth() <= background.get(x).getDepth()) {
+						background.add(x, backdrop);
+					}
 				}
 			}
 		} else if(backdrop.getDepth() > 0f){
 			if(foreground.isEmpty()) {
 				foreground.add(backdrop);
-				return;
-			}
-			for(int x = 0; x<foreground.size(); x++) {
-				if(backdrop.getDepth() <= foreground.get(x).getDepth()) {
-					foreground.add(x, backdrop);
-					return;
+			} else {
+				for(int x = 0; x<foreground.size(); x++) {
+					if(backdrop.getDepth() <= foreground.get(x).getDepth()) {
+						foreground.add(x, backdrop);
+					}
 				}
 			}
 		} else {
 			ground.add(backdrop);
 		}
-	}
-	
-	private byte[] decodeAVLFile(File avl) {
-		byte[] byteArray = null;
-		try (FileInputStream fis = new FileInputStream(avl)) {
-			byteArray = new byte[fis.available()];
-			fis.read(byteArray);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		
-		return byteArray;
+		return backdrop;
 	}
 	
 	public void fillScenery() {
@@ -427,11 +320,6 @@ public class Map implements Serializable {
 		
 		scenery.addAll(cast);
 		scenery.addAll(props);
-		if(interactions == null) {
-			interactions = new LinkedList<Interactable>();
-		} else {
-			//scenery.addAll(interactions);
-		}
 		
 		Entity.count = scenery.size();
 		// TODO Set proper Entity ID counts after deserialization
@@ -487,20 +375,16 @@ public class Map implements Serializable {
 		Entity.count = 0;
 	}
 
-	public void addEntity(Entity entity) {
+	public Entity addEntity(Entity entity) {
 		if(entity instanceof Prop) {
 			props.add((Prop) entity);
 		} else if(entity instanceof Actor) {
 			cast.add((Actor) entity);
-		} else if(entity instanceof Interactable) {
-			interactions.add((Interactable) entity);
 		}
 		
 		scenery.add(entity);
-	}
-
-	public LinkedList<Interactable> getInteractions() {
-		return interactions;
+		
+		return entity;
 	}
 	
 }

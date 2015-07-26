@@ -22,22 +22,26 @@ public class Interpreter {
 	
 	private static InteractionListener parseShowText(final JsonObject element) {
 		return new InteractionAdapter() {
-			public void keyPress() {
-				Theater.get().getSetup().addUI(new ScreenText(element.get("Text").getAsString(), 
+			public void keyPress(Script script) {
+				Theater.get().getSetup().addUI(new ScreenText(element.get("showText").getAsString(), 
 						Camera.get().getDisplayWidth(0.5f), Camera.get().getDisplayHeight(0.8f)));
+				
+				script.prepareNextElement();
 			}
 		};
 	}
 	
 	private static InteractionListener parseShowChoice(final JsonArray element) {
 		return new InteractionAdapter() {
-			public void keyPress() {
+			public void keyPress(Script script) {
 				String options = element.get(0).getAsJsonObject().get("option").getAsString();
 				for(int o = 1; o<element.size(); o++) {
 					options += ";" + element.get(o).getAsJsonObject().get("option").getAsString();
 				}
 				Theater.get().getSetup().addUI(new ScreenSelection(options,
 						Camera.get().getDisplayWidth(0.5f), Camera.get().getDisplayHeight(0.8f)));
+				
+				script.prepareNextElement();
 			}
 		};
 	}

@@ -68,9 +68,9 @@ public abstract class Entity implements Serializable, Cloneable {
 	public abstract void update();
 	
 	public void toDraw() {
-		if(Point2D.distance(getX(), getY(), Camera.get().frame.getCenterX(), Camera.get().frame.getCenterY()) < Camera.DRAW_DISTANCE) {
+		//if(Point2D.distance(getX(), getY(), Camera.get().frame.getCenterX(), Camera.get().frame.getCenterY()) < Camera.DRAW_DISTANCE) {
 			draw();
-		}
+		//}
 	}
 	
 	public void draw() {
@@ -183,5 +183,5 @@ public abstract class Entity implements Serializable, Cloneable {
 	public String toString() {
 		return name;
 	}
-		
+	
 }

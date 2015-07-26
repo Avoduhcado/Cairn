@@ -12,11 +12,10 @@ import core.entities.Ally;
 import core.entities.Enemy;
 import core.entities.Backdrop;
 import core.entities.Entity;
-import core.entities.Interactable;
 import core.entities.Player;
 import core.entities.Actor;
+import core.entities.Prop;
 import core.entities.utils.CharState;
-import core.interactions.InteractionAdapter;
 import core.scene.Map;
 import core.scene.hud.HUD;
 import core.ui.UIElement;
@@ -55,7 +54,16 @@ public class Stage extends GameSetup {
 		});
 		map.addEntity(interactable);*/
 		
-		hud = new HUD();
+		Prop church = Prop.loadProp(100, 100, "ChurchLeft");
+		//church.setInteraction("{event: [{showText: 'Congratulations.;You reached the end.'},{showText: 'Press <t+,$key:SLOT8> to restart.'}] }");
+		map.addEntity(church);
+		
+		//map.addEntity(Prop.loadProp(100, 100, "ChurchLeft"));
+		
+		map.addBackdrop(Backdrop.loadBackdrop(0, 0, "Parallax", -0.1f));
+		map.addBackdrop(Backdrop.loadBackdrop(0, 0, "Graveyard", 0));
+		
+		hud = new HUD(player);
 		
 		bgm.setPosition(new Vector3f(0, 0, -5f));
 		bgm.getAudio().playAsMusic(1f, 1f, true);
@@ -118,6 +126,10 @@ public class Stage extends GameSetup {
 						((Enemy) a).think(this);
 					}
 				}
+			}
+			
+			for(int i = 0; i<map.getProps().size(); i++) {
+				map.getProps().get(i).update();
 			}
 
 			map.update();

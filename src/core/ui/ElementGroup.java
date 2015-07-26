@@ -23,6 +23,7 @@ public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 	private EmptyFrame frame;
 	protected int selection = -1;
 	private SelectionPointer pointer;
+	private CancelListener listener;
 
 	public void update() {
 		for(UIElement e : this) {
@@ -47,6 +48,10 @@ public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 		} else if(selection != -1 && frame.getBounds().contains(MouseInput.getScreenMouse())) {
 			get(selection).setSelected(false);
 			// TODO Get mouse coordinates and update pointer position
+		}
+		
+		if(listener != null && Keybinds.CANCEL.clicked()) {
+			listener.cancel();
 		}
 	}
 	
@@ -109,10 +114,22 @@ public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 	}
 	
 	public void setKeyboardNavigable(boolean enabled, UIElement startIndex) {
-		selection = (enabled ? indexOf(startIndex) : -1);
-		if(get(selection) != null) {
-			get(selection).setSelected(true);
+		if(selection != -1) {
+			get(selection).setSelected(false);
 		}
+		
+		selection = (enabled ? indexOf(startIndex) : -1);
+		if(selection != -1 && get(selection) != null) {
+			get(selection).setSelected(true);
+		} else {
+			if(pointer != null) {
+				pointer = null;
+			}
+		}
+	}
+	
+	public void setCancelListener(CancelListener listener) {
+		this.listener = listener;
 	}
 	
 	private void changeSelection(int direction) {
@@ -149,7 +166,12 @@ public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 		frame.setXBorder(xBorder);
 		frame.setYBorder(yBorder);
 	}
-
+	
+	public interface CancelListener {
+		
+		public void cancel();
+		
+	}
 }
 
 class SelectionPointer {

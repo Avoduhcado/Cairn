@@ -12,7 +12,6 @@ import core.entities.Actor;
 import core.entities.Backdrop;
 import core.entities.Enemy;
 import core.entities.Entity;
-import core.entities.Prop;
 import core.entities.utils.Faction;
 import core.entities.utils.ai.AggressiveAI;
 import core.entities.utils.ai.DocileAI;
@@ -38,8 +37,6 @@ import javax.swing.JToggleButton;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
-import java.util.LinkedList;
-
 import javax.swing.JTabbedPane;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
@@ -58,8 +55,9 @@ public class EntityDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private final JPanel contentPanel = new JPanel();
 
-	private LinkedList<Entity> entities;
-	private LinkedList<Entity> defaultEntities = new LinkedList<Entity>();
+	private Entity entity;
+	private Entity defaultEntity;
+	
 	private JToggleButton directionToggle;
 	private JSpinner depthSpinner;
 	private JSpinner xSpinner;
@@ -82,11 +80,9 @@ public class EntityDialog extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public EntityDialog(final LinkedList<Entity> entitiesToEdit, final Stage stage) {
-		this.entities = entitiesToEdit;
-		for(Entity e : entities) {
-			defaultEntities.add(e.clone());
-		}
+	public EntityDialog(final Entity entityEdit, final Stage stage) {
+		this.entity = entityEdit;
+		this.defaultEntity = entityEdit.clone();
 
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setModalityType(ModalityType.APPLICATION_MODAL);
@@ -99,13 +95,13 @@ public class EntityDialog extends JDialog {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				setVisible(false);
-				entities = defaultEntities;
+				resetToDefault();
 			}
 		});
 		
 		contentPanel.setLayout(null);
 		{
-			JLabel entityName = new JLabel(entities.getFirst().getName());
+			JLabel entityName = new JLabel(entity.getName());
 			entityName.setBounds(10, 11, 414, 14);
 			contentPanel.add(entityName);
 		}
@@ -121,13 +117,11 @@ public class EntityDialog extends JDialog {
 		xSpinner = new JSpinner();
 		xSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent evt) {
-				float distance = (float) xSpinner.getValue() - entities.getFirst().getX();
-				for(Entity e : entities) {
-					e.movePosition(distance, 0);
-				}
+				float distance = (float) xSpinner.getValue() - entity.getX();
+				entity.movePosition(distance, 0);
 			}
 		});
-		xSpinner.setModel(new SpinnerNumberModel(new Float(entities.getFirst().getX()), null, null, new Float(1)));
+		xSpinner.setModel(new SpinnerNumberModel(new Float(entity.getX()), null, null, new Float(1)));
 		xSpinner.setBounds(66, 49, 55, 20);
 		contentPanel.add(xSpinner);
 
@@ -138,17 +132,15 @@ public class EntityDialog extends JDialog {
 		ySpinner = new JSpinner();
 		ySpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent evt) {
-				float distance = (float) ySpinner.getValue() - entities.getFirst().getY();
-				for(Entity e : entities) {
-					e.movePosition(0, distance);
-				}
+				float distance = (float) ySpinner.getValue() - entity.getY();
+				entity.movePosition(0, distance);
 			}
 		});
-		ySpinner.setModel(new SpinnerNumberModel(new Float(entities.getFirst().getY()), null, null, new Float(1)));
+		ySpinner.setModel(new SpinnerNumberModel(new Float(entity.getY()), null, null, new Float(1)));
 		ySpinner.setBounds(187, 49, 55, 20);
 		contentPanel.add(ySpinner);
 
-		if(entities.getFirst() instanceof Backdrop) {
+		if(entity instanceof Backdrop) {
 			JSeparator separator_1 = new JSeparator();
 			separator_1.setBounds(10, 74, 414, 2);
 			contentPanel.add(separator_1);
@@ -160,18 +152,16 @@ public class EntityDialog extends JDialog {
 			depthSpinner = new JSpinner();
 			depthSpinner.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent evt) {
-					for(Entity e : entities) {
-						((Backdrop) e).setDepth((float) depthSpinner.getValue() / 100f);
-					}
+					((Backdrop) entity).setDepth((float) depthSpinner.getValue() / 100f);
 				}
 			});
-			depthSpinner.setModel(new SpinnerNumberModel(new Float(((Backdrop) entities.getFirst()).getDepth() * 100),
+			depthSpinner.setModel(new SpinnerNumberModel(new Float(((Backdrop) entity).getDepth() * 100),
 					new Float(-100), new Float(100), new Float(1)));
 			depthSpinner.setBounds(66, 87, 55, 20);
 			contentPanel.add(depthSpinner);
 		}
 
-		if(entities.getFirst() instanceof Actor) {
+		if(entity instanceof Actor) {
 			JSeparator separator_2 = new JSeparator();
 			separator_2.setBounds(10, 118, 414, 2);
 			contentPanel.add(separator_2);
@@ -181,15 +171,15 @@ public class EntityDialog extends JDialog {
 				public void stateChanged(ChangeEvent e) {
 					if(directionToggle.isSelected()) {
 						directionToggle.setText("Facing Left");
-						((Actor) entities.getFirst()).setDirection(1);
+						((Actor) entity).setDirection(1);
 					} else {
 						directionToggle.setText("Facing Right");
-						((Actor) entities.getFirst()).setDirection(0);
+						((Actor) entity).setDirection(0);
 					}
 				}
 			});
 			directionToggle.setBounds(10, 131, 91, 23);
-			directionToggle.setSelected(((Actor) entities.getFirst()).getDirection() == 1);
+			directionToggle.setSelected(((Actor) entity).getDirection() == 1);
 			contentPanel.add(directionToggle);
 
 			JLabel lblSpeed = new JLabel("Speed");
@@ -197,7 +187,7 @@ public class EntityDialog extends JDialog {
 			contentPanel.add(lblSpeed);
 
 			speedSpinner = new JSpinner();
-			speedSpinner.setModel(new SpinnerNumberModel(new Float(((Actor) entities.getFirst()).getMaxSpeed()),
+			speedSpinner.setModel(new SpinnerNumberModel(new Float(((Actor) entity).getMaxSpeed()),
 					new Float(0), null, new Float(1)));
 			speedSpinner.setBounds(151, 131, 46, 20);
 			contentPanel.add(speedSpinner);
@@ -210,7 +200,7 @@ public class EntityDialog extends JDialog {
 			tabbedPane.addTab("Statistics", null, statsPanel, null);
 			statsPanel.setLayout(new BorderLayout(0, 0));
 
-			if(entities.getFirst() instanceof Enemy) {
+			if(entity instanceof Enemy) {
 				JTabbedPane statsPane = new JTabbedPane(JTabbedPane.TOP);
 				statsPanel.add(statsPane, BorderLayout.CENTER);
 
@@ -225,10 +215,10 @@ public class EntityDialog extends JDialog {
 				currentHealth = new JSpinner();
 				currentHealth.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
-						((Enemy) entities.getFirst()).getStats().getHealth().setCurrent((float) currentHealth.getValue());
+						((Enemy) entity).getStats().getHealth().setCurrent((float) currentHealth.getValue());
 					}
 				});
-				currentHealth.setModel(new SpinnerNumberModel(new Float(((Enemy) entities.getFirst()).getStats().getHealth().getCurrent()),
+				currentHealth.setModel(new SpinnerNumberModel(new Float(((Enemy) entity).getStats().getHealth().getCurrent()),
 						null, null, new Float(1)));
 				currentHealth.setBounds(66, 8, 60, 20);
 				healthPanel.add(currentHealth);
@@ -240,10 +230,10 @@ public class EntityDialog extends JDialog {
 				maxHealth = new JSpinner();
 				maxHealth.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
-						((Enemy) entities.getFirst()).getStats().getHealth().setMax((float) maxHealth.getValue());
+						((Enemy) entity).getStats().getHealth().setMax((float) maxHealth.getValue());
 					}
 				});
-				maxHealth.setModel(new SpinnerNumberModel(new Float(((Enemy) entities.getFirst()).getStats().getHealth().getMax()),
+				maxHealth.setModel(new SpinnerNumberModel(new Float(((Enemy) entity).getStats().getHealth().getMax()),
 						null, null, new Float(1)));
 				maxHealth.setBounds(66, 33, 60, 20);
 				healthPanel.add(maxHealth);
@@ -259,10 +249,10 @@ public class EntityDialog extends JDialog {
 				currentStamina = new JSpinner();
 				currentStamina.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
-						((Enemy) entities.getFirst()).getStats().getStamina().setCurrent((float) currentStamina.getValue());
+						((Enemy) entity).getStats().getStamina().setCurrent((float) currentStamina.getValue());
 					}
 				});
-				currentStamina.setModel(new SpinnerNumberModel(new Float(((Enemy) entities.getFirst()).getStats().getStamina().getCurrent()),
+				currentStamina.setModel(new SpinnerNumberModel(new Float(((Enemy) entity).getStats().getStamina().getCurrent()),
 						null, null, new Float(1)));
 				currentStamina.setBounds(66, 8, 60, 20);
 				staminaPanel.add(currentStamina);
@@ -274,10 +264,10 @@ public class EntityDialog extends JDialog {
 				maxStamina = new JSpinner();
 				maxStamina.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
-						((Enemy) entities.getFirst()).getStats().getStamina().setMax((float) maxStamina.getValue());
+						((Enemy) entity).getStats().getStamina().setMax((float) maxStamina.getValue());
 					}
 				});
-				maxStamina.setModel(new SpinnerNumberModel(new Float(((Enemy) entities.getFirst()).getStats().getStamina().getMax()),
+				maxStamina.setModel(new SpinnerNumberModel(new Float(((Enemy) entity).getStats().getStamina().getMax()),
 						null, null, new Float(1)));
 				maxStamina.setBounds(66, 33, 60, 20);
 				staminaPanel.add(maxStamina);
@@ -293,10 +283,10 @@ public class EntityDialog extends JDialog {
 				currentMagic = new JSpinner();
 				currentMagic.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
-						((Enemy) entities.getFirst()).getStats().getMagic().setCurrent((float) currentMagic.getValue());
+						((Enemy) entity).getStats().getMagic().setCurrent((float) currentMagic.getValue());
 					}
 				});
-				currentMagic.setModel(new SpinnerNumberModel(new Float(((Enemy) entities.getFirst()).getStats().getMagic().getCurrent()),
+				currentMagic.setModel(new SpinnerNumberModel(new Float(((Enemy) entity).getStats().getMagic().getCurrent()),
 						null, null, new Float(1)));
 				currentMagic.setBounds(66, 8, 60, 20);
 				magicPanel.add(currentMagic);
@@ -308,10 +298,10 @@ public class EntityDialog extends JDialog {
 				maxMagic = new JSpinner();
 				maxMagic.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
-						((Enemy) entities.getFirst()).getStats().getMagic().setMax((float) maxMagic.getValue());
+						((Enemy) entity).getStats().getMagic().setMax((float) maxMagic.getValue());
 					}
 				});
-				maxMagic.setModel(new SpinnerNumberModel(new Float(((Enemy) entities.getFirst()).getStats().getMagic().getMax()),
+				maxMagic.setModel(new SpinnerNumberModel(new Float(((Enemy) entity).getStats().getMagic().getMax()),
 						null, null, new Float(1)));
 				maxMagic.setBounds(66, 33, 60, 20);
 				magicPanel.add(maxMagic);
@@ -328,7 +318,7 @@ public class EntityDialog extends JDialog {
 				traitList.setVisibleRowCount(12);
 				traitList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				DefaultListModel<Trait> traitsModel = new DefaultListModel<Trait>();
-				for(Trait t : ((Enemy) entities.getFirst()).getIntelligence().getTraits()) {
+				for(Trait t : ((Enemy) entity).getIntelligence().getTraits()) {
 					traitsModel.addElement(t);
 				}
 				traitList.setModel(traitsModel);
@@ -341,18 +331,18 @@ public class EntityDialog extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						switch((String) aiCombo.getSelectedItem()) {
 						case "Docile":
-							((Enemy) entities.getFirst()).changeIntelligence(new DocileAI());
+							((Enemy) entity).changeIntelligence(new DocileAI());
 							break;
 						case "Aggressive":
-							((Enemy) entities.getFirst()).changeIntelligence(new AggressiveAI(0.5f));
+							((Enemy) entity).changeIntelligence(new AggressiveAI(0.5f));
 							break;
 						}
 					}
 				});
 				aiCombo.setModel(new DefaultComboBoxModel<String>(new String[] {"Docile", "Aggressive"}));
-				if(((Enemy) entities.getFirst()).getIntelligence() instanceof DocileAI) {
+				if(((Enemy) entity).getIntelligence() instanceof DocileAI) {
 					aiCombo.setSelectedIndex(0);
-				} else if(((Enemy) entities.getFirst()).getIntelligence() instanceof AggressiveAI) {
+				} else if(((Enemy) entity).getIntelligence() instanceof AggressiveAI) {
 					aiCombo.setSelectedIndex(1);
 				}
 
@@ -381,7 +371,7 @@ public class EntityDialog extends JDialog {
 				intelligencePanel.add(lblIntelligenceRating);
 
 				intRateSpinner = new JSpinner();
-				intRateSpinner.setModel(new SpinnerNumberModel(((Enemy) entities.getFirst()).getIntelligence().getRating() * 100,
+				intRateSpinner.setModel(new SpinnerNumberModel(((Enemy) entity).getIntelligence().getRating() * 100,
 						0, 100, 1));
 				intRateSpinner.setBounds(10, 67, 57, 20);
 				intelligencePanel.add(intRateSpinner);
@@ -389,10 +379,10 @@ public class EntityDialog extends JDialog {
 				viewAngleSpinner = new JSpinner();
 				viewAngleSpinner.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
-						((Enemy) entities.getFirst()).getIntelligence().setViewAngle((int) viewAngleSpinner.getValue());
+						((Enemy) entity).getIntelligence().setViewAngle((int) viewAngleSpinner.getValue());
 					}
 				});
-				viewAngleSpinner.setModel(new SpinnerNumberModel(((Enemy) entities.getFirst()).getIntelligence().getViewAngle(),
+				viewAngleSpinner.setModel(new SpinnerNumberModel(((Enemy) entity).getIntelligence().getViewAngle(),
 						0, 360, 1));
 				viewAngleSpinner.setBounds(10, 123, 57, 20);
 				intelligencePanel.add(viewAngleSpinner);
@@ -400,10 +390,10 @@ public class EntityDialog extends JDialog {
 				viewDistanceSpinner = new JSpinner();
 				viewDistanceSpinner.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
-						((Enemy) entities.getFirst()).getIntelligence().setViewDistance((int) viewDistanceSpinner.getValue());
+						((Enemy) entity).getIntelligence().setViewDistance((int) viewDistanceSpinner.getValue());
 					}
 				});
-				viewDistanceSpinner.setModel(new SpinnerNumberModel(((Enemy) entities.getFirst()).getIntelligence().getViewDistance(),
+				viewDistanceSpinner.setModel(new SpinnerNumberModel(((Enemy) entity).getIntelligence().getViewDistance(),
 						1, null, 1));
 				viewDistanceSpinner.setBounds(77, 123, 57, 20);
 				intelligencePanel.add(viewDistanceSpinner);
@@ -495,7 +485,7 @@ public class EntityDialog extends JDialog {
 
 				enemyList = new JList<Faction>();
 				DefaultListModel<Faction> enemiesModel = new DefaultListModel<Faction>();
-				for(Faction f : ((Enemy) entities.getFirst()).getReputation().getEnemies()) {
+				for(Faction f : ((Enemy) entity).getReputation().getEnemies()) {
 					enemiesModel.addElement(f);
 				}
 				enemyList.setModel(enemiesModel);
@@ -511,7 +501,7 @@ public class EntityDialog extends JDialog {
 				allyList = new JList<Faction>();
 				scrollPane_2.setViewportView(allyList);
 				DefaultListModel<Faction> alliesModel = new DefaultListModel<Faction>();
-				for(Faction f : ((Enemy) entities.getFirst()).getReputation().getAllies()) {
+				for(Faction f : ((Enemy) entity).getReputation().getAllies()) {
 					alliesModel.addElement(f);
 				}
 				allyList.setModel(alliesModel);
@@ -534,7 +524,7 @@ public class EntityDialog extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						if(factionList.getSelectedIndex() != -1) {
 							for(Faction f : factionList.getSelectedValuesList()) {
-								((Enemy) entities.getFirst()).getReputation().addAlly(f);
+								((Enemy) entity).getReputation().addAlly(f);
 								((DefaultListModel<Faction>) allyList.getModel()).addElement(f);
 								((DefaultListModel<Faction>) factionList.getModel()).removeElement(f);
 							}
@@ -549,7 +539,7 @@ public class EntityDialog extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						if(factionList.getSelectedIndex() != -1) {
 							for(Faction f : factionList.getSelectedValuesList()) {
-								((Enemy) entities.getFirst()).getReputation().addEnemy(f);
+								((Enemy) entity).getReputation().addEnemy(f);
 								((DefaultListModel<Faction>) enemyList.getModel()).addElement(f);
 								((DefaultListModel<Faction>) factionList.getModel()).removeElement(f);
 							}
@@ -564,7 +554,7 @@ public class EntityDialog extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						if(allyList.getSelectedIndex() != -1) {
 							for(Faction f : factionList.getSelectedValuesList()) {
-								((Enemy) entities.getFirst()).getReputation().getAllies().remove(f);
+								((Enemy) entity).getReputation().getAllies().remove(f);
 								((DefaultListModel<Faction>) factionList.getModel()).addElement(f);
 								((DefaultListModel<Faction>) allyList.getModel()).removeElement(f);
 							}
@@ -579,7 +569,7 @@ public class EntityDialog extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						if(enemyList.getSelectedIndex() != -1) {
 							for(Faction f : factionList.getSelectedValuesList()) {
-								((Enemy) entities.getFirst()).getReputation().getEnemies().remove(f);
+								((Enemy) entity).getReputation().getEnemies().remove(f);
 								((DefaultListModel<Faction>) factionList.getModel()).addElement(f);
 								((DefaultListModel<Faction>) enemyList.getModel()).removeElement(f);
 							}
@@ -603,26 +593,24 @@ public class EntityDialog extends JDialog {
 				JButton okButton = new JButton("OK");
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent evt) {
-						float xDistance = (float) xSpinner.getValue() - entities.getFirst().getX();
-						float yDistance = (float) ySpinner.getValue() - entities.getFirst().getY();
-						for(Entity e : entities) {
-							e.movePosition(xDistance, yDistance);
+						float xDistance = (float) xSpinner.getValue() - entity.getX();
+						float yDistance = (float) ySpinner.getValue() - entity.getY();
+						entity.movePosition(xDistance, yDistance);
 
-							if(e instanceof Backdrop) {
-								((Backdrop) e).setDepth((float) depthSpinner.getValue() / 100f);
-							} else if(e instanceof Actor) {
-								((Actor) e).setDirection(directionToggle.isSelected() ? 1 : 0);
-								((Actor) e).setMaxSpeed((float) speedSpinner.getValue());
-								if(e instanceof Enemy) {
-									((Enemy) e).getStats().setHealth(new Health((float) currentHealth.getValue(), (float) maxHealth.getValue()));
-									((Enemy) e).getStats().setStamina(new Stamina((float) currentStamina.getValue(), (float) maxStamina.getValue()));
-									((Enemy) e).getStats().setMagic(new Magic((float) currentMagic.getValue(), (float) maxMagic.getValue()));
-									
-									((Enemy) e).getIntelligence().setViewAngle((int) viewAngleSpinner.getValue());
-									((Enemy) e).getIntelligence().setViewDistance((int) viewDistanceSpinner.getValue());
-									for(int i = 0; i<traitList.getModel().getSize(); i++) {
-										((Enemy) e).getIntelligence().addTrait(traitList.getModel().getElementAt(i));
-									}
+						if(entity instanceof Backdrop) {
+							((Backdrop) entity).setDepth((float) depthSpinner.getValue() / 100f);
+						} else if(entity instanceof Actor) {
+							((Actor) entity).setDirection(directionToggle.isSelected() ? 1 : 0);
+							((Actor) entity).setMaxSpeed((float) speedSpinner.getValue());
+							if(entity instanceof Enemy) {
+								((Enemy) entity).getStats().setHealth(new Health((float) currentHealth.getValue(), (float) maxHealth.getValue()));
+								((Enemy) entity).getStats().setStamina(new Stamina((float) currentStamina.getValue(), (float) maxStamina.getValue()));
+								((Enemy) entity).getStats().setMagic(new Magic((float) currentMagic.getValue(), (float) maxMagic.getValue()));
+
+								((Enemy) entity).getIntelligence().setViewAngle((int) viewAngleSpinner.getValue());
+								((Enemy) entity).getIntelligence().setViewDistance((int) viewDistanceSpinner.getValue());
+								for(int i = 0; i<traitList.getModel().getSize(); i++) {
+									((Enemy) entity).getIntelligence().addTrait(traitList.getModel().getElementAt(i));
 								}
 							}
 						}
@@ -639,33 +627,7 @@ public class EntityDialog extends JDialog {
 				JButton cancelButton = new JButton("Cancel");
 				cancelButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent evt) {
-						for(int i = 0; i<entities.size(); i++) {
-							Entity e = entities.get(i);
-							Entity eDefault = defaultEntities.get(i);
-							e.setPosition(eDefault.getX(), eDefault.getY());
-
-							if(e instanceof Backdrop) {
-								((Backdrop) e).setDepth(((Backdrop) eDefault).getDepth());
-							} else if(e instanceof Actor) {
-								((Actor) e).setDirection(((Actor) eDefault).getDirection());
-								((Actor) e).setMaxSpeed(((Actor) eDefault).getMaxSpeed());
-								if(e instanceof Enemy) {
-									((Enemy) e).getStats().setHealth(((Enemy) eDefault).getStats().getHealth());
-									((Enemy) e).getStats().setStamina(((Enemy) eDefault).getStats().getStamina());
-									((Enemy) e).getStats().setMagic(((Enemy) eDefault).getStats().getMagic());
-									
-									((Enemy) e).changeIntelligence(((Enemy) eDefault).getIntelligence());
-									((Enemy) e).getIntelligence().setViewAngle(((Enemy) eDefault).getIntelligence().getViewAngle());
-									((Enemy) e).getIntelligence().setViewDistance(((Enemy) eDefault).getIntelligence().getViewDistance());
-									
-									((Enemy) e).getReputation().setAllies(((Enemy) eDefault).getReputation().getAllies());
-									((Enemy) e).getReputation().setEnemies(((Enemy) eDefault).getReputation().getEnemies());
-								}
-								/*if(e instanceof Scriptable) {
-
-								}*/
-							}
-						}
+						resetToDefault();
 
 						setVisible(false);
 						dispose();
@@ -677,15 +639,34 @@ public class EntityDialog extends JDialog {
 		}
 	}
 	
-	public LinkedList<Entity> showEntityDialog() {
+	public Entity showEntityDialog() {
 		setVisible(true);
 		
-		return entities;
+		return entity;
 	}
 	
-	/*public static LinkedList<Prop> showPropDialog() {
-		
-	}*/
+	private void resetToDefault() {
+		entity.setPosition(defaultEntity.getX(), defaultEntity.getY());
+
+		if(entity instanceof Backdrop) {
+			((Backdrop) entity).setDepth(((Backdrop) defaultEntity).getDepth());
+		} else if(entity instanceof Actor) {
+			((Actor) entity).setDirection(((Actor) defaultEntity).getDirection());
+			((Actor) entity).setMaxSpeed(((Actor) defaultEntity).getMaxSpeed());
+			if(entity instanceof Enemy) {
+				((Enemy) entity).getStats().setHealth(((Enemy) defaultEntity).getStats().getHealth());
+				((Enemy) entity).getStats().setStamina(((Enemy) defaultEntity).getStats().getStamina());
+				((Enemy) entity).getStats().setMagic(((Enemy) defaultEntity).getStats().getMagic());
+
+				((Enemy) entity).changeIntelligence(((Enemy) defaultEntity).getIntelligence());
+				((Enemy) entity).getIntelligence().setViewAngle(((Enemy) defaultEntity).getIntelligence().getViewAngle());
+				((Enemy) entity).getIntelligence().setViewDistance(((Enemy) defaultEntity).getIntelligence().getViewDistance());
+
+				((Enemy) entity).getReputation().setAllies(((Enemy) defaultEntity).getReputation().getAllies());
+				((Enemy) entity).getReputation().setEnemies(((Enemy) defaultEntity).getReputation().getEnemies());
+			}
+		}
+	}
 
 	public JToggleButton getTglbtnFacing() {
 		return directionToggle;

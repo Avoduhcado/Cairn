@@ -1,5 +1,6 @@
 package core.interactions;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -13,16 +14,25 @@ import core.entities.interfaces.Interactable;
 import core.setups.Stage;
 import core.utilities.keyboard.Keybinds;
 
-public class Script {
+public class Script implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private Interactable host;
+	private String data;
 	
-	private JsonObject root;
-	private Queue<JsonElement> elements = new LinkedList<JsonElement>();
+	private transient JsonObject root;
+	private transient Queue<JsonElement> elements = new LinkedList<JsonElement>();
 	
-	private InteractionListener listener;
+	private transient InteractionListener listener;
 	
-	public Script(String data) {
+	public Script(Interactable host, String data) {
+		this.host = host;
+		this.data = data;
+		
 		JsonParser parser = new JsonParser();
 		root = (JsonObject) parser.parse(data);
 		
@@ -34,30 +44,40 @@ public class Script {
 		for(JsonElement e : root.get("event").getAsJsonArray()) {
 			elements.add(e);
 		}
+		
+		prepareNextElement();
 	}
 	
-	public void read() {
+	public void read() {		
 		if(listener != null) {
 			if(Keybinds.CONFIRM.clicked()) {
-				listener.keyPress();
+				listener.keyPress(this);
 			}
 			
 			if(((Stage) Theater.get().getSetup()).getPlayer().getBox().intersects(((Entity) host).getBox())) {
-				listener.playerCollide();
+				listener.playerCollide(this);
 			}
 			
 			for(Entity e : ((Stage) Theater.get().getSetup()).getMap().getScenery()) {
 				if(e.getBox().intersects(((Entity) host).getBox()) && e != host) {
-					listener.entityCollide(e);
+					listener.entityCollide(this, e);
 				}
 			}
 			
-			listener.autorun();
+			listener.autorun(this);
+		} else if(!elements.isEmpty()) {
+			prepareNextElement();
+		} else {
+			fillQueue();
 		}
 	}
 	
-	private void prepareNextElement() {
-		
+	public void prepareNextElement() {
+		if(elements.isEmpty()) {
+			fillQueue();
+		} else {
+			listener = Interpreter.parseInteraction((JsonObject) elements.poll());
+		}
 	}
 	
 }

@@ -25,6 +25,7 @@ import core.utilities.MathFunctions;
 import core.utilities.keyboard.Keybinds;
 import core.audio.AudioSource;
 import core.entities.interfaces.Combatant;
+import core.entities.interfaces.HUDController;
 import core.entities.utils.CharState;
 import core.entities.utils.Faction;
 import core.entities.utils.Reputation;
@@ -46,6 +47,8 @@ public class Player extends Actor implements Combatant {
 	private Stats stats;
 	private Reputation reputation;
 	private boolean familiar;
+	
+	private HUDController[] hudIcons = new HUDController[2];
 	
 	private Spell spell;
 	
@@ -667,6 +670,10 @@ public class Player extends Actor implements Combatant {
 	public void changeWeapon(Weapon weapon) {
 		equipment.equipWeapon(weapon);
 		skeleton.setAttachment("WEAPON", weapon.getName());
+		
+		if(hudIcons[0] != null) {
+			hudIcons[0].swapEquipment(this);
+		}
 	}
 	
 	public void changeWeapon() {
@@ -676,12 +683,20 @@ public class Player extends Actor implements Combatant {
 			skeleton.setAttachment("WEAPON F", equipment.getEquippedWeapon().getName() + " F");
 		}
 		animStateOverlay.setAnimation(0, "ChangeWeapon", false);
+		
+		if(hudIcons[0] != null) {
+			hudIcons[0].swapEquipment(this);
+		}
 	}
 	
 	// TODO Add items
 	public void changeItem() {
 		equipment.equipBell(true);
 		skeleton.setAttachment("ITEM", "BELL");
+		
+		if(hudIcons[1] != null) {
+			hudIcons[1].swapEquipment(this);
+		}
 	}
 	
 	public void changeArmor(int type) {
@@ -717,6 +732,10 @@ public class Player extends Actor implements Combatant {
 			skeleton.setAttachment("ARMOR CHEST 2", "ARMOR PILGRIM HOOD");
 			break;
 		}
+	}
+	
+	public void setHUDController(int index, HUDController hudIcon) {
+		hudIcons[index] = hudIcon;
 	}
 	
 	public Stats getStats() {

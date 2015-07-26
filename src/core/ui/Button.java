@@ -35,7 +35,7 @@ public class Button extends UIElement {
 			Text.getDefault().setStill(still);
 			Text.getDefault().setColor(isHovering() ? (enabled ? Color.white : Color.gray) : (enabled ? Color.gray : Color.darkGray));
 			Text.getDefault().drawString(text, (float) bounds.getX(), (float) bounds.getY());
-		} else {
+		} else if(background == null) {
 			DrawUtils.setStill(still);
 			DrawUtils.drawRect((float) bounds.getX(), (float) bounds.getY(), bounds);
 		}

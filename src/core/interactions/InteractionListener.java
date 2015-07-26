@@ -4,9 +4,9 @@ import core.entities.Entity;
 
 public interface InteractionListener {
 
-	public void keyPress();
-	public void playerCollide();
-	public void entityCollide(Entity entity);
-	public void autorun();
+	public void keyPress(Script Script);
+	public void playerCollide(Script Script);
+	public void entityCollide(Script Script, Entity entity);
+	public void autorun(Script Script);
 	
 }

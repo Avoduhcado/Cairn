@@ -246,6 +246,22 @@ public class Sprite {
 		
 		return fixedSize.y;
 	}
+
+	public float getFinalWidth() {
+		if(scale.x != 1) {
+			return getWidth() * scale.x;
+		}
+		
+		return getDrawWidth();
+	}
+	
+	public float getFinalHeight() {
+		if(scale.y != 1) {
+			return getHeight() * scale.y;
+		}
+		
+		return getDrawHeight();
+	}
 	
 	public void setStill(boolean still) {
 		this.still = still;
