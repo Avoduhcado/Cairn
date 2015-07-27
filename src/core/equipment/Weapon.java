@@ -16,10 +16,13 @@ public class Weapon implements Serializable {
 	
 	private String slot;
 	private String name;
+	private int combos;
 	
 	private AttackType attackType = AttackType.LIGHT;
 	private Rectangle2D damageHitbox;
 	private Rectangle2D attackRange;
+	
+	// TODO Static weapon loader that reads through spine files for animation/combo info
 	
 	public Weapon(String name, AttackType attackType, float damage) {
 		this.name = name;
@@ -66,6 +69,14 @@ public class Weapon implements Serializable {
 		this.name = name;
 	}
 	
+	public int getCombos() {
+		return combos;
+	}
+
+	public void setCombos(int combos) {
+		this.combos = combos;
+	}
+
 	public AttackType getAttackType() {
 		return attackType;
 	}

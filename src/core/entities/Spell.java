@@ -58,7 +58,8 @@ public class Spell {
 			if(s.getAttachment() != null) {
 				Region region = (Region) s.getAttachment();
 				region.updateWorldVertices(s);
-				String sprite = name + "/" + s.getAttachment().getName();
+				//String sprite = name + "/" + s.getAttachment().getName();
+				String sprite = "actors/" + name + "/" + s.getAttachment().getName();
 
 				SpriteIndex.getSprite(sprite).set2DScale(scale);
 				if(spell.getFlipX()) {

@@ -26,6 +26,8 @@ import core.utilities.keyboard.Keybinds;
 import core.audio.AudioSource;
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.HUDController;
+import core.entities.utils.ActionQueue;
+import core.entities.utils.ActionQueue.EntityAction;
 import core.entities.utils.CharState;
 import core.entities.utils.Faction;
 import core.entities.utils.Reputation;
@@ -48,6 +50,8 @@ public class Player extends Actor implements Combatant {
 	private Reputation reputation;
 	private boolean familiar;
 	
+	private transient ActionQueue actionQueue;
+	
 	private HUDController[] hudIcons = new HUDController[2];
 	
 	private Spell spell;
@@ -66,12 +70,12 @@ public class Player extends Actor implements Combatant {
 				
 		this.stats = new Stats();
 		this.stats.setHealth(new Health(30f, 30f));
-		this.stats.setStamina(new Stamina(2000000f, 2000000f));
+		this.stats.setStamina(new Stamina(35f, 35f));
 		if(!familiar) {
 			this.stats.getStamina().setCurrent(0);
 			this.stats.getStamina().setRegainSpeed(0);
 		} else {
-			this.stats.getStamina().setRegainSpeed(70.5f);
+			this.stats.getStamina().setRegainSpeed(35f);
 		}
 		this.stats.setMagic(new Magic(30f, 30f));
 		this.equipment = new Equipment();
@@ -82,6 +86,8 @@ public class Player extends Actor implements Combatant {
 		this.changeItem();
 		this.equipment.setCurrentMilk(10);
 		this.reputation = new Reputation(Faction.PLAYER, Faction.MONSTER);
+		
+		this.actionQueue = new ActionQueue();
 
 		//setState(CharState.REVIVE);
 	}
@@ -126,11 +132,13 @@ public class Player extends Actor implements Combatant {
 			}
 		}
 		
-		
+		if(getState() == CharState.IDLE && actionQueue.peekAction() != null) {
+			performAction();
+		}
 		
 		stats.update();
 	}
-	
+
 	@Override
 	public void draw() {
 		super.draw();
@@ -234,10 +242,25 @@ public class Player extends Actor implements Combatant {
 					equipment.setChugDrink(event.getInt() == 1);
 					break;
 				case "Combo":
-					equipment.setCombo(event.getInt(), event.getString());
+					if(actionQueue.getActions().size() > 1) {
+						actionQueue.pollAction();
+						performAction();
+					}
+					//equipment.setCombo(event.getInt(), event.getString());
 					break;
 				default:
 					System.out.println("Unhandled event: " + event.getData());
+				}
+			}
+			
+			@Override
+			public void end(int trackIndex) {
+				switch(getState()) {
+				case ATTACK:
+					actionQueue.pollAction();
+					break;
+				default:
+					break;
 				}
 			}
 		});
@@ -332,6 +355,31 @@ public class Player extends Actor implements Combatant {
 		this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)),
 				box.getWidth(), box.getHeight());
+	}
+	
+	private void performAction() {
+		EntityAction action = actionQueue.peekAction();
+		
+		switch(action.getType()) {
+		case ATTACK:
+			setDadArmLeft(false);
+			setState(CharState.ATTACK);
+			setDadArmRight(familiar);
+			stats.getStamina().addCurrent(-5f * action.getFloat());
+			
+			if(!action.getBoolean()) {
+				animState.setAnimation(0, equipment.getEquippedWeapon().getAttackAnim() 
+						+ (action.getInt() > 0 ? action.getInt() : ""), false);
+				equipment.setSuperArmor(false);
+				equipment.getEquippedWeapon().setDamaging(false);
+				equipment.setStep(action.getInt());
+			} else {
+				equipment.setStep(0);
+			}
+			break;
+		default:
+			break;
+		}
 	}
 	
 	public void setDadSkull(boolean enabled) {
@@ -449,7 +497,6 @@ public class Player extends Actor implements Combatant {
 		case ATTACK:
 			equipment.setSuperArmor(false);
 			equipment.getEquippedWeapon().setDamaging(false);
-			equipment.setCombo(-1, null);
 			break;
 		case DEFEND:
 			equipment.setBlock(false);
@@ -465,21 +512,23 @@ public class Player extends Actor implements Combatant {
 	public void attack() {
 		// TODO Spamming attack after defend will still progress a combo
 		// TODO Check if Dad skull is enabled
-		if(stats.getStamina().getCurrent() > 0f) {
-			setDadArmLeft(false);
-			
-			if(getState() != CharState.ATTACK) {
-				setState(CharState.ATTACK);
-				setDadArmRight(familiar);
-				stats.getStamina().addCurrent(-5f);
-			} else if(getState() == CharState.ATTACK && equipment.canCombo()) {
-				animState.setAnimation(0, equipment.getEquippedWeapon().getAttackAnim() 
-						+ (equipment.getStep() > 0 ? equipment.getStep() : ""), false);
-				equipment.setSuperArmor(false);
-				equipment.getEquippedWeapon().setDamaging(false);
-				equipment.setCombo(-1, null);
-				stats.getStamina().addCurrent(-2.5f);
-			}
+		if(stats.getStamina().getCurrent() > 0f && actionQueue.getActions().size() < 2) {
+			actionQueue.addAction(new EntityAction(CharState.ATTACK) {
+				boolean notAttacking = getState() != CharState.ATTACK;
+				@Override
+				public boolean getBoolean() {
+					return notAttacking;
+				}
+				@Override
+				public float getFloat() {
+					return (getBoolean() ? 1f : 0.75f);
+				}
+				@Override
+				public int getInt() {
+					return (getBoolean() ? 0 : 
+						(equipment.getStep() + 1 < equipment.getEquippedWeapon().getCombos() ? equipment.getStep() + 1 : 0));
+				}
+			});
 		}
 	}
 
@@ -628,7 +677,8 @@ public class Player extends Actor implements Combatant {
 		case HEAL:
 			return getEquipment().canChugDrink();
 		case ATTACK:
-			return getEquipment().canCombo();
+			return true;
+			//return getEquipment().canCombo();
 		default:
 			return getState().canAct();
 		}

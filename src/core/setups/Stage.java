@@ -43,8 +43,8 @@ public class Stage extends GameSetup {
 		bgm = new AudioSource("CairnArea4", "BGM");
 		
 		player = new Player(0, 0, "MC and Familiar");
-		loadMap(null, 0, 0);
-		//loadMap("Withered Hearthlands", 1380, 1275);
+		//loadMap(null, 0, 0);
+		loadMap("Withered Hearthlands", 1380, 1275);
 		/*Interactable interactable = new Interactable(100, 0, null);
 		interactable.setInteraction(new InteractionAdapter() {
 			@Override
@@ -54,14 +54,14 @@ public class Stage extends GameSetup {
 		});
 		map.addEntity(interactable);*/
 		
-		Prop church = Prop.loadProp(100, 100, "ChurchLeft");
+		//Prop church = Prop.loadProp(100, 100, "ChurchLeft");
 		//church.setInteraction("{event: [{showText: 'Congratulations.;You reached the end.'},{showText: 'Press <t+,$key:SLOT8> to restart.'}] }");
-		map.addEntity(church);
+		//map.addEntity(church);
 		
 		//map.addEntity(Prop.loadProp(100, 100, "ChurchLeft"));
 		
-		map.addBackdrop(Backdrop.loadBackdrop(0, 0, "Parallax", -0.1f));
-		map.addBackdrop(Backdrop.loadBackdrop(0, 0, "Graveyard", 0));
+		//map.addBackdrop(Backdrop.loadBackdrop(0, 0, "Parallax", -0.1f));
+		//map.addBackdrop(Backdrop.loadBackdrop(0, 0, "Graveyard", 0));
 		
 		hud = new HUD(player);
 		

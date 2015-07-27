@@ -24,8 +24,11 @@ public class Equipment implements Serializable {
 	
 	{
 		lightMace.setDamageHitbox(new Rectangle2D.Double(0.2f, 0, 0.8f, 1));
+		lightMace.setCombos(3);
 		heavyMace.setDamageHitbox(new Rectangle2D.Double(0.65f, 0, 0.35f, 1));
+		heavyMace.setCombos(2);
 		polearm.setDamageHitbox(new Rectangle2D.Double(0.75f, 0.15f, 0.23f, 0.7f));
+		polearm.setCombos(3);
 	}
 	
 	private boolean block;
@@ -168,6 +171,14 @@ public class Equipment implements Serializable {
 
 	public int getStep() {
 		return step;
+	}
+
+	public void setStep(int step) {
+		this.step = step;
+	}
+	
+	public int getNextCombo() {
+		return 0;
 	}
 	
 }
