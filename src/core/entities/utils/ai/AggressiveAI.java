@@ -5,6 +5,7 @@ import core.entities.Actor;
 import core.entities.Entity;
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.Intelligent;
+import core.entities.utils.CharState;
 import core.entities.utils.ai.traits.Trait;
 import core.setups.Stage;
 
@@ -46,6 +47,11 @@ public class AggressiveAI extends Intelligence {
 		if(target == null) {
 			search();
 		} else {
+			if(((Actor) target).getState().isDead()) {
+				setTarget(null);
+				return;
+			}
+			
 			if(((Combatant) host).canReach((Entity) target)) {
 				planAttack();
 			} else {
@@ -63,7 +69,7 @@ public class AggressiveAI extends Intelligence {
 			public void act(Intelligent host, Combatant target) {
 				for(Actor a : ((Stage) Theater.get().getSetup()).getCast()) {
 					if(a instanceof Combatant && host != a && ((Combatant) host).getReputation().isEnemy(((Combatant) a).getReputation())
-							&& getSight().intersects(a.getBox())) {
+							&& getSight().intersects(a.getBox()) && !a.getState().isDead()) {
 						alert((Combatant) a);
 						host.getIntelligence().setAction(null);
 						break;

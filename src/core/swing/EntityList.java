@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.ScrollPaneLayout;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
@@ -47,6 +48,8 @@ import javax.swing.event.ChangeEvent;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
+import javax.swing.JScrollPane;
 
 public class EntityList extends JFrame {
 
@@ -308,11 +311,11 @@ public class EntityList extends JFrame {
 		});
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 		
-		JPanel propTab = new JPanel();
+		JScrollPane propTab = new JScrollPane();
 		tabbedPane.addTab("Props", null, propTab, null);
-		propTab.setLayout(new BorderLayout(0, 0));
 		
 		propTree = new JTree();
+		propTree.setAutoscrolls(true);
 		propTree.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -391,11 +394,11 @@ public class EntityList extends JFrame {
 		propTree.setModel(new DefaultTreeModel(populatePropTree(map.getProps())));
 		propTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		propTree.setShowsRootHandles(true);
-		propTab.add(propTree, BorderLayout.CENTER);
+		propTab.setViewportView(propTree);
+		//propTab.add(propTree, BorderLayout.CENTER);
 		
-		JPanel actorTab = new JPanel();
+		JScrollPane actorTab = new JScrollPane();
 		tabbedPane.addTab("Actors", null, actorTab, null);
-		actorTab.setLayout(new BorderLayout(0, 0));
 		
 		actorTree = new JTree();
 		actorTree.addKeyListener(new KeyAdapter() {
@@ -463,17 +466,16 @@ public class EntityList extends JFrame {
 		actorTree.setModel(new DefaultTreeModel(populateActorTree(map.getCast())));
 		actorTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		actorTree.setShowsRootHandles(true);
-		actorTab.add(actorTree, BorderLayout.CENTER);
+		actorTab.setViewportView(actorTree);
 		
-		JPanel backdropTab = new JPanel();
+		JScrollPane backdropTab = new JScrollPane();
 		tabbedPane.addTab("Backdrops", null, backdropTab, null);
-		backdropTab.setLayout(new BorderLayout(0, 0));
 		
 		backdropTree = new JTree();
 		backdropTree.setModel(new DefaultTreeModel(populateBackdropTree(map.getBackground())));
 		backdropTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		backdropTree.setShowsRootHandles(true);
-		backdropTab.add(backdropTree, BorderLayout.CENTER);
+		backdropTab.setViewportView(backdropTree);
 		
 		//setModalityType(ModalityType.APPLICATION_MODAL);
 		setVisible(true);

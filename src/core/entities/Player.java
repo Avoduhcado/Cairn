@@ -4,7 +4,16 @@ import java.awt.Polygon;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Set;
 
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -24,10 +33,12 @@ import core.setups.Stage;
 import core.utilities.MathFunctions;
 import core.utilities.keyboard.Keybinds;
 import core.audio.AudioSource;
+import core.entities.interfaces.Bonable;
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.HUDController;
 import core.entities.utils.ActionQueue;
 import core.entities.utils.ActionQueue.EntityAction;
+import core.entities.utils.BoxUserData;
 import core.entities.utils.CharState;
 import core.entities.utils.Faction;
 import core.entities.utils.Reputation;
@@ -38,36 +49,38 @@ import core.entities.utils.stats.Stats;
 import core.equipment.Equipment;
 import core.equipment.Weapon;
 
-public class Player extends Actor implements Combatant {
+public class Player extends Actor implements Combatant, Bonable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private Equipment equipment;
 	private Stats stats;
 	private Reputation reputation;
 	private boolean familiar;
 	
+	//private Body collisionBox;
+
 	private transient ActionQueue actionQueue;
-	
+
 	private HUDController[] hudIcons = new HUDController[2];
-	
+
 	private Spell spell;
-	
+
 	private transient AnimationState animStateOverlay;
 	private transient float overlayDelay;
 	private transient int looking;
-	
+
 	public Player(float x, float y, String ref) {
 		super(x, y, ref);
-		
+
 		familiar = true;
 		setDadSkull(familiar);
 		setDadArmRight(false);
 		setDadArmLeft(false);
-				
+		
 		this.stats = new Stats();
 		this.stats.setHealth(new Health(30f, 30f));
 		this.stats.setStamina(new Stamina(35f, 35f));
@@ -86,7 +99,7 @@ public class Player extends Actor implements Combatant {
 		this.changeItem();
 		this.equipment.setCurrentMilk(10);
 		this.reputation = new Reputation(Faction.PLAYER, Faction.MONSTER);
-		
+
 		this.actionQueue = new ActionQueue();
 
 		//setState(CharState.REVIVE);
@@ -97,16 +110,16 @@ public class Player extends Actor implements Combatant {
 		if(getVelocity().length() > 0 && state == CharState.RUN) {
 			stats.getStamina().addCurrent(-Theater.getDeltaSpeed(0.15f));
 		}
-		
+
 		if(spell != null) {
 			spell.update();
 			if(spell.isFinished()) {
 				spell = null;
 			}
 		}
-		
+
 		super.update();
-		
+
 		if(looking == 1) {
 			if(!Camera.get().isPanning()) {
 				Camera.get().setPan(new Vector2f(0f, -200), 1.25f, 0.85f);
@@ -131,42 +144,48 @@ public class Player extends Actor implements Combatant {
 				overlayDelay = 0f;
 			}
 		}
-		
+
 		if(getState() == CharState.IDLE && actionQueue.peekAction() != null) {
 			performAction();
 		}
-		
+
 		stats.update();
 	}
 
 	@Override
 	public void draw() {
 		super.draw();
-		
+
 		if(spell != null) {
 			spell.draw();
 		}
 	}
-	
+
 	@Override
 	public void drawDebug() {
 		super.drawDebug();
-		
+
 		if(Theater.get().debug || debug) {
 			if(equipment.getEquippedWeapon().isDamaging()) {
 				Slot weapon = skeleton.findSlot("WEAPON F");
 				if(weapon.getAttachment() != null) {
 					Region region = (Region) weapon.getAttachment();
 					//region.updateWorldVertices(weapon);
-					
+
 					Polygon box = region.getRotatedBox(weapon, equipment.getEquippedWeapon().getDamageHitbox());
 					DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
 					DrawUtils.drawPoly(region.getWorldX(), region.getWorldY(), box);
 				}
 			}
+			
+			/*DrawUtils.setColor(new Vector3f(0f, 1f, 0f));
+			DrawUtils.drawRect((collisionBox.getPosition().x * 30) - (collisionBox.m_fixtureList.getShape().m_radius * 30),
+					(collisionBox.getPosition().y * 30) - (collisionBox.m_fixtureList.getShape().m_radius * 30), 
+					new Rectangle2D.Double(0, 0,
+							collisionBox.m_fixtureList.getShape().m_radius * 30 * 2, collisionBox.m_fixtureList.getShape().m_radius * 30 * 2));*/
 		}
 	}
-	
+
 	@Override
 	public void buildSkeleton() {
 		SkeletonJson json = new SkeletonJson(null);
@@ -177,7 +196,7 @@ public class Player extends Actor implements Combatant {
 		this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)), 
 				skeleton.getData().getWidth() * scale, skeleton.getData().getHeight() * scale);
-		
+
 		animStateData = new AnimationStateData(skeleton.getData());
 		animStateData.setDefaultMix(0.1f);
 		animStateData.setMix("Idle", "Walk", 0.2f);
@@ -196,12 +215,12 @@ public class Player extends Actor implements Combatant {
 		animState = new AnimationState(animStateData);
 		animState.setAnimation(0, "Idle", true);
 		animStateOverlay = new AnimationState(animStateData);
-		
+
 		skeleton.setBonesToSetupPose();
-		
+
 		buildAnimationEvents();
 	}
-	
+
 	@Override
 	public void buildAnimationEvents() {		
 		animState.addListener(new AnimationStateAdapter() {
@@ -252,7 +271,7 @@ public class Player extends Actor implements Combatant {
 					System.out.println("Unhandled event: " + event.getData());
 				}
 			}
-			
+
 			@Override
 			public void end(int trackIndex) {
 				switch(getState()) {
@@ -276,7 +295,7 @@ public class Player extends Actor implements Combatant {
 		animState.apply(skeleton);
 		animStateOverlay.apply(skeleton);
 	}
-	
+
 	@Override
 	public void updateState() {
 		switch(state) {
@@ -294,7 +313,7 @@ public class Player extends Actor implements Combatant {
 		case ATTACK:
 			if(equipment.getEquippedWeapon().isDamaging()) {
 				Polygon box = getDamageBox();
-				
+
 				for(Actor e : ((Stage) Theater.get().getSetup()).getCast()) {
 					if(e instanceof Combatant && e != this) {
 						for(Rectangle2D r : ((Enemy) e).getHitBoxes(this)) {
@@ -349,24 +368,27 @@ public class Player extends Actor implements Combatant {
 			setState(CharState.IDLE);
 		}
 	}
-	
+
 	@Override
 	public void updateBox() {
 		this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)),
 				box.getWidth(), box.getHeight());
+		if(collisionBox != null) {
+			collisionBox.setTransform(new Vec2((float) box.getCenterX() / 30, (float) (box.getMaxY() - (box.getHeight() * 0.15f)) / 30), 0);
+		}
 	}
-	
+
 	private void performAction() {
 		EntityAction action = actionQueue.peekAction();
-		
+
 		switch(action.getType()) {
 		case ATTACK:
 			setDadArmLeft(false);
 			setState(CharState.ATTACK);
 			setDadArmRight(familiar);
 			stats.getStamina().addCurrent(-5f * action.getFloat());
-			
+
 			if(!action.getBoolean()) {
 				animState.setAnimation(0, equipment.getEquippedWeapon().getAttackAnim() 
 						+ (action.getInt() > 0 ? action.getInt() : ""), false);
@@ -381,7 +403,7 @@ public class Player extends Actor implements Combatant {
 			break;
 		}
 	}
-	
+
 	public void setDadSkull(boolean enabled) {
 		if(enabled) {
 			skeleton.setAttachment("HEAD F", "HEAD F");
@@ -395,7 +417,7 @@ public class Player extends Actor implements Combatant {
 			skeleton.setAttachment("HEAD STRING RIGHT", null);
 		}
 	}
-	
+
 	public void setDadArmRight(boolean enabled) {
 		if(enabled) {
 			skeleton.setAttachment("RIGHT ARM F", "RIGHT ARM F");
@@ -413,7 +435,7 @@ public class Player extends Actor implements Combatant {
 			skeleton.setAttachment("WEAPON F", null);
 		}
 	}
-	
+
 	public void setDadArmLeft(boolean enabled) {
 		if(enabled) {
 			skeleton.setAttachment("LEFT ARM F", "LEFT ARM F");
@@ -433,7 +455,7 @@ public class Player extends Actor implements Combatant {
 			skeleton.setAttachment("SHIELD F", null);
 		}
 	}
-	
+
 	@Override
 	public boolean canRun() {
 		if(getVelocity().length() >= 1f) {
@@ -443,15 +465,15 @@ public class Player extends Actor implements Combatant {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public void moveUp() {
 		if(velocity.x != 0f) {
 			looking = 0;
-			
+
 			velocity.y -= Theater.getDeltaSpeed(0.45f);
 			if(velocity.length() > getMaxSpeed()) {
 				velocity = MathFunctions.limitVector(velocity, getMaxSpeed());
@@ -460,12 +482,12 @@ public class Player extends Actor implements Combatant {
 			looking = 1;
 		}
 	}
-	
+
 	@Override
 	public void moveDown() {
 		if(velocity.x != 0f) {
 			looking = 0;
-			
+
 			velocity.y += Theater.getDeltaSpeed(0.45f);
 			if(velocity.length() > getMaxSpeed()) {
 				velocity = MathFunctions.limitVector(velocity, getMaxSpeed());
@@ -474,7 +496,7 @@ public class Player extends Actor implements Combatant {
 			looking = -1;
 		}
 	}
-	
+
 	@Override
 	public boolean dodge(Vector2f direction) {
 		if(stats.getStamina().getCurrent() > 0f) {
@@ -483,7 +505,7 @@ public class Player extends Actor implements Combatant {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -492,7 +514,7 @@ public class Player extends Actor implements Combatant {
 		looking = 0;
 		setDadArmRight(false);
 		setDadArmLeft(false);
-		
+
 		switch(getState()) {
 		case ATTACK:
 			equipment.setSuperArmor(false);
@@ -507,7 +529,7 @@ public class Player extends Actor implements Combatant {
 			break;
 		}
 	}
-	
+
 	@Override
 	public void attack() {
 		// TODO Spamming attack after defend will still progress a combo
@@ -558,7 +580,7 @@ public class Player extends Actor implements Combatant {
 					&& (getDirection() == 0 ? ((Entity) attacker).getX() >= getX() : getX() >= ((Entity) attacker).getX())) {
 				AudioSource parry = new AudioSource("Parried", "SFX");
 				parry.getAudio().playAsSoundEffect(1f, 1f, false);
-				
+
 				attacker.endCombat();
 				((Actor) attacker).setState(CharState.RECOIL);
 				Vector2f.sub(((Entity) attacker).getPosition(), getPosition(), ((Actor) attacker).velocity);
@@ -580,12 +602,12 @@ public class Player extends Actor implements Combatant {
 			break;
 		}
 	}
-	
+
 	@Override
 	public void takeDamage(Combatant attacker, float damageMod, boolean knockBack) {
 		// TODO Retrieve damage from enemy weapon/stats
 		stats.getHealth().addCurrent(-10f * damageMod);
-		
+
 		if(knockBack) {
 			endCombat();
 			setState(CharState.HIT);
@@ -597,27 +619,27 @@ public class Player extends Actor implements Combatant {
 						new Vector2f(((Entity) attacker).getX(), ((Actor) attacker).getYPlane()), this.velocity);
 			}
 			this.velocity.normalise();
-			
+
 			// TODO Scale to damage
 			this.velocity.scale(2.5f * damageMod);
 		} else {
 			equipment.setSuperInvulnerable(true);
 			System.out.println("SUPER DUPER " + ID);
 		}
-		
+
 		if(stats.getHealth().getCurrent() <= 0f) {
 			setState(CharState.DEATH);
 			System.out.println("YOU DIED " + ID + " HP: " + stats.getHealth().getCurrent());
 		}
 	}
-	
+
 	public Polygon getDamageBox() {
 		// TODO NullPointer after defending and then trying to cast a spell?
 		Polygon box = ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment())
 				.getRotatedBox(skeleton.findSlot(equipment.getEquippedWeapon().getSlot()), equipment.getEquippedWeapon().getDamageHitbox());
 		box.translate((int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldX(),
 				(int) ((Region) skeleton.findSlot(equipment.getEquippedWeapon().getSlot()).getAttachment()).getWorldY());
-		
+
 		return box;
 	}
 
@@ -639,15 +661,15 @@ public class Player extends Actor implements Combatant {
 				hitboxes.add(p.getBounds2D());
 			}
 		}
-		
+
 		return hitboxes;
 	}
-	
+
 	@Override
 	public Reputation getReputation() {
 		return reputation;
 	}
-	
+
 	public void heal() {
 		if(equipment.getCurrentMilk() > 0) {
 			if(state == CharState.HEAL && getEquipment().canChugDrink()) {
@@ -671,7 +693,7 @@ public class Player extends Actor implements Combatant {
 			stats.getMagic().setCurrent(stats.getMagic().getMax());
 		}
 	}
-	
+
 	public boolean canAct() {
 		switch(getState()) {
 		case HEAL:
@@ -683,11 +705,11 @@ public class Player extends Actor implements Combatant {
 			return getState().canAct();
 		}
 	}
-	
+
 	@Override
 	public void setState(CharState state) {
 		super.setState(state);
-		
+
 		if(this.state != state) {
 			switch(state) {
 			case ATTACK:
@@ -708,24 +730,24 @@ public class Player extends Actor implements Combatant {
 			default:
 				break;
 			}
-			
+
 			this.state = state;
 		}
 	}
-	
+
 	public Equipment getEquipment() {
 		return equipment;
 	}
-	
+
 	public void changeWeapon(Weapon weapon) {
 		equipment.equipWeapon(weapon);
 		skeleton.setAttachment("WEAPON", weapon.getName());
-		
+
 		if(hudIcons[0] != null) {
 			hudIcons[0].swapEquipment(this);
 		}
 	}
-	
+
 	public void changeWeapon() {
 		equipment.cycleWeapon();
 		skeleton.setAttachment("WEAPON", equipment.getEquippedWeapon().getName());
@@ -733,22 +755,22 @@ public class Player extends Actor implements Combatant {
 			skeleton.setAttachment("WEAPON F", equipment.getEquippedWeapon().getName() + " F");
 		}
 		animStateOverlay.setAnimation(0, "ChangeWeapon", false);
-		
+
 		if(hudIcons[0] != null) {
 			hudIcons[0].swapEquipment(this);
 		}
 	}
-	
+
 	// TODO Add items
 	public void changeItem() {
 		equipment.equipBell(true);
 		skeleton.setAttachment("ITEM", "BELL");
-		
+
 		if(hudIcons[1] != null) {
 			hudIcons[1].swapEquipment(this);
 		}
 	}
-	
+
 	public void changeArmor(int type) {
 		switch(type) {
 		case 0:
@@ -783,26 +805,86 @@ public class Player extends Actor implements Combatant {
 			break;
 		}
 	}
-	
+
 	public void setHUDController(int index, HUDController hudIcon) {
 		hudIcons[index] = hudIcon;
 	}
-	
+
 	public Stats getStats() {
 		return stats;
 	}
-	
+
 	public void setFamiliar(boolean familiar) {
 		this.familiar = familiar;
 	}
-	
+
 	public void setLooking(int looking) {
 		this.looking = looking;
 	}
-	
+
 	@Override
 	public void setID() {
 		this.ID = "PLAYER";
+	}
+
+	@Override
+	public void collapse(World world, Set<Clutter> bodies, Vec2 force) {
+		AudioSource soundeffect = new AudioSource("Spring Rattle", "SFX");
+		soundeffect.getAudio().playAsSoundEffect(1f, 1f, false);
+		
+		/*BodyDef boxDef = new BodyDef();
+		
+		boxDef.position.set(skeleton.getRootBone().getWorldX(), skeleton.getRootBone().getWorldY());
+		boxDef.angle = (float) Math.toRadians(-skeleton.getRootBone().getWorldRotation());
+		boxDef.type = BodyType.DYNAMIC;
+		Body box = world.createBody(boxDef);*/
+		
+		// TODO Auto-generated method stub
+		for(Slot s : skeleton.drawOrder) {
+			if(s.getAttachment() != null && !s.getAttachment().getName().endsWith(" F") && !s.getAttachment().getName().contains("STRING")) {
+				BodyDef boxDef = new BodyDef();
+				boxDef.position.set(((Region) s.getAttachment()).getWorldX() / 30, ((Region) s.getAttachment()).getWorldY() / 30);
+				boxDef.angle = (float) Math.toRadians(-s.getBone().getWorldRotation() - ((Region) s.getAttachment()).getRotation());
+				boxDef.type = BodyType.DYNAMIC;
+				
+				PolygonShape boxShape = new PolygonShape();
+				boxShape.setAsBox(((Region) s.getAttachment()).getWidth() / 30 / 2, ((Region) s.getAttachment()).getHeight() / 30 / 2);
+				
+				FixtureDef boxFixture = new FixtureDef();
+				boxFixture.density = 1f;
+				boxFixture.shape = boxShape;
+				//boxFixture.filter.maskBits = 0;
+				Body box = world.createBody(boxDef);
+				box.createFixture(boxFixture);
+				//box.setUserData(sprite + "/" + s.getAttachment().getName());
+				box.setUserData(
+						new BoxUserData(this.getYPlane() - ((Region) s.getAttachment()).getWorldY(),
+						sprite + "/" + s.getAttachment().getName(), skeleton.getFlipX()));
+				box.applyForce(new Vec2((float) (Math.random() * 50f) - 25f, -25f), box.getWorldCenter());
+				//box.applyLinearImpulse(new Vec2(100, 0), new Vec2(skeleton.getRootBone().getWorldX(), skeleton.getRootBone().getWorldY()));
+
+				bodies.add(new Clutter(box));
+			}
+		}
+	}
+	
+	@Override
+	public void setCollisionBox(World world) {
+		// TODO Auto-generated method stub
+		BodyDef boxDef = new BodyDef();
+		boxDef.position.set((float) box.getCenterX() / 30, (float) (box.getMaxY() - (box.getHeight() * 0.15f)) / 30);
+		boxDef.type = BodyType.STATIC;
+		
+		CircleShape boxShape = new CircleShape();
+		boxShape.m_radius = (float) (this.getYPlane() - getPosition().y) / 30 / 2;
+		
+		FixtureDef boxFixture = new FixtureDef();
+		boxFixture.density = 1f;
+		boxFixture.shape = boxShape;
+		
+		collisionBox = world.createBody(boxDef);
+		collisionBox.createFixture(boxFixture);
+		collisionBox.setFixedRotation(true);
 	}
 
 }

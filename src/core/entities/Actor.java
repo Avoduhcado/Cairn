@@ -6,7 +6,17 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Set;
 
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.dynamics.World;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -21,7 +31,10 @@ import com.esotericsoftware.spine.attachments.Region;
 
 import core.Camera;
 import core.Theater;
+import core.audio.AudioSource;
+import core.entities.interfaces.Bonable;
 import core.entities.interfaces.Mobile;
+import core.entities.utils.BoxUserData;
 import core.entities.utils.CharState;
 import core.render.DrawUtils;
 import core.render.SpriteIndex;
@@ -31,7 +44,7 @@ import core.utilities.Cheats;
 import core.utilities.MathFunctions;
 import core.utilities.text.Text;
 
-public class Actor extends Entity implements Mobile {
+public class Actor extends Entity implements Mobile, Bonable {
 	
 	/**
 	 * 
@@ -49,6 +62,8 @@ public class Actor extends Entity implements Mobile {
 	private float maxRunSpeed;
 	
 	protected transient CharState state;
+
+	protected Body collisionBox;
 	
 	public Actor(float x, float y, String ref) {
 		this.pos = new Vector2f(x, y);
@@ -109,9 +124,15 @@ public class Actor extends Entity implements Mobile {
 		skeleton.setFlipX(direction == 1);
 		skeleton.setFlipY(true);
 		skeleton.updateWorldTransform();
+		
+		if(collisionBox != null) {
+			//collisionBox.applyForce(collisionBox.getWorld().getGravity().mul(-collisionBox.getMass()), collisionBox.getWorldCenter());
+		}
 	}
 	
 	public void draw() {
+		//drawShadow();
+		
 		for(Slot s : skeleton.drawOrder) {
 			if(s.getAttachment() != null) {
 				Region region = (Region) s.getAttachment();
@@ -153,7 +174,34 @@ public class Actor extends Entity implements Mobile {
 			DrawUtils.setColor(new Vector3f(0f, 0f, 1f));
 			DrawUtils.drawLine(new Line2D.Double(getPosition().x, getPosition().y - 5, getPosition().x, getPosition().y + 5));
 			Text.getDefault().drawString(state.toString() + ", " + getID(), pos.x, pos.y);
+			
+			if(collisionBox != null) {
+				DrawUtils.setColor(new Vector3f(0f, 1f, 0f));
+				DrawUtils.drawRect((collisionBox.getPosition().x * 30) - (collisionBox.m_fixtureList.getShape().m_radius * 30),
+						(collisionBox.getPosition().y * 30) - (collisionBox.m_fixtureList.getShape().m_radius * 30), 
+						new Rectangle2D.Double(0, 0,
+								collisionBox.m_fixtureList.getShape().m_radius * 30 * 2, collisionBox.m_fixtureList.getShape().m_radius * 30 * 2));
+			}
 		}
+	}
+	
+	public void drawShadow() {
+		//GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glPushMatrix();
+		GL11.glTranslatef((float) (box.getCenterX() - Camera.get().frame.getX()), (float) (getYPlane() - Camera.get().frame.getY()), 0f);
+		//GL11.glColor4f(0f, 0f, 0f, 1f);
+		GL11.glBegin(GL11.GL_TRIANGLE_FAN); 
+		{
+			GL11.glVertex2f(0, 0);
+			//GL11.glColor4f(0f, 0f, 0f, 0f);
+			for(int i = 0; i<=360; i+=30) {
+				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * (box.getWidth() * 0.667f)),
+						(float) Math.cos(Math.toRadians(i)) * 7.5f);
+			}
+		}
+		GL11.glEnd();
+		GL11.glPopMatrix();
+		//GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 	
 	public void buildSkeleton() {
@@ -243,6 +291,9 @@ public class Actor extends Entity implements Mobile {
 		this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)),
 				box.getWidth(), box.getHeight());
+		if(collisionBox != null) {
+			collisionBox.setTransform(new Vec2((float) box.getCenterX() / 30, (float) (box.getMaxY() - (box.getHeight() * 0.15f)) / 30), 0);
+		}
 	}
 	
 	public void lookAt(Entity target) {
@@ -445,6 +496,59 @@ public class Actor extends Entity implements Mobile {
 	@Override
 	public void setID() {
 		this.ID = this.getClass().getSimpleName() + count++;
+	}
+
+	@Override
+	public void collapse(World world, Set<Clutter> bodies, Vec2 force) {
+		AudioSource soundeffect = new AudioSource("Spring Rattle", "SFX");
+		soundeffect.getAudio().playAsSoundEffect(1f, 1f, false);
+		
+		// TODO Auto-generated method stub
+		for(Slot s : skeleton.drawOrder) {
+			if(s.getAttachment() != null) {
+				BodyDef boxDef = new BodyDef();
+				boxDef.position.set(((Region) s.getAttachment()).getWorldX() / 30, ((Region) s.getAttachment()).getWorldY() / 30);
+				boxDef.angle = (float) Math.toRadians(-s.getBone().getWorldRotation() - ((Region) s.getAttachment()).getRotation());
+				boxDef.type = BodyType.DYNAMIC;
+				
+				PolygonShape boxShape = new PolygonShape();
+				boxShape.setAsBox(((Region) s.getAttachment()).getWidth() / 30 / 2, ((Region) s.getAttachment()).getHeight() / 30 / 2);
+				
+				FixtureDef boxFixture = new FixtureDef();
+				boxFixture.density = 1f;
+				boxFixture.shape = boxShape;
+				//boxFixture.filter.maskBits = 0;
+				Body box = world.createBody(boxDef);
+				box.createFixture(boxFixture);
+				//box.setUserData(sprite + "/" + s.getAttachment().getName());
+				box.setUserData(
+						new BoxUserData(this.getYPlane() - ((Region) s.getAttachment()).getWorldY(),
+						sprite + "/" + s.getAttachment().getName(), skeleton.getFlipX()));
+				box.applyForce(force, box.getWorldCenter());
+				//box.applyLinearImpulse(new Vec2(100, 0), new Vec2(skeleton.getRootBone().getWorldX(), skeleton.getRootBone().getWorldY()));
+
+				bodies.add(new Clutter(box));
+			}
+		}
+	}
+
+	@Override
+	public void setCollisionBox(World world) {
+		// TODO Auto-generated method stub
+		BodyDef boxDef = new BodyDef();
+		boxDef.position.set((float) box.getCenterX() / 30, (float) (box.getMaxY() - (box.getHeight() * 0.15f)) / 30);
+		boxDef.type = BodyType.STATIC;
+
+		CircleShape boxShape = new CircleShape();
+		boxShape.m_radius = (float) (this.getYPlane() - getPosition().y) / 30 / 2;
+
+		FixtureDef boxFixture = new FixtureDef();
+		boxFixture.density = 1f;
+		boxFixture.shape = boxShape;
+
+		collisionBox = world.createBody(boxDef);
+		collisionBox.createFixture(boxFixture);
+		collisionBox.setFixedRotation(true);
 	}
 
 }

@@ -133,7 +133,7 @@ public class Input {
 			}
 
 			if(Keybinds.SLOT6.clicked()) {
-				Camera.get().setRotate(0.025f, 15, 10);
+				((Stage) setup).getPlayer().collapse(((Stage) setup).getWorld(), ((Stage) setup).getBodies(), null);
 			}
 			if(Keybinds.SLOT7.clicked()) {
 				((Stage) setup).getHUD().setEnabled(!((Stage) setup).getHUD().isEnabled());

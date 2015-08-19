@@ -1,7 +1,21 @@
 package core.setups;
 
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
+import org.jbox2d.callbacks.ContactFilter;
+import org.jbox2d.callbacks.ContactListener;
+import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Filter;
+import org.jbox2d.dynamics.Fixture;
+import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.dynamics.World;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Camera;
@@ -9,14 +23,18 @@ import core.Input;
 import core.Theater;
 import core.audio.AudioSource;
 import core.entities.Ally;
+import core.entities.Clutter;
 import core.entities.Enemy;
 import core.entities.Backdrop;
 import core.entities.Entity;
 import core.entities.Player;
 import core.entities.Actor;
 import core.entities.Prop;
+import core.entities.interfaces.Bonable;
 import core.entities.utils.CharState;
+import core.scene.BoneWorld;
 import core.scene.Map;
+import core.scene.ShadowMap;
 import core.scene.hud.HUD;
 import core.ui.UIElement;
 import core.ui.overlays.EditMenu;
@@ -37,14 +55,45 @@ public class Stage extends GameSetup {
 	
 	private AudioSource bgm;
 	
+	private World world = new World(new Vec2(0, 9.8f), false);
+	private Set<Clutter> bodies = new HashSet<Clutter>();
+	
 	public Stage() {
 		Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		bgm = new AudioSource("CairnArea4", "BGM");
 		
 		player = new Player(0, 0, "MC and Familiar");
-		//loadMap(null, 0, 0);
-		loadMap("Withered Hearthlands", 1380, 1275);
+		loadMap(null, 0, 0);
+		//loadMap("Withered Hearthlands", 1380, 1275);
+		
+		ContactListener boneWorld = new BoneWorld();
+		//world.setContactListener(boneWorld);
+		/*world.setContactFilter(new ContactFilter() {
+			public boolean shouldCollide(Fixture fixtureA, Fixture fixtureB) {
+				return false;
+			}
+		});*/
+		
+		player.setCollisionBox(world);
+		
+		for(Actor a : map.getCast()) {
+			a.setCollisionBox(world);
+		}
+		
+		BodyDef groundDef = new BodyDef();
+		groundDef.position.set(0, 1f);
+		groundDef.type = BodyType.STATIC;
+		PolygonShape groundShape = new PolygonShape();
+		groundShape.setAsBox(1000, 1f);
+		Body ground = world.createBody(groundDef);
+		FixtureDef groundFixture = new FixtureDef();
+		groundFixture.density = 1;
+		groundFixture.restitution = 0.3f;
+		groundFixture.shape = groundShape;
+		ground.createFixture(groundFixture);
+		//bodies.add(ground);
+		
 		/*Interactable interactable = new Interactable(100, 0, null);
 		interactable.setInteraction(new InteractionAdapter() {
 			@Override
@@ -104,10 +153,15 @@ public class Stage extends GameSetup {
 				}
 				uiElements.get(i).update();
 			}
+			
+			for(Clutter c : bodies) {
+				//c.update();
+			}
 
 			player.update();
 			if(player.getState() == CharState.DEAD) {
-				Theater.get().swapSetup(new Stage());
+				player.collapse(world, bodies, null);
+				//Theater.get().swapSetup(new Stage());
 			}
 
 			for(int i = 0; i<map.getCast().size(); i++) {
@@ -117,6 +171,12 @@ public class Stage extends GameSetup {
 					((Ally) a).activateScript(player, this);
 				} else {
 					if(a.getState() == CharState.DEAD) {
+						Vector2f hitForce = new Vector2f();
+						Vector2f.sub(new Vector2f(a.getX(), a.getYPlane()),
+								new Vector2f(player.getX(), player.getYPlane()), hitForce);
+						hitForce.normalise();
+						hitForce.scale(200f);
+						a.collapse(world, bodies, new Vec2(hitForce.x, hitForce.y));
 						//i.remove();
 						removeEntity(a);
 						i--;
@@ -133,6 +193,8 @@ public class Stage extends GameSetup {
 			}
 
 			map.update();
+			
+			world.step(1 / 60f, 8, 3);
 			
 			if(Keybinds.EXIT.clicked()) {
 				Keybinds.inMenu();
@@ -155,6 +217,10 @@ public class Stage extends GameSetup {
 					Keybinds.closeMenu();
 					editMenu.close();
 					editMenu = null;
+					
+					for(Actor a : map.getCast()) {
+						a.setCollisionBox(world);
+					}
 				}
 			} else if(Keybinds.EDIT.clicked()) {
 				hud.setEnabled(false);
@@ -181,6 +247,12 @@ public class Stage extends GameSetup {
 		/*for(LightSource l : map.getLights()) {
 			l.draw();
 		}*/
+		
+		ShadowMap.drawShadows(getCast());
+		
+		for(Clutter c : bodies) {
+			c.draw();
+		}
 
 		for(int x = 0; x<map.getScenery().size(); x++) {
 			for(int i = x; i>=0 && i>x-5; i--) {
@@ -295,6 +367,14 @@ public class Stage extends GameSetup {
 				map.getCast().remove(entity);
 			}
 		}
+	}
+	
+	public World getWorld() {
+		return world;
+	}
+	
+	public Set<Clutter> getBodies() {
+		return bodies;
 	}
 	
 }

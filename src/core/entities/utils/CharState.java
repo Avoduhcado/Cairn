@@ -64,6 +64,16 @@ public enum CharState {
 		}
 	}
 	
+	public boolean isDead() {
+		switch(this) {
+		case DEATH:
+		case DEAD:
+			return true;
+		default:
+			return false;
+		}
+	}
+	
 	@Override
 	public String toString() {
 		return this.name().toLowerCase();
