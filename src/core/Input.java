@@ -56,7 +56,7 @@ public class Input {
 		
 		// Camera zooming
 		if(Mouse.hasWheel() && (mouseScroll = Mouse.getDWheel()) != 0) {
-			float wheel = Theater.getDeltaSpeed(mouseScroll / 12000f);
+			float wheel = Theater.getDeltaSpeed(mouseScroll / 1200f);
 			if(Camera.get().getScale() + wheel >= 0.1f && Camera.get().getScale() + wheel <= 3f) {
 				if(Camera.get().getScale() > 1f && Camera.get().getScale() + wheel < 1f)
 					Camera.get().setScale(1f);

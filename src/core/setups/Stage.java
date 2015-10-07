@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.jbox2d.callbacks.ContactFilter;
 import org.jbox2d.callbacks.ContactListener;
+import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -55,7 +56,7 @@ public class Stage extends GameSetup {
 	
 	private AudioSource bgm;
 	
-	private World world = new World(new Vec2(0, 9.8f), false);
+	private World world = new World(new Vec2(0, 0f));
 	private Set<Clutter> bodies = new HashSet<Clutter>();
 	
 	public Stage() {
@@ -68,20 +69,18 @@ public class Stage extends GameSetup {
 		//loadMap("Withered Hearthlands", 1380, 1275);
 		
 		ContactListener boneWorld = new BoneWorld();
-		//world.setContactListener(boneWorld);
+		world.setContactListener(boneWorld);
 		/*world.setContactFilter(new ContactFilter() {
 			public boolean shouldCollide(Fixture fixtureA, Fixture fixtureB) {
 				return false;
 			}
 		});*/
 		
-		player.setCollisionBox(world);
-		
-		for(Actor a : map.getCast()) {
-			a.setCollisionBox(world);
+		for(Actor a : getCast()) {
+			a.setCollisionBox(buildBody(a));
 		}
 		
-		BodyDef groundDef = new BodyDef();
+		/*BodyDef groundDef = new BodyDef();
 		groundDef.position.set(0, 1f);
 		groundDef.type = BodyType.STATIC;
 		PolygonShape groundShape = new PolygonShape();
@@ -91,7 +90,7 @@ public class Stage extends GameSetup {
 		groundFixture.density = 1;
 		groundFixture.restitution = 0.3f;
 		groundFixture.shape = groundShape;
-		ground.createFixture(groundFixture);
+		ground.createFixture(groundFixture);*/
 		//bodies.add(ground);
 		
 		/*Interactable interactable = new Interactable(100, 0, null);
@@ -155,7 +154,7 @@ public class Stage extends GameSetup {
 			}
 			
 			for(Clutter c : bodies) {
-				//c.update();
+				c.update();
 			}
 
 			player.update();
@@ -218,9 +217,10 @@ public class Stage extends GameSetup {
 					editMenu.close();
 					editMenu = null;
 					
-					for(Actor a : map.getCast()) {
+					// TODO
+					/*for(Actor a : map.getCast()) {
 						a.setCollisionBox(world);
-					}
+					}*/
 				}
 			} else if(Keybinds.EDIT.clicked()) {
 				hud.setEnabled(false);
@@ -235,20 +235,20 @@ public class Stage extends GameSetup {
 	}
 
 	@Override
-	public void draw() {
-		for(Backdrop b : map.getBackground()) {
-			b.toDraw();
+	public void draw() {		
+		for(int x = 0; x<map.getBackground().size(); x++) {
+			map.getBackground().get(x).toDraw();
 		}
 
-		for(Backdrop g : map.getGround()) {
-			g.toDraw();
+		for(int x = 0; x<map.getGround().size(); x++) {
+			map.getGround().get(x).toDraw();
 		}
 
 		/*for(LightSource l : map.getLights()) {
 			l.draw();
 		}*/
 		
-		ShadowMap.drawShadows(getCast());
+		//ShadowMap.drawShadows(getCast());
 		
 		for(Clutter c : bodies) {
 			c.draw();
@@ -271,8 +271,8 @@ public class Stage extends GameSetup {
 			//e.toDraw();
 		}
 
-		for(Backdrop f : map.getForeground()) {
-			f.toDraw();
+		for(int x = 0; x<map.getForeground().size(); x++) {
+			map.getForeground().get(x).toDraw();
 		}
 
 		if(map.getFog() != null)
@@ -375,6 +375,27 @@ public class Stage extends GameSetup {
 	
 	public Set<Clutter> getBodies() {
 		return bodies;
+	}
+	
+	public Body buildBody(Actor actor) {
+		BodyDef boxDef = new BodyDef();
+		boxDef.position.set((float) actor.getBox().getCenterX() / 30, 
+				(float) (actor.getBox().getMaxY() - (actor.getBox().getHeight() * 0.15f)) / 30);
+		boxDef.type = BodyType.DYNAMIC;
+
+		CircleShape boxShape = new CircleShape();
+		boxShape.m_radius = (float) (actor.getYPlane() - actor.getPosition().y) / 30 / 2;
+
+		FixtureDef boxFixture = new FixtureDef();
+		boxFixture.density = 1f;
+		boxFixture.shape = boxShape;
+
+		Body box = world.createBody(boxDef);
+		box.createFixture(boxFixture);
+		box.setFixedRotation(true);
+		box.setLinearDamping(1f);
+		
+		return box;
 	}
 	
 }

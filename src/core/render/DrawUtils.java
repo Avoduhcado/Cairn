@@ -5,6 +5,9 @@ import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 
+import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.Vec2;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -55,6 +58,28 @@ public class DrawUtils {
 		
 		GL11.glPushMatrix();
 		GL11.glTranslated(line.getX1() - Camera.get().frame.getX(), line.getY1() - Camera.get().frame.getY(), 0);
+		GL11.glColor3f(color.x, color.y, color.z);
+		GL11.glLineWidth(1.0f);
+		
+		GL11.glBegin(GL11.GL_LINE_LOOP);
+		{
+			GL11.glVertex2d(0, 0);
+			GL11.glVertex2d(line.getX2() - line.getX1(), line.getY2() - line.getY1());
+		}
+		GL11.glEnd();
+		GL11.glPopMatrix();
+		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		
+		// Reset color
+		reset();
+	}
+	
+	public static void drawLine(float x, float y, Line2D line) {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		
+		GL11.glPushMatrix();
+		GL11.glTranslated(x - Camera.get().frame.getX(), y - Camera.get().frame.getY(), 0);
 		GL11.glColor3f(color.x, color.y, color.z);
 		GL11.glLineWidth(1.0f);
 		
@@ -164,6 +189,28 @@ public class DrawUtils {
 		reset();
 	}
 	
+	// TODO Add parameters for gradiented edges
+	public static void drawShadowFan(float x, float y, float width, float height) {
+		//GL11.glDisable(GL11.GL_TEXTURE_2D);
+		
+		GL11.glPushMatrix();
+		GL11.glTranslatef((float) (x - Camera.get().frame.getX()), (float) (y - Camera.get().frame.getY()), 0f);
+		//GL11.glColor4f(color.x, color.y, color.z, 1f);
+		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+		{
+			GL11.glVertex2f(0, 0);
+			//GL11.glColor4f(0f, 0f, 0f, 0f);
+			for(int i = 0; i<=360; i+=30) {
+				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * width),
+						(float) Math.cos(Math.toRadians(i)) * height);
+			}
+		}
+		GL11.glEnd();
+		GL11.glPopMatrix();
+		
+		//GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+	
 	public static void drawGradient(float r, float g, float b, Rectangle2D rect, boolean fadeUp) {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
@@ -180,6 +227,37 @@ public class DrawUtils {
 			GL11.glVertex2d(rect.getWidth(), rect.getHeight());
 			GL11.glColor4f(r, g, b, fadeUp ? 1f : 0f);
 			GL11.glVertex2d(0, rect.getHeight());
+		}
+		GL11.glEnd();
+		GL11.glPopMatrix();
+		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		
+		// Reset color
+		reset();
+	}
+	
+	public static void drawBox2DPoly(Vec2 position, PolygonShape poly) {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		
+		GL11.glPushMatrix();
+		GL11.glTranslatef((int) ((position.x * 30f) - Camera.get().frame.getX()), 
+				(int) ((position.y * 30f) - Camera.get().frame.getY()), 0);
+		GL11.glColor4f(color.x, color.y, color.z, 0.5f);
+		GL11.glBegin(GL11.GL_QUADS);
+		{
+			for(int n = 0; n<poly.m_count; n++) {
+				GL11.glVertex2f(poly.m_vertices[n].x * 30f, poly.m_vertices[n].y * 30f);
+			}
+		}
+		GL11.glEnd();
+		
+		GL11.glColor3f(color.x, color.y, color.z);
+		GL11.glBegin(GL11.GL_LINE_LOOP);
+		{
+			for(int n = 0; n<poly.m_count; n++) {
+				GL11.glVertex2f(poly.m_vertices[n].x * 30f, poly.m_vertices[n].y * 30f);
+			}
 		}
 		GL11.glEnd();
 		GL11.glPopMatrix();

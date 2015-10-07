@@ -86,11 +86,11 @@ public class Backdrop extends Entity {
 		
 		return null;
 	}
-	
+
 	@Override
 	public void draw() {
 		for(SpriteData t : textures) {
-			if(Point2D.distance(t.getDrawX(pos.x, getWidth()), t.getDrawY(pos.y, getHeight()),
+			if(Point2D.distance(t.getClipX(pos.x, getWidth()), t.getClipY(pos.y, getHeight()),
 					Camera.get().frame.getCenterX(), Camera.get().frame.getCenterY()) < Camera.DRAW_DISTANCE) {
 				SpriteIndex.getSprite(t.getSprite()).setStill(true);
 				SpriteIndex.getSprite(t.getSprite()).setFixedSize(getWidth(), getHeight());
@@ -208,12 +208,20 @@ public class Backdrop extends Entity {
 			this.sprite = ref;
 		}
 		
+		public int getClipX(float posX, float width) {
+			return (int) (posX + (width * y));
+		}
+		
+		public int getClipY(float posY, float height) {
+			return (int) (posY - (height * x));
+		}
+		
 		public int getDrawX(float posX, float width) {
 			return (int) ((posX + (width * y)) - Camera.get().frame.getX() - (Camera.get().frame.getX() * depth));
 		}
 		
 		public int getDrawY(float posY, float height) {
-			return (int) ((posY + (height * x)) - Camera.get().frame.getY() - (Camera.get().frame.getY() * depth));
+			return (int) ((posY - (height * x)) - Camera.get().frame.getY() - (Camera.get().frame.getY() * depth));
 		}
 
 		public String getSprite() {

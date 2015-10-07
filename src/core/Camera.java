@@ -175,6 +175,7 @@ public class Camera {
 		
 		DrawUtils.fillColor(1f, 1f, 1f, 1f);
 		
+		// TODO Make a matrix dawg
 		// Zoom in/out camera
 		zoom();
 		// Shake screen
@@ -383,8 +384,8 @@ public class Camera {
 	
 	public void centerOn(Stage stage) {
 		if(focus != null) {
-			frame.setFrameFromCenter(((Entity) focus).getBox().getCenterX(), ((Entity) focus).getBox().getCenterY(),
-					((Entity) focus).getBox().getCenterX() - (WIDTH/2), ((Entity) focus).getBox().getCenterY() - (HEIGHT/2));
+			frame.setFrameFromCenter(((Entity) focus).getPosition().x, ((Entity) focus).getPosition().y,
+					((Entity) focus).getPosition().x - (WIDTH/2), ((Entity) focus).getPosition().y - (HEIGHT/2));
 			
 			//if(Theater.get().getSetup() != null && Theater.get().getSetup() instanceof Stage) {
 				/*if(frame.getX() < 0) {

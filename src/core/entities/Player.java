@@ -6,7 +6,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Set;
 
-import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -33,7 +32,6 @@ import core.setups.Stage;
 import core.utilities.MathFunctions;
 import core.utilities.keyboard.Keybinds;
 import core.audio.AudioSource;
-import core.entities.interfaces.Bonable;
 import core.entities.interfaces.Combatant;
 import core.entities.interfaces.HUDController;
 import core.entities.utils.ActionQueue;
@@ -49,7 +47,7 @@ import core.entities.utils.stats.Stats;
 import core.equipment.Equipment;
 import core.equipment.Weapon;
 
-public class Player extends Actor implements Combatant, Bonable {
+public class Player extends Actor implements Combatant {
 
 	/**
 	 * 
@@ -61,8 +59,6 @@ public class Player extends Actor implements Combatant, Bonable {
 	private Reputation reputation;
 	private boolean familiar;
 	
-	//private Body collisionBox;
-
 	private transient ActionQueue actionQueue;
 
 	private HUDController[] hudIcons = new HUDController[2];
@@ -369,15 +365,12 @@ public class Player extends Actor implements Combatant, Bonable {
 		}
 	}
 
-	@Override
+	/*@Override
 	public void updateBox() {
 		this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)),
 				box.getWidth(), box.getHeight());
-		if(collisionBox != null) {
-			collisionBox.setTransform(new Vec2((float) box.getCenterX() / 30, (float) (box.getMaxY() - (box.getHeight() * 0.15f)) / 30), 0);
-		}
-	}
+	}*/
 
 	private void performAction() {
 		EntityAction action = actionQueue.peekAction();
@@ -858,33 +851,14 @@ public class Player extends Actor implements Combatant, Bonable {
 				box.createFixture(boxFixture);
 				//box.setUserData(sprite + "/" + s.getAttachment().getName());
 				box.setUserData(
-						new BoxUserData(this.getYPlane() - ((Region) s.getAttachment()).getWorldY(),
+						new BoxUserData(0, (this.getYPlane() - ((Region) s.getAttachment()).getWorldY()) / 30,
 						sprite + "/" + s.getAttachment().getName(), skeleton.getFlipX()));
-				box.applyForce(new Vec2((float) (Math.random() * 50f) - 25f, -25f), box.getWorldCenter());
+				//box.applyForce(new Vec2((float) (Math.random() * 50f) - 25f, -25f), box.getWorldCenter());
 				//box.applyLinearImpulse(new Vec2(100, 0), new Vec2(skeleton.getRootBone().getWorldX(), skeleton.getRootBone().getWorldY()));
 
 				bodies.add(new Clutter(box));
 			}
 		}
-	}
-	
-	@Override
-	public void setCollisionBox(World world) {
-		// TODO Auto-generated method stub
-		BodyDef boxDef = new BodyDef();
-		boxDef.position.set((float) box.getCenterX() / 30, (float) (box.getMaxY() - (box.getHeight() * 0.15f)) / 30);
-		boxDef.type = BodyType.STATIC;
-		
-		CircleShape boxShape = new CircleShape();
-		boxShape.m_radius = (float) (this.getYPlane() - getPosition().y) / 30 / 2;
-		
-		FixtureDef boxFixture = new FixtureDef();
-		boxFixture.density = 1f;
-		boxFixture.shape = boxShape;
-		
-		collisionBox = world.createBody(boxDef);
-		collisionBox.createFixture(boxFixture);
-		collisionBox.setFixedRotation(true);
 	}
 
 }

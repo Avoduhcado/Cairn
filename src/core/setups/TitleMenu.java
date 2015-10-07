@@ -35,7 +35,8 @@ public class TitleMenu extends GameSetup {
 		newGame.setAlign(Align.CENTER);
 		newGame.addEvent(new ClickEvent(newGame) {
 			public void click() {
-				Theater.get().swapSetup(new Stage());
+				Theater.get().swapSetup(new Stage_new());
+				//Theater.get().swapSetup(new Stage());
 			}
 		});
 		

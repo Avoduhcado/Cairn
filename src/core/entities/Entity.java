@@ -11,7 +11,6 @@ import java.io.Serializable;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import core.Camera;
 import core.Input;
 import core.Theater;
 import core.interactions.InteractionListener;

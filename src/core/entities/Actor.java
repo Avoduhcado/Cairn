@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Set;
 
-import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -54,6 +53,7 @@ public class Actor extends Entity implements Mobile, Bonable {
 	protected transient Skeleton skeleton;
 	protected transient AnimationState animState;
 	protected transient AnimationStateData animStateData;
+	protected transient Body body;
 	
 	protected int direction;
 	protected transient Vector2f velocity = new Vector2f(0, 0);
@@ -62,8 +62,6 @@ public class Actor extends Entity implements Mobile, Bonable {
 	private float maxRunSpeed;
 	
 	protected transient CharState state;
-
-	protected Body collisionBox;
 	
 	public Actor(float x, float y, String ref) {
 		this.pos = new Vector2f(x, y);
@@ -92,6 +90,15 @@ public class Actor extends Entity implements Mobile, Bonable {
 		updateAnimations();
 		
 		if(velocity.length() != 0) {
+			body.setLinearDamping(1f);
+			//checkCollision();
+			speed = new Vector2f(Theater.getDeltaSpeed(velocity.x), Theater.getDeltaSpeed(velocity.y));
+		
+			if(this.equals(Camera.get().getFocus())) {
+				Camera.get().follow();
+			}
+			move();
+			
 			if(velocity.x > 0) {
 				velocity.setX(MathFunctions.clamp(velocity.x - Theater.getDeltaSpeed(0.15f), 0, velocity.x));
 			} else if(velocity.x < 0) {
@@ -104,35 +111,30 @@ public class Actor extends Entity implements Mobile, Bonable {
 				velocity.setY(MathFunctions.clamp(velocity.y + Theater.getDeltaSpeed(0.25f), velocity.y, 0));
 			}
 			
-			checkCollision();
-		
-			if(this.equals(Camera.get().getFocus())) {
-				Camera.get().follow();
-			}
-			move();
-			
 			if(velocity.x != 0 && state.canWalk()) {
 				setDirection(velocity.x > 0 ? 0 : 1);
 			}
+		} else {
+			body.setLinearDamping(8f);
 		}
 		
 		updateState();
 		
-		skeleton.setX(pos.x);
-		skeleton.setY(pos.y + (skeleton.getData().getCenterY() * scale));
+		//skeleton.setX(pos.x);
+		//skeleton.setY(pos.y + (skeleton.getData().getCenterY() * scale));
+		skeleton.setX(body.getPosition().x * 30);
+		skeleton.setY((body.getPosition().y * 30) + (skeleton.getData().getCenterY() * scale));
 		
 		skeleton.setFlipX(direction == 1);
 		skeleton.setFlipY(true);
 		skeleton.updateWorldTransform();
 		
-		if(collisionBox != null) {
+		if(body != null) {
 			//collisionBox.applyForce(collisionBox.getWorld().getGravity().mul(-collisionBox.getMass()), collisionBox.getWorldCenter());
 		}
 	}
 	
-	public void draw() {
-		//drawShadow();
-		
+	public void draw() {		
 		for(Slot s : skeleton.drawOrder) {
 			if(s.getAttachment() != null) {
 				Region region = (Region) s.getAttachment();
@@ -175,35 +177,31 @@ public class Actor extends Entity implements Mobile, Bonable {
 			DrawUtils.drawLine(new Line2D.Double(getPosition().x, getPosition().y - 5, getPosition().x, getPosition().y + 5));
 			Text.getDefault().drawString(state.toString() + ", " + getID(), pos.x, pos.y);
 			
-			if(collisionBox != null) {
+			if(body != null) {
 				DrawUtils.setColor(new Vector3f(0f, 1f, 0f));
-				DrawUtils.drawRect((collisionBox.getPosition().x * 30) - (collisionBox.m_fixtureList.getShape().m_radius * 30),
-						(collisionBox.getPosition().y * 30) - (collisionBox.m_fixtureList.getShape().m_radius * 30), 
+				DrawUtils.drawRect((body.getPosition().x * 30) - (body.m_fixtureList.getShape().m_radius * 30),
+						(body.getPosition().y * 30) - (body.m_fixtureList.getShape().m_radius * 30), 
 						new Rectangle2D.Double(0, 0,
-								collisionBox.m_fixtureList.getShape().m_radius * 30 * 2, collisionBox.m_fixtureList.getShape().m_radius * 30 * 2));
+								body.m_fixtureList.getShape().m_radius * 30 * 2, body.m_fixtureList.getShape().m_radius * 30 * 2));
 			}
 		}
 	}
-	
-	public void drawShadow() {
-		//GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glPushMatrix();
-		GL11.glTranslatef((float) (box.getCenterX() - Camera.get().frame.getX()), (float) (getYPlane() - Camera.get().frame.getY()), 0f);
-		//GL11.glColor4f(0f, 0f, 0f, 1f);
-		GL11.glBegin(GL11.GL_TRIANGLE_FAN); 
-		{
-			GL11.glVertex2f(0, 0);
-			//GL11.glColor4f(0f, 0f, 0f, 0f);
-			for(int i = 0; i<=360; i+=30) {
-				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * (box.getWidth() * 0.667f)),
-						(float) Math.cos(Math.toRadians(i)) * 7.5f);
-			}
-		}
-		GL11.glEnd();
-		GL11.glPopMatrix();
-		//GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+	@Override
+	public Skeleton getSkeleton() {
+		return skeleton;
 	}
-	
+
+	@Override
+	public AnimationState getAnimState() {
+		return animState;
+	}
+
+	@Override
+	public AnimationStateData getAnimStateData() {
+		return animStateData;
+	}
+
 	public void buildSkeleton() {
 		SkeletonJson json = new SkeletonJson(null);
 		json.setScale(scale);
@@ -263,11 +261,57 @@ public class Actor extends Entity implements Mobile, Bonable {
 		});
 	}
 	
+	@Override
 	public void updateAnimations() {
 		animState.update(Theater.getDeltaSpeed(0.016f) * (velocity.length() == 0 ? 1 : velocity.length() / maxSpeed));
 		animState.apply(skeleton);
 	}
+
+	@Override
+	public void collapse(World world, Set<Clutter> bodies, Vec2 force) {
+		AudioSource soundeffect = new AudioSource("Spring Rattle", "SFX");
+		soundeffect.getAudio().playAsSoundEffect(1f, 1f, false);
+		
+		// TODO Auto-generated method stub
+		for(Slot s : skeleton.drawOrder) {
+			if(s.getAttachment() != null) {
+				BodyDef boxDef = new BodyDef();
+				boxDef.position.set(((Region) s.getAttachment()).getWorldX() / 30, ((Region) s.getAttachment()).getWorldY() / 30);
+				boxDef.angle = (float) Math.toRadians(-s.getBone().getWorldRotation() - ((Region) s.getAttachment()).getRotation());
+				boxDef.type = BodyType.DYNAMIC;
+				
+				PolygonShape boxShape = new PolygonShape();
+				boxShape.setAsBox(((Region) s.getAttachment()).getWidth() / 30 / 2, ((Region) s.getAttachment()).getHeight() / 30 / 2);
+				
+				FixtureDef boxFixture = new FixtureDef();
+				boxFixture.density = 1f;
+				boxFixture.shape = boxShape;
+				boxFixture.filter.maskBits = 0;
+				Body box = world.createBody(boxDef);
+				box.createFixture(boxFixture);
+				//box.setUserData(sprite + "/" + s.getAttachment().getName());
+				box.setUserData(
+						new BoxUserData(0, (this.getYPlane() - ((Region) s.getAttachment()).getWorldY()) / 30,
+						sprite + "/" + s.getAttachment().getName(), skeleton.getFlipX()));
+				//box.applyForce(new Vec2((float) (Math.random() * 50f) - 25f, -25f), box.getWorldCenter());
+				//box.applyForce(force, box.getWorldCenter());
+				//box.applyLinearImpulse(new Vec2(100, 0), new Vec2(skeleton.getRootBone().getWorldX(), skeleton.getRootBone().getWorldY()));
+
+				bodies.add(new Clutter(box));
+			}
+		}
+	}
+
+	@Override
+	public Body getCollisionBox() {
+		return body;
+	}
 	
+	@Override
+	public void setCollisionBox(Body box) {
+		this.body = box;
+	}
+
 	public void updateState() {
 		switch(state) {
 		case IDLE:
@@ -288,12 +332,13 @@ public class Actor extends Entity implements Mobile, Bonable {
 	
 	@Override
 	public void updateBox() {
-		this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
+		this.box.setFrameFromCenter(pos.x, pos.y, pos.x - (box.getWidth() / 2f), pos.y - (box.getHeight() / 2f));
+		/*this.box.setFrame(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),
 				(pos.y + (skeleton.getData().getCenterY() * scale)) - ((skeleton.getData().getHeight() * scale)),
-				box.getWidth(), box.getHeight());
-		if(collisionBox != null) {
-			collisionBox.setTransform(new Vec2((float) box.getCenterX() / 30, (float) (box.getMaxY() - (box.getHeight() * 0.15f)) / 30), 0);
-		}
+				box.getWidth(), box.getHeight());*/
+		/*if(body != null) {
+			body.setTransform(new Vec2((float) box.getCenterX() / 30, (float) (box.getMaxY() - (box.getHeight() * 0.15f)) / 30), 0);
+		}*/
 	}
 	
 	public void lookAt(Entity target) {
@@ -348,7 +393,17 @@ public class Actor extends Entity implements Mobile, Bonable {
 
 	@Override
 	public void move() {
-		Vector2f.add(speed, pos, pos);
+		//Vector2f.add(speed, pos, pos);
+		//body.applyLinearImpulse(new Vec2(speed.x, speed.y), body.getWorldCenter());
+		//body.applyForceToCenter(new Vec2(speed.x, speed.y));
+		if(body.getLinearVelocity().length() < getMaxSpeed()) {
+			body.applyForceToCenter(new Vec2(velocity.x, velocity.y));
+			System.out.println(body.getLinearVelocity() + " " + velocity);
+		} else {
+			System.out.println("TOO FAST!!!!" + body.getLinearVelocity() + " " + velocity);
+		}
+		
+		pos.set(body.getPosition().x * 30, body.getPosition().y * 30);
 		updateBox();
 	}
 	
@@ -364,7 +419,8 @@ public class Actor extends Entity implements Mobile, Bonable {
 	
 	@Override
 	public Vector2f getSpeed() {
-		return speed;
+		return new Vector2f(body.getLinearVelocity().x, body.getLinearVelocity().y);
+		//return speed;
 	}
 	
 	public void setVelocity(float x, float y) {
@@ -424,10 +480,6 @@ public class Actor extends Entity implements Mobile, Bonable {
 		return false;
 	}
 	
-	public Skeleton getSkeleton() {
-		return skeleton;
-	}
-
 	/**
 	 * @return 0 when facing right, 1 when facing left
 	 */
@@ -496,59 +548,6 @@ public class Actor extends Entity implements Mobile, Bonable {
 	@Override
 	public void setID() {
 		this.ID = this.getClass().getSimpleName() + count++;
-	}
-
-	@Override
-	public void collapse(World world, Set<Clutter> bodies, Vec2 force) {
-		AudioSource soundeffect = new AudioSource("Spring Rattle", "SFX");
-		soundeffect.getAudio().playAsSoundEffect(1f, 1f, false);
-		
-		// TODO Auto-generated method stub
-		for(Slot s : skeleton.drawOrder) {
-			if(s.getAttachment() != null) {
-				BodyDef boxDef = new BodyDef();
-				boxDef.position.set(((Region) s.getAttachment()).getWorldX() / 30, ((Region) s.getAttachment()).getWorldY() / 30);
-				boxDef.angle = (float) Math.toRadians(-s.getBone().getWorldRotation() - ((Region) s.getAttachment()).getRotation());
-				boxDef.type = BodyType.DYNAMIC;
-				
-				PolygonShape boxShape = new PolygonShape();
-				boxShape.setAsBox(((Region) s.getAttachment()).getWidth() / 30 / 2, ((Region) s.getAttachment()).getHeight() / 30 / 2);
-				
-				FixtureDef boxFixture = new FixtureDef();
-				boxFixture.density = 1f;
-				boxFixture.shape = boxShape;
-				//boxFixture.filter.maskBits = 0;
-				Body box = world.createBody(boxDef);
-				box.createFixture(boxFixture);
-				//box.setUserData(sprite + "/" + s.getAttachment().getName());
-				box.setUserData(
-						new BoxUserData(this.getYPlane() - ((Region) s.getAttachment()).getWorldY(),
-						sprite + "/" + s.getAttachment().getName(), skeleton.getFlipX()));
-				box.applyForce(force, box.getWorldCenter());
-				//box.applyLinearImpulse(new Vec2(100, 0), new Vec2(skeleton.getRootBone().getWorldX(), skeleton.getRootBone().getWorldY()));
-
-				bodies.add(new Clutter(box));
-			}
-		}
-	}
-
-	@Override
-	public void setCollisionBox(World world) {
-		// TODO Auto-generated method stub
-		BodyDef boxDef = new BodyDef();
-		boxDef.position.set((float) box.getCenterX() / 30, (float) (box.getMaxY() - (box.getHeight() * 0.15f)) / 30);
-		boxDef.type = BodyType.STATIC;
-
-		CircleShape boxShape = new CircleShape();
-		boxShape.m_radius = (float) (this.getYPlane() - getPosition().y) / 30 / 2;
-
-		FixtureDef boxFixture = new FixtureDef();
-		boxFixture.density = 1f;
-		boxFixture.shape = boxShape;
-
-		collisionBox = world.createBody(boxDef);
-		collisionBox.createFixture(boxFixture);
-		collisionBox.setFixedRotation(true);
 	}
 
 }

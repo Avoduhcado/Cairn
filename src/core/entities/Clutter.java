@@ -21,10 +21,12 @@ public class Clutter {
 	public void update() {
 		if(body.getUserData() instanceof BoxUserData) {
 			if(((BoxUserData) body.getUserData()).isFalling()) {
-				((BoxUserData) body.getUserData()).fall();
-				System.out.println(((BoxUserData) body.getUserData()).getZ());
+				((BoxUserData) body.getUserData()).fall(body.getLinearVelocity());
+				//System.out.println(((BoxUserData) body.getUserData()).getZ());
 			} else {
-				body.applyForce(body.m_world.getGravity().negate().mul(body.m_mass), body.getWorldCenter());
+				System.out.println(((BoxUserData) body.getUserData()).getZ() + " not falling");
+				body.setAwake(false);
+				//body.applyForce(body.getWorld().getGravity().mul(body.getMass()).negate(), body.getWorldCenter());
 			}
 		}
 	}

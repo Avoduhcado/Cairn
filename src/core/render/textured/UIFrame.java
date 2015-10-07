@@ -73,17 +73,17 @@ public class UIFrame extends Sprite {
 		double verHeight = box.getHeight() * (y / 2);
 				
 		
-			GL11.glTexCoord2d(x * texWidth, y * texHeight);
-		    GL11.glVertex2d(verWidth, verHeight);
-		    
-		    GL11.glTexCoord2d((x * texWidth) + texWidth, y * texHeight);
-		    GL11.glVertex2d(verWidth + width, verHeight);
-		    
-		    GL11.glTexCoord2d((x * texWidth) + texWidth, (y * texHeight) + texHeight);
-		    GL11.glVertex2d(verWidth + width, verHeight + height);
-		    
-		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
-		    GL11.glVertex2d(verWidth, verHeight + height);
+		GL11.glTexCoord2d(x * texWidth, y * texHeight);
+		GL11.glVertex2d(verWidth, verHeight);
+
+		GL11.glTexCoord2d((x * texWidth) + texWidth, y * texHeight);
+		GL11.glVertex2d(verWidth + width, verHeight);
+
+		GL11.glTexCoord2d((x * texWidth) + texWidth, (y * texHeight) + texHeight);
+		GL11.glVertex2d(verWidth + width, verHeight + height);
+
+		GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
+		GL11.glVertex2d(verWidth, verHeight + height);
 		
 	}
 	

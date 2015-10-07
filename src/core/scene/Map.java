@@ -11,6 +11,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.dynamics.World;
+
 import core.scene.collisions.Collidable;
 import core.scene.collisions.HitMaps;
 import core.scene.collisions.PathPolygon;
@@ -184,12 +191,12 @@ public class Map implements Serializable {
 			l.update();
 		}*/
 		
-		for(Backdrop b : background) {
-			b.update();
+		/*for(int x = 0; x<background.size(); x++) {
+			background.get(x).update();
 		}
-		for(Backdrop b : foreground) {
-			b.update();
-		}
+		for(int x = 0; x<foreground.size(); x++) {
+			foreground.get(x).update();
+		}*/
 	}
 	
 	public ArrayList<Polygon> getCollisionPolys() {
@@ -295,6 +302,7 @@ public class Map implements Serializable {
 				for(int x = 0; x<background.size(); x++) {
 					if(backdrop.getDepth() <= background.get(x).getDepth()) {
 						background.add(x, backdrop);
+						return backdrop;
 					}
 				}
 			}
@@ -305,13 +313,13 @@ public class Map implements Serializable {
 				for(int x = 0; x<foreground.size(); x++) {
 					if(backdrop.getDepth() <= foreground.get(x).getDepth()) {
 						foreground.add(x, backdrop);
+						return backdrop;
 					}
 				}
 			}
-		} else {
-			ground.add(backdrop);
 		}
 		
+		ground.add(backdrop);
 		return backdrop;
 	}
 	

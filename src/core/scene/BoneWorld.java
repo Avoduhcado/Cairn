@@ -12,8 +12,9 @@ public class BoneWorld implements ContactListener {
 	@Override
 	public void beginContact(Contact contact) {
 		// TODO Auto-generated method stub
-		if(contact.getFixtureA().getBody().getUserData() != null) {
-			System.out.println(contact.getFixtureA().getBody().getUserData().toString());
+		if(contact.getFixtureA().getBody().getUserData() instanceof BoxUserData) {
+			((BoxUserData) contact.getFixtureA().getBody().getUserData()).setZ(1.5f);
+			//System.out.println(contact.getFixtureA().getBody().getUserData().toString());
 		}
 	}
 
