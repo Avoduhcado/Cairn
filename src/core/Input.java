@@ -143,11 +143,11 @@ public class Input {
 			}
 			if(Keybinds.SLOT9.clicked()) {
 				((Stage) setup).getPlayer().setPosition(8000, 700);
-				Camera.get().centerOn((Stage) setup);
+				Camera.get().centerOn();
 			}
 			if(Keybinds.SLOT0.clicked()) {
 				((Stage) setup).getPlayer().setPosition(900, 800);
-				Camera.get().centerOn((Stage) setup);
+				Camera.get().centerOn();
 			}
 			
 			if(Keybinds.MENU.clicked()) {

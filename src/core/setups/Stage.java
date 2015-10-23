@@ -325,8 +325,8 @@ public class Stage extends GameSetup {
 		}
 		
 		player.setPosition(x, y);
-		Camera.get().setFocus(player);
-		Camera.get().centerOn(this);
+		//Camera.get().setFocus(player);
+		//Camera.get().centerOn(this);
 		map.getScenery().add(player);
 		
 		Camera.get().setFade(-1.2f);

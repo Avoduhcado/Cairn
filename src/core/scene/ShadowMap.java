@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL11;
 
 import core.Camera;
 import core.Theater;
-import core.entities.Actor;
 import core.entities_new.Entity;
 import core.render.DrawUtils;
 import core.utilities.MathFunctions;
@@ -30,9 +29,7 @@ public class ShadowMap {
 		GL11.glStencilOp(GL11.GL_REPLACE, GL11.GL_REPLACE, GL11.GL_REPLACE);
 		
 		for(Entity e : entities) {
-			//DrawUtils.drawShadowFan((float) a.getBox().getCenterX(), a.getYPlane(),
-				//	(float) (a.getBox().getWidth() * Camera.ASPECT_RATIO), 5.5f);
-			if(e.getBody().m_type == BodyType.DYNAMIC) {
+			if(e.getBody().m_type == BodyType.DYNAMIC && e.getRender() != null) {
 				DrawUtils.drawShadowFan(e.getBody().getPosition().x * 30f, e.getBody().getPosition().y * 30f,
 							e.getWidth() * 0.6f, 5.5f);
 			}

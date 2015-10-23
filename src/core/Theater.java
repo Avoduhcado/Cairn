@@ -85,8 +85,13 @@ public class Theater {
 		// TODO Unplugging audio device crashes audio. Look into it
 		SoundStore.get().poll(0);
 
-		if(!paused)
+		if(!paused) {
 			getSetup().update();
+		}
+		
+		if(Camera.get().getFocus() != null) {
+			Camera.get().follow();
+		}
 
 		Input.checkInput(getSetup());
 

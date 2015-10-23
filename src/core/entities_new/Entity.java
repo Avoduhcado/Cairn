@@ -1,10 +1,9 @@
 package core.entities_new;
 
-import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
@@ -32,6 +31,9 @@ public class Entity implements Drawable, Serializable {
 	private WorldContainer container;
 	private Controller controller;
 	private CharacterState state;
+	
+	private ArrayList<Entity> ground = new ArrayList<Entity>();
+	private ArrayList<Entity> subEntities = new ArrayList<Entity>();
 	
 	private boolean fixDirection;
 	
@@ -85,6 +87,7 @@ public class Entity implements Drawable, Serializable {
 		body.setFixedRotation(true);
 		body.setLinearDamping(15f);
 		body.setGravityScale(0f);
+		body.setUserData(this);
 	}
 	
 	@Override
@@ -94,22 +97,16 @@ public class Entity implements Drawable, Serializable {
 		} else if(body != null) {
 			switch(body.getFixtureList().getShape().m_type) {
 			case CIRCLE:
-				//DrawUtils.drawShape(body.getPosition().x * 30f, body.getPosition().y * 30f, body.getFixtureList().getShape());
+				DrawUtils.setColor(new Vector3f(0f, 0f, 0.6f));
+				DrawUtils.drawBox2DCircle(body.getPosition(), (CircleShape) body.m_fixtureList.m_shape);
 				break;
 			case EDGE:
-				EdgeShape edge = (EdgeShape) body.m_fixtureList.m_shape;
 				DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
-				DrawUtils.drawLine(body.getPosition().x * 30f, body.getPosition().y * 30f, 
-						new Line2D.Double(edge.m_vertex1.x * 30f, edge.m_vertex1.y * 30f, edge.m_vertex2.x * 30f, edge.m_vertex2.y * 30f));
+				DrawUtils.drawBox2DEdge(body.getPosition(), (EdgeShape) body.m_fixtureList.m_shape);
 				break;
 			case POLYGON:
 				DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
 				DrawUtils.drawBox2DPoly(body.getPosition(), (PolygonShape) body.m_fixtureList.m_shape);
-				/*PolygonShape poly = (PolygonShape) body.m_fixtureList.m_shape;
-				DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
-				DrawUtils.drawRect((body.getPosition().x * 30f) + (poly.m_vertices[0].x * 30f),
-						(body.getPosition().y * 30f) - (poly.m_vertices[0].y * 30f),
-						new Rectangle2D.Float(0f, 0f, (poly.m_vertices[1].x * 30f) * 2f, (poly.m_vertices[1].y * 30f) * 2f));*/
 				break;
 			case CHAIN:
 				break;
@@ -137,11 +134,43 @@ public class Entity implements Drawable, Serializable {
 			this.state = state;
 			
 			if(render != null) {
-				render.setAnimation(state.animation, state.loop);
+				if(state == CharacterState.ATTACK) {
+					render.setAnimation("LightAttack1", state.loop);
+				} else {
+					render.setAnimation(state.animation, state.loop);
+				}
 			}
 		}
 	}
 	
+	public void stepOnGround(Entity ground) {
+		this.ground.add(ground);
+		if(this.ground.size() == 1) {
+			this.changeState(CharacterState.LAND);
+		} else {
+			this.changeState(CharacterState.IDLE);
+		}
+		this.body.setGravityScale(0f);
+		this.body.setLinearDamping(15f);
+	}
+	
+	public void stepOffGround(Entity ground) {
+		this.ground.remove(ground);
+		if(this.ground.isEmpty()) {
+			this.changeState(CharacterState.FALLING);
+			this.body.setGravityScale(2f);
+			this.body.setLinearDamping(2.5f);
+		}
+	}
+	
+	public ArrayList<Entity> getSubEntities() {
+		return subEntities;
+	}
+
+	public void setSubEntities(ArrayList<Entity> subEntities) {
+		this.subEntities = subEntities;
+	}
+
 	public float getWidth() {
 		if(render != null) {
 			return render.getWidth() * Camera.ASPECT_RATIO;

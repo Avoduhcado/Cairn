@@ -1,18 +1,11 @@
 package core;
 
 import java.awt.Color;
-import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import org.jbox2d.collision.shapes.CircleShape;
-import org.jbox2d.collision.shapes.PolygonShape;
-import org.jbox2d.collision.shapes.ShapeType;
-import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.Fixture;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -24,17 +17,9 @@ import org.lwjgl.util.vector.Vector4f;
 import org.newdawn.slick.opengl.PNGDecoder;
 import org.newdawn.slick.util.ResourceLoader;
 
-import core.entities.Clutter;
-import core.entities.Entity;
-import core.entities.interfaces.Mobile;
-import core.entities.utils.BoxUserData;
+import core.entities_new.Entity;
 import core.render.DrawUtils;
-import core.render.SpriteIndex;
-import core.scene.collisions.Collidable;
-import core.scene.collisions.HitMaps;
-import core.scene.collisions.Slope;
 import core.setups.GameSetup;
-import core.setups.Stage;
 import core.utilities.MathFunctions;
 import core.utilities.mouse.MouseInput;
 import core.utilities.text.Text;
@@ -59,13 +44,14 @@ public class Camera {
 	/** Current Camera frame */
 	public Rectangle2D frame = new Rectangle2D.Double(0, 0, WIDTH, HEIGHT);
 	private Vector2f frameSpeed = new Vector2f();
+	private Rectangle2D frameBorder = new Rectangle2D.Float();
 	
 	/** World scale variable */
 	private float scale = 1f;
 	/** VSync status */
 	private boolean vsync;
 	
-	private Mobile focus;
+	private Entity focus;
 	
 	/** Current duration of fade effect */
 	private float fadeTime;
@@ -241,13 +227,6 @@ public class Camera {
 		
 		// Draw debug info
 		if(Theater.get().debug) {
-			for(Collidable c : HitMaps.getMapSectors(HitMaps.getCollisionMap(), focus != null ? ((Entity) focus).getBox() : frame)) {
-				if(c instanceof Slope)
-					DrawUtils.drawLine((Line2D) c.getBox());
-				else
-					DrawUtils.drawRect((float) c.getBounds().getX(), (float) c.getBounds().getY(), c.getBounds());
-			}
-			
 			Text.getFont("DEBUG").setStill(true);
 			//Text.getFont("DEBUG").setSize(0.3f);
 			Text.getFont("DEBUG").drawString("Current Setup: " + Theater.get().getSetup().getClass().getName(), 15, 15);
@@ -323,12 +302,13 @@ public class Camera {
 		}
 	}
 	
-	public Mobile getFocus() {
+	public Entity getFocus() {
 		return focus;
 	}
 	
-	public void setFocus(Mobile focus) {
+	public void setFocus(Entity focus) {
 		this.focus = focus;
+		centerOn();
 	}
 	
 	public Vector2f getFrameSpeed() {
@@ -336,71 +316,37 @@ public class Camera {
 	}
 	
 	public void follow() {
-		// Always centered movement
-		/*if(focus.getVelocity().length() != 0) {
-			frame.setFrame(frame.getX() + focus.getVelocity().x, frame.getY() + focus.getVelocity().y, frame.getWidth(), frame.getHeight());
-		}*/
-		// Frame border movement
-		if(focus.getSpeed().length() != 0) {
-			Line2D border = new Line2D.Double(0,0,0,0);
-			//Vector2f velocity = new Vector2f();
-
-			// TODO Broken in different screen sizes due to frame scaling
-			// Scroll camera down
-			if(focus.getSpeed().y > 0) {
-				border = new Line2D.Double(frame.getX(), frame.getY() + (frame.getHeight() * 0.7f),
-						frame.getMaxX(), frame.getY() + (frame.getHeight() * 0.7f));
-				frameSpeed.setY(focus.getSpeed().y);
-			} else if(focus.getSpeed().y < 0) {
-				// Scroll camera up
-				border = new Line2D.Double(frame.getX(), frame.getY() + (frame.getHeight() * 0.45f),
-						frame.getMaxX(), frame.getY() + (frame.getHeight() * 0.45f));
-				frameSpeed.setY(focus.getSpeed().y);
-			}
-
-			if(!((Entity) focus).getBox().intersectsLine(border)) {
-				//frame.setFrame(frame.getX(), frame.getY() + velocity.y, frame.getWidth(), frame.getHeight());
-				frameSpeed.setY(0);
-			}
-
-			// Scroll camera right
-			if(focus.getSpeed().x > 0) {
-				border = new Line2D.Double(frame.getX() + (frame.getWidth() * 0.55f), frame.getY(),
-						frame.getX() + (frame.getWidth() * 0.55f), frame.getMaxY());
-				frameSpeed.setX(focus.getSpeed().x);
-			} else if(focus.getSpeed().x < 0) {
-				// Scroll camera left
-				border = new Line2D.Double(frame.getX() + (frame.getWidth() * 0.45f), frame.getY(),
-						frame.getX() + (frame.getWidth() * 0.45f), frame.getMaxY());
-				frameSpeed.setX(focus.getSpeed().x);
-			}
-
-			if(!((Entity) focus).getBox().intersectsLine(border)) {
-				//frame.setFrame(frame.getX() + velocity.x, frame.getY(), frame.getWidth(), frame.getHeight());
-				frameSpeed.setX(0);
+		if(focus.getBody().getLinearVelocity().length() != 0) {
+			// Always centered movement
+			//frameSpeed.set(focus.getBody().getLinearVelocity().mul(0.5f).x, focus.getBody().getLinearVelocity().mul(0.5f).y);
+			
+			// Frame border movement
+			frameBorder.setFrame(frame.getX() + (frame.getWidth() * 0.45f), frame.getY() + (frame.getHeight() * 0.45f), 
+					frame.getWidth() * 0.1f, frame.getHeight() * 0.25f);
+			
+			switch(frameBorder.outcode(focus.getBody().getPosition().x * 30f, focus.getBody().getPosition().y * 30f)) {
+			case Rectangle2D.OUT_RIGHT | Rectangle2D.OUT_BOTTOM:
+			case Rectangle2D.OUT_RIGHT | Rectangle2D.OUT_TOP:
+			case Rectangle2D.OUT_LEFT | Rectangle2D.OUT_BOTTOM:
+			case Rectangle2D.OUT_LEFT | Rectangle2D.OUT_TOP:
+				frameSpeed.set(focus.getBody().getLinearVelocity().mul(0.5f).x, focus.getBody().getLinearVelocity().mul(0.5f).y);
+				break;
+			case Rectangle2D.OUT_RIGHT:
+			case Rectangle2D.OUT_LEFT:
+				frameSpeed.setX(focus.getBody().getLinearVelocity().mul(0.5f).x);
+				break;
+			case Rectangle2D.OUT_BOTTOM:
+			case Rectangle2D.OUT_TOP:
+				frameSpeed.setY(focus.getBody().getLinearVelocity().mul(0.5f).y);
+				break;
 			}
 		}
 	}
 	
-	public void centerOn(Stage stage) {
+	public void centerOn() {
 		if(focus != null) {
-			frame.setFrameFromCenter(((Entity) focus).getPosition().x, ((Entity) focus).getPosition().y,
-					((Entity) focus).getPosition().x - (WIDTH/2), ((Entity) focus).getPosition().y - (HEIGHT/2));
-			
-			//if(Theater.get().getSetup() != null && Theater.get().getSetup() instanceof Stage) {
-				/*if(frame.getX() < 0) {
-					frame.setFrame(0, frame.getY(), frame.getWidth(), frame.getHeight());
-				} else if(frame.getMaxX() > stage.getMapWidth()) {
-					frame.setFrame(stage.getMapWidth() - frame.getWidth(), frame.getY(), frame.getWidth(), frame.getHeight());
-				}
-				
-				if(frame.getY() < 0) {
-					frame = new Rectangle2D.Double(frame.getX(), 0, frame.getWidth(), frame.getHeight());
-				} else if(frame.getMaxY() > stage.getMapHeight()) {
-					frame = new Rectangle2D.Double(frame.getX(), stage.getMapHeight() - frame.getHeight(),
-							frame.getWidth(), frame.getHeight());
-				}*/
-			//}
+			frame.setFrameFromCenter(focus.getBody().getPosition().x * 30f, focus.getBody().getPosition().y * 30f,
+					(focus.getBody().getPosition().x * 30f) - (WIDTH / 2f), (focus.getBody().getPosition().y * 30f) - (HEIGHT / 2f));
 		}
 	}
 

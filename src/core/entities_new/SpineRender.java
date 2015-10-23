@@ -56,6 +56,8 @@ public class SpineRender implements Render {
 		animStateData = new AnimationStateData(skeleton.getData());
 		animStateData.setDefaultMix(0.2f);
 		
+		// TODO Add in custom animation data loading
+		
 		animState = new AnimationState(animStateData);
 		setAnimation("Idle", true);
 	}
@@ -82,6 +84,8 @@ public class SpineRender implements Render {
 			public void complete(int trackIndex, int totalLoops) {
 				switch(entity.getState()) {
 				case QUICKSTEP:
+				case LAND:
+				case ATTACK:
 					entity.setFixDirection(false);
 					entity.getBody().setLinearVelocity(new Vec2());
 					entity.changeState(CharacterState.IDLE);
@@ -155,7 +159,7 @@ public class SpineRender implements Render {
 		transform.setFlipX(skeleton.getFlipX());
 		transform.setScaleX(region.getScaleX());
 		transform.setScaleY(region.getScaleY());
-		transform.setColor(region.getColor());
+		transform.setColor(skeleton.drawOrder.get(index).getColor());
 	}
 	
 	public float getWidth() {

@@ -5,7 +5,10 @@ public enum CharacterState {
 	IDLE ("Idle", true),
 	WALK ("Walk", true),
 	RUN ("Run", true), 
-	QUICKSTEP ("QuickStep", false);
+	QUICKSTEP ("QuickStep", false),
+	FALLING ("QuickStep", true), 
+	LAND ("QuickStep", false), 
+	ATTACK ("Attack", false);
 	
 	public final String animation;
 	public final boolean loop;

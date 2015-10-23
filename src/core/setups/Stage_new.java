@@ -13,7 +13,9 @@ import org.jbox2d.dynamics.World;
 
 import core.Camera;
 import core.entities_new.Entity;
+import core.entities_new.FollowController;
 import core.entities_new.PlayerController;
+import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
 public class Stage_new extends GameSetup implements WorldContainer {
@@ -25,10 +27,21 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		
+		world.setContactListener(new BoneWorld());
+		
 		Entity player = new Entity("MC and Familiar", 500, 100, this);
 		player.setController(new PlayerController(player));
 		entities.add(player);
+		
+		Entity dad = new Entity("Skull", 500, 100, this);
+		FollowController dadController = new FollowController(dad, player);
+		dadController.setOffset(0, 0f);
+		dad.setController(dadController);
+		dad.getBody().getFixtureList().getFilterData().categoryBits = 0;
+		entities.add(dad);
+		
 		entities.add(new Entity("Shepherd", 900, 100, this));
+		
 		Entity wall = new Entity(null, 0, 200, this);
 		{
 			BodyDef bodyDef = new BodyDef();
@@ -74,20 +87,41 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 			PolygonShape bodyShape = new PolygonShape();
 			bodyShape.setAsBox(50f / 30f, 50f / 30f);
-			System.out.println(bodyShape.m_vertices[0].x * 30f);
-			System.out.println(bodyShape.m_vertices[1].x * 30f);
-			System.out.println(bodyShape.m_vertices[2].x * 30f);
-			System.out.println(bodyShape.m_vertices[3].x * 30f);
+			//CircleShape bodyShape = new CircleShape();
+			//bodyShape.setRadius(50f / 30f);
 
 			FixtureDef boxFixture = new FixtureDef();
 			boxFixture.density = 1f;
 			boxFixture.shape = bodyShape;
+			boxFixture.isSensor = true;
 			
 			Body body = world.createBody(bodyDef);
 			body.createFixture(boxFixture);
 			ground.setBody(body);
 		}
 		entities.add(ground);
+		
+		ground = new Entity(null, 100, 100, this);
+		{
+			BodyDef bodyDef = new BodyDef();
+			bodyDef.position.set(150f / 30f, 150f / 30f);
+			bodyDef.type = BodyType.STATIC;
+
+			PolygonShape bodyShape = new PolygonShape();
+			bodyShape.setAsBox(50f / 30f, 50f / 30f);
+
+			FixtureDef boxFixture = new FixtureDef();
+			boxFixture.density = 1f;
+			boxFixture.shape = bodyShape;
+			boxFixture.isSensor = true;
+			
+			Body body = world.createBody(bodyDef);
+			body.createFixture(boxFixture);
+			ground.setBody(body);
+		}
+		entities.add(ground);
+		
+		Camera.get().setFocus(player);
 	}
 
 	@Override
@@ -102,6 +136,16 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	@Override
 	public void draw() {
 		ShadowMap.drawShadows(entities);
+		
+		for(int i = 0; i<entities.size(); i++) {
+			for(int j = i; j >= 0 && j > i - 5; j--) {
+				if(entities.get(i).getBody().getPosition().y < entities.get(j).getBody().getPosition().y) {
+					entities.add(j, entities.get(i));
+					entities.remove(i + 1);
+					i--;
+				}
+			}
+		}
 		
 		for(int i = 0; i<entities.size(); i++) {
 			entities.get(i).draw();

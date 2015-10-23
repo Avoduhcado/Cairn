@@ -8,7 +8,7 @@ public class Transform {
 	public float rotation;
 	public float scaleX, scaleY;
 	public boolean flipX;
-	public Vector4f color;
+	public Vector4f color = new Vector4f();
 	public boolean still;
 	
 	public Transform() {

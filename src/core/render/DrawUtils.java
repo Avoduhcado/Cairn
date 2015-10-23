@@ -5,8 +5,9 @@ import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
-import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Vec2;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
@@ -257,6 +258,63 @@ public class DrawUtils {
 		{
 			for(int n = 0; n<poly.m_count; n++) {
 				GL11.glVertex2f(poly.m_vertices[n].x * 30f, poly.m_vertices[n].y * 30f);
+			}
+		}
+		GL11.glEnd();
+		GL11.glPopMatrix();
+		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		
+		// Reset color
+		reset();
+	}
+	
+	public static void drawBox2DEdge(Vec2 position, EdgeShape edge) {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		
+		GL11.glPushMatrix();
+		GL11.glTranslatef((int) ((position.x * 30f) - Camera.get().frame.getX()), 
+				(int) ((position.y * 30f) - Camera.get().frame.getY()), 0);
+		GL11.glColor3f(color.x, color.y, color.z);
+		
+		GL11.glBegin(GL11.GL_LINE_LOOP);
+		{
+			GL11.glVertex2f(edge.m_vertex1.x * 30f, edge.m_vertex1.y * 30f);
+			GL11.glVertex2f(edge.m_vertex2.x * 30f, edge.m_vertex2.y * 30f);
+		}
+		GL11.glEnd();
+		GL11.glPopMatrix();
+		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		
+		// Reset color
+		reset();
+	}
+	
+	public static void drawBox2DCircle(Vec2 position, CircleShape circle) {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		
+		GL11.glPushMatrix();
+		GL11.glTranslatef((int) ((position.x * 30f) - Camera.get().frame.getX()), 
+				(int) ((position.y * 30f) - Camera.get().frame.getY()), 0);
+		GL11.glColor4f(color.x, color.y, color.z, 0.5f);
+		
+		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+		{
+			GL11.glVertex2f(0, 0);
+			for(int i = 0; i<=360; i += 10) {
+				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * (circle.m_radius * 30f)),
+						(float) Math.cos(Math.toRadians(i)) * (circle.m_radius * 30f));
+			}
+		}
+		GL11.glEnd();
+		
+		GL11.glColor3f(color.x, color.y, color.z);
+		GL11.glBegin(GL11.GL_LINE_LOOP);
+		{
+			for(int i = 0; i<=360; i += 10) {
+				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * (circle.m_radius * 30f)),
+						(float) Math.cos(Math.toRadians(i)) * (circle.m_radius * 30f));
 			}
 		}
 		GL11.glEnd();

@@ -9,7 +9,7 @@ public interface Controller {
 	
 	public void move(Vec2 direction);
 	public void dodge();
-	public void fall();
 	public void collapse(Vec2 force);
+	public void attack();
 	
 }
