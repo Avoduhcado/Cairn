@@ -7,13 +7,20 @@ import core.utilities.keyboard.Keybinds;
 public class PlayerController implements Controller {
 
 	private Entity player;
-	
+		
 	private float speed = 30f;
 	private float speedMod = 1f;
 	private Vec2 movement = new Vec2();
 	
-	public PlayerController(Entity player) {
+	public PlayerController(Entity player, boolean spawnFollower) {
 		this.player = player;
+		
+		if(spawnFollower) {
+			Entity dad = new Entity("Skull", 500, 100, player.getContainer());
+			dad.setController(new FollowController(dad, player));
+			dad.getBody().getFixtureList().getFilterData().categoryBits = 0;
+			player.getContainer().addEntity(dad);
+		}
 	}
 
 	@Override
@@ -38,6 +45,10 @@ public class PlayerController implements Controller {
 		if(Keybinds.ATTACK.clicked()) {
 			attack();
 		}
+		
+		if(Keybinds.DEFEND.clicked()) {
+			defend();
+		}
 	}
 
 	@Override
@@ -52,9 +63,6 @@ public class PlayerController implements Controller {
 			}
 			break;
 		case QUICKSTEP:
-			break;
-		case ATTACK:
-			//player.getContainer().removeEntity(player.getSubEntities().remove(0));
 			break;
 		default:
 			break;
@@ -93,13 +101,29 @@ public class PlayerController implements Controller {
 	
 	@Override
 	public void attack() {
-		player.changeState(CharacterState.ATTACK);
-		Entity attack = new Entity("Right Arm", player.getBody().getPosition().x * 30f,
-				player.getBody().getPosition().y * 30f, player.getContainer());
-		attack.changeState(CharacterState.ATTACK);
-		attack.getRender().setFlipped(player.getRender().isFlipped());
-		
-		player.getContainer().addEntity(attack);
+		if(player.getState() != CharacterState.ATTACK) {
+			player.changeState(CharacterState.ATTACK);
+			
+			player.setSubEntity(new Entity("Right Arm", player.getBody().getPosition().x * 30f,
+					player.getBody().getPosition().y * 30f, player.getContainer()));
+			player.getSubEntity().changeState(CharacterState.ATTACK);
+			player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
+			
+			player.getContainer().addEntity(player.getSubEntity());
+		}
+	}
+	
+	private void defend() {
+		if(player.getState() != CharacterState.DEFEND) {
+			player.changeState(CharacterState.DEFEND);
+			
+			player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * 30f,
+					(player.getBody().getPosition().y * 30f) - 10f, player.getContainer()));
+			player.getSubEntity().changeState(CharacterState.DEFEND);
+			player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
+			
+			player.getContainer().addEntity(player.getSubEntity());
+		}
 	}
 	
 }

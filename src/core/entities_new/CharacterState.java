@@ -8,10 +8,11 @@ public enum CharacterState {
 	QUICKSTEP ("QuickStep", false),
 	FALLING ("QuickStep", true), 
 	LAND ("QuickStep", false), 
-	ATTACK ("Attack", false);
+	ATTACK ("Attack", false), 
+	DEFEND ("Defend", false);
 	
-	public final String animation;
-	public final boolean loop;
+	public String animation;
+	public boolean loop;
 	
 	CharacterState(String animation, boolean loop) {
 		this.animation = animation;

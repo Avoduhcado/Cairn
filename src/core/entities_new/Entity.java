@@ -33,7 +33,7 @@ public class Entity implements Drawable, Serializable {
 	private CharacterState state;
 	
 	private ArrayList<Entity> ground = new ArrayList<Entity>();
-	private ArrayList<Entity> subEntities = new ArrayList<Entity>();
+	private Entity subEntity;
 	
 	private boolean fixDirection;
 	
@@ -163,12 +163,12 @@ public class Entity implements Drawable, Serializable {
 		}
 	}
 	
-	public ArrayList<Entity> getSubEntities() {
-		return subEntities;
+	public Entity getSubEntity() {
+		return subEntity;
 	}
 
-	public void setSubEntities(ArrayList<Entity> subEntities) {
-		this.subEntities = subEntities;
+	public void setSubEntity(Entity subEntity) {
+		this.subEntity = subEntity;
 	}
 
 	public float getWidth() {

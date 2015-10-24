@@ -30,15 +30,8 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		world.setContactListener(new BoneWorld());
 		
 		Entity player = new Entity("MC and Familiar", 500, 100, this);
-		player.setController(new PlayerController(player));
+		player.setController(new PlayerController(player, true));
 		entities.add(player);
-		
-		Entity dad = new Entity("Skull", 500, 100, this);
-		FollowController dadController = new FollowController(dad, player);
-		dadController.setOffset(0, 0f);
-		dad.setController(dadController);
-		dad.getBody().getFixtureList().getFilterData().categoryBits = 0;
-		entities.add(dad);
 		
 		entities.add(new Entity("Shepherd", 900, 100, this));
 		

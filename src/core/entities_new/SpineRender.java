@@ -83,9 +83,14 @@ public class SpineRender implements Render {
 			@Override
 			public void complete(int trackIndex, int totalLoops) {
 				switch(entity.getState()) {
+				case ATTACK:
+				case DEFEND:
+					if(entity.getContainer().removeEntity(entity.getSubEntity())) {
+						entity.getContainer().getWorld().destroyBody(entity.getSubEntity().getBody());
+					}
+					entity.setSubEntity(null);
 				case QUICKSTEP:
 				case LAND:
-				case ATTACK:
 					entity.setFixDirection(false);
 					entity.getBody().setLinearVelocity(new Vec2());
 					entity.changeState(CharacterState.IDLE);
