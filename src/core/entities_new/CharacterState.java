@@ -23,4 +23,8 @@ public enum CharacterState {
 		return this == IDLE || this == WALK || this == RUN;
 	}
 	
+	public boolean isActing() {
+		return this == QUICKSTEP || this == ATTACK || this == DEFEND;
+	}
+	
 }

@@ -48,12 +48,18 @@ public class FollowController implements Controller {
 			follower.getRender().setFlipped(leader.getRender().isFlipped());
 		}
 		
-		if(Keybinds.ATTACK.clicked()) {
-			follower.changeState(CharacterState.ATTACK);
-		}
-		
-		if(Keybinds.DEFEND.clicked()) {
-			follower.changeState(CharacterState.DEFEND);
+		if(!follower.getState().isActing()) {
+			if(Keybinds.DODGE.clicked()) {
+				follower.changeState(CharacterState.QUICKSTEP);
+			}
+			
+			if(Keybinds.ATTACK.clicked()) {
+				follower.changeState(CharacterState.ATTACK);
+			}
+			
+			if(Keybinds.DEFEND.clicked()) {
+				follower.changeState(CharacterState.DEFEND);
+			}
 		}
 	}
 

@@ -15,6 +15,7 @@ import core.Camera;
 import core.entities_new.Entity;
 import core.entities_new.FollowController;
 import core.entities_new.PlayerController;
+import core.render.textured.Sprite;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
@@ -23,6 +24,8 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	private World world = new World(new Vec2(0, 9.8f));
 	
+	private Sprite crypt = new Sprite("Crypt 1");
+		
 	public Stage_new() {
 		Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
@@ -130,6 +133,8 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	public void draw() {
 		ShadowMap.drawShadows(entities);
 		
+		crypt.draw(0, 0);
+		
 		for(int i = 0; i<entities.size(); i++) {
 			for(int j = i; j >= 0 && j > i - 5; j--) {
 				if(entities.get(i).getBody().getPosition().y < entities.get(j).getBody().getPosition().y) {
@@ -142,12 +147,14 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		
 		for(int i = 0; i<entities.size(); i++) {
 			entities.get(i).draw();
-		}
+		}	
+		
 	}
 
 	@Override
 	public void drawUI() {
 		// TODO Auto-generated method stub
+		ShadowMap.drawIllumination();
 
 	}
 

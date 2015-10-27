@@ -1,7 +1,10 @@
 package core.entities_new;
 
+import java.awt.Point;
+
 import org.jbox2d.common.Vec2;
 
+import core.scene.ShadowMap;
 import core.utilities.keyboard.Keybinds;
 
 public class PlayerController implements Controller {
@@ -19,6 +22,7 @@ public class PlayerController implements Controller {
 			Entity dad = new Entity("Skull", 500, 100, player.getContainer());
 			dad.setController(new FollowController(dad, player));
 			dad.getBody().getFixtureList().getFilterData().categoryBits = 0;
+			ShadowMap.setIllumination(dad, new Point(0, -75));
 			player.getContainer().addEntity(dad);
 		}
 	}
@@ -38,16 +42,18 @@ public class PlayerController implements Controller {
 			movement.setZero();
 		}
 		
-		if(Keybinds.DODGE.clicked()) {
-			dodge();
-		}
-		
-		if(Keybinds.ATTACK.clicked()) {
-			attack();
-		}
-		
-		if(Keybinds.DEFEND.clicked()) {
-			defend();
+		if(!player.getState().isActing()) {
+			if(Keybinds.DODGE.clicked()) {
+				dodge();
+			}
+			
+			if(Keybinds.ATTACK.clicked()) {
+				attack();
+			}
+			
+			if(Keybinds.DEFEND.clicked()) {
+				defend();
+			}
 		}
 	}
 
@@ -101,29 +107,25 @@ public class PlayerController implements Controller {
 	
 	@Override
 	public void attack() {
-		if(player.getState() != CharacterState.ATTACK) {
-			player.changeState(CharacterState.ATTACK);
-			
-			player.setSubEntity(new Entity("Right Arm", player.getBody().getPosition().x * 30f,
-					player.getBody().getPosition().y * 30f, player.getContainer()));
-			player.getSubEntity().changeState(CharacterState.ATTACK);
-			player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
-			
-			player.getContainer().addEntity(player.getSubEntity());
-		}
+		player.changeState(CharacterState.ATTACK);
+
+		player.setSubEntity(new Entity("Right Arm", player.getBody().getPosition().x * 30f,
+				player.getBody().getPosition().y * 30f, player.getContainer()));
+		player.getSubEntity().changeState(CharacterState.ATTACK);
+		player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
+
+		player.getContainer().addEntity(player.getSubEntity());
 	}
 	
 	private void defend() {
-		if(player.getState() != CharacterState.DEFEND) {
-			player.changeState(CharacterState.DEFEND);
-			
-			player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * 30f,
-					(player.getBody().getPosition().y * 30f) - 10f, player.getContainer()));
-			player.getSubEntity().changeState(CharacterState.DEFEND);
-			player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
-			
-			player.getContainer().addEntity(player.getSubEntity());
-		}
+		player.changeState(CharacterState.DEFEND);
+
+		player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * 30f,
+				(player.getBody().getPosition().y * 30f) - 10f, player.getContainer()));
+		player.getSubEntity().changeState(CharacterState.DEFEND);
+		player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
+
+		player.getContainer().addEntity(player.getSubEntity());
 	}
 	
 }

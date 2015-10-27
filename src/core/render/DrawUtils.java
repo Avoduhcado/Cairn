@@ -191,7 +191,7 @@ public class DrawUtils {
 	}
 	
 	// TODO Add parameters for gradiented edges
-	public static void drawShadowFan(float x, float y, float width, float height) {
+	public static void drawShadowFan(float x, float y, float width, float height, int precision) {
 		//GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
 		GL11.glPushMatrix();
@@ -201,7 +201,7 @@ public class DrawUtils {
 		{
 			GL11.glVertex2f(0, 0);
 			//GL11.glColor4f(0f, 0f, 0f, 0f);
-			for(int i = 0; i<=360; i+=30) {
+			for(int i = 0; i<=360; i+=precision) {
 				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * width),
 						(float) Math.cos(Math.toRadians(i)) * height);
 			}

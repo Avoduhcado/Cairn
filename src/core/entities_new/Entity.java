@@ -16,6 +16,7 @@ import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Camera;
+import core.entities.utils.ActionQueue.EntityAction;
 import core.render.DrawUtils;
 import core.setups.WorldContainer;
 
@@ -34,6 +35,7 @@ public class Entity implements Drawable, Serializable {
 	
 	private ArrayList<Entity> ground = new ArrayList<Entity>();
 	private Entity subEntity;
+	private ArrayList<EntityAction> actionQueue = new ArrayList<EntityAction>();
 	
 	private boolean fixDirection;
 	

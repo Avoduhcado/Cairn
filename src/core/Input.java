@@ -157,10 +157,10 @@ public class Input {
 			if(Keybinds.PAUSE.clicked()) {
 				Theater.get().pause();
 			}
-			
-			if(Keybinds.CANCELTEXT.clicked()) {
-				Screenshot.saveScreenshot(new File(System.getProperty("user.dir")), Camera.get().displayWidth, Camera.get().displayHeight);
-			}
+		}
+		
+		if(Keybinds.CANCELTEXT.clicked()) {
+			Screenshot.saveScreenshot(new File(System.getProperty("user.dir")), Camera.get().displayWidth, Camera.get().displayHeight);
 		}
 	}
 	

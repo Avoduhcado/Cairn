@@ -1,5 +1,7 @@
 package core.scene;
 
+import java.awt.Point;
+import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 import org.jbox2d.dynamics.BodyType;
@@ -18,6 +20,9 @@ public class ShadowMap {
 	private static float time;
 	private static boolean flip;
 	
+	private static Entity illumSource;
+	private static Point illumOffset;
+	
 	public static void drawShadows(List<Entity> entities) {
 		changeSizes();
 		
@@ -31,7 +36,7 @@ public class ShadowMap {
 		for(Entity e : entities) {
 			if(e.getBody().m_type == BodyType.DYNAMIC && e.getRender() != null) {
 				DrawUtils.drawShadowFan(e.getBody().getPosition().x * 30f, e.getBody().getPosition().y * 30f,
-							e.getWidth() * 0.6f, 5.5f);
+							e.getWidth() * 0.6f, 5.5f, 30);
 			}
 		}
 		
@@ -113,6 +118,38 @@ public class ShadowMap {
 				startSizes[x] = sizes[x];
 			}
 		}
+	}
+	
+	public static void drawIllumination() {
+		if(illumSource != null) {
+			GL11.glDisable(GL11.GL_TEXTURE_2D);
+			GL11.glEnable(GL11.GL_STENCIL_TEST);
+			GL11.glColorMask(false, false, false, false);
+			GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
+			GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 1); // Set any stencil to 1
+			GL11.glStencilOp(GL11.GL_REPLACE, GL11.GL_REPLACE, GL11.GL_REPLACE);
+			
+			// Draw Illumination circle
+			DrawUtils.drawShadowFan(
+					(illumSource.getBody().getPosition().x * 30f) + illumOffset.x,
+					(illumSource.getBody().getPosition().y * 30f) + illumOffset.y,
+					(float) (400f + (Math.random() * 5f)), (float) (225f + (Math.random() * 5f)), 10);
+			
+			GL11.glColorMask(true, true, true, true);
+			GL11.glStencilFunc(GL11.GL_NOTEQUAL, 1, 1); // Pass test if stencil value is 1
+			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+			
+			// Draw encroaching darkness
+			DrawUtils.fillColor(0, 0, 0, 1f);
+			
+			GL11.glDisable(GL11.GL_STENCIL_TEST);
+			GL11.glEnable(GL11.GL_TEXTURE_2D);
+		}
+	}
+	
+	public static void setIllumination(Entity source, Point offset) {
+		illumSource = source;
+		illumOffset = offset;
 	}
 	
 }
