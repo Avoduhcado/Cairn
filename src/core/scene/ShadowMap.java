@@ -6,10 +6,14 @@ import java.util.List;
 
 import org.jbox2d.dynamics.BodyType;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector3f;
+
+import com.esotericsoftware.spine.attachments.Region;
 
 import core.Camera;
 import core.Theater;
 import core.entities_new.Entity;
+import core.entities_new.SpineRender;
 import core.render.DrawUtils;
 import core.utilities.MathFunctions;
 
@@ -27,7 +31,14 @@ public class ShadowMap {
 		changeSizes();
 		
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_STENCIL_TEST);
+		for(Entity e : entities) {
+			if(e.getBody().m_type == BodyType.DYNAMIC && e.getRender() != null) {
+				DrawUtils.drawShadowFan(e.getBody().getPosition().x * 30f, e.getBody().getPosition().y * 30f,
+							(e.getWidth() * 0.4f) + (float) (Math.random() * 1f), 4f + (float) (Math.random() * 1f), 30);
+			}
+		}
+		
+		/*GL11.glEnable(GL11.GL_STENCIL_TEST);
 		GL11.glColorMask(false, false, false, false);
 		GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
 		GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 1); // Set any stencil to 1
@@ -102,7 +113,7 @@ public class ShadowMap {
 		
 		GL11.glPopMatrix();
 		
-		GL11.glDisable(GL11.GL_STENCIL_TEST);
+		GL11.glDisable(GL11.GL_STENCIL_TEST);*/
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 	
@@ -130,10 +141,13 @@ public class ShadowMap {
 			GL11.glStencilOp(GL11.GL_REPLACE, GL11.GL_REPLACE, GL11.GL_REPLACE);
 			
 			// Draw Illumination circle
+			DrawUtils.setTransform(0, 0, 0, 0, 0, 
+					illumSource.getRender().getTransform().getRotation(),
+					0, 0, 0);
 			DrawUtils.drawShadowFan(
 					(illumSource.getBody().getPosition().x * 30f) + illumOffset.x,
 					(illumSource.getBody().getPosition().y * 30f) + illumOffset.y,
-					(float) (400f + (Math.random() * 5f)), (float) (225f + (Math.random() * 5f)), 10);
+					400f + (float) (Math.random() * 5f), 225f + (float) (Math.random() * 5f), 10);
 			
 			GL11.glColorMask(true, true, true, true);
 			GL11.glStencilFunc(GL11.GL_NOTEQUAL, 1, 1); // Pass test if stencil value is 1

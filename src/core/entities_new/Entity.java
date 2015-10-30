@@ -61,8 +61,8 @@ public class Entity implements Drawable, Serializable {
 					return new GridRender(name);
 				}
 			}
-		} else if(dir.exists() && !dir.isDirectory()) {
-			// TODO Implement static render
+		} else if(new File(System.getProperty("resources") + "/sprites/" + name + ".png").exists()) {
+			return new PlainRender(name, this);
 		}
 		
 		return null;
@@ -128,6 +128,22 @@ public class Entity implements Drawable, Serializable {
 			}
 			
 			render.animate(1f, body.getPosition());
+		}
+		
+		if(body != null && body.getFixtureList().getUserData() != null) {
+			body.getFixtureList().setUserData((float) body.getFixtureList().getUserData() - body.getLinearVelocity().length());
+		
+			if((float) body.getFixtureList().getUserData() <= 0) {
+				body.applyForceToCenter(body.getLinearVelocity().negate().mul(2));
+				body.getFixtureList().setUserData(body.getLinearVelocity().length());
+			}
+			
+			if((float) body.getFixtureList().getUserData() <= 1f) {
+				body.getFixtureList().setUserData(null);
+				body.setGravityScale(0);
+			}
+			
+			System.out.println(body.getFixtureList().getUserData());
 		}
 	}
 	

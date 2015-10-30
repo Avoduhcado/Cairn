@@ -8,8 +8,10 @@ import java.awt.geom.Rectangle2D;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.common.Mat33;
 import org.jbox2d.common.Vec2;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Camera;
@@ -20,6 +22,8 @@ public class DrawUtils {
 	private static Vector3f color = new Vector3f(0f, 0f, 0f);
 	private static boolean scaled;
 	private static boolean still;
+	
+	private static Matrix3f transform = new Matrix3f();
 
 	/**
 	 * Set new drawing color.
@@ -44,6 +48,7 @@ public class DrawUtils {
 			scaled = false;
 		}
 		still = false;
+		transform.setZero();
 	}
 	
 	/**
@@ -196,18 +201,21 @@ public class DrawUtils {
 		
 		GL11.glPushMatrix();
 		GL11.glTranslatef((float) (x - Camera.get().frame.getX()), (float) (y - Camera.get().frame.getY()), 0f);
-		//GL11.glColor4f(color.x, color.y, color.z, 1f);
+		GL11.glRotatef(transform.m12, 0, 0, 1);
+		GL11.glColor4f(color.x, color.y, color.z, 1f);
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
 		{
 			GL11.glVertex2f(0, 0);
 			//GL11.glColor4f(0f, 0f, 0f, 0f);
-			for(int i = 0; i<=360; i+=precision) {
+			for(int i = 0; i<=360; i += precision) {
 				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * width),
-						(float) Math.cos(Math.toRadians(i)) * height);
+						(float) (Math.cos(Math.toRadians(i)) * height));
 			}
 		}
 		GL11.glEnd();
 		GL11.glPopMatrix();
+		
+		reset();
 		
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
@@ -383,6 +391,22 @@ public class DrawUtils {
 
 	public static void setStill(boolean still) {
 		DrawUtils.still = still;
+	}
+	
+	public static void setTransform(Matrix3f transform) {
+		DrawUtils.transform = transform;
+	}
+	
+	public static void setTransform(float x, float y, float z, float xR, float yR, float zR, float xS, float yS, float zS) {
+		DrawUtils.transform.m00 = x;
+		DrawUtils.transform.m01 = y;
+		DrawUtils.transform.m02 = z;
+		DrawUtils.transform.m10 = xR;
+		DrawUtils.transform.m11 = yR;
+		DrawUtils.transform.m12 = zR;
+		DrawUtils.transform.m20 = xS;
+		DrawUtils.transform.m21 = yS;
+		DrawUtils.transform.m22 = zS;
 	}
 	
 }

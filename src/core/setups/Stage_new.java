@@ -13,7 +13,6 @@ import org.jbox2d.dynamics.World;
 
 import core.Camera;
 import core.entities_new.Entity;
-import core.entities_new.FollowController;
 import core.entities_new.PlayerController;
 import core.render.textured.Sprite;
 import core.scene.BoneWorld;
@@ -38,7 +37,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		
 		entities.add(new Entity("Shepherd", 900, 100, this));
 		
-		Entity wall = new Entity(null, 0, 200, this);
+		Entity wall = new Entity(null, 0, 300, this);
 		{
 			BodyDef bodyDef = new BodyDef();
 			bodyDef.position.set(0 / 30f, 300 / 30f);
@@ -131,9 +130,10 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 	@Override
 	public void draw() {
-		ShadowMap.drawShadows(entities);
+		crypt.set2DScale(Camera.ASPECT_RATIO);
+		crypt.draw(0, -600);
 		
-		crypt.draw(0, 0);
+		ShadowMap.drawShadows(entities);
 		
 		for(int i = 0; i<entities.size(); i++) {
 			for(int j = i; j >= 0 && j > i - 5; j--) {
@@ -147,14 +147,14 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		
 		for(int i = 0; i<entities.size(); i++) {
 			entities.get(i).draw();
-		}	
+		}
 		
+		ShadowMap.drawIllumination();
 	}
 
 	@Override
 	public void drawUI() {
 		// TODO Auto-generated method stub
-		ShadowMap.drawIllumination();
 
 	}
 

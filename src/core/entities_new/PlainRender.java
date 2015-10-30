@@ -1,24 +1,34 @@
 package core.entities_new;
 
 import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
 
+import core.render.SpriteList;
 import core.render.Transform;
 
-public class GridRender implements Render {
+public class PlainRender implements Render {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
-	public GridRender(String name) {
-		// TODO Auto-generated constructor stub
+	
+	private String sprite;
+	private Entity entity;
+	
+	private Transform transform;
+	
+	public PlainRender(String name, Entity entity) {
+		this.sprite = name;
+		this.entity = entity;
+		
+		this.transform = new Transform();
 	}
 
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
-		
+		setTransform(0);
+		SpriteList.get(sprite).draw(transform);
 	}
 
 	@Override
@@ -38,29 +48,29 @@ public class GridRender implements Render {
 		// TODO Auto-generated method stub
 		
 	}
-	
+
 	@Override
 	public boolean isFlipped() {
-		// TODO Auto-generated method stub
-		return false;
+		return transform.flipX;
 	}
-	
+
 	@Override
 	public void setFlipped(boolean flipped) {
-		// TODO Auto-generated method stub
-		
+		transform.flipX = flipped;
 	}
 
 	@Override
 	public Transform getTransform() {
-		// TODO Auto-generated method stub
-		return null;
+		return transform;
 	}
 
 	@Override
 	public void setTransform(int index) {
-		// TODO Auto-generated method stub
+		Body body = entity.getBody();
 		
+		transform.x = body.getPosition().x * 30f;
+		transform.y = body.getPosition().y * 30f;
+		transform.rotation = (float) Math.toDegrees(body.getAngle());
 	}
 
 	@Override

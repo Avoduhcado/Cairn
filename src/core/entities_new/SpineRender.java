@@ -167,6 +167,11 @@ public class SpineRender implements Render {
 		transform.setColor(skeleton.drawOrder.get(index).getColor());
 	}
 	
+	@Override
+	public String getSprite() {
+		return sprite;
+	}
+	
 	public float getWidth() {
 		return skeleton.getData().getWidth();
 	}
@@ -174,6 +179,10 @@ public class SpineRender implements Render {
 	@Override
 	public float getHeight() {
 		return skeleton.getData().getHeight();
+	}
+	
+	public Skeleton getSkeleton() {
+		return skeleton;
 	}
 
 }

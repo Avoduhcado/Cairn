@@ -12,9 +12,10 @@ public class FollowController implements Controller {
 	private Entity leader;
 	private Entity follower;
 	
+	private float lagDistance = 50;
 	private float xOffset, yOffset;
 	
-	private float speed = 30f;
+	private float speed = 20f;
 	private float speedMod = 1f;
 	
 	public FollowController(Entity follower, Entity leader) {
@@ -30,13 +31,13 @@ public class FollowController implements Controller {
 		double distance = Point.distance((leadBody.getPosition().x * 30f) + xOffset, (leadBody.getPosition().y * 30f) + yOffset,
 				followBody.getPosition().x * 30f, followBody.getPosition().y * 30f);
 		
-		if(distance > 50) {
+		if(distance > lagDistance) {
 			if(distance > leadBody.getLinearVelocity().lengthSquared()) {
 				speedMod = 1.5f;
 			}
 			move(new Vec2((((leadBody.getPosition().x * 30f) + xOffset) - followBody.getPosition().x * 30f) / (float) distance,
 					(((leadBody.getPosition().y * 30f) + yOffset) - followBody.getPosition().y * 30f) / (float) distance));
-		} else if(leadBody.getLinearVelocity().length() <= 0.25f && distance > 15) {
+		} else if(leadBody.getLinearVelocity().length() <= 0.25f && distance > lagDistance / 4f) {
 			speedMod = 0.35f;
 			move(new Vec2((((leadBody.getPosition().x * 30f) + xOffset) - followBody.getPosition().x * 30f) / (float) distance,
 					(((leadBody.getPosition().y * 30f) + yOffset) - followBody.getPosition().y * 30f) / (float) distance));
@@ -104,7 +105,15 @@ public class FollowController implements Controller {
 		// TODO Auto-generated method stub
 
 	}
-	
+
+	public float getLagDistance() {
+		return lagDistance;
+	}
+
+	public void setLagDistance(float lagDistance) {
+		this.lagDistance = lagDistance;
+	}
+
 	public void setOffset(float xOffset, float yOffset) {
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
