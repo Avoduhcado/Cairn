@@ -73,7 +73,7 @@ public class PlayerController implements Controller {
 		}
 		
 		if(Keybinds.CONTROL.clicked()) {
-			collapse(null);
+			collapse(player.getBody().getLinearVelocity());
 		}
 	}
 
@@ -129,11 +129,19 @@ public class PlayerController implements Controller {
 					Region region = (Region) s.getAttachment();
 					Entity bone = new Entity(render.getSprite() + "/" + region.getName(),
 							region.getWorldX(), region.getWorldY(), player.getContainer());
-					//bone.getRender().setFlipped(render.isFlipped());
+					bone.getRender().setFlipped(render.isFlipped());
+					bone.setFixDirection(true);
 					
 					BodyDef bodyDef = new BodyDef();
-					bodyDef.position.set(region.getWorldX() / 30f, region.getWorldY() / 30f);
+					bodyDef.position.set((region.getWorldX() + (region.getWidth() / 2f)) / 30f,
+							(region.getWorldY() + (region.getHeight() / 2f)) / 30f);
 					bodyDef.type = BodyType.DYNAMIC;
+					/*if(s.getSkeleton().getFlipX()) {
+						bodyDef.angle = (float) Math.toRadians(s.getBone().getWorldRotation() + region.getRotation());
+					} else {
+						bodyDef.angle = (float) Math.toRadians(-s.getBone().getWorldRotation() - region.getRotation());
+					}*/
+					bodyDef.angle = (float) Math.toRadians(region.getRotation());
 
 					PolygonShape bodyShape = new PolygonShape();
 					bodyShape.setAsBox(region.getWidth() / 30f / 2f, region.getHeight() / 30f / 2f);
@@ -142,17 +150,19 @@ public class PlayerController implements Controller {
 					boxFixture.density = 1f;
 					boxFixture.shape = bodyShape;
 					boxFixture.filter.groupIndex = -2;
-					boxFixture.userData = region.getWorldY();
+					boxFixture.userData = Math.abs(s.getBone().getWorldY());
 
 					Body body = player.getContainer().getWorld().createBody(bodyDef);
 					body.createFixture(boxFixture);
+					body.setAngularDamping(1f);
 					body.setGravityScale(1f);
 					body.setLinearDamping(1f);
 					body.setUserData(bone);
+					body.setLinearVelocity(force);
 					
 					bone.setBody(body);
 					
-					System.out.println(body.getFixtureList().getUserData());
+					System.out.println(body.getFixtureList().getUserData() + " " + body.getUserData().toString());
 					
 					player.getContainer().addEntity(bone);
 				}

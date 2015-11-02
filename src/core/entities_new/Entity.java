@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
@@ -108,7 +109,7 @@ public class Entity implements Drawable, Serializable {
 				break;
 			case POLYGON:
 				DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
-				DrawUtils.drawBox2DPoly(body.getPosition(), (PolygonShape) body.m_fixtureList.m_shape);
+				DrawUtils.drawBox2DPoly(body, (PolygonShape) body.m_fixtureList.m_shape);
 				break;
 			case CHAIN:
 				break;
@@ -131,19 +132,18 @@ public class Entity implements Drawable, Serializable {
 		}
 		
 		if(body != null && body.getFixtureList().getUserData() != null) {
-			body.getFixtureList().setUserData((float) body.getFixtureList().getUserData() - body.getLinearVelocity().length());
+			body.getFixtureList().setUserData((float) body.getFixtureList().getUserData() - body.getLinearVelocity().y);
 		
-			if((float) body.getFixtureList().getUserData() <= 0) {
-				body.applyForceToCenter(body.getLinearVelocity().negate().mul(2));
-				body.getFixtureList().setUserData(body.getLinearVelocity().length());
+			if((float) body.getFixtureList().getUserData() <= 0f) {
+				body.getFixtureList().setUserData(Math.abs(body.getLinearVelocity().y));
+				body.setLinearVelocity(new Vec2(body.getLinearVelocity().x, -body.getLinearVelocity().y));
+				body.applyAngularImpulse(10f);
 			}
 			
 			if((float) body.getFixtureList().getUserData() <= 1f) {
 				body.getFixtureList().setUserData(null);
 				body.setGravityScale(0);
 			}
-			
-			System.out.println(body.getFixtureList().getUserData());
 		}
 	}
 	
@@ -244,6 +244,15 @@ public class Entity implements Drawable, Serializable {
 
 	public void setFixDirection(boolean fixDirection) {
 		this.fixDirection = fixDirection;
+	}
+	
+	@Override
+	public String toString() {
+		if(render != null) {
+			return this.render.getSprite();
+		}
+		
+		return super.toString();
 	}
 	
 }

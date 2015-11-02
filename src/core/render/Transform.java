@@ -10,6 +10,7 @@ public class Transform {
 	public boolean flipX;
 	public Vector4f color = new Vector4f();
 	public boolean still;
+	public boolean centerRotate;
 	
 	public Transform() {
 		setX(0);
@@ -20,9 +21,11 @@ public class Transform {
 		setFlipX(false);
 		setColor(new Vector4f(1f,1f,1f,1f));
 		setStill(false);
+		setCenterRotate(false);
 	}
 	
-	public Transform(float x, float y, float rotation, float scaleX, float scaleY, boolean flipX, Vector4f color, boolean still) {
+	public Transform(float x, float y, float rotation, float scaleX, float scaleY,
+			boolean flipX, Vector4f color, boolean still, boolean centerRotate) {
 		setX(x);
 		setY(y);
 		setRotation(rotation);
@@ -31,6 +34,7 @@ public class Transform {
 		setFlipX(flipX);
 		setColor(color != null ? color : new Vector4f(1f,1f,1f,1f));
 		setStill(still);
+		setCenterRotate(centerRotate);
 	}
 
 	public float getX() {
@@ -95,6 +99,14 @@ public class Transform {
 
 	public void setStill(boolean still) {
 		this.still = still;
+	}
+
+	public boolean isCenterRotate() {
+		return centerRotate;
+	}
+
+	public void setCenterRotate(boolean centerRotate) {
+		this.centerRotate = centerRotate;
 	}
 	
 }

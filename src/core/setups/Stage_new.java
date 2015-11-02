@@ -130,8 +130,8 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 	@Override
 	public void draw() {
-		crypt.set2DScale(Camera.ASPECT_RATIO);
-		crypt.draw(0, -600);
+		//crypt.set2DScale(Camera.ASPECT_RATIO);
+		//crypt.draw(0, -600);
 		
 		ShadowMap.drawShadows(entities);
 		
@@ -149,7 +149,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			entities.get(i).draw();
 		}
 		
-		ShadowMap.drawIllumination();
+		//ShadowMap.drawIllumination();
 	}
 
 	@Override

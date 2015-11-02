@@ -10,6 +10,7 @@ import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Mat33;
 import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector3f;
@@ -246,12 +247,13 @@ public class DrawUtils {
 		reset();
 	}
 	
-	public static void drawBox2DPoly(Vec2 position, PolygonShape poly) {
+	public static void drawBox2DPoly(Body body, PolygonShape poly) {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
 		GL11.glPushMatrix();
-		GL11.glTranslatef((int) ((position.x * 30f) - Camera.get().frame.getX()), 
-				(int) ((position.y * 30f) - Camera.get().frame.getY()), 0);
+		GL11.glTranslatef((int) ((body.getPosition().x * 30f) - Camera.get().frame.getX()), 
+				(int) ((body.getPosition().y * 30f) - Camera.get().frame.getY()), 0);
+		GL11.glRotated(body.getAngle(), 0, 0, 1f);
 		GL11.glColor4f(color.x, color.y, color.z, 0.5f);
 		GL11.glBegin(GL11.GL_QUADS);
 		{

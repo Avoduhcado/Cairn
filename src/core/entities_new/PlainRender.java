@@ -1,5 +1,6 @@
 package core.entities_new;
 
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 
@@ -67,22 +68,22 @@ public class PlainRender implements Render {
 	@Override
 	public void setTransform(int index) {
 		Body body = entity.getBody();
+		PolygonShape shape = ((PolygonShape) body.getFixtureList().getShape());
 		
-		transform.x = body.getPosition().x * 30f;
-		transform.y = body.getPosition().y * 30f;
-		transform.rotation = (float) Math.toDegrees(body.getAngle());
+		transform.x = (body.getPosition().x + shape.getVertex(0).x) * 30f;
+		transform.y = (body.getPosition().y + shape.getVertex(0).y) * 30f;
+		transform.centerRotate = true;
+		transform.rotation = (float) body.getAngle();
 	}
 
 	@Override
 	public String getSprite() {
-		// TODO Auto-generated method stub
-		return null;
+		return sprite;
 	}
 
 	@Override
 	public float getWidth() {
-		// TODO Auto-generated method stub
-		return 0;
+		return SpriteList.get(sprite).getWidth();
 	}
 
 	@Override

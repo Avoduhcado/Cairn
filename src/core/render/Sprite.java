@@ -49,10 +49,18 @@ public class Sprite {
 			GL11.glTranslated(transform.x - Camera.get().frame.getX(), transform.y - Camera.get().frame.getY(), 0f);
 		}
 		GL11.glScalef(Camera.ASPECT_RATIO * transform.scaleX, Camera.ASPECT_RATIO * transform.scaleY, 0f);
-		GL11.glRotatef(transform.rotation, 0, 0, 1);
+		if(transform.centerRotate) {
+			GL11.glTranslatef(texture.getImageWidth() / 2f, texture.getImageHeight() / 2f, 0);
+			// Use Math.toDegrees for dope cool spinning effect
+			GL11.glRotated(transform.rotation, 0, 0, 1);
+			GL11.glTranslatef(-texture.getImageWidth() / 2f, -texture.getImageHeight() / 2f, 0);
+		} else {
+			GL11.glRotated(transform.rotation, 0, 0, 1);
+		}
 		if(transform.flipX) {
 			GL11.glRotatef(180f, 0, 1, 0);
 		}
+		
 		GL11.glColor4f(transform.color.x, transform.color.y, transform.color.z, transform.color.w);
 		
 		GL11.glEnable(GL11.GL_BLEND);
@@ -93,6 +101,14 @@ public class Sprite {
 			textureXWidth = (float) (width * subRegion.getWidth());
 			textureYHeight = (float) (height * subRegion.getHeight());
 		}*/
+	}
+	
+	public float getWidth() {
+		return texture.getImageWidth();
+	}
+	
+	public float getHeight() {
+		return texture.getImageHeight();
 	}
 	
 }
