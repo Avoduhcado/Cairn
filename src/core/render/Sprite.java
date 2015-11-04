@@ -60,6 +60,7 @@ public class Sprite {
 		if(transform.flipX) {
 			GL11.glRotatef(180f, 0, 1, 0);
 		}
+		//GL11.glScalef(Camera.ASPECT_RATIO, Camera.ASPECT_RATIO, 0f);
 		
 		GL11.glColor4f(transform.color.x, transform.color.y, transform.color.z, transform.color.w);
 		

@@ -14,6 +14,7 @@ import org.jbox2d.dynamics.World;
 import core.Camera;
 import core.entities_new.Entity;
 import core.entities_new.PlayerController;
+import core.entities_new.SpineRender;
 import core.render.textured.Sprite;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
@@ -31,11 +32,13 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		
 		world.setContactListener(new BoneWorld());
 		
-		Entity player = new Entity("MC and Familiar", 500, 100, this);
+		Entity player = new Entity("MC and Familiar", 500, 0, this);
 		player.setController(new PlayerController(player, true));
 		entities.add(player);
 		
-		entities.add(new Entity("Shepherd", 900, 100, this));
+		Entity shp = new Entity("Shepherd", 900, 100, this);
+		//((SpineRender) shp.getRender()).getSkeleton().findSlot("CROOK").setAttachment(null);
+		entities.add(shp);
 		
 		Entity wall = new Entity(null, 0, 300, this);
 		{

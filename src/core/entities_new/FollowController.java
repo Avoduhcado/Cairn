@@ -32,7 +32,7 @@ public class FollowController implements Controller {
 				followBody.getPosition().x * 30f, followBody.getPosition().y * 30f);
 		
 		if(distance > lagDistance) {
-			if(distance > leadBody.getLinearVelocity().lengthSquared()) {
+			if(distance > lagDistance * 1.5f) {
 				speedMod = 1.5f;
 			}
 			move(new Vec2((((leadBody.getPosition().x * 30f) + xOffset) - followBody.getPosition().x * 30f) / (float) distance,
@@ -84,6 +84,9 @@ public class FollowController implements Controller {
 
 	@Override
 	public void move(Vec2 direction) {
+		if(!follower.getBody().isFixedRotation()) {
+			follower.getBody().applyTorque(90 * (direction.x < 0 ? -1f : 1f));
+		}
 		follower.getBody().applyForceToCenter(direction.mul(speed * speedMod));
 		follower.changeState(speedMod > 1 ? CharacterState.RUN : CharacterState.WALK);
 	}

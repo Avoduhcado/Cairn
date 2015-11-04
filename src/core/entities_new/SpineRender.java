@@ -2,6 +2,7 @@ package core.entities_new;
 
 import org.jbox2d.common.Vec2;
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector4f;
 
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
@@ -183,6 +184,21 @@ public class SpineRender implements Render {
 	
 	public Skeleton getSkeleton() {
 		return skeleton;
+	}
+
+	@Override
+	public void shadow() {
+		for(int i = 0; i<skeleton.drawOrder.size(); i++) {
+			if(skeleton.drawOrder.get(i).getAttachment() != null) {
+				Region region = (Region) skeleton.drawOrder.get(i).getAttachment();
+				
+				setTransform(i);
+				transform.setY(skeleton.getY() - ((skeleton.getY() - region.getWorldY()) * 0.175f));
+				transform.setScaleY(0.175f);
+				transform.color = new Vector4f(0, 0, 0, 1f);
+				SpriteList.get(sprite + "/" + skeleton.drawOrder.get(i).getAttachment().getName()).draw(transform);
+			}
+		}
 	}
 
 }

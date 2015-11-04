@@ -81,4 +81,10 @@ public class GridRender implements Render {
 		return 0;
 	}
 
+	@Override
+	public void shadow() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

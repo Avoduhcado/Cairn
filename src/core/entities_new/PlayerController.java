@@ -31,15 +31,16 @@ public class PlayerController implements Controller {
 			Entity dad = new Entity("Skull", 500, 100, player.getContainer());
 			dad.setController(new FollowController(dad, player));
 			dad.getBody().getFixtureList().getFilterData().categoryBits = 0;
+			ShadowMap.setIllumination(dad, new Point(0, -105));
 			player.getContainer().addEntity(dad);
 			
-			Entity lantern = new Entity("Lantern", 500, 100, player.getContainer());
+			/*Entity lantern = new Entity("Lantern", 500, 100, player.getContainer());
 			FollowController lanternControl = new FollowController(lantern, player);
 			lanternControl.setOffset(0, -105f);
 			lantern.setController(lanternControl);
 			lantern.getBody().getFixtureList().getFilterData().categoryBits = 0;
 			ShadowMap.setIllumination(lantern, new Point(0, 0));
-			player.getContainer().addEntity(lantern);
+			player.getContainer().addEntity(lantern);*/
 		}
 	}
 
@@ -124,7 +125,12 @@ public class PlayerController implements Controller {
 		if(player.getRender() instanceof SpineRender) {
 			SpineRender render = (SpineRender) player.getRender();
 			
-			for(Slot s : render.getSkeleton().drawOrder) {
+			//for(Slot s : render.getSkeleton().drawOrder) {
+			Slot s = null;
+			s = render.getSkeleton().findSlot("HEAD");
+			/*do {
+				s = render.getSkeleton().drawOrder.get((int) (Math.random() * render.getSkeleton().drawOrder.size()));
+			} while(s.getAttachment() == null);*/
 				if(s.getAttachment() != null) {
 					Region region = (Region) s.getAttachment();
 					Entity bone = new Entity(render.getSprite() + "/" + region.getName(),
@@ -149,7 +155,8 @@ public class PlayerController implements Controller {
 					FixtureDef boxFixture = new FixtureDef();
 					boxFixture.density = 1f;
 					boxFixture.shape = bodyShape;
-					boxFixture.filter.groupIndex = -2;
+					//boxFixture.filter.groupIndex = -2;
+					boxFixture.filter.categoryBits = 0;
 					boxFixture.userData = Math.abs(s.getBone().getWorldY());
 
 					Body body = player.getContainer().getWorld().createBody(bodyDef);
@@ -163,12 +170,17 @@ public class PlayerController implements Controller {
 					bone.setBody(body);
 					
 					System.out.println(body.getFixtureList().getUserData() + " " + body.getUserData().toString());
+					s.setAttachment(null);
+					
+					FollowController hedF = new FollowController(bone, player);
+					bone.setController(hedF);
+					
 					
 					player.getContainer().addEntity(bone);
 				}
-			}
+			//}
 			
-			player.getContainer().removeEntity(player);
+			//player.getContainer().removeEntity(player);
 		}
 	}
 	

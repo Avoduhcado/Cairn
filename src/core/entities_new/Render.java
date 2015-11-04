@@ -12,6 +12,7 @@ public interface Render extends Serializable {
 	
 	public void animate(float speed, Vec2 position);
 	public void setAnimation(String animation, boolean loop);
+	public void shadow();
 	public boolean isFlipped();
 	public void setFlipped(boolean flipped);
 	

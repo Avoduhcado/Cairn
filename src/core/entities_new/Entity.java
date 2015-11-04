@@ -141,8 +141,10 @@ public class Entity implements Drawable, Serializable {
 			}
 			
 			if((float) body.getFixtureList().getUserData() <= 1f) {
-				body.getFixtureList().setUserData(null);
-				body.setGravityScale(0);
+				//body.getFixtureList().setUserData(null);
+				//body.setGravityScale(0);
+				//body.setLinearDamping(5f);
+				//body.getFixtureList().getFilterData().groupIndex = 0;
 			}
 		}
 	}

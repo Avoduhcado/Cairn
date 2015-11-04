@@ -28,15 +28,24 @@ public class ShadowMap {
 	private static Point illumOffset;
 	
 	public static void drawShadows(List<Entity> entities) {
-		changeSizes();
-		
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		for(Entity e : entities) {
 			if(e.getBody().m_type == BodyType.DYNAMIC && e.getRender() != null) {
-				DrawUtils.drawShadowFan(e.getBody().getPosition().x * 30f, e.getBody().getPosition().y * 30f,
-							(e.getWidth() * 0.4f) + (float) (Math.random() * 1f), 4f + (float) (Math.random() * 1f), 30);
+				e.getRender().shadow();
 			}
 		}
+		
+		//changeSizes();
+		
+		//GL11.glDisable(GL11.GL_TEXTURE_2D);
+		/*for(Entity e : entities) {
+			if(e.getBody().m_type == BodyType.DYNAMIC && e.getRender() != null) {
+				DrawUtils.drawShadowFan(e.getBody().getPosition().x * 30f,
+						(e.getBody().getPosition().y * 30f)
+						+ (e.getBody().getFixtureList().getUserData() != null ? (float) e.getBody().getFixtureList().getUserData() : 0),
+						(e.getWidth() * 0.4f) + (float) (Math.random() * 1f),
+						4f + (float) (Math.random() * 1f), 30);
+			}
+		}*/
 		
 		/*GL11.glEnable(GL11.GL_STENCIL_TEST);
 		GL11.glColorMask(false, false, false, false);
@@ -46,8 +55,11 @@ public class ShadowMap {
 		
 		for(Entity e : entities) {
 			if(e.getBody().m_type == BodyType.DYNAMIC && e.getRender() != null) {
-				DrawUtils.drawShadowFan(e.getBody().getPosition().x * 30f, e.getBody().getPosition().y * 30f,
-							e.getWidth() * 0.6f, 5.5f, 30);
+				DrawUtils.drawShadowFan(e.getBody().getPosition().x * 30f,
+						(e.getBody().getPosition().y * 30f)
+						+ (e.getBody().getFixtureList().getUserData() != null ? (float) e.getBody().getFixtureList().getUserData() : 0),
+						(e.getWidth() * 0.4f) + (float) (Math.random() * 1f),
+						4f + (float) (Math.random() * 1f), 30);
 			}
 		}
 		
@@ -113,8 +125,8 @@ public class ShadowMap {
 		
 		GL11.glPopMatrix();
 		
-		GL11.glDisable(GL11.GL_STENCIL_TEST);*/
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_STENCIL_TEST);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);*/
 	}
 	
 	private static void changeSizes() {
