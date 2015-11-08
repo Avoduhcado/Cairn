@@ -12,9 +12,13 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector3f;
+
+import com.esotericsoftware.spine.Slot;
+import com.esotericsoftware.spine.attachments.Region;
 
 import core.Camera;
 import core.entities.utils.ActionQueue.EntityAction;
@@ -79,7 +83,7 @@ public class Entity implements Drawable, Serializable {
 		bodyDef.type = BodyType.DYNAMIC;
 
 		CircleShape bodyShape = new CircleShape();
-		bodyShape.m_radius = 15f / 30f/ 2f;
+		bodyShape.m_radius = 15f / 30f / 2f;
 
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 1f;
@@ -87,6 +91,33 @@ public class Entity implements Drawable, Serializable {
 
 		body = world.createBody(bodyDef);
 		body.createFixture(boxFixture);
+		if(render != null && render instanceof SpineRender) {
+			for(Slot s : ((SpineRender) render).getSkeleton().drawOrder) {
+				if(s.getAttachment() != null) {
+					Region region = (Region) s.getAttachment();
+					region.updateWorldVertices(s);
+					
+					Vec2[] verts = new Vec2[4];
+					verts[0] = new Vec2(0, 0);
+					verts[1] = new Vec2(region.getWidth() / 30f, 0);
+					verts[2] = new Vec2(region.getWidth() / 30f, region.getHeight() / 30f);
+					verts[3] = new Vec2(0, region.getHeight() / 30f);
+					//for(Vec2 v : verts) {
+					//	v.addLocal(region.getWorldX() / 30f, region.getWorldY() / 30f);
+					//}
+					
+					PolygonShape polyShape = new PolygonShape();
+					polyShape.set(verts, 4);
+
+					boxFixture.shape = polyShape;
+					boxFixture.density = 0;
+					boxFixture.userData = s;
+					boxFixture.isSensor = true;
+					
+					body.createFixture(boxFixture);
+				}
+			}
+		}
 		body.setFixedRotation(true);
 		body.setLinearDamping(15f);
 		body.setGravityScale(0f);
@@ -97,19 +128,35 @@ public class Entity implements Drawable, Serializable {
 	public void draw() {
 		if(render != null) {
 			render.draw();
-		} else if(body != null) {
-			switch(body.getFixtureList().getShape().m_type) {
+		}
+		
+		for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {
+			switch(f.getShape().m_type) {
 			case CIRCLE:
 				DrawUtils.setColor(new Vector3f(0f, 0f, 0.6f));
-				DrawUtils.drawBox2DCircle(body.getPosition(), (CircleShape) body.m_fixtureList.m_shape);
+				DrawUtils.drawBox2DCircle(body.getPosition(), (CircleShape) f.m_shape);
 				break;
 			case EDGE:
 				DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
-				DrawUtils.drawBox2DEdge(body.getPosition(), (EdgeShape) body.m_fixtureList.m_shape);
+				DrawUtils.drawBox2DEdge(body.getPosition(), (EdgeShape) f.m_shape);
 				break;
 			case POLYGON:
 				DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
-				DrawUtils.drawBox2DPoly(body, (PolygonShape) body.m_fixtureList.m_shape);
+				// TODO Not accurate placements
+				if(f.getUserData() != null && f.getUserData() instanceof Slot) {
+					Slot s = (Slot) f.getUserData();
+					if(s.getAttachment() != null) {
+						Region r = (Region) s.getAttachment();
+						r.updateWorldVertices(s);
+						DrawUtils.setTransform(r.getWorldX(), r.getWorldY(), 0,
+								0, (render.isFlipped() ? 1 : 0), (render.isFlipped() ? s.getBone().getWorldRotation() + r.getRotation()
+										: -s.getBone().getWorldRotation() - r.getRotation()),
+								1, 1, 1);
+						DrawUtils.drawBox2DPoly(null, (PolygonShape) f.m_shape);
+					}
+				} else {
+					DrawUtils.drawBox2DPoly(body, (PolygonShape) f.m_shape);
+				}
 				break;
 			case CHAIN:
 				break;
@@ -131,7 +178,7 @@ public class Entity implements Drawable, Serializable {
 			render.animate(1f, body.getPosition());
 		}
 		
-		if(body != null && body.getFixtureList().getUserData() != null) {
+		if(body != null && body.getFixtureList().getUserData() != null && body.getFixtureList().getUserData() instanceof Float) {
 			body.getFixtureList().setUserData((float) body.getFixtureList().getUserData() - body.getLinearVelocity().y);
 		
 			if((float) body.getFixtureList().getUserData() <= 0f) {

@@ -8,6 +8,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 
 import com.esotericsoftware.spine.Slot;
@@ -30,7 +31,9 @@ public class PlayerController implements Controller {
 		if(spawnFollower) {
 			Entity dad = new Entity("Skull", 500, 100, player.getContainer());
 			dad.setController(new FollowController(dad, player));
-			dad.getBody().getFixtureList().getFilterData().categoryBits = 0;
+			for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
+				f.getFilterData().categoryBits = 0;
+			}
 			ShadowMap.setIllumination(dad, new Point(0, -105));
 			player.getContainer().addEntity(dad);
 			
