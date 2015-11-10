@@ -56,13 +56,13 @@ public class Entity implements Drawable, Serializable {
 		if(dir.exists() && dir.isDirectory()) {
 			File[] files = dir.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
-					return name.endsWith(".avo") || name.endsWith(".json");
+					return name.endsWith(".avl") || name.endsWith(".json");
 				}
 			});
 			if(files.length > 0) {
 				if(files[0].getName().endsWith(".json")) {
 					return new SpineRender(name, this);
-				} else if(files[0].getName().endsWith(".avo")) {
+				} else if(files[0].getName().endsWith(".avl")) {
 					return new GridRender(name);
 				}
 			}

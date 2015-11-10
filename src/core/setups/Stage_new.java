@@ -32,6 +32,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		
 		world.setContactListener(new BoneWorld());
 		
+		Entity dream = new Entity("Dream", 0, 0, this);
+		entities.add(dream);
+		
 		Entity player = new Entity("MC and Familiar", 500, 0, this);
 		player.setController(new PlayerController(player, true));
 		entities.add(player);
