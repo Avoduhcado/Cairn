@@ -29,7 +29,8 @@ public class PlayerController implements Controller {
 		this.player = player;
 		
 		if(spawnFollower) {
-			Entity dad = new Entity("Skull", 500, 100, player.getContainer());
+			Entity dad = new Entity("Skull",
+					player.getBody().getPosition().x * 30f, player.getBody().getPosition().y * 30f, player.getContainer());
 			dad.setController(new FollowController(dad, player));
 			for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
 				f.getFilterData().categoryBits = 0;
@@ -190,13 +191,16 @@ public class PlayerController implements Controller {
 	@Override
 	public void attack() {
 		player.changeState(CharacterState.ATTACK);
-
+		
 		player.setSubEntity(new Entity("Right Arm", player.getBody().getPosition().x * 30f,
-				player.getBody().getPosition().y * 30f, player.getContainer()));
+				(player.getBody().getPosition().y * 30f) - 10, player.getContainer()));
 		player.getSubEntity().changeState(CharacterState.ATTACK);
 		player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
 
 		player.getContainer().addEntity(player.getSubEntity());
+		
+		System.out.println(player.getSubEntity());
+		System.out.println(player.getContainer().getEntities().contains(player.getSubEntity()));
 	}
 	
 	private void defend() {

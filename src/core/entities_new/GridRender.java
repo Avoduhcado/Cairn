@@ -3,7 +3,6 @@ package core.entities_new;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.List;
 import org.jbox2d.common.Vec2;
 import org.lwjgl.util.vector.Vector4f;
 
-import core.entities.Backdrop;
+import core.Camera;
 import core.render.SpriteList;
 import core.render.Transform;
 import core.utilities.AvoFileDecoder;
@@ -24,7 +23,8 @@ public class GridRender implements Render {
 	private static final long serialVersionUID = 1L;
 
 	private String sprite;
-	private List<Tile> tiles = new LinkedList<Tile>();
+	private List<Point> tiles = new LinkedList<Point>();
+	private float width, height;
 	
 	private float depth = 0;
 	
@@ -40,14 +40,12 @@ public class GridRender implements Render {
 	
 	private void loadTiles(String ref) {
 		File backdropDirectory = new File(System.getProperty("resources") + "/sprites/" + ref);
-		Dimension size = new Dimension();
 		
 		if(backdropDirectory.exists() && backdropDirectory.isDirectory()) {
 			byte[] data = AvoFileDecoder.decodeAVLFile(new File(backdropDirectory.getAbsolutePath() + "/" + ref + ".avl"));
-			size.width = ByteBuffer.wrap(data, 0, 4).getInt();
-			size.height = ByteBuffer.wrap(data, 4, 4).getInt();
+			width = ByteBuffer.wrap(data, 0, 4).getInt() * Camera.ASPECT_RATIO;
+			height = ByteBuffer.wrap(data, 4, 4).getInt() * Camera.ASPECT_RATIO;
 			
-			//Backdrop backdrop = new Backdrop(x, y, size.width, size.height, ref, depth);
 			String[] backdropNames = backdropDirectory.list();
 			for(String n : backdropNames) {
 				if(n.endsWith(".png")) {
@@ -55,8 +53,7 @@ public class GridRender implements Render {
 					String loc = n.substring(n.lastIndexOf('[') + 1, n.lastIndexOf(']'));
 					Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
 					
-					tiles.add(new Tile(coord.x, coord.y));
-					//backdrop.addTexture(coord.x, coord.y, "backdrops/" + ref + "/" + n);
+					tiles.add(coord);
 				}
 			}			
 		}
@@ -64,8 +61,9 @@ public class GridRender implements Render {
 
 	@Override
 	public void draw() {
-		for(Tile t : tiles) {
-			SpriteList.get(sprite + "/" + sprite + "[" + t.x + "," + t.y + "]").draw(transform);
+		for(int i = 0; i<tiles.size(); i++) {
+			setTransform(i);
+			SpriteList.get(sprite + "/" + sprite + "[" + tiles.get(i).x + "," + tiles.get(i).y + "]").draw(transform);
 		}
 	}
 
@@ -106,8 +104,8 @@ public class GridRender implements Render {
 
 	@Override
 	public void setTransform(int index) {
-		transform.x = transform.x;
-		transform.y = transform.y;
+		transform.x = (tiles.get(index).y * height);
+		transform.y = (tiles.get(index).x * width);
 		transform.flipX = isFlipped();
 		transform.scaleY = 1f;
 		transform.scaleX = 1f;
@@ -136,21 +134,6 @@ public class GridRender implements Render {
 	@Override
 	public void shadow() {
 		// TODO Auto-generated method stub
-		
-	}
-	
-	private class Tile implements Serializable {
-		
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private int x, y;
-		
-		public Tile(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
 		
 	}
 

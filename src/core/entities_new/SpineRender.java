@@ -86,7 +86,9 @@ public class SpineRender implements Render {
 				switch(entity.getState()) {
 				case ATTACK:
 				case DEFEND:
+					System.out.println(entity.getSubEntity() + " " + entity.toString());
 					if(entity.getContainer().removeEntity(entity.getSubEntity())) {
+						System.out.println("Removed sub entity from " + entity.toString());
 						entity.getContainer().getWorld().destroyBody(entity.getSubEntity().getBody());
 					}
 					entity.setSubEntity(null);

@@ -21,6 +21,7 @@ import core.scene.ShadowMap;
 
 public class Stage_new extends GameSetup implements WorldContainer {
 	
+	private ArrayList<Entity> background = new ArrayList<Entity>();
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	private World world = new World(new Vec2(0, 9.8f));
 	
@@ -33,9 +34,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		world.setContactListener(new BoneWorld());
 		
 		Entity dream = new Entity("Dream", 0, 0, this);
-		entities.add(dream);
+		background.add(dream);
 		
-		Entity player = new Entity("MC and Familiar", 500, 0, this);
+		Entity player = new Entity("MC and Familiar", 5000, 1000, this);
 		player.setController(new PlayerController(player, true));
 		entities.add(player);
 		
@@ -138,6 +139,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	public void draw() {
 		//crypt.set2DScale(Camera.ASPECT_RATIO);
 		//crypt.draw(0, -600);
+		for(int i = 0; i<background.size(); i++) {
+			background.get(i).draw();
+		}
 		
 		ShadowMap.drawShadows(entities);
 		
@@ -155,7 +159,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			entities.get(i).draw();
 		}
 		
-		//ShadowMap.drawIllumination();
+		ShadowMap.drawIllumination();
 	}
 
 	@Override
@@ -173,6 +177,11 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	@Override
 	public World getWorld() {
 		return world;
+	}
+
+	@Override
+	public ArrayList<Entity> getEntities() {
+		return entities;
 	}
 
 	@Override

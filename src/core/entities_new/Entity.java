@@ -21,6 +21,7 @@ import com.esotericsoftware.spine.Slot;
 import com.esotericsoftware.spine.attachments.Region;
 
 import core.Camera;
+import core.Theater;
 import core.entities.utils.ActionQueue.EntityAction;
 import core.render.DrawUtils;
 import core.setups.WorldContainer;
@@ -130,36 +131,38 @@ public class Entity implements Drawable, Serializable {
 			render.draw();
 		}
 		
-		for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {
-			switch(f.getShape().m_type) {
-			case CIRCLE:
-				DrawUtils.setColor(new Vector3f(0f, 0f, 0.6f));
-				DrawUtils.drawBox2DCircle(body.getPosition(), (CircleShape) f.m_shape);
-				break;
-			case EDGE:
-				DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
-				DrawUtils.drawBox2DEdge(body.getPosition(), (EdgeShape) f.m_shape);
-				break;
-			case POLYGON:
-				DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
-				// TODO Not accurate placements
-				if(f.getUserData() != null && f.getUserData() instanceof Slot) {
-					Slot s = (Slot) f.getUserData();
-					if(s.getAttachment() != null) {
-						Region r = (Region) s.getAttachment();
-						r.updateWorldVertices(s);
-						DrawUtils.setTransform(r.getWorldX(), r.getWorldY(), 0,
-								0, (render.isFlipped() ? 1 : 0), (render.isFlipped() ? s.getBone().getWorldRotation() + r.getRotation()
-										: -s.getBone().getWorldRotation() - r.getRotation()),
-								1, 1, 1);
-						DrawUtils.drawBox2DPoly(null, (PolygonShape) f.m_shape);
+		if(Theater.get().debug) {
+			for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {
+				switch(f.getShape().m_type) {
+				case CIRCLE:
+					DrawUtils.setColor(new Vector3f(0f, 0f, 0.6f));
+					DrawUtils.drawBox2DCircle(body.getPosition(), (CircleShape) f.m_shape);
+					break;
+				case EDGE:
+					DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
+					DrawUtils.drawBox2DEdge(body.getPosition(), (EdgeShape) f.m_shape);
+					break;
+				case POLYGON:
+					DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
+					// TODO Not accurate placements
+					if(f.getUserData() != null && f.getUserData() instanceof Slot) {
+						Slot s = (Slot) f.getUserData();
+						if(s.getAttachment() != null) {
+							Region r = (Region) s.getAttachment();
+							r.updateWorldVertices(s);
+							DrawUtils.setTransform(r.getWorldX(), r.getWorldY(), 0,
+									0, (render.isFlipped() ? 1 : 0), (render.isFlipped() ? s.getBone().getWorldRotation() + r.getRotation()
+											: -s.getBone().getWorldRotation() - r.getRotation()),
+									1, 1, 1);
+							DrawUtils.drawBox2DPoly(null, (PolygonShape) f.m_shape);
+						}
+					} else {
+						DrawUtils.drawBox2DPoly(body, (PolygonShape) f.m_shape);
 					}
-				} else {
-					DrawUtils.drawBox2DPoly(body, (PolygonShape) f.m_shape);
+					break;
+				case CHAIN:
+					break;
 				}
-				break;
-			case CHAIN:
-				break;
 			}
 		}
 	}
