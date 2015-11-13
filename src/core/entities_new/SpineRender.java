@@ -1,6 +1,7 @@
 package core.entities_new;
 
 import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Fixture;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector4f;
 
@@ -76,6 +77,29 @@ public class SpineRender implements Render {
 				case "Footstep":
 					// TODO
 					break;
+				case "Damage":
+					System.out.println(event.getFloat() + " " + event.getInt() + " " + event.getString() + " " + event.getData());
+					switch(event.getInt()) {
+					case 0:
+						entity.setSensorData(null);
+						break;
+					case 1:
+						SensorData sensorData = new SensorData(entity, SensorType.WEAPON);
+						if(skeleton.findSlot(event.getString()) != null) {
+							Region region = (Region) skeleton.findSlot(event.getString()).getAttachment();
+							if(region != null) {
+								Fixture fixture = (Fixture) region.getUserData();
+								sensorData.setSensor(fixture);
+								entity.setSensorData(sensorData);
+								System.out.println("Dicksss");
+								region.setColor(new Vector4f(1f, 0, 0, 1f));
+							}
+						}
+						break;
+					default:
+						break;
+					}
+					break;
 				default:
 					System.out.println("Unhandled event: " + event.getData());
 				}
@@ -86,11 +110,6 @@ public class SpineRender implements Render {
 				switch(entity.getState()) {
 				case ATTACK:
 				case DEFEND:
-					System.out.println(entity.getSubEntity() + " " + entity.toString());
-					if(entity.getContainer().removeEntity(entity.getSubEntity())) {
-						System.out.println("Removed sub entity from " + entity.toString());
-						entity.getContainer().getWorld().destroyBody(entity.getSubEntity().getBody());
-					}
 					entity.setSubEntity(null);
 				case QUICKSTEP:
 				case LAND:

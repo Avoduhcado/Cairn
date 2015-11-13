@@ -22,7 +22,9 @@ public class Region extends Attachment {
 	private float width, height;
 	private float offsetX, offsetY;
 	private float worldX, worldY;
-	private Vector4f color;
+	private Vector4f color = new Vector4f(1, 1, 1, 1);
+	
+	private Object userData;
 
 	public Region(String name) {
 		super(name);
@@ -61,7 +63,7 @@ public class Region extends Attachment {
 	
 	public void updateWorldVertices (Slot slot) {
 		Skeleton skeleton = slot.getSkeleton();
-		
+				
 		Bone bone = slot.getBone();
 		float x = skeleton.getX() + bone.getWorldX();
 		float y = skeleton.getY() + bone.getWorldY();
@@ -252,6 +254,14 @@ public class Region extends Attachment {
 		}
 		
 		return at;
+	}
+
+	public Object getUserData() {
+		return userData;
+	}
+
+	public void setUserData(Object userData) {
+		this.userData = userData;
 	}
 	
 }

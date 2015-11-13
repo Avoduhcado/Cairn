@@ -1,6 +1,5 @@
 package core.entities_new;
 
-import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -23,6 +22,7 @@ public class GridRender implements Render {
 	private static final long serialVersionUID = 1L;
 
 	private String sprite;
+	private Entity entity;
 	private List<Point> tiles = new LinkedList<Point>();
 	private float width, height;
 	
@@ -30,8 +30,9 @@ public class GridRender implements Render {
 	
 	private Transform transform;
 	
-	public GridRender(String name) {
+	public GridRender(String name, Entity entity) {
 		this.sprite = name;
+		this.entity = entity;
 		
 		this.transform = new Transform();
 		
@@ -63,7 +64,7 @@ public class GridRender implements Render {
 	public void draw() {
 		for(int i = 0; i<tiles.size(); i++) {
 			setTransform(i);
-			SpriteList.get(sprite + "/" + sprite + "[" + tiles.get(i).x + "," + tiles.get(i).y + "]").draw(transform);
+			SpriteList.get(sprite + "/" + getSprite(i)).draw(transform);
 		}
 	}
 
@@ -104,8 +105,8 @@ public class GridRender implements Render {
 
 	@Override
 	public void setTransform(int index) {
-		transform.x = (tiles.get(index).y * height);
-		transform.y = (tiles.get(index).x * width);
+		transform.x = (entity.getBody().getPosition().x * 30f) + (tiles.get(index).y * height);
+		transform.y = (entity.getBody().getPosition().y * 30f) - (tiles.get(index).x * width);
 		transform.flipX = isFlipped();
 		transform.scaleY = 1f;
 		transform.scaleX = 1f;
@@ -115,10 +116,13 @@ public class GridRender implements Render {
 
 	@Override
 	public String getSprite() {
-		// TODO Auto-generated method stub
-		return null;
+		return sprite;
 	}
 
+	public String getSprite(int index) {
+		return sprite + "[" + tiles.get(index).x + "," + tiles.get(index).y + "]";
+	}
+	
 	@Override
 	public float getWidth() {
 		// TODO Auto-generated method stub
@@ -133,8 +137,14 @@ public class GridRender implements Render {
 
 	@Override
 	public void shadow() {
-		// TODO Auto-generated method stub
-		
+	}
+
+	public float getDepth() {
+		return depth;
+	}
+
+	public void setDepth(float depth) {
+		this.depth = depth;
 	}
 
 }

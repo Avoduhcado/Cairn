@@ -2,7 +2,6 @@ package core.entities_new;
 
 import java.awt.Point;
 
-import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -66,13 +65,9 @@ public class PlayerController implements Controller {
 		if(!player.getState().isActing()) {
 			if(Keybinds.DODGE.clicked()) {
 				dodge();
-			}
-			
-			if(Keybinds.ATTACK.clicked()) {
+			} else if(Keybinds.ATTACK.clicked()) {
 				attack();
-			}
-			
-			if(Keybinds.DEFEND.clicked()) {
+			} else if(Keybinds.DEFEND.clicked()) {
 				defend();
 			}
 		}
@@ -85,15 +80,11 @@ public class PlayerController implements Controller {
 	@Override
 	public void resolveState() {
 		switch(player.getState()) {
-		case IDLE:
-			break;
 		case WALK:
 		case RUN:
 			if(player.getBody().getLinearVelocity().length() <= 0.25f) {
 				player.changeState(CharacterState.IDLE);
 			}
-			break;
-		case QUICKSTEP:
 			break;
 		default:
 			break;
@@ -192,22 +183,19 @@ public class PlayerController implements Controller {
 	public void attack() {
 		player.changeState(CharacterState.ATTACK);
 		
-		player.setSubEntity(new Entity("Right Arm", player.getBody().getPosition().x * 30f,
-				(player.getBody().getPosition().y * 30f) - 10, player.getContainer()));
+		player.setSubEntity(new Entity("Right Arm", (player.getBody().getPosition().x * 30f),
+				(player.getBody().getPosition().y * 30f), player.getContainer()));
 		player.getSubEntity().changeState(CharacterState.ATTACK);
 		player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
 
 		player.getContainer().addEntity(player.getSubEntity());
-		
-		System.out.println(player.getSubEntity());
-		System.out.println(player.getContainer().getEntities().contains(player.getSubEntity()));
 	}
 	
 	private void defend() {
 		player.changeState(CharacterState.DEFEND);
 
 		player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * 30f,
-				(player.getBody().getPosition().y * 30f) - 10f, player.getContainer()));
+				(player.getBody().getPosition().y * 30f) - 15f, player.getContainer()));
 		player.getSubEntity().changeState(CharacterState.DEFEND);
 		player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
 

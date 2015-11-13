@@ -53,6 +53,8 @@ public class Camera {
 	
 	private Entity focus;
 	
+	private Vector4f fillColor = new Vector4f(1f, 1f, 1f, 1f);
+	
 	/** Current duration of fade effect */
 	private float fadeTime;
 	/** Total duration of fade effect */
@@ -159,7 +161,7 @@ public class Camera {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
 		
-		DrawUtils.fillColor(1f, 1f, 1f, 1f);
+		DrawUtils.fillColor(fillColor.x, fillColor.y, fillColor.z, fillColor.w);
 		
 		// TODO Make a matrix dawg
 		// Zoom in/out camera
@@ -311,6 +313,14 @@ public class Camera {
 		centerOn();
 	}
 	
+	public Vector4f getFillColor() {
+		return fillColor;
+	}
+
+	public void setFillColor(Vector4f fillColor) {
+		this.fillColor = fillColor;
+	}
+
 	public Vector2f getFrameSpeed() {
 		return frameSpeed;
 	}

@@ -10,12 +10,13 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
+import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
 import core.entities_new.Entity;
 import core.entities_new.PlayerController;
-import core.entities_new.SpineRender;
-import core.render.textured.Sprite;
+import core.entities_new.SensorData;
+import core.entities_new.SensorType;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
@@ -25,18 +26,20 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	private World world = new World(new Vec2(0, 9.8f));
 	
-	private Sprite crypt = new Sprite("Crypt 1");
-		
 	public Stage_new() {
 		Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		
 		world.setContactListener(new BoneWorld());
 		
-		Entity dream = new Entity("Dream", 0, 0, this);
+		Entity dream = new Entity("Ruined Sepulcher", 0, 0, this);
+		dream.getBody().setType(BodyType.STATIC);
+		dream.getBody().getFixtureList().getFilterData().categoryBits = 0;
 		background.add(dream);
 		
-		Entity player = new Entity("MC and Familiar", 5000, 1000, this);
+		Camera.get().setFillColor(new Vector4f(0, 0, 0, 1));
+		
+		Entity player = new Entity("MC and Familiar", 495, 450, this);
 		player.setController(new PlayerController(player, true));
 		entities.add(player);
 		
@@ -101,6 +104,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			body.createFixture(boxFixture);
 			ground.setBody(body);
 		}
+		ground.setSensorData(new SensorData(ground, SensorType.GROUND));
 		entities.add(ground);
 		
 		ground = new Entity(null, 100, 100, this);
@@ -121,6 +125,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			body.createFixture(boxFixture);
 			ground.setBody(body);
 		}
+		ground.setSensorData(new SensorData(ground, SensorType.GROUND));
 		entities.add(ground);
 		
 		Camera.get().setFocus(player);
@@ -137,8 +142,6 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 	@Override
 	public void draw() {
-		//crypt.set2DScale(Camera.ASPECT_RATIO);
-		//crypt.draw(0, -600);
 		for(int i = 0; i<background.size(); i++) {
 			background.get(i).draw();
 		}

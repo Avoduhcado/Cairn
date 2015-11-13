@@ -36,8 +36,10 @@ public class Entity implements Drawable, Serializable {
 	private Render render;
 	private Body body;
 	private WorldContainer container;
-	private Controller controller;
 	private CharacterState state;
+
+	private Controller controller;
+	private SensorData sensorData;
 	
 	private ArrayList<Entity> ground = new ArrayList<Entity>();
 	private Entity subEntity;
@@ -64,7 +66,7 @@ public class Entity implements Drawable, Serializable {
 				if(files[0].getName().endsWith(".json")) {
 					return new SpineRender(name, this);
 				} else if(files[0].getName().endsWith(".avl")) {
-					return new GridRender(name);
+					return new GridRender(name, this);
 				}
 			}
 		} else if(new File(System.getProperty("resources") + "/sprites/" + name + ".png").exists()) {
@@ -92,7 +94,7 @@ public class Entity implements Drawable, Serializable {
 
 		body = world.createBody(bodyDef);
 		body.createFixture(boxFixture);
-		if(render != null && render instanceof SpineRender) {
+		/*if(render != null && render instanceof SpineRender) {
 			for(Slot s : ((SpineRender) render).getSkeleton().drawOrder) {
 				if(s.getAttachment() != null) {
 					Region region = (Region) s.getAttachment();
@@ -115,10 +117,10 @@ public class Entity implements Drawable, Serializable {
 					boxFixture.userData = s;
 					boxFixture.isSensor = true;
 					
-					body.createFixture(boxFixture);
+					region.setUserData(body.createFixture(boxFixture));
 				}
 			}
-		}
+		}*/
 		body.setFixedRotation(true);
 		body.setLinearDamping(15f);
 		body.setGravityScale(0f);
@@ -191,9 +193,9 @@ public class Entity implements Drawable, Serializable {
 			}
 			
 			if((float) body.getFixtureList().getUserData() <= 1f) {
-				//body.getFixtureList().setUserData(null);
-				//body.setGravityScale(0);
-				//body.setLinearDamping(5f);
+				body.getFixtureList().setUserData(null);
+				body.setGravityScale(0);
+				body.setLinearDamping(5f);
 				//body.getFixtureList().getFilterData().groupIndex = 0;
 			}
 		}
@@ -227,6 +229,7 @@ public class Entity implements Drawable, Serializable {
 	public void stepOffGround(Entity ground) {
 		this.ground.remove(ground);
 		if(this.ground.isEmpty()) {
+			// TODO Interrupt() delete any sub entities/general state cleanup
 			this.changeState(CharacterState.FALLING);
 			this.body.setGravityScale(2f);
 			this.body.setLinearDamping(2.5f);
@@ -238,6 +241,12 @@ public class Entity implements Drawable, Serializable {
 	}
 
 	public void setSubEntity(Entity subEntity) {
+		if(getSubEntity() != null) {
+			if(getContainer().removeEntity(getSubEntity())) {
+				getContainer().getWorld().destroyBody(getSubEntity().getBody());
+			}
+		}
+		
 		this.subEntity = subEntity;
 	}
 
@@ -274,6 +283,14 @@ public class Entity implements Drawable, Serializable {
 		this.container = container;
 	}
 
+	public CharacterState getState() {
+		return state;
+	}
+
+	public void setState(CharacterState state) {
+		this.state = state;
+	}
+
 	public Controller getController() {
 		return controller;
 	}
@@ -282,12 +299,12 @@ public class Entity implements Drawable, Serializable {
 		this.controller = controller;
 	}
 
-	public CharacterState getState() {
-		return state;
+	public SensorData getSensorData() {
+		return sensorData;
 	}
 
-	public void setState(CharacterState state) {
-		this.state = state;
+	public void setSensorData(SensorData sensorData) {
+		this.sensorData = sensorData;
 	}
 
 	public boolean isFixDirection() {
@@ -306,5 +323,5 @@ public class Entity implements Drawable, Serializable {
 		
 		return super.toString();
 	}
-	
+
 }
