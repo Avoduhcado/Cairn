@@ -30,6 +30,8 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		
+		ShadowMap.init();
+		
 		world.setContactListener(new BoneWorld());
 		
 		Entity dream = new Entity("Ruined Sepulcher", 0, 0, this);
@@ -146,7 +148,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			background.get(i).draw();
 		}
 		
-		ShadowMap.drawShadows(entities);
+		ShadowMap.get().drawShadows(entities);
 		
 		for(int i = 0; i<entities.size(); i++) {
 			for(int j = i; j >= 0 && j > i - 5; j--) {
@@ -162,7 +164,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			entities.get(i).draw();
 		}
 		
-		ShadowMap.drawIllumination();
+		ShadowMap.get().drawIllumination();
 	}
 
 	@Override

@@ -34,7 +34,7 @@ public class PlayerController implements Controller {
 			for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
 				f.getFilterData().categoryBits = 0;
 			}
-			ShadowMap.setIllumination(dad, new Point(0, -105));
+			ShadowMap.get().setIllumination(dad, new Point(0, -105));
 			player.getContainer().addEntity(dad);
 			
 			/*Entity lantern = new Entity("Lantern", 500, 100, player.getContainer());

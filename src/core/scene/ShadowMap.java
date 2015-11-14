@@ -1,33 +1,44 @@
 package core.scene;
 
 import java.awt.Point;
-import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 import org.jbox2d.dynamics.BodyType;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector3f;
-
-import com.esotericsoftware.spine.attachments.Region;
-
-import core.Camera;
 import core.Theater;
 import core.entities_new.Entity;
-import core.entities_new.SpineRender;
 import core.render.DrawUtils;
 import core.utilities.MathFunctions;
 
 public class ShadowMap {
 	
-	private static float[] startSizes = {2f, 5f, 12f, 20f};
-	private static float[] sizes = {2f, 5f, 12f, 20f};
-	private static float time;
-	private static boolean flip;
+	private float[] startSizes = {2f, 5f, 12f, 20f};
+	private float[] sizes = {2f, 5f, 12f, 20f};
+	private float time;
+	private boolean flip;
 	
-	private static Entity illumSource;
-	private static Point illumOffset;
+	private Entity illumSource;
+	private Point illumOffset;
 	
-	public static void drawShadows(List<Entity> entities) {
+	private float shadowWidth = 500f, shadowHeight = shadowWidth / 1.77777f;
+	private float haloRatio = 0.9175f;
+	private float glowTime, glowLimit = 1f, glowStart;
+	private boolean glowing = true;
+	
+	private static ShadowMap shadowMap;
+	
+	public static void init() {
+		shadowMap = new ShadowMap();
+	}
+	
+	public static ShadowMap get() {
+		if(shadowMap == null) {
+			init();
+		}
+		return shadowMap;
+	}
+	
+	public void drawShadows(List<Entity> entities) {
 		for(Entity e : entities) {
 			if(e.getBody().m_type == BodyType.DYNAMIC && e.getRender() != null) {
 				e.getRender().shadow();
@@ -129,7 +140,7 @@ public class ShadowMap {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);*/
 	}
 	
-	private static void changeSizes() {
+	private void changeSizes() {
 		time = MathFunctions.clamp(time + Theater.getDeltaSpeed(0.025f), 0, 6.5f);
 		for(int x = 0; x<sizes.length; x++) {
 			sizes[x] = MathFunctions.easeIn(time, startSizes[x], flip ? -5 : 5, 6.5f);
@@ -143,14 +154,35 @@ public class ShadowMap {
 		}
 	}
 	
-	public static void drawIllumination() {
+	/** TODO Introduce a proper wavy flicker, not random
+	 *	Scaling factors for the shadows
+	 *	Make interior shadow bounce in further, at same time scale
+	 */
+	public void drawIllumination() {
 		if(illumSource != null) {
+			glowTime = MathFunctions.clamp(glowTime + Theater.getDeltaSpeed(0.025f), 0, glowLimit);
+			float glow = MathFunctions.linearTween(glowTime, glowStart, glowing ? (glowLimit * 25) : -(glowLimit * 25), glowLimit);
+			if(glowTime >= glowLimit) {
+				glowStart = glow;
+				glowTime = 0;
+				if(!glowing) {
+					int chance = (int) (Math.random() * 100);
+					if(chance > 90) {
+						glowLimit = (float) Math.random() + 0.25f;
+					} else {
+						glowLimit = (float) Math.random() * 0.35f;
+					}
+				}
+				glowing = !glowing;
+			}
+			
 			GL11.glDisable(GL11.GL_TEXTURE_2D);
 			GL11.glEnable(GL11.GL_STENCIL_TEST);
-			GL11.glColorMask(false, false, false, false);
 			GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
-			GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 1); // Set any stencil to 1
-			GL11.glStencilOp(GL11.GL_REPLACE, GL11.GL_REPLACE, GL11.GL_REPLACE);
+			
+			GL11.glColorMask(false, false, false, false);
+			GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF); // Set any stencil to 2
+			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
 			
 			// Draw Illumination circle
 			DrawUtils.setTransform(0, 0, 0, 0, 0, 
@@ -159,21 +191,40 @@ public class ShadowMap {
 			DrawUtils.drawShadowFan(
 					(illumSource.getBody().getPosition().x * 30f) + illumOffset.x,
 					(illumSource.getBody().getPosition().y * 30f) + illumOffset.y,
-					400f + (float) (Math.random() * 5f), 225f + (float) (Math.random() * 5f), 10);
+					shadowWidth + (glow * haloRatio), shadowHeight + (glow * haloRatio), (int) (Math.random() * 3) + 8);
+			
+			GL11.glStencilFunc(GL11.GL_ALWAYS, 2, 0xFF); // Pass test if stencil value is 1
+			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+			
+			// Draw encroaching darkness
+			DrawUtils.setTransform(0, 0, 0, 0, 0, 
+					illumSource.getRender().getTransform().getRotation(),
+					0, 0, 0);
+			DrawUtils.drawShadowFan(
+					(illumSource.getBody().getPosition().x * 30f) + illumOffset.x,
+					(illumSource.getBody().getPosition().y * 30f) + illumOffset.y,
+					(shadowWidth + glow * 1.5f) * haloRatio, (shadowHeight + glow * 1.5f) * haloRatio,
+					(int) (Math.random() * 3) + 8);
 			
 			GL11.glColorMask(true, true, true, true);
-			GL11.glStencilFunc(GL11.GL_NOTEQUAL, 1, 1); // Pass test if stencil value is 1
+			GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF); // Pass test if stencil value is 1
 			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
 			
 			// Draw encroaching darkness
 			DrawUtils.fillColor(0, 0, 0, 1f);
+			
+			GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF); // Pass test if stencil value is 1
+			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+			
+			// Draw encroaching darkness
+			DrawUtils.fillColor(0, 0, 0, 0.65f);
 			
 			GL11.glDisable(GL11.GL_STENCIL_TEST);
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
 	}
 	
-	public static void setIllumination(Entity source, Point offset) {
+	public void setIllumination(Entity source, Point offset) {
 		illumSource = source;
 		illumOffset = offset;
 	}
