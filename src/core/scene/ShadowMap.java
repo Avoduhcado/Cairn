@@ -22,8 +22,11 @@ public class ShadowMap {
 	
 	private float shadowWidth = 500f, shadowHeight = shadowWidth / 1.77777f;
 	private float haloRatio = 0.9175f;
+	
 	private float glowTime, glowLimit = 1f, glowStart;
 	private boolean glowing = true;
+	
+	private float resizeTime, resizeDuration, resizeStart, resizeChange;
 	
 	private static ShadowMap shadowMap;
 	
@@ -140,6 +143,7 @@ public class ShadowMap {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);*/
 	}
 	
+	@SuppressWarnings("unused")
 	private void changeSizes() {
 		time = MathFunctions.clamp(time + Theater.getDeltaSpeed(0.025f), 0, 6.5f);
 		for(int x = 0; x<sizes.length; x++) {
@@ -160,6 +164,15 @@ public class ShadowMap {
 	 */
 	public void drawIllumination() {
 		if(illumSource != null) {
+			if(resizeDuration != 0) {
+				resizeTime = MathFunctions.clamp(resizeTime + Theater.getDeltaSpeed(0.025f), 0, resizeDuration);
+				shadowWidth = MathFunctions.linearTween(resizeTime, resizeStart, resizeChange, resizeDuration);
+				shadowHeight = shadowWidth / 1.77777f;
+				if(resizeTime >= resizeDuration) {
+					resizeDuration = 0;
+				}
+			}
+			
 			glowTime = MathFunctions.clamp(glowTime + Theater.getDeltaSpeed(0.025f), 0, glowLimit);
 			float glow = MathFunctions.linearTween(glowTime, glowStart, glowing ? (glowLimit * 25) : -(glowLimit * 25), glowLimit);
 			if(glowTime >= glowLimit) {
@@ -222,6 +235,13 @@ public class ShadowMap {
 			GL11.glDisable(GL11.GL_STENCIL_TEST);
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
+	}
+	
+	public void resizeIllumination(float resizeFactor) {
+		resizeTime = 0f;
+		resizeDuration = 1f;
+		resizeStart = shadowWidth;
+		resizeChange = shadowWidth * resizeFactor;
 	}
 	
 	public void setIllumination(Entity source, Point offset) {

@@ -6,6 +6,7 @@ import org.newdawn.slick.openal.SoundStore;
 import core.setups.GameSetup;
 import core.setups.SplashScreen;
 import core.utilities.Config;
+import core.utilities.Resources;
 import core.utilities.text.Text;
 
 public class Theater {
@@ -50,6 +51,19 @@ public class Theater {
 
 	/** Creates a new Theater */
 	public static void init() {
+		// Determine OS and set natives path accordingly
+		if(System.getProperty("os.name").startsWith("Windows")) {
+			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/windows");
+		} else if(System.getProperty("os.name").startsWith("Mac")) {
+			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/macosx");
+		} else if(System.getProperty("os.name").startsWith("Linux")) {
+			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/linux");
+		} else {
+			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/solaris");
+		}
+		System.setProperty("resources", System.getProperty("user.dir") + "/resources");
+		Resources.init();
+		
 		theater = new Theater();
 	}
 
@@ -127,6 +141,7 @@ public class Theater {
 		Config.createConfig();
 		//Ensemble.get().close();
 		Camera.get().close();
+		Resources.get().close();
 		AL.destroy();
 		System.exit(0);
 	}
@@ -182,18 +197,6 @@ public class Theater {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// Determine OS and set natives path accordingly
-		if(System.getProperty("os.name").startsWith("Windows")) {
-			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/windows");
-		} else if(System.getProperty("os.name").startsWith("Mac")) {
-			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/macosx");
-		} else if(System.getProperty("os.name").startsWith("Linux")) {
-			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/linux");
-		} else {
-			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/solaris");
-		}
-		System.setProperty("resources", System.getProperty("user.dir") + "/resources");
-		
 		Theater.init();
 		theater.play();
 	}

@@ -1,14 +1,14 @@
 package core.render;
 
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
-import org.newdawn.slick.util.ResourceLoader;
-
 import core.Camera;
+import core.utilities.Resources;
 
 public class Sprite {
 
@@ -25,7 +25,8 @@ public class Sprite {
 	
 	private Texture load(String ref) throws IOException {
 		return TextureLoader.getTexture("PNG",
-				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/sprites/" + ref + ".png"));
+				//ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/sprites/" + ref + ".png"));
+				Files.newInputStream(Resources.get().getFileSystem().getPath("/" + ref + ".png")));
 	}
 	
 	private void loadError() {

@@ -7,6 +7,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
 
 import core.entities.utils.CharState;
+import core.scene.ShadowMap;
 import core.setups.GameSetup;
 import core.setups.Stage;
 import core.utilities.Screenshot;
@@ -161,6 +162,16 @@ public class Input {
 		
 		if(Keybinds.CANCELTEXT.clicked()) {
 			Screenshot.saveScreenshot(new File(System.getProperty("user.dir")), Camera.get().displayWidth, Camera.get().displayHeight);
+		}
+		
+		if(Keybinds.SLOT9.clicked()) {
+			ShadowMap.get().resizeIllumination(1f);
+		}
+		if(Keybinds.SLOT8.clicked()) {
+			ShadowMap.get().resizeIllumination(0.2f);
+		}
+		if(Keybinds.SLOT7.clicked()) {
+			ShadowMap.get().resizeIllumination(-0.2f);
 		}
 	}
 	
