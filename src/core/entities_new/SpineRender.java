@@ -1,6 +1,12 @@
 package core.entities_new;
 
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
@@ -8,10 +14,13 @@ import org.lwjgl.util.vector.Vector4f;
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Event;
+import com.esotericsoftware.spine.MathUtils;
 import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonJson;
 import com.esotericsoftware.spine.Skin;
+import com.esotericsoftware.spine.Slot;
 import com.esotericsoftware.spine.AnimationState.AnimationStateAdapter;
+import com.esotericsoftware.spine.attachments.Attachment;
 import com.esotericsoftware.spine.attachments.AttachmentLoader;
 import com.esotericsoftware.spine.attachments.BoundingBoxAttachment;
 import com.esotericsoftware.spine.attachments.Box2dAttachment;
@@ -22,6 +31,7 @@ import com.esotericsoftware.spine.attachments.SkinnedMeshAttachment;
 import core.Camera;
 import core.Theater;
 import core.render.DrawUtils;
+import core.render.Sprite;
 import core.render.SpriteList;
 import core.render.Transform;
 
@@ -46,6 +56,7 @@ public class SpineRender implements Render {
 		
 		this.sprite = ref;
 		buildSkeleton(ref);
+		//buildBodies();
 		buildAnimationEvents();
 		this.transform = new Transform();
 	}
@@ -54,7 +65,9 @@ public class SpineRender implements Render {
 		SkeletonJson json = new SkeletonJson(new AbstractLoader() {
 			public RegionAttachment newRegionAttachment(Skin skin, String name, String path) {
 				Box2dAttachment attachment = new Box2dAttachment(name);
-				attachment.setRegion(SpriteList.get(sprite + "/" + name));
+				Sprite region = SpriteList.get(sprite + "/" + name);
+				attachment.setRegion(region);
+				
 				return attachment;
 			}
 		});
@@ -78,7 +91,34 @@ public class SpineRender implements Render {
 		animState = new AnimationState(animStateData);
 		setAnimation("Idle", true);
 	}
-	
+
+	public void buildBodies(World world) {
+		for(Slot s : skeleton.drawOrder) {
+			if(s.getAttachment() != null && s.getAttachment() instanceof Box2dAttachment) {
+				Box2dAttachment attachment = (Box2dAttachment) s.getAttachment();
+				Sprite region = attachment.getRegion();
+				
+				BodyDef bodyDef = new BodyDef();
+				bodyDef.position.set(0 / 30f, 0 / 30f);
+				bodyDef.type = BodyType.STATIC;
+
+				PolygonShape bodyShape = new PolygonShape();
+				bodyShape.setAsBox(region.getWidth() / 2f / 30f, region.getHeight() / 2f / 30f);
+
+				FixtureDef boxFixture = new FixtureDef();
+				boxFixture.density = 1f;
+				boxFixture.shape = bodyShape;
+				boxFixture.isSensor = true;
+				//boxFixture.filter.categoryBits = 0;
+				
+				Body body = world.createBody(bodyDef);
+				body.createFixture(boxFixture);
+				body.setUserData(attachment);
+				attachment.setBody(body);
+			}
+		}
+	}
+
 	private void buildAnimationEvents() {
 		animState.addListener(new AnimationStateAdapter() {
 			@Override
@@ -131,9 +171,21 @@ public class SpineRender implements Render {
 	@Override
 	public void draw() {
 		for(int i = 0; i<skeleton.drawOrder.size(); i++) {
-			if(skeleton.drawOrder.get(i).getAttachment() != null) {
+			Attachment attachment = skeleton.drawOrder.get(i).getAttachment();
+			if(attachment != null) {
 				setTransform(i);
-				SpriteList.get(sprite + "/" + skeleton.drawOrder.get(i).getAttachment().getName()).draw(transform);
+				float width = (((RegionAttachment) attachment).getRegion().getWidth() * Camera.ASPECT_RATIO);
+				float height = (((RegionAttachment) attachment).getRegion().getHeight() * Camera.ASPECT_RATIO);
+				((Box2dAttachment) attachment).getBody().setTransform(
+						new Vec2((transform.x + (isFlipped() ? -(width / 2f) : (width / 2f))) / 30f,
+								(transform.y + (height / 2f)) / 30f), transform.rotation);
+				SpriteList.get(sprite + "/" + attachment.getName()).draw(transform);
+				
+				if(Theater.get().debug) {
+					DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
+					DrawUtils.drawBox2DPoly(((Box2dAttachment) attachment).getBody(),
+							(PolygonShape) ((Box2dAttachment) attachment).getBody().m_fixtureList.m_shape);
+				}
 			}
 		}
 	}
@@ -180,9 +232,6 @@ public class SpineRender implements Render {
 		RegionAttachment region = (RegionAttachment) skeleton.drawOrder.get(index).getAttachment();
 		region.updateOffset();
 		region.updateWorldVertices(skeleton.drawOrder.get(index), false);
-		
-		DrawUtils.setColor(new Vector3f(1, 0, 0));
-		DrawUtils.drawVerts(region.getWorldVertices());
 		
 		transform.setX(region.getWorldVertices()[10]);
 		transform.setY(region.getWorldVertices()[11]);

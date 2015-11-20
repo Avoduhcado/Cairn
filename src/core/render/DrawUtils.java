@@ -271,22 +271,15 @@ public class DrawUtils {
 	}
 	
 	public static void drawBox2DPoly(Body body, PolygonShape poly) {
+		
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
 		GL11.glPushMatrix();
-		if(body != null) {
-			GL11.glTranslatef((int) ((body.getPosition().x * 30f) - Camera.get().frame.getX()), 
-					(int) ((body.getPosition().y * 30f) - Camera.get().frame.getY()), 0);
-			GL11.glRotated(body.getAngle(), 0, 0, 1f);
-		} else {
-			GL11.glTranslatef((int) (transform.m00 - Camera.get().frame.getX()), 
-					(int) (transform.m01 - Camera.get().frame.getY()), 0);
-			GL11.glRotated(transform.m12, 0, 0, 1f);
-			if(transform.m11 == 1) {
-				GL11.glRotated(180, 0, 1, 0);
-			}
-			GL11.glScalef(transform.m20, transform.m21, transform.m22);
-		}
+		GL11.glTranslated((body.getPosition().x * 30f) - Camera.get().frame.getX(), 
+				(body.getPosition().y * 30f) - Camera.get().frame.getY(), 0);
+		GL11.glRotated(body.getAngle(), 0, 0, 1f);
+		GL11.glScalef(Camera.ASPECT_RATIO, Camera.ASPECT_RATIO, 0);
+		
 		GL11.glColor4f(color.x, color.y, color.z, 0.5f);
 		GL11.glBegin(GL11.GL_QUADS);
 		{

@@ -76,6 +76,13 @@ public class BoneWorld implements ContactListener {
 		if(!(sensorA ^ sensorB)) {
 			return false;
 		}
+		
+		// TODO Implement non entity based sensors
+		boolean entityA = fixtureA.getBody().getUserData() instanceof Entity;
+		boolean entityB = fixtureB.getBody().getUserData() instanceof Entity;
+		if(entityA || entityB) {
+			return false;
+		}
 				
 		if(sensorA) {
 			sensor = (Entity) contact.getFixtureA().getBody().getUserData();
