@@ -18,7 +18,7 @@ import core.entities.interfaces.Interactable;
 import core.interactions.Script;
 import core.render.SpriteIndex;
 import core.utilities.AvoFileDecoder;
-
+@Deprecated
 public class Prop extends Entity implements Interactable {
 	
 	/**

@@ -141,7 +141,6 @@ public class Theater {
 		Config.createConfig();
 		//Ensemble.get().close();
 		Camera.get().close();
-		Resources.get().close();
 		AL.destroy();
 		System.exit(0);
 	}

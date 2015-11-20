@@ -13,6 +13,7 @@ import com.esotericsoftware.spine.MathUtils;
 import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.Slot;
 
+@Deprecated
 public class Region extends Attachment {
 
 	private String path;

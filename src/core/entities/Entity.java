@@ -19,6 +19,7 @@ import core.render.SpriteIndex;
 import core.utilities.mouse.MouseInput;
 import core.utilities.text.Text;
 
+@Deprecated
 public abstract class Entity implements Serializable, Cloneable {
 	
 	/**

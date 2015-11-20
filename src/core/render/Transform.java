@@ -2,6 +2,8 @@ package core.render;
 
 import org.lwjgl.util.vector.Vector4f;
 
+import com.esotericsoftware.spine.utils.Color;
+
 public class Transform {
 
 	public float x, y;
@@ -91,6 +93,10 @@ public class Transform {
 
 	public void setColor(Vector4f color) {
 		this.color = (color != null ? color : new Vector4f(1f,1f,1f,1f));
+	}
+	
+	public void setColor(Color color) {
+		this.color = (color != null ? new Vector4f(color.r, color.b, color.g, color.a) : new Vector4f(1f,1f,1f,1f));
 	}
 
 	public boolean isStill() {

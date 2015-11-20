@@ -46,7 +46,7 @@ import core.entities.utils.stats.Stamina;
 import core.entities.utils.stats.Stats;
 import core.equipment.Equipment;
 import core.equipment.Weapon;
-
+@Deprecated
 public class Player extends Actor implements Combatant {
 
 	/**
@@ -186,7 +186,7 @@ public class Player extends Actor implements Combatant {
 	public void buildSkeleton() {
 		SkeletonJson json = new SkeletonJson(null);
 		json.setScale(scale);
-		skeleton = new Skeleton(json.readSkeletonData(sprite + "/" + name));
+		skeleton = new Skeleton(json.readSkeletonData(sprite, name));
 		skeleton.updateWorldTransform();
 
 		this.box = new Rectangle2D.Double(pos.x - ((skeleton.getData().getWidth() * scale) / 2f),

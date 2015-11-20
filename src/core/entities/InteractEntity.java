@@ -8,6 +8,7 @@ import core.Theater;
 import core.interactions.InteractionListener;
 import core.setups.Stage;
 
+@Deprecated
 public class InteractEntity extends Entity {
 
 	/**

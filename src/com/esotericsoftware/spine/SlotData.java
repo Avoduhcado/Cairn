@@ -30,12 +30,12 @@
 
 package com.esotericsoftware.spine;
 
-import org.lwjgl.util.vector.Vector4f;
+import com.esotericsoftware.spine.utils.Color;
 
 public class SlotData {
 	final String name;
 	final BoneData boneData;
-	final Vector4f color = new Vector4f(1f, 1f, 1f, 1f);
+	final Color color = new Color(1f, 1f, 1f, 1f);
 	String attachmentName;
 	boolean additiveBlending;
 
@@ -59,7 +59,7 @@ public class SlotData {
 		return boneData;
 	}
 
-	public Vector4f getColor () {
+	public Color getColor () {
 		return color;
 	}
 

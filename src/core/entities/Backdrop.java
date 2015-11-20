@@ -18,6 +18,7 @@ import core.render.SpriteIndex;
 import core.utilities.AvoFileDecoder;
 import core.utilities.MathFunctions;
 
+@Deprecated
 public class Backdrop extends Entity {
 
 	/**

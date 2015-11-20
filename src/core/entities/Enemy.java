@@ -35,6 +35,7 @@ import core.render.DrawUtils;
 import core.setups.Stage;
 import core.utilities.MathFunctions;
 
+@Deprecated
 public class Enemy extends Actor implements Combatant, Intelligent {
 
 	/**

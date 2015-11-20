@@ -8,7 +8,6 @@ import java.awt.geom.Rectangle2D;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
-import org.jbox2d.common.Mat33;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.lwjgl.opengl.GL11;
@@ -52,6 +51,29 @@ public class DrawUtils {
 		transform.setZero();
 	}
 	
+	public static void drawVerts(float[] vertices) {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		
+		GL11.glPushMatrix();
+		//GL11.glTranslated(line.getX1() - Camera.get().frame.getX(), line.getY1() - Camera.get().frame.getY(), 0);
+		GL11.glTranslated(vertices[0] - Camera.get().frame.getX(), vertices[1] - Camera.get().frame.getY(), 0);
+		GL11.glColor3f(color.x, color.y, color.z);
+		
+		GL11.glBegin(GL11.GL_LINE_LOOP);
+		{
+			for(int n = 0; n<vertices.length; n+=5) {
+				GL11.glVertex2f(vertices[n], vertices[n+1]);
+			}
+		}
+		GL11.glEnd();
+		GL11.glPopMatrix();
+		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		
+		// Reset color
+		reset();
+	}
+	
 	/**
 	 * Draw a line to the screen.
 	 * 
@@ -64,7 +86,8 @@ public class DrawUtils {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
 		GL11.glPushMatrix();
-		GL11.glTranslated(line.getX1() - Camera.get().frame.getX(), line.getY1() - Camera.get().frame.getY(), 0);
+		//GL11.glTranslated(line.getX1() - Camera.get().frame.getX(), line.getY1() - Camera.get().frame.getY(), 0);
+		GL11.glTranslated(line.getX1(), line.getY1(), 0);
 		GL11.glColor3f(color.x, color.y, color.z);
 		GL11.glLineWidth(1.0f);
 		

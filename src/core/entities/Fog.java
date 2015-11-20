@@ -9,6 +9,7 @@ import core.Camera;
 import core.entities.interfaces.Mobile;
 import core.render.SpriteIndex;
 
+@Deprecated
 public class Fog extends Prop implements Mobile {
 	
 	/**

@@ -43,7 +43,7 @@ public class HUDMagicBar {
 		
 		SkeletonJson json = new SkeletonJson(null);
 		json.setScale(scale);
-		magicBell = new Skeleton(json.readSkeletonData("HUD/HUD"));
+		magicBell = new Skeleton(json.readSkeletonData("HUD", "HUD"));
 		magicBell.updateWorldTransform();
 		animStateData = new AnimationStateData(magicBell.getData());
 		animStateData.setDefaultMix(0.1f);
@@ -100,7 +100,7 @@ public class HUDMagicBar {
 				} else {
 					SpriteIndex.getSprite(sprite).set2DRotation(-s.getBone().getWorldRotation() - region.getRotation(), 0f);
 				}
-				SpriteIndex.getSprite(sprite).setColor(s.getColor());
+				//SpriteIndex.getSprite(sprite).setColor(s.getColor());
 				SpriteIndex.getSprite(sprite).draw(region.getWorldX(),
 						region.getWorldY());
 			}

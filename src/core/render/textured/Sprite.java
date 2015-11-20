@@ -15,6 +15,7 @@ import org.newdawn.slick.util.ResourceLoader;
 import core.Camera;
 import core.Theater;
 
+@Deprecated
 public class Sprite {
 	
 	protected Texture texture;

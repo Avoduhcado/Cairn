@@ -1,8 +1,6 @@
 package core.render;
 
 import java.io.IOException;
-import java.nio.file.Files;
-
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.newdawn.slick.opengl.Texture;
@@ -26,7 +24,8 @@ public class Sprite {
 	private Texture load(String ref) throws IOException {
 		return TextureLoader.getTexture("PNG",
 				//ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/sprites/" + ref + ".png"));
-				Files.newInputStream(Resources.get().getFileSystem().getPath("/" + ref + ".png")));
+				//Files.newInputStream(Resources.get().getFileSystem().getPath("/" + ref + ".png")));
+				Resources.get().getResource(ref + ".png"));
 	}
 	
 	private void loadError() {
@@ -61,7 +60,6 @@ public class Sprite {
 		if(transform.flipX) {
 			GL11.glRotatef(180f, 0, 1, 0);
 		}
-		//GL11.glScalef(Camera.ASPECT_RATIO, Camera.ASPECT_RATIO, 0f);
 		
 		GL11.glColor4f(transform.color.x, transform.color.y, transform.color.z, transform.color.w);
 		
@@ -105,11 +103,11 @@ public class Sprite {
 		}*/
 	}
 	
-	public float getWidth() {
+	public int getWidth() {
 		return texture.getImageWidth();
 	}
 	
-	public float getHeight() {
+	public int getHeight() {
 		return texture.getImageHeight();
 	}
 	

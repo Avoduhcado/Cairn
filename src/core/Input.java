@@ -165,13 +165,13 @@ public class Input {
 		}
 		
 		if(Keybinds.SLOT9.clicked()) {
-			ShadowMap.get().resizeIllumination(1f);
+			ShadowMap.get().getLightSources().get(0).setResize(1f);
 		}
 		if(Keybinds.SLOT8.clicked()) {
-			ShadowMap.get().resizeIllumination(0.2f);
+			ShadowMap.get().getLightSources().get(0).setResize(0.2f);
 		}
 		if(Keybinds.SLOT7.clicked()) {
-			ShadowMap.get().resizeIllumination(-0.2f);
+			ShadowMap.get().getLightSources().get(0).setResize(-0.2f);
 		}
 	}
 	

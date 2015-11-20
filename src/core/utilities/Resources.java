@@ -1,15 +1,12 @@
 package core.utilities;
 
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.ProviderNotFoundException;
+import java.io.InputStream;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 
 public class Resources {
 
-	private FileSystem fileSystem;
+	private ZipFile zipFile;
 	
 	private static Resources resources;
 	
@@ -22,27 +19,26 @@ public class Resources {
 	}
 	
 	private Resources() {
-		Path resFile = Paths.get(System.getProperty("resources"), "sprites.avo");
-		System.out.println(resFile.toString());
 		try {
-			fileSystem = FileSystems.newFileSystem(resFile, null);
-		} catch (IOException | ProviderNotFoundException e) {
+			zipFile = new ZipFile(System.getProperty("resources") + "/sprites.avo");
+
+			if(zipFile.isEncrypted()) {
+				zipFile.setPassword("butts");
+			}
+		} catch (ZipException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public FileSystem getFileSystem() {
-		return fileSystem;
-	}
-	
-	public void close() {
-		if(fileSystem.isOpen()) {
-			try {
-				fileSystem.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+	public InputStream getResource(String resource) {
+		try {
+			return zipFile.getInputStream(zipFile.getFileHeader(resource));
+		} catch (ZipException e) {
+			System.out.println(resource);
+			e.printStackTrace();
 		}
+		
+		return null;
 	}
 	
 }

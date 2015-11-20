@@ -1,12 +1,5 @@
 package core.setups;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.ProviderNotFoundException;
 import java.util.ArrayList;
 
 import org.jbox2d.collision.shapes.EdgeShape;
@@ -55,6 +48,12 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		Entity shp = new Entity("Shepherd", 900, 455, this);
 		//((SpineRender) shp.getRender()).getSkeleton().findSlot("CROOK").setAttachment(null);
 		entities.add(shp);
+		
+		Entity light = new Entity("Hanging Light", 690, 185, this);
+		light.getBody().setType(BodyType.STATIC);
+		light.getBody().getFixtureList().getFilterData().categoryBits = 0;
+		entities.add(light);
+		ShadowMap.get().addIllumination(light, null, 225f);
 		
 		Entity wall = new Entity(null, 0, 300, this);
 		{

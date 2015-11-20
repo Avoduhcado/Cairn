@@ -7,7 +7,7 @@ import core.entities.Entity;
 import core.entities.utils.Reputation;
 import core.entities.utils.stats.Stats;
 import core.equipment.Equipment;
-
+@Deprecated
 public interface Combatant {
 
 	public void attack();

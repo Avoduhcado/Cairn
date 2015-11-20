@@ -176,9 +176,9 @@ public class Entity implements Drawable, Serializable {
 		}
 		
 		if(render != null) {
-			if(body.getLinearVelocity().x != 0 && !fixDirection) {
+			/*if(body.getLinearVelocity().x != 0 && !fixDirection) {
 				render.setFlipped(body.getLinearVelocity().x < 0);
-			}
+			}*/
 			
 			render.animate(1f, body.getPosition());
 		}

@@ -88,7 +88,13 @@ public class FollowController implements Controller {
 			follower.getBody().applyTorque(90 * (direction.x < 0 ? -1f : 1f));
 		}
 		follower.getBody().applyForceToCenter(direction.mul(speed * speedMod));
-		follower.changeState(speedMod > 1 ? CharacterState.RUN : CharacterState.WALK);
+		if(follower.getState().canMove()) {
+			follower.changeState(speedMod > 1 ? CharacterState.RUN : CharacterState.WALK);
+		}
+		
+		if(follower.getBody().getLinearVelocity().x != 0 && !follower.isFixDirection() && follower.getRender() != null) {
+			follower.getRender().setFlipped(follower.getBody().getLinearVelocity().x < 0);
+		}
 	}
 
 	@Override
@@ -121,5 +127,5 @@ public class FollowController implements Controller {
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
 	}
-
+	
 }

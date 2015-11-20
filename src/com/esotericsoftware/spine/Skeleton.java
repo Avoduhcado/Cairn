@@ -33,10 +33,9 @@ package com.esotericsoftware.spine;
 import java.util.ArrayList;
 
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector4f;
-
 import com.esotericsoftware.spine.attachments.Attachment;
 import com.esotericsoftware.spine.attachments.Region;
+import com.esotericsoftware.spine.utils.Color;
 
 public class Skeleton {
 	final SkeletonData data;
@@ -46,7 +45,7 @@ public class Skeleton {
 	final ArrayList<IkConstraint> ikConstraints;
 	private final ArrayList<ArrayList<Bone>> boneCache = new ArrayList<ArrayList<Bone>>();
 	Skin skin;
-	final Vector4f color;
+	final Color color;
 	float time;
 	boolean flipX, flipY;
 	float x, y;
@@ -74,7 +73,7 @@ public class Skeleton {
 		for (IkConstraintData ikConstraintData : data.ikConstraints)
 			ikConstraints.add(new IkConstraint(ikConstraintData, this));
 
-		color = new Vector4f(1f, 1f, 1f, 1f);
+		color = new Color(1f, 1f, 1f, 1f);
 
 		updateCache();
 	}
@@ -110,7 +109,7 @@ public class Skeleton {
 		}
 
 		skin = skeleton.skin;
-		color = new Vector4f(skeleton.color);
+		color = new Color(skeleton.color);
 		time = skeleton.time;
 		flipX = skeleton.flipX;
 		flipY = skeleton.flipY;
@@ -408,11 +407,11 @@ public class Skeleton {
 		size.set(maxX - minX, maxY - minY);
 	}
 
-	public Vector4f getColor () {
+	public Color getColor () {
 		return color;
 	}
 
-	public void setColor (Vector4f color) {
+	public void setColor (Color color) {
 		this.color.set(color);
 	}
 

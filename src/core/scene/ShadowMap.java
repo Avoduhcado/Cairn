@@ -1,6 +1,7 @@
 package core.scene;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jbox2d.dynamics.BodyType;
@@ -17,17 +18,8 @@ public class ShadowMap {
 	private float time;
 	private boolean flip;
 	
-	private Entity illumSource;
-	private Point illumOffset;
-	
-	private float shadowWidth = 500f, shadowHeight = shadowWidth / 1.77777f;
-	private float haloRatio = 0.9175f;
-	
-	private float glowTime, glowLimit = 1f, glowStart;
-	private boolean glowing = true;
-	
-	private float resizeTime, resizeDuration, resizeStart, resizeChange;
-	
+	private ArrayList<Illumination> lightSources = new ArrayList<Illumination>();
+
 	private static ShadowMap shadowMap;
 	
 	public static void init() {
@@ -47,100 +39,6 @@ public class ShadowMap {
 				e.getRender().shadow();
 			}
 		}
-		
-		//changeSizes();
-		
-		//GL11.glDisable(GL11.GL_TEXTURE_2D);
-		/*for(Entity e : entities) {
-			if(e.getBody().m_type == BodyType.DYNAMIC && e.getRender() != null) {
-				DrawUtils.drawShadowFan(e.getBody().getPosition().x * 30f,
-						(e.getBody().getPosition().y * 30f)
-						+ (e.getBody().getFixtureList().getUserData() != null ? (float) e.getBody().getFixtureList().getUserData() : 0),
-						(e.getWidth() * 0.4f) + (float) (Math.random() * 1f),
-						4f + (float) (Math.random() * 1f), 30);
-			}
-		}*/
-		
-		/*GL11.glEnable(GL11.GL_STENCIL_TEST);
-		GL11.glColorMask(false, false, false, false);
-		GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
-		GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 1); // Set any stencil to 1
-		GL11.glStencilOp(GL11.GL_REPLACE, GL11.GL_REPLACE, GL11.GL_REPLACE);
-		
-		for(Entity e : entities) {
-			if(e.getBody().m_type == BodyType.DYNAMIC && e.getRender() != null) {
-				DrawUtils.drawShadowFan(e.getBody().getPosition().x * 30f,
-						(e.getBody().getPosition().y * 30f)
-						+ (e.getBody().getFixtureList().getUserData() != null ? (float) e.getBody().getFixtureList().getUserData() : 0),
-						(e.getWidth() * 0.4f) + (float) (Math.random() * 1f),
-						4f + (float) (Math.random() * 1f), 30);
-			}
-		}
-		
-		GL11.glColorMask(true, true, true, true);
-		GL11.glStencilFunc(GL11.GL_EQUAL, 1, 1); // Pass test if stencil value is 1
-		GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
-		
-		//GL11.glEnable(GL11.GL_LINE_STIPPLE);
-		GL11.glEnable(GL11.GL_LINE_SMOOTH);
-		
-		GL11.glPushMatrix();
-		GL11.glColor3f(0f, 0f, 0f);
-		//GL11.glLineStipple(20, (short) 0x3F07);
-		GL11.glLineWidth(3.5f);
-		GL11.glBegin(GL11.GL_LINES);
-		{
-			//for(int x = -Camera.get().displayWidth / 2; x<Camera.get().displayWidth; x+= 28) {
-			for(int x = -Camera.get().displayHeight / 2; x<Camera.get().displayHeight; x+= 28) {
-				//GL11.glVertex2d(x + (sizes[0] * 2), 0);
-				GL11.glVertex2d(0, x + (sizes[0] * 2));
-				//GL11.glVertex2d(x + (Camera.get().displayWidth * 0.55f), Camera.get().displayHeight);
-				GL11.glVertex2d(Camera.get().displayWidth, x + (Camera.get().displayHeight * 0.05f));
-			}
-		}
-		GL11.glEnd();
-		
-		//GL11.glLineStipple(15, (short) 0xAAF7);
-		GL11.glLineWidth(2f);
-		GL11.glBegin(GL11.GL_LINES);
-		{
-			for(int x = -Camera.get().displayHeight / 2; x<Camera.get().displayHeight; x+= 14) {
-				//GL11.glVertex2d(x, 0 - (sizes[1] * 2));
-				//GL11.glVertex2d(x + (Camera.get().displayWidth * 0.55f), Camera.get().displayHeight);
-				GL11.glVertex2d(0, x - (sizes[1] * 2));
-				GL11.glVertex2d(Camera.get().displayWidth, x + (Camera.get().displayHeight * 0.05f));
-			}
-		}
-		GL11.glEnd();
-		
-		GL11.glLineWidth(5f);
-		GL11.glBegin(GL11.GL_LINES);
-		{
-			for(int x = -Camera.get().displayHeight / 2; x<Camera.get().displayHeight; x+= 56) {
-				//GL11.glVertex2d(x - (sizes[2] * 3), 0);
-				//GL11.glVertex2d(x + (Camera.get().displayWidth * 0.55f), Camera.get().displayHeight);
-				GL11.glVertex2d(0, x - (sizes[2] * 3));
-				GL11.glVertex2d(Camera.get().displayWidth, x + (Camera.get().displayHeight * 0.05f));
-			}
-		}
-		GL11.glEnd();
-		
-		GL11.glLineWidth(1.2f);
-		GL11.glBegin(GL11.GL_LINES);
-		{
-			for(int x = -Camera.get().displayHeight / 2; x<Camera.get().displayHeight; x+= 19) {
-				//GL11.glVertex2d(x + (sizes[3] * 3), 0);
-				//GL11.glVertex2d(x + (Camera.get().displayWidth * 0.55f), Camera.get().displayHeight);
-				GL11.glVertex2d(0, x + (sizes[3] * 3));
-				GL11.glVertex2d(Camera.get().displayWidth, x + (Camera.get().displayHeight * 0.05f));
-			}
-		}
-		GL11.glEnd();
-		
-		GL11.glPopMatrix();
-		
-		GL11.glDisable(GL11.GL_STENCIL_TEST);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);*/
 	}
 	
 	@SuppressWarnings("unused")
@@ -158,23 +56,118 @@ public class ShadowMap {
 		}
 	}
 	
-	/** TODO Introduce a proper wavy flicker, not random
-	 *	Scaling factors for the shadows
-	 *	Make interior shadow bounce in further, at same time scale
-	 */
 	public void drawIllumination() {
-		if(illumSource != null) {
-			if(resizeDuration != 0) {
-				resizeTime = MathFunctions.clamp(resizeTime + Theater.getDeltaSpeed(0.025f), 0, resizeDuration);
-				shadowWidth = MathFunctions.linearTween(resizeTime, resizeStart, resizeChange, resizeDuration);
-				shadowHeight = shadowWidth / 1.77777f;
-				if(resizeTime >= resizeDuration) {
-					resizeDuration = 0;
-				}
-			}
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_STENCIL_TEST);
+		GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
+		GL11.glColorMask(false, false, false, false);
+		
+		for(Illumination i : lightSources) {
+			Entity illumSource = i.illumSource;
+			Point illumOffset = i.illumOffset;
 			
+			if(i.resizeDuration != 0) {
+				i.resize();
+			}
+			i.flicker();
+			
+			// Stencil in light circle edge
+			GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
+			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+			
+			// Draw Illumination flicker
+			DrawUtils.setTransform(0, 0, 0, 0, 0, 
+					illumSource.getRender().getTransform().getRotation(),
+					0, 0, 0);
+			DrawUtils.drawShadowFan(
+					(illumSource.getBody().getPosition().x * 30f) + illumOffset.x,
+					(illumSource.getBody().getPosition().y * 30f) + illumOffset.y,
+					i.shadowWidth + (i.glow * i.haloRatio), i.shadowHeight + (i.glow * i.haloRatio), (int) (Math.random() * 3) + 8);
+		}
+		
+		for(Illumination i : lightSources) {
+			Entity illumSource = i.illumSource;
+			Point illumOffset = i.illumOffset;
+			
+			// Stencil in interior light circles
+			GL11.glStencilFunc(GL11.GL_ALWAYS, 2, 0xFF); // Pass test if stencil value is 1
+			GL11.glStencilOp(0, 0, GL11.GL_REPLACE);
+			
+			// Draw illumination circle
+			DrawUtils.setTransform(0, 0, 0, 0, 0, 
+					illumSource.getRender().getTransform().getRotation(),
+					0, 0, 0);
+			DrawUtils.drawShadowFan(
+					(illumSource.getBody().getPosition().x * 30f) + illumOffset.x,
+					(illumSource.getBody().getPosition().y * 30f) + illumOffset.y,
+					(i.shadowWidth + (i.glow * 1.5f)) * i.haloRatio, (i.shadowHeight + (i.glow * 1.5f)) * i.haloRatio,
+					(int) (Math.random() * 3) + 8);
+		}
+		
+		GL11.glColorMask(true, true, true, true);
+		GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF); // Pass test if stencil value is 1
+		GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+		
+		// Fill light edges
+		DrawUtils.fillColor(0, 0, 0, 0.65f);
+		
+		GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF); // Pass test if stencil value is 0
+		GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+		
+		// Fill in darkness
+		DrawUtils.fillColor(0, 0, 0, 1f);
+		
+		GL11.glDisable(GL11.GL_STENCIL_TEST);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+	
+	public ArrayList<Illumination> getLightSources() {
+		return lightSources;
+	}
+	
+	public void addIllumination(Entity source, Point offset, float radius) {
+		lightSources.add(new Illumination(source, offset, radius));
+	}
+	
+	public class Illumination {
+		
+		public Entity illumSource;
+		public Point illumOffset;
+		
+		private float shadowWidth, shadowHeight;
+		private float haloRatio = 0.9175f;
+		
+		private float glowTime, glowLimit = 1f, glowStart, glow;
+		private boolean glowing = true;
+		
+		private float resizeTime, resizeDuration, resizeStart, resizeChange;
+		
+		Illumination(Entity source, Point offset, float radius) {
+			illumSource = source;
+			illumOffset = offset == null ? new Point(0, 0) : offset;
+			shadowWidth = radius;
+			shadowHeight = radius / 1.777f;
+		}
+		
+		public void resize() {
+			resizeTime = MathFunctions.clamp(resizeTime + Theater.getDeltaSpeed(0.025f), 0, resizeDuration);
+			shadowWidth = MathFunctions.linearTween(resizeTime, resizeStart, resizeChange, resizeDuration);
+			shadowHeight = shadowWidth / 1.77777f;
+			if(resizeTime >= resizeDuration) {
+				resizeDuration = 0;
+			}
+		}
+		
+		public void setResize(float resizeFactor) {
+			resizeTime = 0f;
+			resizeDuration = 1f;
+			resizeStart = shadowWidth;
+			resizeChange = shadowWidth * resizeFactor;
+		}
+		
+		public void flicker() {
 			glowTime = MathFunctions.clamp(glowTime + Theater.getDeltaSpeed(0.025f), 0, glowLimit);
-			float glow = MathFunctions.linearTween(glowTime, glowStart, glowing ? (glowLimit * 25) : -(glowLimit * 25), glowLimit);
+			glow = MathFunctions.linearTween(glowTime, glowStart, glowing ? (glowLimit * 25) : -(glowLimit * 25), glowLimit);
 			if(glowTime >= glowLimit) {
 				glowStart = glow;
 				glowTime = 0;
@@ -188,65 +181,8 @@ public class ShadowMap {
 				}
 				glowing = !glowing;
 			}
-			
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glEnable(GL11.GL_STENCIL_TEST);
-			GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
-			
-			GL11.glColorMask(false, false, false, false);
-			GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF); // Set any stencil to 2
-			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
-			
-			// Draw Illumination circle
-			DrawUtils.setTransform(0, 0, 0, 0, 0, 
-					illumSource.getRender().getTransform().getRotation(),
-					0, 0, 0);
-			DrawUtils.drawShadowFan(
-					(illumSource.getBody().getPosition().x * 30f) + illumOffset.x,
-					(illumSource.getBody().getPosition().y * 30f) + illumOffset.y,
-					shadowWidth + (glow * haloRatio), shadowHeight + (glow * haloRatio), (int) (Math.random() * 3) + 8);
-			
-			GL11.glStencilFunc(GL11.GL_ALWAYS, 2, 0xFF); // Pass test if stencil value is 1
-			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
-			
-			// Draw encroaching darkness
-			DrawUtils.setTransform(0, 0, 0, 0, 0, 
-					illumSource.getRender().getTransform().getRotation(),
-					0, 0, 0);
-			DrawUtils.drawShadowFan(
-					(illumSource.getBody().getPosition().x * 30f) + illumOffset.x,
-					(illumSource.getBody().getPosition().y * 30f) + illumOffset.y,
-					(shadowWidth + glow * 1.5f) * haloRatio, (shadowHeight + glow * 1.5f) * haloRatio,
-					(int) (Math.random() * 3) + 8);
-			
-			GL11.glColorMask(true, true, true, true);
-			GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF); // Pass test if stencil value is 1
-			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
-			
-			// Draw encroaching darkness
-			DrawUtils.fillColor(0, 0, 0, 1f);
-			
-			GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF); // Pass test if stencil value is 1
-			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
-			
-			// Draw encroaching darkness
-			DrawUtils.fillColor(0, 0, 0, 0.65f);
-			
-			GL11.glDisable(GL11.GL_STENCIL_TEST);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
-	}
-	
-	public void resizeIllumination(float resizeFactor) {
-		resizeTime = 0f;
-		resizeDuration = 1f;
-		resizeStart = shadowWidth;
-		resizeChange = shadowWidth * resizeFactor;
-	}
-	
-	public void setIllumination(Entity source, Point offset) {
-		illumSource = source;
-		illumOffset = offset;
+		
 	}
 	
 }

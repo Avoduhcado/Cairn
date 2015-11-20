@@ -11,7 +11,7 @@ import com.esotericsoftware.spine.attachments.Region;
 
 import core.Theater;
 import core.render.SpriteIndex;
-
+@Deprecated
 public class Spell {
 
 	private String name;
@@ -31,7 +31,7 @@ public class Spell {
 		
 		SkeletonJson json = new SkeletonJson(null);
 		json.setScale(scale);
-		spell = new Skeleton(json.readSkeletonData("actors/" + name + "/" + name));
+		spell = new Skeleton(json.readSkeletonData("actors/" + name, name));
 		spell.updateWorldTransform();
 		animStateData = new AnimationStateData(spell.getData());
 		animStateData.setDefaultMix(0.1f);
@@ -67,7 +67,7 @@ public class Spell {
 				} else {
 					SpriteIndex.getSprite(sprite).set2DRotation(-s.getBone().getWorldRotation() - region.getRotation(), 0f);
 				}
-				SpriteIndex.getSprite(sprite).setColor(s.getColor());
+				//SpriteIndex.getSprite(sprite).setColor(s.getColor());
 				SpriteIndex.getSprite(sprite).draw(region.getWorldX(), region.getWorldY());
 			}
 		}

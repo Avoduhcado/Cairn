@@ -30,7 +30,7 @@
 
 package com.esotericsoftware.spine;
 
-import org.lwjgl.util.vector.Vector4f;
+import com.esotericsoftware.spine.utils.Color;
 
 public class BoneData {
 	final BoneData parent;
@@ -43,7 +43,7 @@ public class BoneData {
 	boolean inheritScale = true, inheritRotation = true;
 
 	// Nonessential.
-	final Vector4f color = new Vector4f(0.61f, 0.61f, 0.61f, 1f);
+	final Color color = new Color(0.61f, 0.61f, 0.61f, 1f);
 
 	/** @param parent May be null. */
 	public BoneData (String name, BoneData parent) {
@@ -167,7 +167,7 @@ public class BoneData {
 		this.inheritRotation = inheritRotation;
 	}
 
-	public Vector4f getColor () {
+	public Color getColor () {
 		return color;
 	}
 

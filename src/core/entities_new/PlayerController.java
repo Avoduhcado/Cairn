@@ -34,7 +34,7 @@ public class PlayerController implements Controller {
 			for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
 				f.getFilterData().categoryBits = 0;
 			}
-			ShadowMap.get().setIllumination(dad, new Point(0, -105));
+			ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
 			player.getContainer().addEntity(dad);
 			
 			/*Entity lantern = new Entity("Lantern", 500, 100, player.getContainer());
@@ -97,6 +97,10 @@ public class PlayerController implements Controller {
 			direction.normalize();
 			player.getBody().applyForceToCenter(direction.mul(speed * speedMod));
 			player.changeState(speedMod > 1 ? CharacterState.RUN : CharacterState.WALK);
+			
+			if(player.getBody().getLinearVelocity().x != 0 && !player.isFixDirection() && player.getRender() != null) {
+				player.getRender().setFlipped(player.getBody().getLinearVelocity().x < 0);
+			}
 		}
 	}
 	

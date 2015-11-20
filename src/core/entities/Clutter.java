@@ -10,6 +10,7 @@ import core.Camera;
 import core.entities.utils.BoxUserData;
 import core.render.SpriteIndex;
 
+@Deprecated
 public class Clutter {
 
 	private Body body;

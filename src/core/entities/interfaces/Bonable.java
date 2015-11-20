@@ -11,7 +11,7 @@ import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Skeleton;
 
 import core.entities.Clutter;
-
+@Deprecated
 public interface Bonable {
 
 	public Skeleton getSkeleton();

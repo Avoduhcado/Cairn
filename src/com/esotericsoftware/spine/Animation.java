@@ -32,9 +32,8 @@ package com.esotericsoftware.spine;
 
 import java.util.ArrayList;
 
-import org.lwjgl.util.vector.Vector4f;
-
 import com.esotericsoftware.spine.attachments.Attachment;
+import com.esotericsoftware.spine.utils.Color;
 
 public class Animation {
 	final String name;
@@ -459,16 +458,9 @@ public class Animation {
 				b = prevFrameB + (frames[frameIndex + FRAME_B] - prevFrameB) * percent;
 				a = prevFrameA + (frames[frameIndex + FRAME_A] - prevFrameA) * percent;
 			}
-			/*Color color = skeleton.slots.get(slotIndex).color;
+			Color color = skeleton.slots.get(slotIndex).color;
 			if (alpha < 1)
 				color.add((r - color.r) * alpha, (g - color.g) * alpha, (b - color.b) * alpha, (a - color.a) * alpha);
-			else
-				color.set(r, g, b, a);*/
-			
-			Vector4f color = skeleton.slots.get(slotIndex).color;
-			// TODO It used to add colors, I changed to set
-			if (alpha < 1)
-				color.set((r - color.x) * alpha, (g - color.y) * alpha, (b - color.z) * alpha, (a - color.w) * alpha);
 			else
 				color.set(r, g, b, a);
 		}

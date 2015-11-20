@@ -1,7 +1,7 @@
 package core.entities.interfaces;
 
 import org.lwjgl.util.vector.Vector2f;
-
+@Deprecated
 public interface Mobile {
 	
 	public void checkCollision();

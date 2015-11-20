@@ -32,14 +32,13 @@ package com.esotericsoftware.spine;
 
 import java.util.ArrayList;
 
-import org.lwjgl.util.vector.Vector4f;
-
 import com.esotericsoftware.spine.attachments.Attachment;
+import com.esotericsoftware.spine.utils.Color;
 
 public class Slot {
 	final SlotData data;
 	final Bone bone;
-	final Vector4f color;
+	final Color color;
 	Attachment attachment;
 	private float attachmentTime;
 	private ArrayList<Float> attachmentVertices = new ArrayList<Float>();
@@ -47,7 +46,7 @@ public class Slot {
 	Slot (SlotData data) {
 		this.data = data;
 		bone = null;
-		color = new Vector4f(1f, 1f, 1f, 1f);
+		color = new Color(1f, 1f, 1f, 1f);
 	}
 
 	public Slot (SlotData data, Bone bone) {
@@ -55,7 +54,7 @@ public class Slot {
 		if (bone == null) throw new IllegalArgumentException("bone cannot be null.");
 		this.data = data;
 		this.bone = bone;
-		color = new Vector4f();
+		color = new Color();
 		setToSetupPose();
 	}
 
@@ -65,7 +64,7 @@ public class Slot {
 		if (bone == null) throw new IllegalArgumentException("bone cannot be null.");
 		data = slot.data;
 		this.bone = bone;
-		color = new Vector4f(slot.color);
+		color = new Color(slot.color);
 		attachment = slot.attachment;
 		attachmentTime = slot.attachmentTime;
 	}
@@ -82,7 +81,7 @@ public class Slot {
 		return bone.skeleton;
 	}
 
-	public Vector4f getColor () {
+	public Color getColor () {
 		return color;
 	}
 

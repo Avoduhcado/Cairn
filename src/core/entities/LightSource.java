@@ -16,6 +16,7 @@ import core.Theater;
 import core.render.DrawUtils;
 import core.render.SpriteIndex;
 
+@Deprecated
 public class LightSource extends Entity {
 	
 	/**

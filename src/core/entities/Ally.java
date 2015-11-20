@@ -9,6 +9,7 @@ import core.interactions.InteractionListener;
 import core.setups.Stage;
 import core.utilities.scripts.Script;
 
+@Deprecated
 public class Ally extends Actor implements Scriptable {
 
 	/**

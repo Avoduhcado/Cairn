@@ -43,6 +43,7 @@ import core.utilities.Cheats;
 import core.utilities.MathFunctions;
 import core.utilities.text.Text;
 
+@Deprecated
 public class Actor extends Entity implements Mobile, Bonable {
 	
 	/**
@@ -149,7 +150,7 @@ public class Actor extends Entity implements Mobile, Bonable {
 				} else {
 					SpriteIndex.getSprite(sprite + attachment).set2DRotation(-s.getBone().getWorldRotation() - region.getRotation(), 0f);
 				}
-				SpriteIndex.getSprite(sprite + attachment).setColor(s.getColor());
+				//SpriteIndex.getSprite(sprite + attachment).setColor(s.getColor());
 				SpriteIndex.getSprite(sprite + attachment).draw(region.getWorldX(), region.getWorldY());
 			}
 		}
@@ -206,9 +207,9 @@ public class Actor extends Entity implements Mobile, Bonable {
 		SkeletonJson json = new SkeletonJson(null);
 		json.setScale(scale);
 		if(sprite.contains("_")) {
-			skeleton = new Skeleton(json.readSkeletonData(sprite.split("_")[0] + "/" + name));
+			skeleton = new Skeleton(json.readSkeletonData(sprite.split("_")[0], name));
 		} else {
-			skeleton = new Skeleton(json.readSkeletonData(sprite + "/" + name));
+			skeleton = new Skeleton(json.readSkeletonData(sprite, name));
 		}
 		skeleton.updateWorldTransform();
 				
