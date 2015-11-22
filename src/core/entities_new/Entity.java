@@ -45,9 +45,9 @@ public class Entity implements Drawable, Serializable {
 	private boolean fixDirection;
 	
 	public Entity(String name, float x, float y, WorldContainer container) {
-		setRender(loadRender(name));
 		loadBody(container.getWorld(), x, y);
 		setContainer(container);
+		setRender(loadRender(name));
 		setState(CharacterState.IDLE);
 	}
 	
@@ -91,11 +91,6 @@ public class Entity implements Drawable, Serializable {
 
 		body = world.createBody(bodyDef);
 		body.createFixture(boxFixture);
-		
-		if(render != null && render instanceof SpineRender) {
-			((SpineRender) render).buildBodies(world);
-		}
-		
 		body.setFixedRotation(true);
 		body.setLinearDamping(15f);
 		body.setGravityScale(0f);
@@ -137,10 +132,6 @@ public class Entity implements Drawable, Serializable {
 		}
 		
 		if(render != null) {
-			/*if(body.getLinearVelocity().x != 0 && !fixDirection) {
-				render.setFlipped(body.getLinearVelocity().x < 0);
-			}*/
-			
 			render.animate(1f, body.getPosition());
 		}
 		
@@ -209,14 +200,6 @@ public class Entity implements Drawable, Serializable {
 		}
 		
 		this.subEntity = subEntity;
-	}
-
-	public float getWidth() {
-		if(render != null) {
-			return render.getWidth() * Camera.ASPECT_RATIO;
-		}
-		
-		return 1f;
 	}
 	
 	public Render getRender() {

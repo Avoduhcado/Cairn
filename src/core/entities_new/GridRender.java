@@ -122,18 +122,6 @@ public class GridRender implements Render {
 	public String getSprite(int index) {
 		return sprite + "[" + tiles.get(index).x + "," + tiles.get(index).y + "]";
 	}
-	
-	@Override
-	public float getWidth() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public float getHeight() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
 	@Override
 	public void shadow() {

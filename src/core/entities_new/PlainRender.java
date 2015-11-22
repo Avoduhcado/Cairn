@@ -87,20 +87,6 @@ public class PlainRender implements Render {
 	}
 
 	@Override
-	public float getWidth() {
-		Body body = entity.getBody();
-		
-		return (body.getFixtureList().getAABB(0).upperBound.x - body.getFixtureList().getAABB(0).lowerBound.x) * 30f;
-	}
-
-	@Override
-	public float getHeight() {
-		Body body = entity.getBody();
-		
-		return (body.getFixtureList().getAABB(0).upperBound.y - body.getFixtureList().getAABB(0).lowerBound.y) * 30f;
-	}
-
-	@Override
 	public void shadow() {
 		Body body = entity.getBody();
 		PolygonShape shape = ((PolygonShape) body.getFixtureList().getShape());

@@ -5,7 +5,7 @@ import org.jbox2d.dynamics.Body;
 public class Box2dAttachment extends RegionAttachment {
 	private Body body;
 
-	public Box2dAttachment (String name) {
+	public Box2dAttachment(String name) {
 		super(name);
 	}
 	

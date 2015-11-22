@@ -19,8 +19,5 @@ public interface Render extends Serializable {
 	public Transform getTransform();
 	public void setTransform(int index);
 	public String getSprite();
-	
-	public float getWidth();
-	public float getHeight();
 		
 }

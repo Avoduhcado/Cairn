@@ -34,7 +34,9 @@ import java.util.ArrayList;
 
 import org.lwjgl.util.vector.Vector2f;
 import com.esotericsoftware.spine.attachments.Attachment;
-import com.esotericsoftware.spine.attachments.Region;
+import com.esotericsoftware.spine.attachments.MeshAttachment;
+import com.esotericsoftware.spine.attachments.RegionAttachment;
+import com.esotericsoftware.spine.attachments.SkinnedMeshAttachment;
 import com.esotericsoftware.spine.utils.Color;
 
 public class Skeleton {
@@ -159,18 +161,18 @@ public class Skeleton {
 
 	/** Updates the world transform for each bone and applies IK constraints. */
 	public void updateWorldTransform () {
-		//ArrayList<Bone> bones = this.bones;
+		ArrayList<Bone> bones = this.bones;
 		for (int i = 0, nn = bones.size(); i < nn; i++) {
 			Bone bone = bones.get(i);
 			bone.rotationIK = bone.rotation;
 		}
-		//ArrayList<ArrayList<Bone>> boneCache = this.boneCache;
-		//ArrayList<IkConstraint> ikConstraints = this.ikConstraints;
+		ArrayList<ArrayList<Bone>> boneCache = this.boneCache;
+		ArrayList<IkConstraint> ikConstraints = this.ikConstraints;
 		int i = 0, last = ikConstraints.size();
 		while (true) {
-			//ArrayList<Bone> updateBones = boneCache.get(i);
-			for (int ii = 0, nn = boneCache.get(i).size(); ii < nn; ii++)
-				boneCache.get(i).get(ii).updateWorldTransform();
+			ArrayList<Bone> updateBones = boneCache.get(i);
+			for (int ii = 0, nn = updateBones.size(); ii < nn; ii++)
+				updateBones.get(ii).updateWorldTransform();
 			if (i == last) break;
 			ikConstraints.get(i).apply();
 			i++;
@@ -184,7 +186,7 @@ public class Skeleton {
 	}
 
 	public void setBonesToSetupPose () {
-		//ArrayList<Bone> bones = this.bones;
+		ArrayList<Bone> bones = this.bones;
 		for (int i = 0, n = bones.size(); i < n; i++)
 			bones.get(i).setToSetupPose();
 
@@ -196,13 +198,11 @@ public class Skeleton {
 		}
 	}
 
-	// TODO THIS MIGHT BE FUCKED
 	public void setSlotsToSetupPose () {
-		//ArrayList<Slot> slots = this.slots;
-		//System.arraycopy(slots, 0, drawOrder, 0, slots.size());
+		ArrayList<Slot> slots = this.slots;
+		System.arraycopy(slots, 0, drawOrder, 0, slots.size());
 		for (int i = 0, n = slots.size(); i < n; i++) {
 			slots.get(i).setToSetupPose(i);
-			drawOrder.get(i).setToSetupPose(i);
 		}
 	}
 
@@ -372,13 +372,7 @@ public class Skeleton {
 			float[] vertices = null;
 			Attachment attachment = slot.attachment;
 
-			if (attachment instanceof Region) {
-				Region region = (Region)attachment;
-				region.updateWorldVertices(slot);
-				//vertices = region.getWorldVertices();
-				vertices = region.getVertices(slot);
-			}
-			/*if (attachment instanceof RegionAttachment) {
+			if (attachment instanceof RegionAttachment) {
 				RegionAttachment region = (RegionAttachment)attachment;
 				region.updateWorldVertices(slot, false);
 				vertices = region.getWorldVertices();
@@ -392,7 +386,7 @@ public class Skeleton {
 				SkinnedMeshAttachment mesh = (SkinnedMeshAttachment)attachment;
 				mesh.updateWorldVertices(slot, true);
 				vertices = mesh.getWorldVertices();
-			}*/
+			}
 			if (vertices != null) {
 				for (int ii = 0, nn = vertices.length; ii < nn; ii += 2) {
 					float x = vertices[ii], y = vertices[ii + 1];

@@ -17,6 +17,7 @@ import core.entities_new.Entity;
 import core.entities_new.PlayerController;
 import core.entities_new.SensorData;
 import core.entities_new.SensorType;
+import core.entities_new.SpineRender;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
@@ -47,7 +48,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		
 		Entity shp = new Entity("Shepherd", 900, 455, this);
 		//((SpineRender) shp.getRender()).getSkeleton().findSlot("CROOK").setAttachment(null);
-		entities.add(shp);
+		//entities.add(shp);
 		
 		Entity light = new Entity("Hanging Light", 690, 185, this);
 		light.getBody().setType(BodyType.STATIC);
