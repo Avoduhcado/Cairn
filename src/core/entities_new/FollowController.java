@@ -5,13 +5,11 @@ import java.awt.Point;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 
-import core.utilities.keyboard.Keybinds;
-
-public class FollowController implements Controller {
+public class FollowController implements Controller, ActionEventListener {
 
 	private Entity leader;
 	private Entity follower;
-	
+		
 	private float lagDistance = 50;
 	private float xOffset, yOffset;
 	
@@ -21,6 +19,8 @@ public class FollowController implements Controller {
 	public FollowController(Entity follower, Entity leader) {
 		this.follower = follower;
 		this.leader = leader;
+		
+		this.leader.getController().addActionEventListener(this);
 	}
 	
 	@Override
@@ -47,20 +47,6 @@ public class FollowController implements Controller {
 			move(new Vec2((((leadBody.getPosition().x * 30f) + xOffset) - followBody.getPosition().x * 30f) / (float) distance,
 					(((leadBody.getPosition().y * 30f) + yOffset) - followBody.getPosition().y * 30f) / (float) distance));
 			follower.getRender().setFlipped(leader.getRender().isFlipped());
-		}
-		
-		if(!follower.getState().isActing()) {
-			if(Keybinds.DODGE.clicked()) {
-				follower.changeState(CharacterState.QUICKSTEP);
-			}
-			
-			if(Keybinds.ATTACK.clicked()) {
-				follower.changeState(CharacterState.ATTACK);
-			}
-			
-			if(Keybinds.DEFEND.clicked()) {
-				follower.changeState(CharacterState.DEFEND);
-			}
 		}
 	}
 
@@ -115,6 +101,12 @@ public class FollowController implements Controller {
 
 	}
 
+	@Override
+	public void defend() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	public float getLagDistance() {
 		return lagDistance;
 	}
@@ -126,6 +118,34 @@ public class FollowController implements Controller {
 	public void setOffset(float xOffset, float yOffset) {
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
+	}
+
+	@Override
+	public void actionPerformed(EntityAction e) {
+		switch(e.getType()) {
+		case ATTACK:
+			follower.changeState(CharacterState.ATTACK);
+			break;
+		case DEFEND:
+			follower.changeState(CharacterState.DEFEND);
+			break;
+		case QUICKSTEP:
+			follower.changeState(CharacterState.QUICKSTEP);
+			follower.setFixDirection(true);
+			break;
+		default:
+			break;
+		
+		}
+	}
+
+	@Override
+	public void addActionEventListener(ActionEventListener ael) {		
+	}
+
+	@Override
+	public boolean removeActionEventListener(ActionEventListener ael) {
+		return false;
 	}
 	
 }

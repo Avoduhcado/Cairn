@@ -97,23 +97,20 @@ public class SpineRender implements Render {
 		for(Slot s : skeleton.drawOrder) {
 			if(s.getAttachment() != null && s.getAttachment() instanceof Box2dAttachment) {
 				Box2dAttachment attachment = (Box2dAttachment) s.getAttachment();
-				if(attachment.getName().matches("HEAD")) {
-					System.out.println(attachment.getWidth() + " " + attachment.getHeight() + " " + attachment.getX() + 
-							" " + attachment.getY() + " " + attachment.getRotation());
-				}
 				attachment.updateWorldVertices(s, false);
 
 				BodyDef bodyDef = new BodyDef();
 				bodyDef.position.set(attachment.getWorldVertices()[Attachment.X3] / 30f,
 						attachment.getWorldVertices()[Attachment.Y3] / 30f);
-				bodyDef.type = BodyType.STATIC;
+				bodyDef.angle = (float) Math.toRadians(-s.getBone().getWorldRotation() - attachment.getRotation());
+				bodyDef.type = BodyType.DYNAMIC;
 
 				PolygonShape bodyShape = new PolygonShape();
 				Vec2[] verts = new Vec2[] {
-						new Vec2(attachment.getWorldVertices()[Attachment.U2] / 30f, attachment.getWorldVertices()[Attachment.V2] / 30f),
-						new Vec2(attachment.getWorldVertices()[Attachment.U3] / 30f, attachment.getWorldVertices()[Attachment.V3] / 30f),
 						new Vec2(attachment.getWorldVertices()[Attachment.U4] / 30f, attachment.getWorldVertices()[Attachment.V4] / 30f),
 						new Vec2(attachment.getWorldVertices()[Attachment.U1] / 30f, attachment.getWorldVertices()[Attachment.V1] / 30f),
+						new Vec2(attachment.getWorldVertices()[Attachment.U2] / 30f, attachment.getWorldVertices()[Attachment.V2] / 30f),
+						new Vec2(attachment.getWorldVertices()[Attachment.U3] / 30f, attachment.getWorldVertices()[Attachment.V3] / 30f),
 				};
 				bodyShape.set(verts, 4);
 
@@ -121,11 +118,12 @@ public class SpineRender implements Render {
 				boxFixture.density = 1f;
 				boxFixture.shape = bodyShape;
 				boxFixture.isSensor = true;
-				//boxFixture.filter.categoryBits = 0;
+				boxFixture.userData = attachment;
 
 				Body body = world.createBody(bodyDef);
 				body.createFixture(boxFixture);
-				body.setUserData(attachment);
+				body.setGravityScale(0);
+				body.setUserData(new SensorData(entity, SensorType.BODY));
 				attachment.setBody(body);
 			}
 		}
@@ -145,20 +143,25 @@ public class SpineRender implements Render {
 					// TODO
 					break;
 				case "Damage":
-					System.out.println(event.getFloat() + " " + event.getInt() + " " + event.getString() + " " + event.getData());
-					switch(event.getInt()) {
-					case 0:
-						entity.setSensorData(null);
+					//System.out.println(event.getFloat() + " " + event.getInt() + " " + event.getString() + " " + event.getData());
+					// TODO
+					if(event.getString() == null)
 						break;
-					case 1:
-
-						break;
-					default:
-						break;
+					String[] slots = event.getString().split(";");
+					for(String slot : slots) {
+						if(skeleton.findSlot(slot) == null) {
+							continue;
+						}
+						Box2dAttachment attachment = (Box2dAttachment) skeleton.findSlot(slot).getAttachment();
+						if(attachment == null) {
+							continue;
+						}
+						((SensorData) attachment.getBody().getUserData()).setType(event.getInt() == 1 ?
+								SensorType.WEAPON : SensorType.BODY);
 					}
 					break;
 				default:
-					System.out.println("Unhandled event: " + event.getData());
+					//System.out.println("Unhandled event: " + event.getData());
 				}
 			}
 
@@ -169,7 +172,9 @@ public class SpineRender implements Render {
 				case DEFEND:
 					entity.setSubEntity(null);
 				case QUICKSTEP:
+					entity.getBody().setLinearDamping(15f);
 				case LAND:
+				case HIT:
 					entity.setFixDirection(false);
 					entity.getBody().setLinearVelocity(new Vec2());
 					entity.changeState(CharacterState.IDLE);
@@ -190,7 +195,12 @@ public class SpineRender implements Render {
 				SpriteList.get(sprite + "/" + attachment.getName()).draw(transform);
 
 				if(Theater.get().debug) {
-					DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
+					SensorData sd = (SensorData) ((Box2dAttachment) attachment).getBody().getUserData();
+					if(sd.getType() == SensorType.WEAPON) {
+						DrawUtils.setColor(new Vector3f(0.8f, 0f, 0f));
+					} else {
+						DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
+					}
 					DrawUtils.drawBox2DPoly(((Box2dAttachment) attachment).getBody(),
 							(PolygonShape) ((Box2dAttachment) attachment).getBody().m_fixtureList.m_shape);
 				}
@@ -206,33 +216,33 @@ public class SpineRender implements Render {
 
 	@Override
 	public void animate(float speed, Vec2 position) {
-		skeleton.setPosition(position.x * 30f, position.y * 30f);
-		skeleton.updateWorldTransform();
-
 		animState.update(Theater.getDeltaSpeed(0.016f) * speed);
 		animState.apply(skeleton);
+		
+		skeleton.setPosition(position.x * 30f, position.y * 30f);
+		skeleton.updateWorldTransform();
 
 		for(Slot slot : skeleton.getSlots()) {
 			if (!(slot.getAttachment() instanceof Box2dAttachment)) continue;
 			Box2dAttachment attachment = (Box2dAttachment) slot.getAttachment();
 			if (attachment.getBody() == null) continue;
-			float x = attachment.getWorldVertices()[Attachment.X3] / 30f;
-			float y = attachment.getWorldVertices()[Attachment.Y3] / 30f;
+			
 			float rotation = -slot.getBone().getWorldRotation() - attachment.getRotation();
+			float x = attachment.getWorldVertices()[Attachment.X3];
+			float y = attachment.getWorldVertices()[Attachment.Y3];
 			
 			if(skeleton.getFlipX()) {
-				// TODO
-				//x -= attachment.getWidth() / 2f / 30f;
-				x -= attachment.getWidth() / 2f / 30f;
-				//y += attachment.getHeight() / 2f / 30f;
-				x += (-MathUtils.cosDeg(180) + MathUtils.sinDeg(180) * 0.667f) / 30f;
-				y -= (MathUtils.sinDeg(180) + MathUtils.cosDeg(180) * 0.667f) / 30f;
-				x -= attachment.getWidth() / 2f / 30f;
-				//y += attachment.getHeight() / 2f / 30f;
+				x = attachment.getWorldVertices()[Attachment.X4];
+				y = attachment.getWorldVertices()[Attachment.Y4];
 				rotation = -rotation;
 			}
-			attachment.getBody().setTransform(new Vec2(x, y), rotation);
+			
+			attachment.getBody().setTransform(new Vec2(x / 30f, y / 30f), rotation * MathUtils.degRad);
 		}
+	}
+	
+	public String getAnimation() {
+		return animState.getCurrent(0).getAnimation().getName();
 	}
 
 	@Override
@@ -292,6 +302,16 @@ public class SpineRender implements Render {
 				transform.color = new Vector4f(0, 0, 0, 1f);
 				SpriteList.get(sprite + "/" + skeleton.drawOrder.get(i).getAttachment().getName()).draw(transform);
 			}
+		}
+	}
+
+	public void destroyBodies() {
+		for(Slot slot : skeleton.getSlots()) {
+			if (!(slot.getAttachment() instanceof Box2dAttachment)) continue;
+			Box2dAttachment attachment = (Box2dAttachment) slot.getAttachment();
+			if (attachment.getBody() == null) continue;
+			
+			entity.getContainer().getWorld().destroyBody(attachment.getBody());
 		}
 	}
 

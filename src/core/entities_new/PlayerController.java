@@ -1,6 +1,7 @@
 package core.entities_new;
 
 import java.awt.Point;
+import java.util.ArrayList;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -24,27 +25,12 @@ public class PlayerController implements Controller {
 	private float speedMod = 1f;
 	private Vec2 movement = new Vec2();
 	
-	public PlayerController(Entity player, boolean spawnFollower) {
+	private EntityAction actionQueue;
+	
+	private ArrayList<ActionEventListener> actionEventListeners = new ArrayList<ActionEventListener>();
+	
+	public PlayerController(Entity player) {
 		this.player = player;
-		
-		if(spawnFollower) {
-			Entity dad = new Entity("Skull",
-					player.getBody().getPosition().x * 30f, player.getBody().getPosition().y * 30f, player.getContainer());
-			dad.setController(new FollowController(dad, player));
-			for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
-				f.getFilterData().categoryBits = 0;
-			}
-			ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
-			player.getContainer().addEntity(dad);
-			
-			/*Entity lantern = new Entity("Lantern", 500, 100, player.getContainer());
-			FollowController lanternControl = new FollowController(lantern, player);
-			lanternControl.setOffset(0, -105f);
-			lantern.setController(lanternControl);
-			lantern.getBody().getFixtureList().getFilterData().categoryBits = 0;
-			ShadowMap.setIllumination(lantern, new Point(0, 0));
-			player.getContainer().addEntity(lantern);*/
-		}
 	}
 
 	@Override
@@ -62,18 +48,24 @@ public class PlayerController implements Controller {
 			movement.setZero();
 		}
 		
-		if(!player.getState().isActing()) {
-			if(Keybinds.DODGE.clicked()) {
-				dodge();
-			} else if(Keybinds.ATTACK.clicked()) {
-				attack();
-			} else if(Keybinds.DEFEND.clicked()) {
-				defend();
-			}
+		if(Keybinds.DODGE.clicked()) {
+			dodge();
+		} else if(Keybinds.ATTACK.clicked()) {
+			attack();
+		} else if(Keybinds.DEFEND.clicked()) {
+			defend();
 		}
 		
 		if(Keybinds.CONTROL.clicked()) {
 			collapse(player.getBody().getLinearVelocity());
+		}
+		
+		if(actionQueue != null && !player.getState().isActing()) {
+			actionQueue.act();
+			for(ActionEventListener l : actionEventListeners) {
+				l.actionPerformed(actionQueue);
+			}
+			setActionQueue(null);
 		}
 	}
 
@@ -106,17 +98,23 @@ public class PlayerController implements Controller {
 	
 	@Override
 	public void dodge() {
-		if(player.getBody().getLinearVelocity().length() == 0) {
-			player.getBody().applyLinearImpulse(new Vec2(player.getRender().isFlipped() ? 10f : -10f, 0f),
-					player.getBody().getWorldCenter());
-		} else {
-			player.getBody().getLinearVelocity().normalize();
-			player.getBody().applyLinearImpulse(player.getBody().getLinearVelocity().mul(10f * speedMod),
-					player.getBody().getWorldCenter());
-		}
-		
-		player.changeState(CharacterState.QUICKSTEP);
-		player.setFixDirection(true);
+		setActionQueue(new EntityAction(CharacterState.QUICKSTEP, player.getState()) {
+			@Override
+			public void act() {
+				player.getBody().setLinearDamping(5f);
+				if(player.getBody().getLinearVelocity().length() == 0) {
+					player.getBody().applyLinearImpulse(new Vec2(player.getRender().isFlipped() ? 3.5f : -3.5f, 0f),
+							player.getBody().getWorldCenter());
+				} else {
+					player.getBody().getLinearVelocity().normalize();
+					player.getBody().applyLinearImpulse(player.getBody().getLinearVelocity().mul(3.5f * speedMod),
+							player.getBody().getWorldCenter());
+				}
+
+				player.changeState(CharacterState.QUICKSTEP);
+				player.setFixDirection(true);
+			}
+		});
 	}
 
 	@Override
@@ -185,25 +183,76 @@ public class PlayerController implements Controller {
 	
 	@Override
 	public void attack() {
-		player.changeState(CharacterState.ATTACK);
-		
-		player.setSubEntity(new Entity("Right Arm", (player.getBody().getPosition().x * 30f),
-				(player.getBody().getPosition().y * 30f), player.getContainer()));
-		player.getSubEntity().changeState(CharacterState.ATTACK);
-		player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
+		setActionQueue(new EntityAction(CharacterState.ATTACK, player.getState()) {
+			{
+				System.out.println(player.getState());
+			}
+			
+			@Override
+			public void act() {
+				player.getBody().setLinearDamping(5f);
+				CharacterState.ATTACK.setCustomAnimation(this.getString());
+				player.changeState(CharacterState.ATTACK);
+				
+				player.setSubEntity(new Entity("Right Arm", (player.getBody().getPosition().x * 30f),
+						(player.getBody().getPosition().y * 30f), player.getContainer()));
+				player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
+				player.getSubEntity().changeState(CharacterState.ATTACK);
+				player.getSubEntity().getBody().getFixtureList().m_filter.categoryBits = 0;
+				player.getSubEntity().getBody().setLinearVelocity(player.getBody().getLinearVelocity().clone());
+				player.getSubEntity().getBody().setLinearDamping(5f);
 
-		player.getContainer().addEntity(player.getSubEntity());
+				player.getContainer().addEntity(player.getSubEntity());
+			}
+			
+			@Override
+			public String getString() {
+				String toReturn = "LightAttack";
+				if(getPrevState() == CharacterState.ATTACK) {
+					toReturn = getPrevState().getAnimation();
+					switch(toReturn) {
+					case "LightAttack":
+						return "LightAttack1";
+					case "LightAttack1":
+						return "LightAttack2";
+					case "LightAttack2":
+						return "LightAttack";
+					}
+				}
+				
+				return toReturn;
+			}
+		});
+		
+		
 	}
 	
-	private void defend() {
-		player.changeState(CharacterState.DEFEND);
+	public void defend() {
+		setActionQueue(new EntityAction(CharacterState.DEFEND, player.getState()) {
+			@Override
+			public void act() {
+				player.changeState(CharacterState.DEFEND);
 
-		player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * 30f,
-				(player.getBody().getPosition().y * 30f) - 15f, player.getContainer()));
-		player.getSubEntity().changeState(CharacterState.DEFEND);
-		player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
+				player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * 30f,
+						(player.getBody().getPosition().y * 30f) - 15f, player.getContainer()));
+				player.getSubEntity().changeState(CharacterState.DEFEND);
+				player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
 
-		player.getContainer().addEntity(player.getSubEntity());
+				player.getContainer().addEntity(player.getSubEntity());
+			}
+		});
+	}
+	
+	private void setActionQueue(EntityAction action) {
+		actionQueue = action;
+	}
+
+	public void addActionEventListener(ActionEventListener ael) {
+		this.actionEventListeners.add(ael);
+	}
+	
+	public boolean removeActionEventListener(ActionEventListener ael) {
+		return this.actionEventListeners.remove(ael);
 	}
 	
 }

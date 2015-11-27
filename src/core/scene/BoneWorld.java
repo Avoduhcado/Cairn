@@ -8,29 +8,34 @@ import org.jbox2d.dynamics.contacts.Contact;
 
 import core.entities_new.Entity;
 import core.entities_new.SensorData;
+import core.entities_new.SensorType;
 
 public class BoneWorld implements ContactListener {
 	
 	// TODO Enable multiple types of sensors
-	private Entity sensor = null;
+	private SensorData sensor = null;
 	private Entity entity = null;
 
 	@Override
 	public void beginContact(Contact contact) {
 		if(sortSensors(contact)) {
-			SensorData data;
-			if((data = sensor.getSensorData()) != null) {
-				switch(data.getType()) {
-				case GROUND:
-					entity.stepOnGround(sensor);
-					break;
-				case BODY:
-					break;
-				case WEAPON:
-					break;
-				default:
-					break;
+			switch(sensor.getType()) {
+			case GROUND:
+				//System.out.println("Stepping on ground");
+				entity.stepOnGround(sensor.getEntity());
+				break;
+			case BODY:
+				//System.out.println("Bodies colliding!! " + sensor.getEntity().toString() + " " + entity.toString());
+				break;
+			case WEAPON:
+				//System.out.println("Weapon colliding: " + sensor.getEntity() + " " + entity);
+				if(sensor.getEntity() != entity && sensor.getEntity() != entity.getSubEntity()) {
+					System.out.println("Hit boys " + sensor.getEntity() + " " + entity);
+					entity.hit(sensor.getEntity());
 				}
+				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -38,32 +43,28 @@ public class BoneWorld implements ContactListener {
 	@Override
 	public void endContact(Contact contact) {
 		if(sortSensors(contact)) {
-			SensorData data;
-			if((data = sensor.getSensorData()) != null) {
-				switch(data.getType()) {
-				case GROUND:
-					entity.stepOnGround(sensor);
-					break;
-				case BODY:
-					break;
-				case WEAPON:
-					break;
-				default:
-					break;
-				}
+			switch(sensor.getType()) {
+			case GROUND:
+				//System.out.println("Stepping off ground");
+				entity.stepOffGround(sensor.getEntity());
+				break;
+			case BODY:
+				break;
+			case WEAPON:
+				break;
+			default:
+				break;
 			}
 		}
 	}
 
 	@Override
 	public void preSolve(Contact contact, Manifold oldManifold) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void postSolve(Contact contact, ContactImpulse impulse) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -76,20 +77,16 @@ public class BoneWorld implements ContactListener {
 		if(!(sensorA ^ sensorB)) {
 			return false;
 		}
-		
-		// TODO Implement non entity based sensors
-		boolean entityA = fixtureA.getBody().getUserData() instanceof Entity;
-		boolean entityB = fixtureB.getBody().getUserData() instanceof Entity;
-		if(entityA || entityB) {
-			return false;
-		}
 				
 		if(sensorA) {
-			sensor = (Entity) contact.getFixtureA().getBody().getUserData();
-			entity = (Entity) contact.getFixtureB().getBody().getUserData();
+			sensor = (SensorData) fixtureA.getBody().getUserData();
+			entity = (Entity) fixtureB.getBody().getUserData();
+			if(sensor.getType() == SensorType.WEAPON) {
+				System.out.println("Weapon sensoring " + fixtureA.getUserData() + ", " + entity);
+			}
 		} else {
-			sensor = (Entity) contact.getFixtureB().getBody().getUserData();
-			entity = (Entity) contact.getFixtureA().getBody().getUserData();
+			sensor = (SensorData) fixtureB.getBody().getUserData();
+			entity = (Entity) fixtureA.getBody().getUserData();
 		}
 		
 		return true;

@@ -1,5 +1,6 @@
 package core.setups;
 
+import java.awt.Point;
 import java.util.ArrayList;
 
 import org.jbox2d.collision.shapes.EdgeShape;
@@ -8,16 +9,18 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
+import core.Theater;
 import core.entities_new.Entity;
+import core.entities_new.FollowController;
 import core.entities_new.PlayerController;
 import core.entities_new.SensorData;
 import core.entities_new.SensorType;
-import core.entities_new.SpineRender;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
@@ -26,7 +29,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	private ArrayList<Entity> background = new ArrayList<Entity>();
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	private World world = new World(new Vec2(0, 9.8f));
-	
+		
 	public Stage_new() {
 		Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
@@ -38,22 +41,32 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		Entity dream = new Entity("Ruined Sepulcher", 0, 0, this);
 		dream.getBody().setType(BodyType.STATIC);
 		dream.getBody().getFixtureList().getFilterData().categoryBits = 0;
+		// TODO addBackground function
 		background.add(dream);
 		
 		Camera.get().setFillColor(new Vector4f(0, 0, 0, 1));
 		
-		Entity player = new Entity("MC and Familiar", 495, 450, this);
-		player.setController(new PlayerController(player, true));
-		entities.add(player);
+		Entity player = new Entity("Skelebones", 495, 450, this);
+		player.setController(new PlayerController(player));
+		addEntity(player);
+		
+		Entity dad = new Entity("Skull",
+				player.getBody().getPosition().x * 30f, player.getBody().getPosition().y * 30f, player.getContainer());
+		dad.setController(new FollowController(dad, player));
+		for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
+			f.getFilterData().categoryBits = 0;
+		}
+		addEntity(dad);
+		ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
 		
 		Entity shp = new Entity("Shepherd", 900, 455, this);
 		//((SpineRender) shp.getRender()).getSkeleton().findSlot("CROOK").setAttachment(null);
-		//entities.add(shp);
+		addEntity(shp);
 		
 		Entity light = new Entity("Hanging Light", 690, 185, this);
 		light.getBody().setType(BodyType.STATIC);
 		light.getBody().getFixtureList().getFilterData().categoryBits = 0;
-		entities.add(light);
+		addEntity(light);
 		ShadowMap.get().addIllumination(light, null, 225f);
 		
 		Entity wall = new Entity(null, 0, 300, this);
@@ -73,7 +86,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			body.createFixture(boxFixture);
 			wall.setBody(body);
 		}
-		entities.add(wall);
+		addEntity(wall);
 		wall = new Entity(null, 100, 100, this);
 		{
 			BodyDef bodyDef = new BodyDef();
@@ -91,7 +104,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			body.createFixture(boxFixture);
 			wall.setBody(body);
 		}
-		entities.add(wall);
+		addEntity(wall);
 		
 		Entity ground = new Entity(null, 100, 100, this);
 		{
@@ -111,10 +124,10 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			
 			Body body = world.createBody(bodyDef);
 			body.createFixture(boxFixture);
+			body.setUserData(new SensorData(ground, SensorType.GROUND));
 			ground.setBody(body);
 		}
-		ground.setSensorData(new SensorData(ground, SensorType.GROUND));
-		entities.add(ground);
+		addEntity(ground);
 		
 		ground = new Entity(null, 100, 100, this);
 		{
@@ -132,10 +145,10 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			
 			Body body = world.createBody(bodyDef);
 			body.createFixture(boxFixture);
+			body.setUserData(new SensorData(ground, SensorType.GROUND));
 			ground.setBody(body);
 		}
-		ground.setSensorData(new SensorData(ground, SensorType.GROUND));
-		entities.add(ground);
+		addEntity(ground);
 		
 		Camera.get().setFocus(player);
 	}

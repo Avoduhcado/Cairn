@@ -1,14 +1,10 @@
 package core.entities_new;
 
-import org.jbox2d.dynamics.Fixture;
-
 public class SensorData {
 
 	private Entity entity;
 	private SensorType type;
-	
-	private Fixture sensor;
-	
+		
 	public SensorData(Entity entity, SensorType type) {
 		this.entity = entity;
 		this.type = type;
@@ -18,16 +14,21 @@ public class SensorData {
 		return entity;
 	}
 	
+	public void setEntity(Entity entity) {
+		this.entity = entity;
+	}
+	
 	public SensorType getType() {
 		return type;
 	}
-
-	public Fixture getSensor() {
-		return sensor;
+	
+	public void setType(SensorType type) {
+		this.type = type;
 	}
 
-	public void setSensor(Fixture sensor) {
-		this.sensor = sensor;
+	@Override
+	public String toString() {
+		return entity.toString() + " " + type;
 	}
 	
 }

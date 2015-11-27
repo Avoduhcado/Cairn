@@ -17,9 +17,7 @@ import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector3f;
 
-import core.Camera;
 import core.Theater;
-import core.entities.utils.ActionQueue.EntityAction;
 import core.render.DrawUtils;
 import core.setups.WorldContainer;
 
@@ -36,11 +34,13 @@ public class Entity implements Drawable, Serializable {
 	private CharacterState state;
 
 	private Controller controller;
-	private SensorData sensorData;
 	
 	private ArrayList<Entity> ground = new ArrayList<Entity>();
 	private Entity subEntity;
-	private ArrayList<EntityAction> actionQueue = new ArrayList<EntityAction>();
+	private Entity prevAttacker;
+	//private EntityAction actionQueue;
+	//private ActionQueue actions;
+	//private ArrayList<EntityAction> actionQueue = new ArrayList<EntityAction>();
 	
 	private boolean fixDirection;
 	
@@ -108,7 +108,7 @@ public class Entity implements Drawable, Serializable {
 				switch(f.getShape().m_type) {
 				case CIRCLE:
 					DrawUtils.setColor(new Vector3f(0f, 0f, 0.6f));
-					DrawUtils.drawBox2DCircle(body.getPosition(), (CircleShape) f.m_shape);
+					DrawUtils.drawBox2DCircle(body, (CircleShape) f.m_shape);
 					break;
 				case EDGE:
 					DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
@@ -130,6 +130,8 @@ public class Entity implements Drawable, Serializable {
 			controller.collectInput();
 			controller.resolveState();
 		}
+		
+		
 		
 		if(render != null) {
 			render.animate(1f, body.getPosition());
@@ -153,16 +155,20 @@ public class Entity implements Drawable, Serializable {
 		}
 	}
 	
+	public void changeStateForced(CharacterState state) {
+		this.state = state;
+		
+		if(render != null) {
+			render.setAnimation(state.getCustomAnimation() != null ? state.getCustomAnimation() : state.animation, state.loop);
+		}
+	}
+	
 	public void changeState(CharacterState state) {
 		if(this.state != state) {
 			this.state = state;
 			
 			if(render != null) {
-				if(state == CharacterState.ATTACK) {
-					render.setAnimation("LightAttack1", state.loop);
-				} else {
-					render.setAnimation(state.animation, state.loop);
-				}
+				render.setAnimation(state.getCustomAnimation() != null ? state.getCustomAnimation() : state.animation, state.loop);
 			}
 		}
 	}
@@ -188,6 +194,13 @@ public class Entity implements Drawable, Serializable {
 		}
 	}
 	
+	private void destroyBodies() {
+		getContainer().getWorld().destroyBody(getBody());
+		if(render instanceof SpineRender) {
+			((SpineRender) render).destroyBodies();
+		}
+	}
+	
 	public Entity getSubEntity() {
 		return subEntity;
 	}
@@ -195,13 +208,13 @@ public class Entity implements Drawable, Serializable {
 	public void setSubEntity(Entity subEntity) {
 		if(getSubEntity() != null) {
 			if(getContainer().removeEntity(getSubEntity())) {
-				getContainer().getWorld().destroyBody(getSubEntity().getBody());
+				getSubEntity().destroyBodies();
 			}
 		}
 		
 		this.subEntity = subEntity;
 	}
-	
+
 	public Render getRender() {
 		return render;
 	}
@@ -243,14 +256,6 @@ public class Entity implements Drawable, Serializable {
 		this.controller = controller;
 	}
 
-	public SensorData getSensorData() {
-		return sensorData;
-	}
-
-	public void setSensorData(SensorData sensorData) {
-		this.sensorData = sensorData;
-	}
-
 	public boolean isFixDirection() {
 		return fixDirection;
 	}
@@ -266,6 +271,13 @@ public class Entity implements Drawable, Serializable {
 		}
 		
 		return super.toString();
+	}
+
+	public void hit(Entity entity) {
+		if(prevAttacker != entity) {
+			this.changeStateForced(CharacterState.HIT);
+			this.prevAttacker = entity;
+		}
 	}
 
 }

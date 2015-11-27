@@ -11,5 +11,10 @@ public interface Controller {
 	public void dodge();
 	public void collapse(Vec2 force);
 	public void attack();
+	public void defend();
+	
+
+	public void addActionEventListener(ActionEventListener ael);
+	public boolean removeActionEventListener(ActionEventListener ael);
 	
 }
