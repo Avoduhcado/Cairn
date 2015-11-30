@@ -10,7 +10,8 @@ public enum CharacterState {
 	LAND ("QuickStep", false), 
 	ATTACK ("Attack", false), 
 	DEFEND ("Defend", false), 
-	HIT ("Hit", false);
+	HIT ("Hit", false),
+	CHANGE_WEAPON ("ChangeWeapon", false);
 	
 	public String animation;
 	public boolean loop;

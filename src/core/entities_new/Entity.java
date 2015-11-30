@@ -18,6 +18,7 @@ import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Theater;
+import core.inventory.Equipment;
 import core.render.DrawUtils;
 import core.setups.WorldContainer;
 
@@ -32,17 +33,16 @@ public class Entity implements Drawable, Serializable {
 	private Body body;
 	private WorldContainer container;
 	private CharacterState state;
+	private Equipment equipment;
 
 	private Controller controller;
 	
 	private ArrayList<Entity> ground = new ArrayList<Entity>();
 	private Entity subEntity;
 	private Entity prevAttacker;
-	//private EntityAction actionQueue;
-	//private ActionQueue actions;
-	//private ArrayList<EntityAction> actionQueue = new ArrayList<EntityAction>();
 	
 	private boolean fixDirection;
+	private float z, groundZ;
 	
 	public Entity(String name, float x, float y, WorldContainer container) {
 		loadBody(container.getWorld(), x, y);
@@ -130,26 +130,26 @@ public class Entity implements Drawable, Serializable {
 			controller.collectInput();
 			controller.resolveState();
 		}
-		
-		
-		
+
 		if(render != null) {
 			render.animate(1f, body.getPosition());
 		}
+			
+		if(body.getGravityScale() > 0 && getGroundZ() != 0) {
+			setZ(getGroundZ() - (body.getPosition().y * 30f));
+			System.out.println("z: " + getZ() + " gZ: " + getGroundZ() + " y: " + body.getPosition().y * 30f
+					+ " lY: " + body.getLinearVelocity().y);
 		
-		if(body != null && body.getFixtureList().getUserData() != null && body.getFixtureList().getUserData() instanceof Float) {
-			body.getFixtureList().setUserData((float) body.getFixtureList().getUserData() - body.getLinearVelocity().y);
-		
-			if((float) body.getFixtureList().getUserData() <= 0f) {
-				body.getFixtureList().setUserData(Math.abs(body.getLinearVelocity().y));
+			if(getZ() <= 0f && body.getLinearVelocity().y > 2) {
 				body.setLinearVelocity(new Vec2(body.getLinearVelocity().x, -body.getLinearVelocity().y));
 				body.applyAngularImpulse(10f);
-			}
-			
-			if((float) body.getFixtureList().getUserData() <= 1f) {
-				body.getFixtureList().setUserData(null);
+			} else if(getZ() < 0f) {
+				System.out.println("PING PING PING " + body.getPosition().y * 30f);
+				setZ(0);
+				setGroundZ(0);
 				body.setGravityScale(0);
-				body.setLinearDamping(5f);
+				body.setLinearDamping(15f);
+				body.setLinearVelocity(new Vec2());
 				//body.getFixtureList().getFilterData().groupIndex = 0;
 			}
 		}
@@ -248,6 +248,14 @@ public class Entity implements Drawable, Serializable {
 		this.state = state;
 	}
 
+	public Equipment getEquipment() {
+		return equipment;
+	}
+
+	public void setEquipment(Equipment equipment) {
+		this.equipment = equipment;
+	}
+
 	public Controller getController() {
 		return controller;
 	}
@@ -264,6 +272,22 @@ public class Entity implements Drawable, Serializable {
 		this.fixDirection = fixDirection;
 	}
 	
+	public float getZ() {
+		return z;
+	}
+
+	public void setZ(float z) {
+		this.z = z;
+	}
+
+	public float getGroundZ() {
+		return groundZ;
+	}
+
+	public void setGroundZ(float groundZ) {
+		this.groundZ = groundZ;
+	}
+
 	@Override
 	public String toString() {
 		if(render != null) {

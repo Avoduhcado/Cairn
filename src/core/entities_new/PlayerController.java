@@ -54,10 +54,18 @@ public class PlayerController implements Controller {
 			attack();
 		} else if(Keybinds.DEFEND.clicked()) {
 			defend();
+		} else if(Keybinds.SLOT1.clicked()) {
+			changeWeapon();
 		}
 		
 		if(Keybinds.CONTROL.clicked()) {
 			collapse(player.getBody().getLinearVelocity());
+		}
+		
+		if(Keybinds.SLOT3.press()) {
+			player.setZ(player.getZ() + 1);
+		} else if(Keybinds.SLOT4.press()) {
+			player.setZ(player.getZ() - 1);
 		}
 		
 		if(actionQueue != null && !player.getState().isActing()) {
@@ -68,7 +76,7 @@ public class PlayerController implements Controller {
 			setActionQueue(null);
 		}
 	}
-
+	
 	@Override
 	public void resolveState() {
 		switch(player.getState()) {
@@ -184,10 +192,6 @@ public class PlayerController implements Controller {
 	@Override
 	public void attack() {
 		setActionQueue(new EntityAction(CharacterState.ATTACK, player.getState()) {
-			{
-				System.out.println(player.getState());
-			}
-			
 			@Override
 			public void act() {
 				player.getBody().setLinearDamping(5f);
@@ -218,13 +222,13 @@ public class PlayerController implements Controller {
 					case "LightAttack2":
 						return "LightAttack";
 					}
+				} else {
+					toReturn = player.getEquipment().getEquippedWeapon().getAnimation();
 				}
 				
 				return toReturn;
 			}
 		});
-		
-		
 	}
 	
 	public void defend() {
@@ -239,6 +243,17 @@ public class PlayerController implements Controller {
 				player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
 
 				player.getContainer().addEntity(player.getSubEntity());
+			}
+		});
+	}
+
+	private void changeWeapon() {
+		setActionQueue(new EntityAction(CharacterState.CHANGE_WEAPON, player.getState()) {
+			@Override
+			public void act() {
+				player.changeState(CharacterState.CHANGE_WEAPON);
+				
+				player.getEquipment().cycleEquippedWeapon();
 			}
 		});
 	}

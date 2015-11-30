@@ -160,6 +160,14 @@ public class SpineRender implements Render {
 								SensorType.WEAPON : SensorType.BODY);
 					}
 					break;
+				case "SFX":
+					entity.getBody().applyLinearImpulse(new Vec2(entity.getRender().isFlipped() ? -15f : 15f, -6f),
+							entity.getBody().getWorldCenter());
+					entity.getBody().setGravityScale(1f);
+					entity.getBody().setLinearDamping(1f);
+					System.out.println("Starting y: " + entity.getBody().getPosition().y * 30f);
+					entity.setGroundZ(entity.getBody().getPosition().y * 30f);
+					break;
 				default:
 					//System.out.println("Unhandled event: " + event.getData());
 				}
@@ -172,11 +180,11 @@ public class SpineRender implements Render {
 				case DEFEND:
 					entity.setSubEntity(null);
 				case QUICKSTEP:
-					entity.getBody().setLinearDamping(15f);
+					//entity.getBody().setLinearDamping(15f);
 				case LAND:
 				case HIT:
 					entity.setFixDirection(false);
-					entity.getBody().setLinearVelocity(new Vec2());
+					//entity.getBody().setLinearVelocity(new Vec2());
 					entity.changeState(CharacterState.IDLE);
 					break;
 				default:
@@ -292,13 +300,17 @@ public class SpineRender implements Render {
 
 	@Override
 	public void shadow() {
+		float scale = 0.175f * (entity.getGroundZ() != 0 ? (entity.getGroundZ() - entity.getZ()) / entity.getGroundZ() : 1);
 		for(int i = 0; i<skeleton.drawOrder.size(); i++) {
 			if(skeleton.drawOrder.get(i).getAttachment() != null) {
 				RegionAttachment region = (RegionAttachment) skeleton.drawOrder.get(i).getAttachment();
 
 				setTransform(i);
-				transform.setY(skeleton.getY() - ((skeleton.getY() - region.getWorldVertices()[11]) * 0.175f));
-				transform.setScaleY(0.175f);
+				transform.setY(skeleton.getY() - ((skeleton.getY() - region.getWorldVertices()[11]) * scale) + entity.getZ());
+				transform.setScaleY(scale);
+				if(entity.getGroundZ() != 0) {
+					transform.setScaleX((entity.getGroundZ() - entity.getZ()) / entity.getGroundZ());
+				}
 				transform.color = new Vector4f(0, 0, 0, 1f);
 				SpriteList.get(sprite + "/" + skeleton.drawOrder.get(i).getAttachment().getName()).draw(transform);
 			}

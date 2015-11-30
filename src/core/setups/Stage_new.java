@@ -21,6 +21,8 @@ import core.entities_new.FollowController;
 import core.entities_new.PlayerController;
 import core.entities_new.SensorData;
 import core.entities_new.SensorType;
+import core.inventory.Equipment;
+import core.inventory.Weapon;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
@@ -42,12 +44,23 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		dream.getBody().setType(BodyType.STATIC);
 		dream.getBody().getFixtureList().getFilterData().categoryBits = 0;
 		// TODO addBackground function
-		background.add(dream);
+		//background.add(dream);
 		
-		Camera.get().setFillColor(new Vector4f(0, 0, 0, 1));
+		//Camera.get().setFillColor(new Vector4f(0, 0, 0, 1));
 		
 		Entity player = new Entity("Skelebones", 495, 450, this);
 		player.setController(new PlayerController(player));
+		Equipment equipment = new Equipment();
+		Weapon weapon = new Weapon("001", "Light Mace");
+		weapon.setAnimation("LightAttack");
+		equipment.addWeapon(weapon);
+		weapon = new Weapon("002", "Heavy Mace");
+		weapon.setAnimation("HeavyAttack");
+		equipment.addWeapon(weapon);
+		weapon = new Weapon("003", "Polearm");
+		weapon.setAnimation("ThrustAttack");
+		equipment.addWeapon(weapon);
+		player.setEquipment(equipment);
 		addEntity(player);
 		
 		Entity dad = new Entity("Skull",
@@ -56,6 +69,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
 			f.getFilterData().categoryBits = 0;
 		}
+		dad.setZ(player.getBody().getPosition().y);
 		addEntity(dad);
 		ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
 		

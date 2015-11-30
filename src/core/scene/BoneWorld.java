@@ -29,6 +29,7 @@ public class BoneWorld implements ContactListener {
 				break;
 			case WEAPON:
 				//System.out.println("Weapon colliding: " + sensor.getEntity() + " " + entity);
+				// TODO Hitting ground/wall?
 				if(sensor.getEntity() != entity && sensor.getEntity() != entity.getSubEntity()) {
 					System.out.println("Hit boys " + sensor.getEntity() + " " + entity);
 					entity.hit(sensor.getEntity());
