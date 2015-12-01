@@ -56,6 +56,8 @@ public class PlayerController implements Controller {
 			defend();
 		} else if(Keybinds.SLOT1.clicked()) {
 			changeWeapon();
+		} else if(Keybinds.SLOT2.clicked()) {
+			jump(new Vec2(0, -6f));
 		}
 		
 		if(Keybinds.CONTROL.clicked()) {
@@ -254,6 +256,20 @@ public class PlayerController implements Controller {
 				player.changeState(CharacterState.CHANGE_WEAPON);
 				
 				player.getEquipment().cycleEquippedWeapon();
+			}
+		});
+	}
+	
+	public void jump(Vec2 impulse) {
+		setActionQueue(new EntityAction(CharacterState.JUMPING, player.getState()) {
+			@Override
+			public void act() {
+				player.changeState(getType());
+				player.getBody().applyLinearImpulse(impulse, player.getBody().getWorldCenter());
+				player.getBody().setGravityScale(1f);
+				player.getBody().setLinearDamping(1f);
+				System.out.println("Starting y: " + player.getBody().getPosition().y * 30f);
+				player.setGroundZ(player.getBody().getPosition().y * 30f);
 			}
 		});
 	}

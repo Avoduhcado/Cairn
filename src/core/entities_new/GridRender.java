@@ -1,7 +1,6 @@
 package core.entities_new;
 
 import java.awt.Point;
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +12,8 @@ import core.Camera;
 import core.render.SpriteList;
 import core.render.Transform;
 import core.utilities.AvoFileDecoder;
+import core.utilities.Resources;
+import net.lingala.zip4j.model.FileHeader;
 
 public class GridRender implements Render {
 
@@ -40,23 +41,21 @@ public class GridRender implements Render {
 	}
 	
 	private void loadTiles(String ref) {
-		File backdropDirectory = new File(System.getProperty("resources") + "/sprites/" + ref);
+		byte[] data = AvoFileDecoder.decodeAVLStream(Resources.get().getResource(ref + "/" + ref + ".avl"));
+		width = ByteBuffer.wrap(data, 0, 4).getInt() * Camera.ASPECT_RATIO;
+		height = ByteBuffer.wrap(data, 4, 4).getInt() * Camera.ASPECT_RATIO;
 		
-		if(backdropDirectory.exists() && backdropDirectory.isDirectory()) {
-			byte[] data = AvoFileDecoder.decodeAVLFile(new File(backdropDirectory.getAbsolutePath() + "/" + ref + ".avl"));
-			width = ByteBuffer.wrap(data, 0, 4).getInt() * Camera.ASPECT_RATIO;
-			height = ByteBuffer.wrap(data, 4, 4).getInt() * Camera.ASPECT_RATIO;
-			
-			String[] backdropNames = backdropDirectory.list();
-			for(String n : backdropNames) {
-				if(n.endsWith(".png")) {
-					n = n.split(".png")[0];
-					String loc = n.substring(n.lastIndexOf('[') + 1, n.lastIndexOf(']'));
-					Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
-					
-					tiles.add(coord);
-				}
-			}			
+		List<FileHeader> files = Resources.get().getSubList(ref);
+		
+		for(FileHeader header : files) {
+			String name = header.getFileName();
+			if(name.endsWith(".png")) {
+				name = name.split(".png")[0];
+				String loc = name.substring(name.lastIndexOf('[') + 1, name.lastIndexOf(']'));
+				Point coord = new Point(Integer.parseInt(loc.split(",")[0]), Integer.parseInt(loc.split(",")[1]));
+				
+				tiles.add(coord);
+			}
 		}
 	}
 

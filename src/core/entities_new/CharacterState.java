@@ -6,6 +6,7 @@ public enum CharacterState {
 	WALK ("Walk", true),
 	RUN ("Run", true), 
 	QUICKSTEP ("QuickStep", false),
+	JUMPING ("QuickStep", true),
 	FALLING ("QuickStep", true), 
 	LAND ("QuickStep", false), 
 	ATTACK ("Attack", false), 

@@ -1,6 +1,5 @@
 package core.setups;
 
-import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -11,19 +10,17 @@ import java.util.Queue;
 
 import core.Camera;
 import core.Theater;
-import core.render.textured.Sprite;
+import core.ui.Icon;
 import core.utilities.keyboard.Keybinds;
 
 public class SplashScreen extends GameSetup {
 
 	/** Queued list of images to display */
-	private Queue<Sprite> splashImages = new LinkedList<Sprite>();
+	private Queue<Icon> splashImages = new LinkedList<Icon>();
 	/** Time to display each image */
 	private float timer = 5f;
 	/** True if audio ding has played */
 	private boolean dinged;
-	/** Point to draw image at */
-	private Point2D point;
 	
 	/**
 	 * Splash Screen
@@ -31,8 +28,6 @@ public class SplashScreen extends GameSetup {
 	 */
 	public SplashScreen() {
 		loadSplashes();
-		point = new Point2D.Double(Camera.get().getDisplayWidth(0.5f) - (splashImages.peek().getWidth() * 0.5f), 
-				Camera.get().getDisplayHeight(0.5f) - (splashImages.peek().getHeight() * 0.5f));
 	}
 	
 	/**
@@ -44,7 +39,9 @@ public class SplashScreen extends GameSetup {
 			String line = null;
 			while((line = reader.readLine()) != null) {
 				// Load each screen
-				splashImages.add(new Sprite(line));
+				Icon icon = new Icon(line);
+				icon.setPosition(Float.NaN, Float.NaN);
+				splashImages.add(icon);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -74,7 +71,11 @@ public class SplashScreen extends GameSetup {
 						line = reader.readLine();
 						tempNumber--;
 					}
-					splashImages.add(new Sprite(line));
+					
+					Icon icon = new Icon(line);
+					icon.setPosition(Float.NaN, Float.NaN);
+					splashImages.add(icon);
+					
 					reader.close();
 					reader = new BufferedReader(new FileReader(System.getProperty("resources") + "/splash/splash text"));
 				} else {
@@ -146,10 +147,10 @@ public class SplashScreen extends GameSetup {
 		}
 	}
 	
-	@Override
 	/**
 	 * Draw current splash screen in center of screen.
 	 */
+	@Override
 	public void draw() {
 		
 	}
@@ -157,14 +158,12 @@ public class SplashScreen extends GameSetup {
 	@Override
 	public void drawUI() {
 		if(splashImages.peek() != null) {
-			splashImages.peek().draw((float)point.getX(), (float)point.getY());
+			splashImages.peek().draw();
 		}
 	}
 	
 	@Override
 	public void resizeRefresh() {
-		point = new Point2D.Double(Camera.get().getDisplayWidth(0.5f) - (splashImages.peek().getWidth() * 0.5f), 
-				Camera.get().getDisplayHeight(0.5f) - (splashImages.peek().getHeight() * 0.5f));
 	}
 	
 }

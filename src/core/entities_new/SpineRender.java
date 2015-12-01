@@ -161,12 +161,12 @@ public class SpineRender implements Render {
 					}
 					break;
 				case "SFX":
-					entity.getBody().applyLinearImpulse(new Vec2(entity.getRender().isFlipped() ? -15f : 15f, -6f),
+					/*entity.getBody().applyLinearImpulse(new Vec2(entity.getRender().isFlipped() ? -1.5f : 1.5f, -6f),
 							entity.getBody().getWorldCenter());
 					entity.getBody().setGravityScale(1f);
 					entity.getBody().setLinearDamping(1f);
 					System.out.println("Starting y: " + entity.getBody().getPosition().y * 30f);
-					entity.setGroundZ(entity.getBody().getPosition().y * 30f);
+					entity.setGroundZ(entity.getBody().getPosition().y * 30f);*/
 					break;
 				default:
 					//System.out.println("Unhandled event: " + event.getData());
@@ -182,6 +182,7 @@ public class SpineRender implements Render {
 				case QUICKSTEP:
 					//entity.getBody().setLinearDamping(15f);
 				case LAND:
+					entity.getBody().setLinearDamping(15f);
 				case HIT:
 					entity.setFixDirection(false);
 					//entity.getBody().setLinearVelocity(new Vec2());

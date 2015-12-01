@@ -5,6 +5,8 @@ import java.io.FilenameFilter;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.jbox2d.collision.RayCastInput;
+import org.jbox2d.collision.RayCastOutput;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -15,12 +17,16 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import core.Camera;
 import core.Theater;
 import core.inventory.Equipment;
 import core.render.DrawUtils;
 import core.setups.WorldContainer;
+import core.utilities.Resources;
+import net.lingala.zip4j.model.FileHeader;
 
 public class Entity implements Drawable, Serializable {
 
@@ -52,21 +58,14 @@ public class Entity implements Drawable, Serializable {
 	}
 	
 	private Render loadRender(String name) {
-		File dir = new File(System.getProperty("resources") + "/sprites/" + name);
-		if(dir.exists() && dir.isDirectory()) {
-			File[] files = dir.listFiles(new FilenameFilter() {
-				public boolean accept(File dir, String name) {
-					return name.endsWith(".avl") || name.endsWith(".json");
-				}
-			});
-			if(files.length > 0) {
-				if(files[0].getName().endsWith(".json")) {
-					return new SpineRender(name, this);
-				} else if(files[0].getName().endsWith(".avl")) {
-					return new GridRender(name, this);
-				}
+		FileHeader dir = Resources.get().getResourceHeader(name + "/");
+		if(dir != null && dir.isDirectory()) {
+			if(Resources.get().getResourceHeader(name + "/" + name + ".json") != null) {
+				return new SpineRender(name, this);
+			} else if(Resources.get().getResourceHeader(name + "/" + name + ".avl") != null) {
+				return new GridRender(name, this);
 			}
-		} else if(new File(System.getProperty("resources") + "/sprites/" + name + ".png").exists()) {
+		} else if(Resources.get().getResourceHeader(name + ".png") != null) {
 			return new PlainRender(name, this);
 		}
 		
@@ -137,19 +136,29 @@ public class Entity implements Drawable, Serializable {
 			
 		if(body.getGravityScale() > 0 && getGroundZ() != 0) {
 			setZ(getGroundZ() - (body.getPosition().y * 30f));
-			System.out.println("z: " + getZ() + " gZ: " + getGroundZ() + " y: " + body.getPosition().y * 30f
-					+ " lY: " + body.getLinearVelocity().y);
+			if(body.getLinearVelocity().y > 0 && getState() == CharacterState.JUMPING) {
+				changeState(CharacterState.FALLING);
+			}
+			//System.out.println("z: " + getZ() + " gZ: " + getGroundZ() + " y: " + body.getPosition().y * 30f
+				//	+ " lY: " + body.getLinearVelocity().y);
 		
 			if(getZ() <= 0f && body.getLinearVelocity().y > 2) {
-				body.setLinearVelocity(new Vec2(body.getLinearVelocity().x, -body.getLinearVelocity().y));
+				if(body.getLinearVelocity().y > 8) {
+					Camera.get().setShake(new Vector2f(5, 10), 5.5f, 0.65f);
+				}
+				body.setLinearVelocity(new Vec2(body.getLinearVelocity().x, -body.getLinearVelocity().y * 0.5f));
 				body.applyAngularImpulse(10f);
+				changeState(CharacterState.JUMPING);
+				System.out.println(body.getLinearVelocity().y);
 			} else if(getZ() < 0f) {
 				System.out.println("PING PING PING " + body.getPosition().y * 30f);
+				changeState(CharacterState.LAND);
 				setZ(0);
 				setGroundZ(0);
 				body.setGravityScale(0);
 				body.setLinearDamping(15f);
 				body.setLinearVelocity(new Vec2());
+				body.getFixtureList().getFilterData().categoryBits = 1;
 				//body.getFixtureList().getFilterData().groupIndex = 0;
 			}
 		}
@@ -189,8 +198,33 @@ public class Entity implements Drawable, Serializable {
 		if(this.ground.isEmpty()) {
 			// TODO Interrupt() delete any sub entities/general state cleanup
 			this.changeState(CharacterState.FALLING);
-			this.body.setGravityScale(2f);
-			this.body.setLinearDamping(2.5f);
+			this.body.setGravityScale(1f);
+			this.body.setLinearDamping(1f);
+			body.getFixtureList().getFilterData().categoryBits = 0;
+			
+			float closestFraction = 10;
+			for(Entity e : this.getContainer().getEntities()) {
+				Fixture fixture = e.getBody().getFixtureList();
+				if(fixture.isSensor() && fixture.getBody().getUserData() instanceof SensorData) {
+					SensorData data = (SensorData) fixture.getBody().getUserData();
+					if(data.getType() == SensorType.GROUND) {
+						RayCastOutput output = new RayCastOutput();
+						RayCastInput input = new RayCastInput();
+						input.p1.set(this.body.getPosition());
+						input.p2.set(this.body.getPosition().x, this.body.getPosition().y + (50 / 30f));
+						input.maxFraction = closestFraction;
+						
+						if(!fixture.raycast(output, input, 0)) {
+							continue;
+						}
+						if(output.fraction < closestFraction) {
+							closestFraction = output.fraction;
+							this.setGroundZ(fixture.getBody().getPosition().y * 30f);
+							System.out.println(output.fraction + " " + output.normal);
+						}
+					}
+				}
+			}
 		}
 	}
 	

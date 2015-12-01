@@ -225,6 +225,9 @@ public class DrawUtils {
 		
 		GL11.glPushMatrix();
 		GL11.glTranslatef((float) (x - Camera.get().frame.getX()), (float) (y - Camera.get().frame.getY()), 0f);
+		if(transform.m11 == 1) {
+			GL11.glRotatef(180, 0, 1, 0);
+		}
 		GL11.glRotatef(transform.m12, 0, 0, 1);
 		GL11.glColor4f(color.x, color.y, color.z, 1f);
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);

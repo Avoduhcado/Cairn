@@ -3,6 +3,8 @@ package core.setups;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import org.jbox2d.collision.RayCastInput;
+import org.jbox2d.collision.RayCastOutput;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -30,7 +32,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	
 	private ArrayList<Entity> background = new ArrayList<Entity>();
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
-	private World world = new World(new Vec2(0, 9.8f));
+	private World world = new World(new Vec2(0, 15f));
 		
 	public Stage_new() {
 		Camera.get().setFade(-2.5f);
@@ -44,9 +46,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		dream.getBody().setType(BodyType.STATIC);
 		dream.getBody().getFixtureList().getFilterData().categoryBits = 0;
 		// TODO addBackground function
-		//background.add(dream);
+		background.add(dream);
 		
-		//Camera.get().setFillColor(new Vector4f(0, 0, 0, 1));
+		Camera.get().setFillColor(new Vector4f(0, 0, 0, 1));
 		
 		Entity player = new Entity("Skelebones", 495, 450, this);
 		player.setController(new PlayerController(player));
@@ -73,9 +75,15 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		addEntity(dad);
 		ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
 		
-		Entity shp = new Entity("Shepherd", 900, 455, this);
+		//Entity shp = new Entity("Shepherd", 900, 455, this);
 		//((SpineRender) shp.getRender()).getSkeleton().findSlot("CROOK").setAttachment(null);
-		addEntity(shp);
+		//addEntity(shp);
+		
+		Entity collector = new Entity("Collector", 775, -455, this);
+		collector.getBody().setGravityScale(2f);
+		collector.getBody().setLinearDamping(1f);
+		collector.setGroundZ(455);
+		addEntity(collector);
 		
 		Entity light = new Entity("Hanging Light", 690, 185, this);
 		light.getBody().setType(BodyType.STATIC);
@@ -83,7 +91,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		addEntity(light);
 		ShadowMap.get().addIllumination(light, null, 225f);
 		
-		Entity wall = new Entity(null, 0, 300, this);
+		/*Entity wall = new Entity(null, 0, 300, this);
 		{
 			BodyDef bodyDef = new BodyDef();
 			bodyDef.position.set(0 / 30f, 300 / 30f);
@@ -118,9 +126,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			body.createFixture(boxFixture);
 			wall.setBody(body);
 		}
-		addEntity(wall);
+		addEntity(wall);*/
 		
-		Entity ground = new Entity(null, 100, 100, this);
+		Entity ground = new Entity(null, 0, 0, this);
 		{
 			BodyDef bodyDef = new BodyDef();
 			bodyDef.position.set(100f / 30f, 100f / 30f);
@@ -128,8 +136,6 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 			PolygonShape bodyShape = new PolygonShape();
 			bodyShape.setAsBox(50f / 30f, 50f / 30f);
-			//CircleShape bodyShape = new CircleShape();
-			//bodyShape.setRadius(50f / 30f);
 
 			FixtureDef boxFixture = new FixtureDef();
 			boxFixture.density = 1f;
@@ -143,14 +149,14 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		}
 		addEntity(ground);
 		
-		ground = new Entity(null, 100, 100, this);
+		ground = new Entity(null, 0, 0, this);
 		{
 			BodyDef bodyDef = new BodyDef();
-			bodyDef.position.set(150f / 30f, 150f / 30f);
+			bodyDef.position.set(100f / 30f, 550f / 30f);
 			bodyDef.type = BodyType.STATIC;
 
 			PolygonShape bodyShape = new PolygonShape();
-			bodyShape.setAsBox(50f / 30f, 50f / 30f);
+			bodyShape.setAsBox(500f / 30f, 50f / 30f);
 
 			FixtureDef boxFixture = new FixtureDef();
 			boxFixture.density = 1f;
@@ -163,6 +169,16 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			ground.setBody(body);
 		}
 		addEntity(ground);
+		
+		RayCastOutput output = new RayCastOutput();
+		RayCastInput input = new RayCastInput();
+		input.p1.set(player.getBody().getPosition());
+		input.p2.set(player.getBody().getPosition().x, player.getBody().getPosition().y + (50 / 30f));
+		input.maxFraction = 10;
+		
+		if(ground.getBody().getFixtureList().raycast(output, input, 0)) {
+			System.out.println(output.fraction + " " + output.normal);
+		}
 		
 		Camera.get().setFocus(player);
 	}

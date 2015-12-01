@@ -2,9 +2,9 @@ package core.setups;
 
 import core.Camera;
 import core.Theater;
-import core.render.textured.Sprite;
 import core.ui.Button;
 import core.ui.ElementGroup;
+import core.ui.Icon;
 import core.ui.overlays.OptionsMenu;
 import core.ui.utils.Align;
 import core.ui.utils.ClickEvent;
@@ -12,7 +12,7 @@ import core.ui.utils.ClickEvent;
 public class TitleMenu extends GameSetup {
 
 	/** Title logo */
-	private Sprite logo;
+	private Icon logo;
 	/** A button group contain New Game, Options, and Exit */
 	private ElementGroup<Button> buttons;
 	/** The options menu */
@@ -28,7 +28,8 @@ public class TitleMenu extends GameSetup {
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		
 		// Load title logo
-		logo = new Sprite("Avogine Title");
+		logo = new Icon("Avogine Title");
+		logo.setPosition(Float.NaN, Camera.get().getDisplayHeight(0.1667f));
 		
 		Button newGame = new Button("New Game", Float.NaN, Camera.get().getDisplayHeight(0.55f), 0, null);
 		newGame.setStill(true);
@@ -97,7 +98,7 @@ public class TitleMenu extends GameSetup {
 	@Override
 	public void drawUI() {
 		// Draw logo
-		logo.draw(Float.NaN, Camera.get().getDisplayHeight(0.1667f));
+		logo.draw();
 
 		// If options menu is open, draw it
 		if(optionsMenu != null) {

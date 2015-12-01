@@ -76,7 +76,8 @@ public class ShadowMap {
 			GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
 			
 			// Draw Illumination flicker
-			DrawUtils.setTransform(0, 0, 0, 0, 0, 
+			DrawUtils.setTransform(0, 0, 0, 0, 
+					illumSource.getRender().isFlipped() && !illumSource.isFixDirection() ? 1 : 0, 
 					illumSource.getRender().getTransform().getRotation(),
 					0, 0, 0);
 			DrawUtils.drawShadowFan(
@@ -94,7 +95,8 @@ public class ShadowMap {
 			GL11.glStencilOp(0, 0, GL11.GL_REPLACE);
 			
 			// Draw illumination circle
-			DrawUtils.setTransform(0, 0, 0, 0, 0, 
+			DrawUtils.setTransform(0, 0, 0, 0,
+					illumSource.getRender().isFlipped() && !illumSource.isFixDirection() ? 1 : 0, 
 					illumSource.getRender().getTransform().getRotation(),
 					0, 0, 0);
 			DrawUtils.drawShadowFan(
