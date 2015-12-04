@@ -6,10 +6,10 @@ public abstract class EntityAction implements ActionEvent {
 	private CharacterState type;
 	
 	public EntityAction(CharacterState state, CharacterState prevState) {
-		this.type = state;
+		this.setType(state);
 		this.setPrevState(prevState);
 	}
-	
+
 	@Override
 	public abstract void act();
 

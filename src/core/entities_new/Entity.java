@@ -139,8 +139,6 @@ public class Entity implements Drawable, Serializable {
 			if(body.getLinearVelocity().y > 0 && getState() == CharacterState.JUMPING) {
 				changeState(CharacterState.FALLING);
 			}
-			//System.out.println("z: " + getZ() + " gZ: " + getGroundZ() + " y: " + body.getPosition().y * 30f
-				//	+ " lY: " + body.getLinearVelocity().y);
 		
 			if(getZ() <= 0f && body.getLinearVelocity().y > 2) {
 				if(body.getLinearVelocity().y > 8) {
@@ -149,9 +147,7 @@ public class Entity implements Drawable, Serializable {
 				body.setLinearVelocity(new Vec2(body.getLinearVelocity().x, -body.getLinearVelocity().y * 0.5f));
 				body.applyAngularImpulse(10f);
 				changeState(CharacterState.JUMPING);
-				System.out.println(body.getLinearVelocity().y);
 			} else if(getZ() < 0f) {
-				System.out.println("PING PING PING " + body.getPosition().y * 30f);
 				changeState(CharacterState.LAND);
 				setZ(0);
 				setGroundZ(0);

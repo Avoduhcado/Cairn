@@ -54,7 +54,7 @@ public class Transform {
 	public void setY(float y) {
 		this.y = y;
 	}
-
+	
 	public float getRotation() {
 		return rotation;
 	}

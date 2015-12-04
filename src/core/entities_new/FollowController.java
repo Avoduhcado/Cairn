@@ -124,13 +124,13 @@ public class FollowController implements Controller, ActionEventListener {
 	public void actionPerformed(EntityAction e) {
 		switch(e.getType()) {
 		case ATTACK:
-			follower.changeState(CharacterState.ATTACK);
+			follower.changeStateForced(CharacterState.ATTACK);
 			break;
 		case DEFEND:
-			follower.changeState(CharacterState.DEFEND);
+			follower.changeStateForced(CharacterState.DEFEND);
 			break;
 		case QUICKSTEP:
-			follower.changeState(CharacterState.QUICKSTEP);
+			follower.changeStateForced(CharacterState.QUICKSTEP);
 			follower.setFixDirection(true);
 			break;
 		default:

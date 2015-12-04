@@ -39,7 +39,7 @@ public class Sprite {
 	
 	public void draw(Transform transform) {
 		texture.bind();
-		updateTextureOffsets();
+		updateTextureOffsets(transform);
 		
 		GL11.glPushMatrix();
 		
@@ -78,39 +78,28 @@ public class Sprite {
 			GL11.glTexCoord2f(texXOffset, texYOffset);
 			GL11.glVertex2f(0, 0);
 			GL11.glTexCoord2f(texWidth, texYOffset);
-			GL11.glVertex2f(texture.getImageWidth(), 0);
+			GL11.glVertex2f(getWidth(), 0);
 			GL11.glTexCoord2f(texWidth, texHeight);
-			GL11.glVertex2f(texture.getImageWidth(), texture.getImageHeight());
+			GL11.glVertex2f(getWidth(), getHeight());
 			GL11.glTexCoord2f(texXOffset, texHeight);
-			GL11.glVertex2f(0, texture.getImageHeight());
+			GL11.glVertex2f(0, getHeight());
 		}
 		GL11.glEnd();
 		GL11.glPopMatrix();
 	}
 	
-	private void updateTextureOffsets() {
+	private void updateTextureOffsets(Transform transform) {
 		texXOffset = 0;
 		texYOffset = 0;
 		texWidth = texture.getWidth();
 		texHeight = texture.getHeight();
-		/*if(subRegion == null) {
-			texXOffset = width * frame;
-			texYOffset = height * direction;
-			texWidth = (width * frame) + width;
-			texHeight = (height * direction) + height;
-		} else {
-			textureX = (float) (width * subRegion.getX());
-			textureY = (float) (height * subRegion.getY());
-			textureXWidth = (float) (width * subRegion.getWidth());
-			textureYHeight = (float) (height * subRegion.getHeight());
-		}*/
 	}
 	
-	public int getWidth() {
+	public float getWidth() {
 		return texture.getImageWidth();
 	}
 	
-	public int getHeight() {
+	public float getHeight() {
 		return texture.getImageHeight();
 	}
 	

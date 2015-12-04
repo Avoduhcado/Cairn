@@ -28,7 +28,7 @@ public class SensorData {
 
 	@Override
 	public String toString() {
-		return entity.toString() + " " + type;
+		return entity.toString() + ": " + type;
 	}
 	
 }

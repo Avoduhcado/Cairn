@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import core.render.textured.Sprite;
 
+@Deprecated
 public class SpriteIndex {
 
 	private static HashMap<String, Sprite> sprites = new HashMap<String, Sprite>();

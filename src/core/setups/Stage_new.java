@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import org.jbox2d.collision.RayCastInput;
 import org.jbox2d.collision.RayCastOutput;
-import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -17,7 +16,6 @@ import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
-import core.Theater;
 import core.entities_new.Entity;
 import core.entities_new.FollowController;
 import core.entities_new.PlayerController;
@@ -42,7 +40,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		
 		world.setContactListener(new BoneWorld());
 		
-		Entity dream = new Entity("Ruined Sepulcher", 0, 0, this);
+		Entity dream = new Entity("Test Land", 0, 0, this);
 		dream.getBody().setType(BodyType.STATIC);
 		dream.getBody().getFixtureList().getFilterData().categoryBits = 0;
 		// TODO addBackground function
@@ -52,7 +50,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		
 		Entity player = new Entity("Skelebones", 495, 450, this);
 		player.setController(new PlayerController(player));
-		Equipment equipment = new Equipment();
+		Equipment equipment = new Equipment(player);
 		Weapon weapon = new Weapon("001", "Light Mace");
 		weapon.setAnimation("LightAttack");
 		equipment.addWeapon(weapon);
@@ -185,11 +183,11 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 	@Override
 	public void update() {
+		world.step(1 / 60f, 8, 3);
+		
 		for(int i = 0; i<entities.size(); i++) {
 			entities.get(i).update();
 		}
-		
-		world.step(1 / 60f, 8, 3);
 	}
 
 	@Override

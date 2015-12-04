@@ -1,6 +1,5 @@
 package core.entities_new;
 
-import java.awt.Point;
 import java.util.ArrayList;
 
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -8,13 +7,11 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 
 import com.esotericsoftware.spine.Slot;
 import com.esotericsoftware.spine.attachments.Region;
 
-import core.scene.ShadowMap;
 import core.utilities.keyboard.Keybinds;
 
 public class PlayerController implements Controller {
@@ -64,10 +61,9 @@ public class PlayerController implements Controller {
 			collapse(player.getBody().getLinearVelocity());
 		}
 		
-		if(Keybinds.SLOT3.press()) {
-			player.setZ(player.getZ() + 1);
-		} else if(Keybinds.SLOT4.press()) {
-			player.setZ(player.getZ() - 1);
+		if(Keybinds.SLOT3.clicked()) {
+			player.getBody().getFixtureList().setSensor(!player.getBody().getFixtureList().isSensor());
+			System.out.println("Is player a sensor? " + player.getBody().getFixtureList().isSensor());
 		}
 		
 		if(actionQueue != null && !player.getState().isActing()) {
@@ -194,41 +190,43 @@ public class PlayerController implements Controller {
 	@Override
 	public void attack() {
 		setActionQueue(new EntityAction(CharacterState.ATTACK, player.getState()) {
+			private String currentAnimation = ((SpineRender) player.getRender()).getAnimation();
+			
 			@Override
 			public void act() {
 				player.getBody().setLinearDamping(5f);
 				CharacterState.ATTACK.setCustomAnimation(this.getString());
 				player.changeState(CharacterState.ATTACK);
 				
-				player.setSubEntity(new Entity("Right Arm", (player.getBody().getPosition().x * 30f),
-						(player.getBody().getPosition().y * 30f), player.getContainer()));
-				player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
-				player.getSubEntity().changeState(CharacterState.ATTACK);
-				player.getSubEntity().getBody().getFixtureList().m_filter.categoryBits = 0;
-				player.getSubEntity().getBody().setLinearVelocity(player.getBody().getLinearVelocity().clone());
-				player.getSubEntity().getBody().setLinearDamping(5f);
+				Entity rightArm = new Entity("Right Arm", (player.getBody().getPosition().x * 30f),
+						(player.getBody().getPosition().y * 30f), player.getContainer());
+				((SpineRender) rightArm.getRender()).setAttachment("WEAPON",
+						player.getEquipment().getEquippedWeapon().getName().toUpperCase());
+				rightArm.getRender().setFlipped(player.getRender().isFlipped());
+				rightArm.changeState(CharacterState.ATTACK);
+				rightArm.getBody().getFixtureList().getFilterData().categoryBits = 0;
+				rightArm.getBody().setLinearVelocity(player.getBody().getLinearVelocity().clone());
+				rightArm.getBody().setLinearDamping(5f);
+				player.setSubEntity(rightArm);
 
 				player.getContainer().addEntity(player.getSubEntity());
 			}
 			
 			@Override
 			public String getString() {
-				String toReturn = "LightAttack";
 				if(getPrevState() == CharacterState.ATTACK) {
-					toReturn = getPrevState().getAnimation();
-					switch(toReturn) {
-					case "LightAttack":
-						return "LightAttack1";
-					case "LightAttack1":
-						return "LightAttack2";
-					case "LightAttack2":
-						return "LightAttack";
+					SpineRender render = (SpineRender) player.getRender();
+					String[] prevAnimation = currentAnimation.split("-");
+					int currentPhase = Integer.valueOf(prevAnimation[1]);
+					
+					if(render.getSkeleton().getData().findAnimation(prevAnimation[0] + "-" + (currentPhase + 1)) != null) {
+						return prevAnimation[0] + "-" + (currentPhase + 1);
+					} else {
+						return prevAnimation[0] + "-0";
 					}
 				} else {
-					toReturn = player.getEquipment().getEquippedWeapon().getAnimation();
-				}
-				
-				return toReturn;
+					return player.getEquipment().getEquippedWeapon().getAnimation() + "-0";
+				}				
 			}
 		});
 	}
@@ -268,7 +266,6 @@ public class PlayerController implements Controller {
 				player.getBody().applyLinearImpulse(impulse, player.getBody().getWorldCenter());
 				player.getBody().setGravityScale(1f);
 				player.getBody().setLinearDamping(1f);
-				System.out.println("Starting y: " + player.getBody().getPosition().y * 30f);
 				player.setGroundZ(player.getBody().getPosition().y * 30f);
 			}
 		});

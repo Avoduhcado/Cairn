@@ -280,13 +280,13 @@ public class DrawUtils {
 		GL11.glTranslated((body.getPosition().x * 30f) - Camera.get().frame.getX(), 
 				(body.getPosition().y * 30f) - Camera.get().frame.getY(), 0);
 		GL11.glRotated(Math.toDegrees(body.getAngle()), 0, 0, 1f);
-		GL11.glScalef(Camera.ASPECT_RATIO, Camera.ASPECT_RATIO, 0);
+		//GL11.glScalef(Camera.ASPECT_RATIO, Camera.ASPECT_RATIO, 0);
 		
 		GL11.glColor4f(color.x, color.y, color.z, 0.5f);
 		GL11.glBegin(GL11.GL_QUADS);
 		{
-			for(int n = 0; n<poly.m_count; n++) {
-				GL11.glVertex2f(poly.m_vertices[n].x * 30f, poly.m_vertices[n].y * 30f);
+			for(int n = 0; n<poly.getVertexCount(); n++) {
+				GL11.glVertex2f(poly.getVertex(n).x * 30f, poly.getVertex(n).y * 30f);
 			}
 		}
 		GL11.glEnd();
@@ -294,8 +294,8 @@ public class DrawUtils {
 		GL11.glColor3f(color.x, color.y, color.z);
 		GL11.glBegin(GL11.GL_LINE_LOOP);
 		{
-			for(int n = 0; n<poly.m_count; n++) {
-				GL11.glVertex2f(poly.m_vertices[n].x * 30f, poly.m_vertices[n].y * 30f);
+			for(int n = 0; n<poly.getVertexCount(); n++) {
+				GL11.glVertex2f(poly.getVertex(n).x * 30f, poly.getVertex(n).y * 30f);
 			}
 		}
 		GL11.glEnd();

@@ -3,7 +3,8 @@ package core.inventory;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import core.utilities.MathFunctions;
+import core.entities_new.Entity;
+import core.entities_new.SpineRender;
 
 public class Equipment implements Serializable {
 	
@@ -12,14 +13,16 @@ public class Equipment implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	private Entity owner;
+	
 	private ArrayList<Weapon> weapons = new ArrayList<Weapon>();
 	private int equippedWeapon;
 	
 	//private ArrayList<Consumable> consumables = new ArrayList<Consumable>();
 	//private ArrayList<Trinket> trinkets = new ArrayList<Trinket>();
 	
-	public Equipment() {
-		
+	public Equipment(Entity entity) {
+		this.owner = entity;
 	}
 
 	public ArrayList<Weapon> getWeapons() {
@@ -44,8 +47,13 @@ public class Equipment implements Serializable {
 	
 	public void cycleEquippedWeapon() {
 		equippedWeapon++;
-		if(equippedWeapon > weapons.size()) {
+		if(equippedWeapon >= weapons.size()) {
 			equippedWeapon = 0;
+		}
+		
+		if(owner.getRender() != null && owner.getRender() instanceof SpineRender) {
+			SpineRender render = (SpineRender) owner.getRender();
+			render.setAttachment("WEAPON", getEquippedWeapon().getName().toUpperCase());
 		}
 	}
 

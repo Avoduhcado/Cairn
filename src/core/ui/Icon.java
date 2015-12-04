@@ -43,7 +43,7 @@ public class Icon extends UIElement {
 
 	public void setX(float x) {
 		if(Float.isNaN(x)) {
-			this.x = Camera.get().getDisplayWidth(0.5f) -
+			this.x = Camera.get().getDisplayWidth(0.5f) - 
 					((SpriteList.get(image).getWidth() * Camera.ASPECT_RATIO) / 2f);
 		} else {
 			this.x = x;

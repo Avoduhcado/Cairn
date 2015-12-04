@@ -8,7 +8,6 @@ import org.jbox2d.dynamics.contacts.Contact;
 
 import core.entities_new.Entity;
 import core.entities_new.SensorData;
-import core.entities_new.SensorType;
 
 public class BoneWorld implements ContactListener {
 	
@@ -28,10 +27,10 @@ public class BoneWorld implements ContactListener {
 				//System.out.println("Bodies colliding!! " + sensor.getEntity().toString() + " " + entity.toString());
 				break;
 			case WEAPON:
-				//System.out.println("Weapon colliding: " + sensor.getEntity() + " " + entity);
+				System.out.println("Weapon colliding: " + sensor.getEntity() + ", " + entity);
 				// TODO Hitting ground/wall?
 				if(sensor.getEntity() != entity && sensor.getEntity() != entity.getSubEntity()) {
-					System.out.println("Hit boys " + sensor.getEntity() + " " + entity);
+					System.out.println("Hit boys!!! " + sensor.getEntity() + ", " + entity);
 					entity.hit(sensor.getEntity());
 				}
 				break;
@@ -82,12 +81,13 @@ public class BoneWorld implements ContactListener {
 		if(sensorA) {
 			sensor = (SensorData) fixtureA.getBody().getUserData();
 			entity = (Entity) fixtureB.getBody().getUserData();
-			if(sensor.getType() == SensorType.WEAPON) {
-				System.out.println("Weapon sensoring " + fixtureA.getUserData() + ", " + entity);
-			}
+			if(sensor.getEntity() != entity)
+				System.out.println(sensor.getEntity() + " and " + entity);
 		} else {
 			sensor = (SensorData) fixtureB.getBody().getUserData();
 			entity = (Entity) fixtureA.getBody().getUserData();
+			if(sensor.getEntity() != entity)
+				System.out.println(sensor.getEntity() + " and " + entity);
 		}
 		
 		return true;
