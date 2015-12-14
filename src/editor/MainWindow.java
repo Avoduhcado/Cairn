@@ -9,6 +9,8 @@ import org.newdawn.slick.util.ResourceLoader;
 
 import java.awt.Toolkit;
 import java.io.IOException;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class MainWindow {
 
@@ -44,6 +46,11 @@ public class MainWindow {
 	 */
 	private void initialize() {
 		frmCairnEditor = new JFrame();
+		frmCairnEditor.getContentPane().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+			}
+		});
 		try {
 			frmCairnEditor.setIconImage(ImageIO.read(
 					ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/sprites/ui/Icon.png")));

@@ -25,28 +25,30 @@ public class FollowController implements Controller, ActionEventListener {
 	
 	@Override
 	public void collectInput() {
-		speedMod = 1f;
-		Body leadBody = leader.getBody();
-		Body followBody = follower.getBody();
-		double distance = Point.distance((leadBody.getPosition().x * 30f) + xOffset, (leadBody.getPosition().y * 30f) + yOffset,
-				followBody.getPosition().x * 30f, followBody.getPosition().y * 30f);
-		
-		if(distance > lagDistance) {
-			if(distance > lagDistance * 1.5f) {
-				speedMod = 1.5f;
+		if(follower.getState().canMove()) {
+			speedMod = 1f;
+			Body leadBody = leader.getBody();
+			Body followBody = follower.getBody();
+			double distance = Point.distance((leadBody.getPosition().x * 30f) + xOffset, (leadBody.getPosition().y * 30f) + yOffset,
+					followBody.getPosition().x * 30f, followBody.getPosition().y * 30f);
+			
+			if(distance > lagDistance) {
+				if(distance > lagDistance * 1.5f) {
+					speedMod = 1.5f;
+				}
+				move(new Vec2((((leadBody.getPosition().x * 30f) + xOffset) - followBody.getPosition().x * 30f) / (float) distance,
+						(((leadBody.getPosition().y * 30f) + yOffset) - followBody.getPosition().y * 30f) / (float) distance));
+			} else if(leadBody.getLinearVelocity().length() <= 0.25f && distance > lagDistance / 4f) {
+				speedMod = 0.35f;
+				move(new Vec2((((leadBody.getPosition().x * 30f) + xOffset) - followBody.getPosition().x * 30f) / (float) distance,
+						(((leadBody.getPosition().y * 30f) + yOffset) - followBody.getPosition().y * 30f) / (float) distance));
 			}
-			move(new Vec2((((leadBody.getPosition().x * 30f) + xOffset) - followBody.getPosition().x * 30f) / (float) distance,
-					(((leadBody.getPosition().y * 30f) + yOffset) - followBody.getPosition().y * 30f) / (float) distance));
-		} else if(leadBody.getLinearVelocity().length() <= 0.25f && distance > lagDistance / 4f) {
-			speedMod = 0.35f;
-			move(new Vec2((((leadBody.getPosition().x * 30f) + xOffset) - followBody.getPosition().x * 30f) / (float) distance,
-					(((leadBody.getPosition().y * 30f) + yOffset) - followBody.getPosition().y * 30f) / (float) distance));
-		}
-		
-		if(leadBody.getLinearVelocity().length() == 0f && (leader.getRender().isFlipped() != follower.getRender().isFlipped())) {
-			move(new Vec2((((leadBody.getPosition().x * 30f) + xOffset) - followBody.getPosition().x * 30f) / (float) distance,
-					(((leadBody.getPosition().y * 30f) + yOffset) - followBody.getPosition().y * 30f) / (float) distance));
-			follower.getRender().setFlipped(leader.getRender().isFlipped());
+			
+			if(leadBody.getLinearVelocity().length() == 0f && (leader.getRender().isFlipped() != follower.getRender().isFlipped())) {
+				move(new Vec2((((leadBody.getPosition().x * 30f) + xOffset) - followBody.getPosition().x * 30f) / (float) distance,
+						(((leadBody.getPosition().y * 30f) + yOffset) - followBody.getPosition().y * 30f) / (float) distance));
+				follower.getRender().setFlipped(leader.getRender().isFlipped());
+			}
 		}
 	}
 
@@ -131,6 +133,8 @@ public class FollowController implements Controller, ActionEventListener {
 			break;
 		case QUICKSTEP:
 			follower.changeStateForced(CharacterState.QUICKSTEP);
+			//follower.getBody().setLinearDamping(5f);
+			follower.getBody().applyLinearImpulse(leader.getBody().getLinearVelocity().mul(0.75f), follower.getBody().getWorldCenter());
 			follower.setFixDirection(true);
 			break;
 		default:

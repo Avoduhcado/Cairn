@@ -12,6 +12,7 @@ import org.jbox2d.dynamics.FixtureDef;
 import com.esotericsoftware.spine.Slot;
 import com.esotericsoftware.spine.attachments.Region;
 
+import core.Camera;
 import core.utilities.keyboard.Keybinds;
 
 public class PlayerController implements Controller {
@@ -58,7 +59,12 @@ public class PlayerController implements Controller {
 		}
 		
 		if(Keybinds.CONTROL.clicked()) {
-			collapse(player.getBody().getLinearVelocity());
+			Camera.get().setZoom(0.5f, 0.3333f);
+			//collapse(player.getBody().getLinearVelocity());
+		} else if(Keybinds.MENU.clicked()) {
+			Camera.get().setZoom(0.5f, -0.3333f);
+		} else if(Keybinds.SLOT6.clicked()) {
+			Camera.get().zoomTo(0.5f, 1f);
 		}
 		
 		if(Keybinds.SLOT3.clicked()) {
@@ -266,7 +272,7 @@ public class PlayerController implements Controller {
 				player.getBody().applyLinearImpulse(impulse, player.getBody().getWorldCenter());
 				player.getBody().setGravityScale(1f);
 				player.getBody().setLinearDamping(1f);
-				player.setGroundZ(player.getBody().getPosition().y * 30f);
+				player.getZBody().setGroundZ(player.getBody().getPosition().y * 30f);
 			}
 		});
 	}

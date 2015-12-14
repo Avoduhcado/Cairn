@@ -1,7 +1,5 @@
 package core.entities_new;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -36,7 +34,7 @@ public class Entity implements Drawable, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Render render;
-	private Body body;
+	private ZBody zBody;
 	private WorldContainer container;
 	private CharacterState state;
 	private Equipment equipment;
@@ -48,7 +46,6 @@ public class Entity implements Drawable, Serializable {
 	private Entity prevAttacker;
 	
 	private boolean fixDirection;
-	private float z, groundZ;
 	
 	public Entity(String name, float x, float y, WorldContainer container) {
 		loadBody(container.getWorld(), x, y);
@@ -73,8 +70,8 @@ public class Entity implements Drawable, Serializable {
 	}
 	
 	private void loadBody(World world, float x, float y) {
-		if(body != null) {
-			world.destroyBody(body);
+		if(zBody != null) {
+			world.destroyBody(getBody());
 		}
 		
 		BodyDef bodyDef = new BodyDef();
@@ -87,13 +84,13 @@ public class Entity implements Drawable, Serializable {
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 1f;
 		boxFixture.shape = bodyShape;
-
-		body = world.createBody(bodyDef);
-		body.createFixture(boxFixture);
-		body.setFixedRotation(true);
-		body.setLinearDamping(15f);
-		body.setGravityScale(0f);
-		body.setUserData(this);
+		
+		setZBody(new ZBody(world.createBody(bodyDef)));
+		getBody().createFixture(boxFixture);
+		getBody().setFixedRotation(true);
+		getBody().setLinearDamping(15f);
+		getBody().setGravityScale(0f);
+		getBody().setUserData(this);
 	}
 	
 	@Override
@@ -103,25 +100,30 @@ public class Entity implements Drawable, Serializable {
 		}
 		
 		if(Theater.get().debug) {
-			for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {
+			for(Fixture f = zBody.getBody().getFixtureList(); f != null; f = f.getNext()) {
 				switch(f.getShape().m_type) {
 				case CIRCLE:
 					DrawUtils.setColor(new Vector3f(0f, 0f, 0.6f));
-					DrawUtils.drawBox2DCircle(body, (CircleShape) f.m_shape);
+					DrawUtils.drawBox2DCircle(zBody.getBody(), (CircleShape) f.m_shape);
 					break;
 				case EDGE:
 					DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
-					DrawUtils.drawBox2DEdge(body.getPosition(), (EdgeShape) f.m_shape);
+					DrawUtils.drawBox2DEdge(zBody.getBody().getPosition(), (EdgeShape) f.m_shape);
 					break;
 				case POLYGON:
 					DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
-					DrawUtils.drawBox2DPoly(body, (PolygonShape) f.m_shape);
+					DrawUtils.drawBox2DPoly(zBody.getBody(), (PolygonShape) f.m_shape);
 					break;
 				case CHAIN:
 					break;
 				}
 			}
 		}
+	}
+	
+	@Override
+	public int compareTo(Entity e) {
+		return (int) ((this.getBody().getPosition().y * 30f) - (e.getBody().getPosition().y * 30f));
 	}
 	
 	public void update() {
@@ -131,30 +133,30 @@ public class Entity implements Drawable, Serializable {
 		}
 
 		if(render != null) {
-			render.animate(1f, body.getPosition());
+			render.animate(1f, getBody().getPosition());
 		}
 			
-		if(body.getGravityScale() > 0 && getGroundZ() != 0) {
-			setZ(getGroundZ() - (body.getPosition().y * 30f));
-			if(body.getLinearVelocity().y > 0 && getState() == CharacterState.JUMPING) {
+		if(getBody().getGravityScale() > 0 && zBody.getGroundZ() != 0) {
+			zBody.setZ(zBody.getGroundZ() - (getBody().getPosition().y * 30f));
+			if(getBody().getLinearVelocity().y > 0 && getState() == CharacterState.JUMPING) {
 				changeState(CharacterState.FALLING);
 			}
 		
-			if(getZ() <= 0f && body.getLinearVelocity().y > 2) {
-				if(body.getLinearVelocity().y > 8) {
+			if(zBody.getZ() <= 0f && getBody().getLinearVelocity().y > 2) {
+				if(getBody().getLinearVelocity().y > 8) {
 					Camera.get().setShake(new Vector2f(5, 10), 5.5f, 0.65f);
 				}
-				body.setLinearVelocity(new Vec2(body.getLinearVelocity().x, -body.getLinearVelocity().y * 0.5f));
-				body.applyAngularImpulse(10f);
+				getBody().setLinearVelocity(new Vec2(getBody().getLinearVelocity().x, -getBody().getLinearVelocity().y * 0.5f));
+				getBody().applyAngularImpulse(10f);
 				changeState(CharacterState.JUMPING);
-			} else if(getZ() < 0f) {
+			} else if(zBody.getZ() < 0f) {
 				changeState(CharacterState.LAND);
-				setZ(0);
-				setGroundZ(0);
-				body.setGravityScale(0);
-				body.setLinearDamping(15f);
-				body.setLinearVelocity(new Vec2());
-				body.getFixtureList().getFilterData().categoryBits = 1;
+				zBody.setZ(0);
+				zBody.setGroundZ(0);
+				getBody().setGravityScale(0);
+				getBody().setLinearDamping(15f);
+				getBody().setLinearVelocity(new Vec2());
+				getBody().getFixtureList().getFilterData().categoryBits = 1;
 				//body.getFixtureList().getFilterData().groupIndex = 0;
 			}
 		}
@@ -185,8 +187,8 @@ public class Entity implements Drawable, Serializable {
 		} else {
 			this.changeState(CharacterState.IDLE);
 		}
-		this.body.setGravityScale(0f);
-		this.body.setLinearDamping(15f);
+		getBody().setGravityScale(0f);
+		getBody().setLinearDamping(15f);
 	}
 	
 	public void stepOffGround(Entity ground) {
@@ -194,9 +196,9 @@ public class Entity implements Drawable, Serializable {
 		if(this.ground.isEmpty()) {
 			// TODO Interrupt() delete any sub entities/general state cleanup
 			this.changeState(CharacterState.FALLING);
-			this.body.setGravityScale(1f);
-			this.body.setLinearDamping(1f);
-			body.getFixtureList().getFilterData().categoryBits = 0;
+			getBody().setGravityScale(1f);
+			getBody().setLinearDamping(1f);
+			getBody().getFixtureList().getFilterData().categoryBits = 0;
 			
 			float closestFraction = 10;
 			for(Entity e : this.getContainer().getEntities()) {
@@ -206,8 +208,8 @@ public class Entity implements Drawable, Serializable {
 					if(data.getType() == SensorType.GROUND) {
 						RayCastOutput output = new RayCastOutput();
 						RayCastInput input = new RayCastInput();
-						input.p1.set(this.body.getPosition());
-						input.p2.set(this.body.getPosition().x, this.body.getPosition().y + (50 / 30f));
+						input.p1.set(getBody().getPosition());
+						input.p2.set(getBody().getPosition().x, getBody().getPosition().y + (50 / 30f));
 						input.maxFraction = closestFraction;
 						
 						if(!fixture.raycast(output, input, 0)) {
@@ -215,7 +217,7 @@ public class Entity implements Drawable, Serializable {
 						}
 						if(output.fraction < closestFraction) {
 							closestFraction = output.fraction;
-							this.setGroundZ(fixture.getBody().getPosition().y * 30f);
+							zBody.setGroundZ(fixture.getBody().getPosition().y * 30f);
 							System.out.println(output.fraction + " " + output.normal);
 						}
 					}
@@ -253,13 +255,21 @@ public class Entity implements Drawable, Serializable {
 		this.render = render;
 	}
 	
+	public ZBody getZBody() {
+		return zBody;
+	}
+	
+	public void setZBody(ZBody body) {
+		this.zBody = body;
+	}
+	
 	public Body getBody() {
-		return body;
+		return zBody.getBody();
 	}
 	
 	public void setBody(Body body) {
-		container.getWorld().destroyBody(this.body);
-		this.body = body;
+		container.getWorld().destroyBody(getBody());
+		getZBody().setBody(body);
 	}
 
 	public WorldContainer getContainer() {
@@ -300,22 +310,6 @@ public class Entity implements Drawable, Serializable {
 
 	public void setFixDirection(boolean fixDirection) {
 		this.fixDirection = fixDirection;
-	}
-	
-	public float getZ() {
-		return z;
-	}
-
-	public void setZ(float z) {
-		this.z = z;
-	}
-
-	public float getGroundZ() {
-		return groundZ;
-	}
-
-	public void setGroundZ(float groundZ) {
-		this.groundZ = groundZ;
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
+import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
@@ -40,6 +41,9 @@ public class Camera {
 	public static final float ASPECT_RATIO = 0.667f;
 	/** Maximum draw distance for entities */
 	public static int DRAW_DISTANCE = 5000;
+	
+	/** View Matrix */
+	//private Matrix3f view = new Matrix3f();
 
 	/** Current Camera frame */
 	public Rectangle2D frame = new Rectangle2D.Double(0, 0, WIDTH, HEIGHT);
@@ -79,6 +83,11 @@ public class Camera {
 	private float shakeTime;
 	private float shakePower;
 	private Vector2f shakeOffset;
+	
+	/** Zoom variables */
+	private float zoomTime;
+	private float zoomDuration;
+	private Vector2f zoom = new Vector2f(0, 0);
 	
 	/** Determine whether window should upscale or increase view distance on resize */
 	private boolean upscale = true;
@@ -122,6 +131,10 @@ public class Camera {
 		
 		frame = new Rectangle2D.Double(0, 0, WIDTH, HEIGHT);
 		setFade(-1f);
+		
+		//view.m20 = 1;
+		//view.m21 = 1;
+		//view.m22 = 1;
 	}
 	
 	public static ByteBuffer[] loadIcon(String ref) throws IOException {
@@ -156,12 +169,23 @@ public class Camera {
 		Display.setTitle(Theater.title + "  FPS: " + Theater.fps + " " + Theater.version);
 	}
 	
+	/*private void applyViewMatrix() {
+		GL11.glTranslated(frame.getWidth() / 2f, frame.getHeight() / 2f, 0);
+		GL11.glScalef(view.m20, view.m21, view.m22);
+		GL11.glRotatef(view.m10, 0, 0, 1f);
+		GL11.glTranslated(-frame.getWidth() / 2f, -frame.getHeight() / 2f, 0);
+		
+		GL11.glTranslatef(view.m00, view.m01, view.m02);
+	}*/
+	
 	public void draw(GameSetup setup) {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
 		
 		DrawUtils.fillColor(fillColor.x, fillColor.y, fillColor.z, fillColor.w);
+		
+		//applyViewMatrix();
 		
 		// TODO Make a matrix dawg
 		// Zoom in/out camera
@@ -233,7 +257,30 @@ public class Camera {
 		this.scale = scale;
 	}
 	
+	public void setZoom(float duration, float change) {
+		zoomTime = 0;
+		zoomDuration = duration;
+		zoom.x = scale;
+		zoom.y = change;
+	}
+	
+	public void zoomTo(float duration, float target) {
+		zoomTime = 0;
+		zoomDuration = duration;
+		zoom.x = scale;
+		zoom.y = target - scale;
+	}
+	
 	public void zoom() {
+		if(zoomDuration != 0) {
+			zoomTime = MathFunctions.clamp(zoomTime + Theater.getDeltaSpeed(0.025f), 0, zoomDuration);
+			
+			scale = MathFunctions.linearTween(zoomTime, zoom.x, zoom.y, zoomDuration);
+			if(zoomTime >= zoomDuration) {
+				zoomDuration = 0;
+			}
+		}
+		
 		GL11.glTranslated(frame.getWidth() / 2f, frame.getHeight() / 2f, 0);
 		GL11.glScalef(scale, scale, 1f);
 		GL11.glTranslated(-frame.getWidth() / 2f, -frame.getHeight() / 2f, 0);

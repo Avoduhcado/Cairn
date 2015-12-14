@@ -2,6 +2,8 @@ package core.setups;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.jbox2d.collision.RayCastInput;
 import org.jbox2d.collision.RayCastOutput;
@@ -16,6 +18,7 @@ import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
+import core.entities_new.DepthSort;
 import core.entities_new.Entity;
 import core.entities_new.FollowController;
 import core.entities_new.PlayerController;
@@ -41,6 +44,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		world.setContactListener(new BoneWorld());
 		
 		Entity dream = new Entity("Test Land", 0, 0, this);
+		//Entity dream = new Entity("Ruined Sepulcher", 0, 0, this);
 		dream.getBody().setType(BodyType.STATIC);
 		dream.getBody().getFixtureList().getFilterData().categoryBits = 0;
 		// TODO addBackground function
@@ -69,7 +73,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
 			f.getFilterData().categoryBits = 0;
 		}
-		dad.setZ(player.getBody().getPosition().y);
+		dad.getZBody().setZ(player.getBody().getPosition().y);
 		addEntity(dad);
 		ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
 		
@@ -80,7 +84,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		Entity collector = new Entity("Collector", 775, -455, this);
 		collector.getBody().setGravityScale(2f);
 		collector.getBody().setLinearDamping(1f);
-		collector.setGroundZ(455);
+		collector.getZBody().setGroundZ(455);
 		addEntity(collector);
 		
 		Entity light = new Entity("Hanging Light", 690, 185, this);
@@ -198,16 +202,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		
 		ShadowMap.get().drawShadows(entities);
 		
-		for(int i = 0; i<entities.size(); i++) {
-			for(int j = i; j >= 0 && j > i - 5; j--) {
-				if(entities.get(i).getBody().getPosition().y < entities.get(j).getBody().getPosition().y) {
-					entities.add(j, entities.get(i));
-					entities.remove(i + 1);
-					i--;
-				}
-			}
-		}
-		
+		entities.sort((o1, o2) -> (int) (o1.getZBody().getScreenY() - o2.getZBody().getScreenY()));
 		for(int i = 0; i<entities.size(); i++) {
 			entities.get(i).draw();
 		}

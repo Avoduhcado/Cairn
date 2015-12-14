@@ -313,16 +313,17 @@ public class SpineRender implements Render {
 
 	@Override
 	public void shadow() {
-		float scale = 0.175f * (entity.getGroundZ() != 0 ? (entity.getGroundZ() - entity.getZ()) / entity.getGroundZ() : 1);
+		ZBody zBody = entity.getZBody();
+		float scale = 0.175f * (zBody.getGroundZ() != 0 ? (zBody.getGroundZ() - zBody.getZ()) / zBody.getGroundZ() : 1);
 		for(int i = 0; i<skeleton.drawOrder.size(); i++) {
 			if(skeleton.drawOrder.get(i).getAttachment() != null) {
 				RegionAttachment region = (RegionAttachment) skeleton.drawOrder.get(i).getAttachment();
 
 				setTransform(i);
-				transform.setY(skeleton.getY() - ((skeleton.getY() - region.getWorldVertices()[Attachment.Y3]) * scale) + entity.getZ());
+				transform.setY(skeleton.getY() - ((skeleton.getY() - region.getWorldVertices()[Attachment.Y3]) * scale) + zBody.getZ());
 				transform.setScaleY(scale);
-				if(entity.getGroundZ() != 0) {
-					transform.setScaleX((entity.getGroundZ() - entity.getZ()) / entity.getGroundZ());
+				if(zBody.getGroundZ() != 0) {
+					transform.setScaleX((zBody.getGroundZ() - zBody.getZ()) / zBody.getGroundZ());
 				}
 				transform.color = new Vector4f(0, 0, 0, 1f);
 				SpriteList.get(sprite + "/" + skeleton.drawOrder.get(i).getAttachment().getName()).draw(transform);

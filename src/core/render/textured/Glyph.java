@@ -28,6 +28,7 @@ public class Glyph extends Sprite {
 		super(ref);
 		
 		setupVertices(x, y, width, height);
+		//System.out.println(textureX + " " + textureY + " " + textureXWidth + " " + textureYHeight);
 				
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
