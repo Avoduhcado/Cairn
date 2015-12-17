@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import core.entities_new.Entity;
-import core.entities_new.SpineRender;
+import core.entities_new.components.SpineRender;
 
 public class Equipment implements Serializable {
 	

@@ -11,7 +11,6 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
-import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
@@ -21,6 +20,7 @@ import org.newdawn.slick.util.ResourceLoader;
 import core.entities_new.Entity;
 import core.render.DrawUtils;
 import core.setups.GameSetup;
+import core.setups.Stage_new;
 import core.utilities.MathFunctions;
 import core.utilities.mouse.MouseInput;
 import core.utilities.text.Text;
@@ -350,7 +350,8 @@ public class Camera {
 			frameBorder.setFrame(frame.getX() + (frame.getWidth() * 0.45f), frame.getY() + (frame.getHeight() * 0.45f), 
 					frame.getWidth() * 0.1f, frame.getHeight() * 0.25f);
 			
-			switch(frameBorder.outcode(focus.getBody().getPosition().x * 30f, focus.getBody().getPosition().y * 30f)) {
+			switch(frameBorder.outcode(focus.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
+					focus.getBody().getPosition().y * Stage_new.SCALE_FACTOR)) {
 			case Rectangle2D.OUT_RIGHT | Rectangle2D.OUT_BOTTOM:
 			case Rectangle2D.OUT_RIGHT | Rectangle2D.OUT_TOP:
 			case Rectangle2D.OUT_LEFT | Rectangle2D.OUT_BOTTOM:
@@ -371,8 +372,10 @@ public class Camera {
 	
 	public void centerOn() {
 		if(focus != null) {
-			frame.setFrameFromCenter(focus.getBody().getPosition().x * 30f, focus.getBody().getPosition().y * 30f,
-					(focus.getBody().getPosition().x * 30f) - (WIDTH / 2f), (focus.getBody().getPosition().y * 30f) - (HEIGHT / 2f));
+			frame.setFrameFromCenter(focus.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
+					focus.getBody().getPosition().y * Stage_new.SCALE_FACTOR,
+					(focus.getBody().getPosition().x * Stage_new.SCALE_FACTOR) - (WIDTH / 2f),
+					(focus.getBody().getPosition().y * Stage_new.SCALE_FACTOR) - (HEIGHT / 2f));
 		}
 	}
 

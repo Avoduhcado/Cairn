@@ -1,21 +1,24 @@
-package core.entities_new;
+package core.entities_new.components;
 
 import java.awt.Point;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jbox2d.common.Vec2;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
+import core.entities_new.Entity;
+import core.entities_new.event.EntityEvent;
 import core.render.SpriteList;
 import core.render.Transform;
+import core.setups.Stage_new;
 import core.utilities.AvoFileDecoder;
 import core.utilities.Resources;
 import net.lingala.zip4j.model.FileHeader;
 
-public class GridRender implements Render {
+public class GridRender implements Renderable, Serializable {
 
 	/**
 	 * 
@@ -74,17 +77,11 @@ public class GridRender implements Render {
 	}
 
 	@Override
-	public void animate(float speed, Vec2 position) {
+	public void animate(float speed) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
-	public void setAnimation(String animation, boolean loop) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	@Override
 	public boolean isFlipped() {
 		// TODO Auto-generated method stub
@@ -104,8 +101,8 @@ public class GridRender implements Render {
 
 	@Override
 	public void setTransform(int index) {
-		transform.x = (entity.getBody().getPosition().x * 30f) + (tiles.get(index).y * height);
-		transform.y = (entity.getBody().getPosition().y * 30f) - (tiles.get(index).x * width);
+		transform.x = (entity.getBody().getPosition().x * Stage_new.SCALE_FACTOR) + (tiles.get(index).y * height);
+		transform.y = (entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR) - (tiles.get(index).x * width);
 		transform.flipX = isFlipped();
 		transform.scaleY = 1f;
 		transform.scaleX = 1f;
@@ -123,7 +120,7 @@ public class GridRender implements Render {
 	}
 
 	@Override
-	public void shadow() {
+	public void drawShadow() {
 	}
 
 	public float getDepth() {
@@ -132,6 +129,12 @@ public class GridRender implements Render {
 
 	public void setDepth(float depth) {
 		this.depth = depth;
+	}
+
+	@Override
+	public void fireEvent(EntityEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

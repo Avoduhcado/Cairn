@@ -152,7 +152,7 @@ public class Input {
 			}
 			
 			if(Keybinds.MENU.clicked()) {
-				Camera.get().setScale(1f);
+				Camera.get().zoomTo(1f, 1.5f);
 			}
 			
 			if(Keybinds.PAUSE.clicked()) {

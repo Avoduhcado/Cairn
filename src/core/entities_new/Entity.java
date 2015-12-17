@@ -20,41 +20,59 @@ import org.lwjgl.util.vector.Vector3f;
 
 import core.Camera;
 import core.Theater;
+import core.entities_new.components.Controllable;
+import core.entities_new.components.GridRender;
+import core.entities_new.components.PlainRender;
+import core.entities_new.components.Renderable;
+import core.entities_new.components.SpineRender;
+import core.entities_new.components.ZBody;
+import core.entities_new.event.CombatEvent;
+import core.entities_new.event.CombatListener;
+import core.entities_new.event.EntityEvent;
+import core.entities_new.event.StateChangeEvent;
+import core.entities_new.utils.DepthSort;
+import core.entities_new.utils.SensorData;
+import core.entities_new.utils.SensorType;
 import core.inventory.Equipment;
 import core.render.DrawUtils;
+import core.setups.Stage_new;
 import core.setups.WorldContainer;
 import core.utilities.Resources;
 import net.lingala.zip4j.model.FileHeader;
 
-public class Entity implements Drawable, Serializable {
+public class Entity implements DepthSort, Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private Render render;
-	private ZBody zBody;
 	private WorldContainer container;
+	// TODO Extract somehow
 	private CharacterState state;
+	
+	private Renderable render;
+	private ZBody zBody;
+	// TODO Extract this
 	private Equipment equipment;
 
-	private Controller controller;
+	private Controllable controller;
+	private CombatListener combatListener;
 	
 	private ArrayList<Entity> ground = new ArrayList<Entity>();
+	// TODO Delete this
 	private Entity subEntity;
-	private Entity prevAttacker;
 	
 	private boolean fixDirection;
 	
 	public Entity(String name, float x, float y, WorldContainer container) {
-		loadBody(container.getWorld(), x, y);
 		setContainer(container);
+		loadBody(container.getWorld(), x, y);
 		setRender(loadRender(name));
 		setState(CharacterState.IDLE);
 	}
 	
-	private Render loadRender(String name) {
+	private Renderable loadRender(String name) {
 		FileHeader dir = Resources.get().getResourceHeader(name + "/");
 		if(dir != null && dir.isDirectory()) {
 			if(Resources.get().getResourceHeader(name + "/" + name + ".json") != null) {
@@ -75,27 +93,27 @@ public class Entity implements Drawable, Serializable {
 		}
 		
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(x / 30f, y / 30f);
+		bodyDef.position.set(x / Stage_new.SCALE_FACTOR, y / Stage_new.SCALE_FACTOR);
 		bodyDef.type = BodyType.DYNAMIC;
 
 		CircleShape bodyShape = new CircleShape();
-		bodyShape.m_radius = 15f / 30f / 2f;
+		bodyShape.m_radius = 15f / Stage_new.SCALE_FACTOR / 2f;
 
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 1f;
 		boxFixture.shape = bodyShape;
 		
-		setZBody(new ZBody(world.createBody(bodyDef)));
-		getBody().createFixture(boxFixture);
-		getBody().setFixedRotation(true);
-		getBody().setLinearDamping(15f);
-		getBody().setGravityScale(0f);
-		getBody().setUserData(this);
+		Body body = world.createBody(bodyDef);
+		body.createFixture(boxFixture);
+		body.setFixedRotation(true);
+		body.setLinearDamping(15f);
+		body.setGravityScale(0f);
+		body.setUserData(this);
+		setZBody(new ZBody(body));
 	}
 	
-	@Override
 	public void draw() {
-		if(render != null) {
+		if(render()) {
 			render.draw();
 		}
 		
@@ -123,25 +141,25 @@ public class Entity implements Drawable, Serializable {
 	
 	@Override
 	public int compareTo(Entity e) {
-		return (int) ((this.getBody().getPosition().y * 30f) - (e.getBody().getPosition().y * 30f));
+		return (int) ((this.getBody().getPosition().y * Stage_new.SCALE_FACTOR) - (e.getBody().getPosition().y * Stage_new.SCALE_FACTOR));
 	}
 	
 	public void update() {
-		if(controller != null) {
+		if(controller()) {
 			controller.collectInput();
 			controller.resolveState();
 		}
 
-		if(render != null) {
-			render.animate(1f, getBody().getPosition());
+		if(render()) {
+			render.animate(1f);
 		}
-			
+		
 		if(getBody().getGravityScale() > 0 && zBody.getGroundZ() != 0) {
-			zBody.setZ(zBody.getGroundZ() - (getBody().getPosition().y * 30f));
+			zBody.setZ(zBody.getGroundZ() - (getBody().getPosition().y * Stage_new.SCALE_FACTOR));
 			if(getBody().getLinearVelocity().y > 0 && getState() == CharacterState.JUMPING) {
 				changeState(CharacterState.FALLING);
 			}
-		
+
 			if(zBody.getZ() <= 0f && getBody().getLinearVelocity().y > 2) {
 				if(getBody().getLinearVelocity().y > 8) {
 					Camera.get().setShake(new Vector2f(5, 10), 5.5f, 0.65f);
@@ -163,20 +181,16 @@ public class Entity implements Drawable, Serializable {
 	}
 	
 	public void changeStateForced(CharacterState state) {
-		this.state = state;
-		
-		if(render != null) {
-			render.setAnimation(state.getCustomAnimation() != null ? state.getCustomAnimation() : state.animation, state.loop);
+		if(render()) {
+			render.fireEvent(new StateChangeEvent(state, this.state));
 		}
+		
+		this.state = state;
 	}
 	
 	public void changeState(CharacterState state) {
 		if(this.state != state) {
-			this.state = state;
-			
-			if(render != null) {
-				render.setAnimation(state.getCustomAnimation() != null ? state.getCustomAnimation() : state.animation, state.loop);
-			}
+			changeStateForced(state);
 		}
 	}
 	
@@ -209,7 +223,7 @@ public class Entity implements Drawable, Serializable {
 						RayCastOutput output = new RayCastOutput();
 						RayCastInput input = new RayCastInput();
 						input.p1.set(getBody().getPosition());
-						input.p2.set(getBody().getPosition().x, getBody().getPosition().y + (50 / 30f));
+						input.p2.set(getBody().getPosition().x, getBody().getPosition().y + (50 / Stage_new.SCALE_FACTOR));
 						input.maxFraction = closestFraction;
 						
 						if(!fixture.raycast(output, input, 0)) {
@@ -217,7 +231,7 @@ public class Entity implements Drawable, Serializable {
 						}
 						if(output.fraction < closestFraction) {
 							closestFraction = output.fraction;
-							zBody.setGroundZ(fixture.getBody().getPosition().y * 30f);
+							zBody.setGroundZ(fixture.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
 							System.out.println(output.fraction + " " + output.normal);
 						}
 					}
@@ -247,12 +261,20 @@ public class Entity implements Drawable, Serializable {
 		this.subEntity = subEntity;
 	}
 
-	public Render getRender() {
+	public boolean render() {
+		return render != null;
+	}
+	
+	public Renderable getRender() {
 		return render;
 	}
 	
-	public void setRender(Render render) {
+	public void setRender(Renderable render) {
 		this.render = render;
+	}
+	
+	public boolean geometric() {
+		return zBody != null;
 	}
 	
 	public ZBody getZBody() {
@@ -296,20 +318,47 @@ public class Entity implements Drawable, Serializable {
 		this.equipment = equipment;
 	}
 
-	public Controller getController() {
-		return controller;
-	}
-
-	public void setController(Controller controller) {
-		this.controller = controller;
-	}
-
 	public boolean isFixDirection() {
 		return fixDirection;
 	}
 
 	public void setFixDirection(boolean fixDirection) {
 		this.fixDirection = fixDirection;
+	}
+
+	public boolean controller() {
+		return controller != null;
+	}
+	
+	public Controllable getController() {
+		return controller;
+	}
+
+	public void setController(Controllable controller) {
+		this.controller = controller;
+	}
+	
+	public void removeCombatListener(CombatListener l) {
+		if(l == null) {
+			return;
+		}
+		combatListener = null;
+	}
+	
+	public void addCombatListener(CombatListener l) {
+		this.combatListener = l;
+	}
+	
+	public void fireEvent(EntityEvent e) {
+		if(e instanceof CombatEvent) {
+			processCombatEvent((CombatEvent) e);
+		}
+	}
+
+	protected void processCombatEvent(CombatEvent e) {
+		if(combatListener != null) {
+			combatListener.hit(e);
+		}
 	}
 
 	@Override
@@ -319,13 +368,6 @@ public class Entity implements Drawable, Serializable {
 		}
 		
 		return super.toString();
-	}
-
-	public void hit(Entity entity) {
-		if(prevAttacker != entity) {
-			this.changeStateForced(CharacterState.HIT);
-			this.prevAttacker = entity;
-		}
 	}
 
 }

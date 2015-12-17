@@ -1,8 +1,8 @@
-package core.entities_new;
+package core.entities_new.components;
 
 import org.jbox2d.common.Vec2;
 
-public interface Controller {
+public interface Controllable {
 
 	public void collectInput();
 	public void resolveState();
@@ -12,9 +12,5 @@ public interface Controller {
 	public void collapse(Vec2 force);
 	public void attack();
 	public void defend();
-	
-
-	public void addActionEventListener(ActionEventListener ael);
-	public boolean removeActionEventListener(ActionEventListener ael);
 	
 }

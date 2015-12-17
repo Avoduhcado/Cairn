@@ -13,6 +13,7 @@ hs_err_pid*
 # Superfluous files/folders
 /bin
 /resources
+/res
 /screenshots
 /.git
 /.settings

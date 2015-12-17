@@ -1,4 +1,6 @@
-package core.entities_new;
+package core.entities_new.event;
+
+import core.entities_new.CharacterState;
 
 public abstract class EntityAction implements ActionEvent {
 

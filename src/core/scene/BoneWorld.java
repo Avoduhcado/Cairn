@@ -1,15 +1,26 @@
 package core.scene;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jbox2d.callbacks.ContactImpulse;
 import org.jbox2d.callbacks.ContactListener;
 import org.jbox2d.collision.Manifold;
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.contacts.Contact;
 
 import core.entities_new.Entity;
-import core.entities_new.SensorData;
+import core.entities_new.EntityData;
+import core.entities_new.event.CombatEvent;
+import core.entities_new.utils.SensorData;
+import core.entities_new.utils.SensorType;
+import core.setups.Stage_new;
+import core.setups.WorldContainer;
 
 public class BoneWorld implements ContactListener {
+	
+	private WorldContainer container;
 	
 	// TODO Enable multiple types of sensors
 	private SensorData sensor = null;
@@ -17,6 +28,24 @@ public class BoneWorld implements ContactListener {
 
 	@Override
 	public void beginContact(Contact contact) {
+		if(contact.getFixtureA().isSensor() && contact.getFixtureB().isSensor()) {
+			if(contactIsWeaponVsBone(contact)) {
+				Vec2 aPosition = contact.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR);
+				Vec2 bPosition = contact.getFixtureB().getBody().getPosition().mul(Stage_new.SCALE_FACTOR);
+				Vec2 collisionPoint = new Vec2(aPosition.x - ((aPosition.x - bPosition.x) / 2f),
+						aPosition.y + ((aPosition.y - bPosition.y) / 2f));
+				
+				System.out.println("DICKS");
+				/*container.queueEntity(new EntityData("Skelebones",
+						collisionPoint.x,
+						collisionPoint.y,
+						container, contact));*/
+				//weaponVsBone.add(contact);
+			} else if(contactIsWeaponVsGround(contact)) {
+				//weaponVsGround.add(contact);
+			}
+		}
+		
 		if(sortSensors(contact)) {
 			switch(sensor.getType()) {
 			case GROUND:
@@ -31,7 +60,8 @@ public class BoneWorld implements ContactListener {
 				// TODO Hitting ground/wall?
 				if(sensor.getEntity() != entity && sensor.getEntity() != entity.getSubEntity()) {
 					System.out.println("Hit boys!!! " + sensor.getEntity() + ", " + entity);
-					entity.hit(sensor.getEntity());
+					// TODO Pass in proper weapons, maybe include slots that were hit?
+					entity.fireEvent(new CombatEvent(sensor.getEntity(), null, entity));
 				}
 				break;
 			default:
@@ -42,6 +72,14 @@ public class BoneWorld implements ContactListener {
 
 	@Override
 	public void endContact(Contact contact) {
+		if(contact.getFixtureA().isSensor() && contact.getFixtureB().isSensor()) {
+			if(contactIsWeaponVsBone(contact)) {
+				//weaponVsBone.remove(contact);
+			} else if(contactIsWeaponVsGround(contact)) {
+				//weaponVsGround.remove(contact);
+			}
+		}
+		
 		if(sortSensors(contact)) {
 			switch(sensor.getType()) {
 			case GROUND:
@@ -60,12 +98,12 @@ public class BoneWorld implements ContactListener {
 
 	@Override
 	public void preSolve(Contact contact, Manifold oldManifold) {
-
+		
 	}
 
 	@Override
 	public void postSolve(Contact contact, ContactImpulse impulse) {
-
+		
 	}
 
 	private boolean sortSensors(Contact contact) {
@@ -81,16 +119,55 @@ public class BoneWorld implements ContactListener {
 		if(sensorA) {
 			sensor = (SensorData) fixtureA.getBody().getUserData();
 			entity = (Entity) fixtureB.getBody().getUserData();
-			if(sensor.getEntity() != entity)
-				System.out.println(sensor.getEntity() + " and " + entity);
 		} else {
 			sensor = (SensorData) fixtureB.getBody().getUserData();
 			entity = (Entity) fixtureA.getBody().getUserData();
-			if(sensor.getEntity() != entity)
-				System.out.println(sensor.getEntity() + " and " + entity);
 		}
 		
 		return true;
+	}
+	
+	private boolean fixtureIsBone(Fixture fixture) {
+		return fixture.getBody().getUserData() != null &&
+				((SensorData) fixture.getBody().getUserData()).getType() == SensorType.BODY;
+	}
+	
+	private boolean fixtureIsGround(Fixture fixture) {
+		return fixture.getBody().getUserData() != null &&
+				((SensorData) fixture.getBody().getUserData()).getType() == SensorType.GROUND;
+	}
+
+	private boolean fixtureIsWeapon(Fixture fixture) {
+		return fixture.getBody().getUserData() != null &&
+				((SensorData) fixture.getBody().getUserData()).getType() == SensorType.WEAPON;
+	}
+	
+	private boolean contactIsWeaponVsBone(Contact contact) {
+		Fixture fA = contact.getFixtureA();
+		Fixture fB = contact.getFixtureB();
+		if(fixtureIsWeapon(fA) && fixtureIsBone(fB)) {
+			return true;
+		}
+		if(fixtureIsWeapon(fB) && fixtureIsBone(fA)) {
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean contactIsWeaponVsGround(Contact contact) {
+		Fixture fA = contact.getFixtureA();
+		Fixture fB = contact.getFixtureB();
+		if(fixtureIsWeapon(fA) && fixtureIsGround(fB)) {
+			return true;
+		}
+		if(fixtureIsWeapon(fB) && fixtureIsGround(fA)) {
+			return true;
+		}
+		return false;
+	}
+	
+	public void setContainer(WorldContainer container) {
+		this.container = container;
 	}
 	
 }

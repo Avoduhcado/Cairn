@@ -2,9 +2,7 @@ package core.setups;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-
+import java.util.HashMap;
 import org.jbox2d.collision.RayCastInput;
 import org.jbox2d.collision.RayCastOutput;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -18,12 +16,14 @@ import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
-import core.entities_new.DepthSort;
 import core.entities_new.Entity;
-import core.entities_new.FollowController;
-import core.entities_new.PlayerController;
-import core.entities_new.SensorData;
-import core.entities_new.SensorType;
+import core.entities_new.EntityData;
+import core.entities_new.components.FollowController;
+import core.entities_new.components.PlayerController;
+import core.entities_new.components.ZBody;
+import core.entities_new.utils.CombatLoader;
+import core.entities_new.utils.SensorData;
+import core.entities_new.utils.SensorType;
 import core.inventory.Equipment;
 import core.inventory.Weapon;
 import core.scene.BoneWorld;
@@ -34,14 +34,21 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	private ArrayList<Entity> background = new ArrayList<Entity>();
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	private World world = new World(new Vec2(0, 15f));
+	
+	private ArrayList<EntityData> queuedEntities = new ArrayList<EntityData>();
+	
+	public static final float SCALE_FACTOR = 30f;
 		
 	public Stage_new() {
 		Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		
 		ShadowMap.init();
-		
-		world.setContactListener(new BoneWorld());
+
+		BoneWorld boneWorld = new BoneWorld();
+		boneWorld.setContainer(this);
+		world.setContactListener(boneWorld);
+		//world.setAllowSleep(false);
 		
 		Entity dream = new Entity("Test Land", 0, 0, this);
 		//Entity dream = new Entity("Ruined Sepulcher", 0, 0, this);
@@ -68,7 +75,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		addEntity(player);
 		
 		Entity dad = new Entity("Skull",
-				player.getBody().getPosition().x * 30f, player.getBody().getPosition().y * 30f, player.getContainer());
+				player.getBody().getPosition().x * Stage_new.SCALE_FACTOR, player.getBody().getPosition().y * Stage_new.SCALE_FACTOR, player.getContainer());
 		dad.setController(new FollowController(dad, player));
 		for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
 			f.getFilterData().categoryBits = 0;
@@ -85,10 +92,11 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		collector.getBody().setGravityScale(2f);
 		collector.getBody().setLinearDamping(1f);
 		collector.getZBody().setGroundZ(455);
+		collector.addCombatListener(CombatLoader.plainCombatant());
 		addEntity(collector);
 		
 		Entity light = new Entity("Hanging Light", 690, 185, this);
-		light.getBody().setType(BodyType.STATIC);
+		//light.getBody().setType(BodyType.STATIC);
 		light.getBody().getFixtureList().getFilterData().categoryBits = 0;
 		addEntity(light);
 		ShadowMap.get().addIllumination(light, null, 225f);
@@ -96,11 +104,11 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		/*Entity wall = new Entity(null, 0, 300, this);
 		{
 			BodyDef bodyDef = new BodyDef();
-			bodyDef.position.set(0 / 30f, 300 / 30f);
+			bodyDef.position.set(0 / Stage_new.SCALE_FACTOR, 300 / Stage_new.SCALE_FACTOR);
 			bodyDef.type = BodyType.STATIC;
 
 			EdgeShape bodyShape = new EdgeShape();
-			bodyShape.set(new Vec2(0, 0), new Vec2(400f / 30f, 0));
+			bodyShape.set(new Vec2(0, 0), new Vec2(400f / Stage_new.SCALE_FACTOR, 0));
 
 			FixtureDef boxFixture = new FixtureDef();
 			boxFixture.density = 1f;
@@ -114,11 +122,11 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		wall = new Entity(null, 100, 100, this);
 		{
 			BodyDef bodyDef = new BodyDef();
-			bodyDef.position.set(100 / 30f, 100 / 30f);
+			bodyDef.position.set(100 / Stage_new.SCALE_FACTOR, 100 / Stage_new.SCALE_FACTOR);
 			bodyDef.type = BodyType.STATIC;
 
 			EdgeShape bodyShape = new EdgeShape();
-			bodyShape.set(new Vec2(0, 0), new Vec2(400f / 30f, 1000f / 30f));
+			bodyShape.set(new Vec2(0, 0), new Vec2(400f / Stage_new.SCALE_FACTOR, 1000f / Stage_new.SCALE_FACTOR));
 
 			FixtureDef boxFixture = new FixtureDef();
 			boxFixture.density = 1f;
@@ -133,11 +141,11 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		Entity ground = new Entity(null, 0, 0, this);
 		{
 			BodyDef bodyDef = new BodyDef();
-			bodyDef.position.set(100f / 30f, 100f / 30f);
+			bodyDef.position.set(100f / Stage_new.SCALE_FACTOR, 100f / Stage_new.SCALE_FACTOR);
 			bodyDef.type = BodyType.STATIC;
 
 			PolygonShape bodyShape = new PolygonShape();
-			bodyShape.setAsBox(50f / 30f, 50f / 30f);
+			bodyShape.setAsBox(50f / Stage_new.SCALE_FACTOR, 50f / Stage_new.SCALE_FACTOR);
 
 			FixtureDef boxFixture = new FixtureDef();
 			boxFixture.density = 1f;
@@ -154,11 +162,11 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		ground = new Entity(null, 0, 0, this);
 		{
 			BodyDef bodyDef = new BodyDef();
-			bodyDef.position.set(100f / 30f, 550f / 30f);
+			bodyDef.position.set(100f / Stage_new.SCALE_FACTOR, 550f / Stage_new.SCALE_FACTOR);
 			bodyDef.type = BodyType.STATIC;
 
 			PolygonShape bodyShape = new PolygonShape();
-			bodyShape.setAsBox(500f / 30f, 50f / 30f);
+			bodyShape.setAsBox(500f / Stage_new.SCALE_FACTOR, 50f / Stage_new.SCALE_FACTOR);
 
 			FixtureDef boxFixture = new FixtureDef();
 			boxFixture.density = 1f;
@@ -175,7 +183,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		RayCastOutput output = new RayCastOutput();
 		RayCastInput input = new RayCastInput();
 		input.p1.set(player.getBody().getPosition());
-		input.p2.set(player.getBody().getPosition().x, player.getBody().getPosition().y + (50 / 30f));
+		input.p2.set(player.getBody().getPosition().x, player.getBody().getPosition().y + (50 / Stage_new.SCALE_FACTOR));
 		input.maxFraction = 10;
 		
 		if(ground.getBody().getFixtureList().raycast(output, input, 0)) {
@@ -188,6 +196,13 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	@Override
 	public void update() {
 		world.step(1 / 60f, 8, 3);
+		
+		if(!queuedEntities.isEmpty()) {
+			for(EntityData e : queuedEntities) {
+				entities.add(e.createEntity());
+			}
+			queuedEntities.clear();
+		}
 		
 		for(int i = 0; i<entities.size(); i++) {
 			entities.get(i).update();
@@ -245,6 +260,11 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	public void addPlayer(Entity player) {
 		entities.add(player);
 		// TODO Link assorted player controllers
+	}
+
+	@Override
+	public void queueEntity(EntityData entityData) {
+		queuedEntities.add(entityData);
 	}
 
 }

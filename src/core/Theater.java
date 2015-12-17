@@ -61,7 +61,7 @@ public class Theater {
 		} else {
 			System.setProperty("org.lwjgl.librarypath", System.getProperty("user.dir") + "/native/solaris");
 		}
-		System.setProperty("resources", System.getProperty("user.dir") + "/resources");
+		System.setProperty("resources", System.getProperty("user.dir") + "/res");
 		Resources.init();
 		
 		theater = new Theater();
@@ -79,7 +79,6 @@ public class Theater {
 		Camera.init();
 		Text.loadFont("SYSTEM", "Benegraphic");
 		Text.loadFont("DEBUG", "Benegraphic");
-		//Ensemble.init();
 		Config.loadConfig();
 		//LoadingList.setDeferredLoading(true);
 		
@@ -139,7 +138,6 @@ public class Theater {
 	 */
 	public void close() {
 		Config.createConfig();
-		//Ensemble.get().close();
 		Camera.get().close();
 		AL.destroy();
 		System.exit(0);

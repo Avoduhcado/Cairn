@@ -78,7 +78,7 @@ public class Player extends Actor implements Combatant {
 		setDadArmLeft(false);
 		
 		this.stats = new Stats();
-		this.stats.setHealth(new Health(30f, 30f));
+		this.stats.setHealth(new Health(35f, 35f));
 		this.stats.setStamina(new Stamina(35f, 35f));
 		if(!familiar) {
 			this.stats.getStamina().setCurrent(0);
@@ -86,7 +86,7 @@ public class Player extends Actor implements Combatant {
 		} else {
 			this.stats.getStamina().setRegainSpeed(35f);
 		}
-		this.stats.setMagic(new Magic(30f, 30f));
+		this.stats.setMagic(new Magic(35f, 35f));
 		this.equipment = new Equipment();
 		this.equipment.addWeapon(Equipment.lightMace);
 		this.equipment.addWeapon(Equipment.heavyMace);

@@ -1,4 +1,4 @@
-package core.entities_new;
+package core.entities_new.event;
 
 public interface ActionEvent {
 	

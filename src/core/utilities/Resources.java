@@ -26,7 +26,7 @@ public class Resources {
 	
 	private Resources() {
 		try {
-			zipFile = new ZipFile(System.getProperty("resources") + "/sprites.avo");
+			zipFile = new ZipFile(System.getProperty("resources") + "/sprites.zip");
 
 			if(zipFile.isEncrypted()) {
 				zipFile.setPassword(new char[]{'b','u','t','t','s'});

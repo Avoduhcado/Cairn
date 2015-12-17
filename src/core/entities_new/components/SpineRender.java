@@ -1,4 +1,6 @@
-package core.entities_new;
+package core.entities_new.components;
+
+import java.io.Serializable;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -31,12 +33,20 @@ import com.esotericsoftware.spine.attachments.SkinnedMeshAttachment;
 
 import core.Camera;
 import core.Theater;
+import core.entities_new.CharacterState;
+import core.entities_new.Entity;
+import core.entities_new.event.EntityEvent;
+import core.entities_new.event.StateChangeEvent;
+import core.entities_new.event.StateChangeListener;
+import core.entities_new.utils.SensorData;
+import core.entities_new.utils.SensorType;
 import core.render.DrawUtils;
 import core.render.Sprite;
 import core.render.SpriteList;
 import core.render.Transform;
+import core.setups.Stage_new;
 
-public class SpineRender implements Render {
+public class SpineRender implements Renderable, Serializable {
 
 	/**
 	 * 
@@ -52,9 +62,20 @@ public class SpineRender implements Render {
 
 	private Transform transform;
 
+	private StateChangeListener stateChangeListener;
+
 	public SpineRender(String ref, Entity entity) {
 		this.entity = entity;
 
+		this.stateChangeListener = e -> {
+			String animation = e.getNewState().getAnimation();
+			boolean loop = e.getNewState().loop;
+
+			if(animState.getData().getSkeletonData().findAnimation(animation) != null) {
+				animState.setAnimation(0, animation, loop);
+			}
+		};
+		
 		this.sprite = ref;
 		buildSkeleton(ref);
 		buildBodies(entity.getContainer().getWorld());
@@ -63,7 +84,7 @@ public class SpineRender implements Render {
 	}
 
 	private void buildSkeleton(String ref) {
-		SkeletonJson json = new SkeletonJson(new AbstractLoader() {
+		SkeletonJson json = new SkeletonJson(new AttachmentLoaderAdapter() {
 			public RegionAttachment newRegionAttachment(Skin skin, String name, String path) {
 				Box2dAttachment attachment = new Box2dAttachment(name);
 				Sprite region = SpriteList.get(sprite + "/" + name);
@@ -81,7 +102,7 @@ public class SpineRender implements Render {
 			skeleton = new Skeleton(json.readSkeletonData(ref, ref));
 		}
 
-		skeleton.setPosition(entity.getBody().getPosition().x * 30f, entity.getBody().getPosition().y * 30f);
+		skeleton.setPosition(entity.getBody().getPosition().x * Stage_new.SCALE_FACTOR, entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
 		skeleton.setFlipY(true);
 		skeleton.updateWorldTransform();
 
@@ -91,7 +112,7 @@ public class SpineRender implements Render {
 		// TODO Add in custom animation data loading
 
 		animState = new AnimationState(animStateData);
-		setAnimation("Idle", true);
+		animState.setAnimation(0, "Idle", true);
 	}
 
 	private void buildBodies(World world) {
@@ -107,17 +128,17 @@ public class SpineRender implements Render {
 		attachment.updateWorldVertices(slot, false);
 
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(attachment.getWorldVertices()[Attachment.X3] / 30f,
-				attachment.getWorldVertices()[Attachment.Y3] / 30f);
+		bodyDef.position.set(attachment.getWorldVertices()[Attachment.X3] / Stage_new.SCALE_FACTOR,
+				attachment.getWorldVertices()[Attachment.Y3] / Stage_new.SCALE_FACTOR);
 		bodyDef.angle = (float) Math.toRadians(-slot.getBone().getWorldRotation() - attachment.getRotation());
 		bodyDef.type = BodyType.DYNAMIC;
 
 		PolygonShape bodyShape = new PolygonShape();
 		Vec2[] verts = new Vec2[] {
-				new Vec2(attachment.getWorldVertices()[Attachment.U4] / 30f, attachment.getWorldVertices()[Attachment.V4] / 30f),
-				new Vec2(attachment.getWorldVertices()[Attachment.U1] / 30f, attachment.getWorldVertices()[Attachment.V1] / 30f),
-				new Vec2(attachment.getWorldVertices()[Attachment.U2] / 30f, attachment.getWorldVertices()[Attachment.V2] / 30f),
-				new Vec2(attachment.getWorldVertices()[Attachment.U3] / 30f, attachment.getWorldVertices()[Attachment.V3] / 30f),
+				new Vec2(attachment.getWorldVertices()[Attachment.U4] / Stage_new.SCALE_FACTOR, attachment.getWorldVertices()[Attachment.V4] / Stage_new.SCALE_FACTOR),
+				new Vec2(attachment.getWorldVertices()[Attachment.U1] / Stage_new.SCALE_FACTOR, attachment.getWorldVertices()[Attachment.V1] / Stage_new.SCALE_FACTOR),
+				new Vec2(attachment.getWorldVertices()[Attachment.U2] / Stage_new.SCALE_FACTOR, attachment.getWorldVertices()[Attachment.V2] / Stage_new.SCALE_FACTOR),
+				new Vec2(attachment.getWorldVertices()[Attachment.U3] / Stage_new.SCALE_FACTOR, attachment.getWorldVertices()[Attachment.V3] / Stage_new.SCALE_FACTOR),
 		};
 		for(Vec2 v : verts) {
 			v.mulLocal(Camera.ASPECT_RATIO);
@@ -128,7 +149,7 @@ public class SpineRender implements Render {
 		boxFixture.density = 1f;
 		boxFixture.shape = bodyShape;
 		boxFixture.isSensor = true;
-		//boxFixture.userData = attachment;
+		boxFixture.userData = attachment.getName();
 
 		Body body = world.createBody(bodyDef);
 		body.createFixture(boxFixture);
@@ -167,6 +188,7 @@ public class SpineRender implements Render {
 						}
 						((SensorData) attachment.getBody().getUserData()).setType(event.getInt() == 1 ?
 								SensorType.WEAPON : SensorType.BODY);
+						attachment.getBody().getWorld().setAllowSleep(event.getInt() == 1 ? false : true);
 						System.out.println(attachment.getBody().getUserData() + ", " + attachment.getName());
 					}
 					break;
@@ -175,8 +197,24 @@ public class SpineRender implements Render {
 							entity.getBody().getWorldCenter());
 					entity.getBody().setGravityScale(1f);
 					entity.getBody().setLinearDamping(1f);
-					System.out.println("Starting y: " + entity.getBody().getPosition().y * 30f);
-					entity.setGroundZ(entity.getBody().getPosition().y * 30f);*/
+					System.out.println("Starting y: " + entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
+					entity.setGroundZ(entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR);*/
+					break;
+				case "SpawnFollower":
+					Entity rightArm = new Entity("Right Arm", (entity.getBody().getPosition().x * Stage_new.SCALE_FACTOR),
+							(entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR), entity.getContainer());
+					((SpineRender) rightArm.getRender()).setAttachment("WEAPON",
+							entity.getEquipment().getEquippedWeapon().getName().toUpperCase());
+					rightArm.getRender().setFlipped(entity.getRender().isFlipped());
+
+					CharacterState.ATTACK.setCustomAnimation(animState.getCurrent(0).getAnimation().getName());
+					rightArm.changeState(CharacterState.ATTACK);
+					rightArm.getBody().getFixtureList().getFilterData().categoryBits = 0;
+					rightArm.getBody().setLinearVelocity(entity.getBody().getLinearVelocity().clone());
+					rightArm.getBody().setLinearDamping(5f);
+					entity.setSubEntity(rightArm);
+
+					entity.getContainer().addEntity(entity.getSubEntity());
 					break;
 				default:
 					//System.out.println("Unhandled event: " + event.getData());
@@ -188,7 +226,7 @@ public class SpineRender implements Render {
 				switch(entity.getState()) {
 				case ATTACK:
 				case DEFEND:
-					entity.setSubEntity(null);
+					//entity.setSubEntity(null);
 				case QUICKSTEP:
 					//entity.getBody().setLinearDamping(15f);
 				case LAND:
@@ -229,17 +267,39 @@ public class SpineRender implements Render {
 	}
 
 	@Override
+	public void drawShadow() {
+		ZBody zBody = entity.getZBody();
+		float scale = 0.175f * (zBody.getGroundZ() != 0 ? (zBody.getGroundZ() - zBody.getZ()) / zBody.getGroundZ() : 1);
+		
+		for(int i = 0; i<skeleton.drawOrder.size(); i++) {
+			if(skeleton.drawOrder.get(i).getAttachment() != null) {
+				RegionAttachment region = (RegionAttachment) skeleton.drawOrder.get(i).getAttachment();
+
+				setTransform(i);
+				transform.setY(skeleton.getY() - ((skeleton.getY() - region.getWorldVertices()[Attachment.Y3]) * scale) + zBody.getZ());
+				transform.setScaleY(scale);
+				if(zBody.getGroundZ() != 0) {
+					transform.setScaleX((zBody.getGroundZ() - zBody.getZ()) / zBody.getGroundZ());
+				}
+				transform.color = new Vector4f(0, 0, 0, 1f);
+				SpriteList.get(sprite + "/" + skeleton.drawOrder.get(i).getAttachment().getName()).draw(transform);
+			}
+		}
+	}
+
+	@Override
 	public void debugDraw() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void animate(float speed, Vec2 position) {
+	public void animate(float speed) {
 		animState.update(Theater.getDeltaSpeed(0.016f) * speed);
 		animState.apply(skeleton);
 		
-		skeleton.setPosition(position.x * 30f, position.y * 30f);
+		skeleton.setPosition(entity.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
+				entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
 		skeleton.updateWorldTransform();
 
 		for(Slot slot : skeleton.getSlots()) {
@@ -257,19 +317,12 @@ public class SpineRender implements Render {
 				rotation = -rotation;
 			}
 
-			attachment.getBody().setTransform(new Vec2(x / 30f, y / 30f), rotation * MathUtils.degRad);
+			attachment.getBody().setTransform(new Vec2(x / Stage_new.SCALE_FACTOR, y / Stage_new.SCALE_FACTOR), rotation * MathUtils.degRad);
 		}
 	}
 	
 	public String getAnimation() {
 		return animState.getCurrent(0).getAnimation().getName();
-	}
-
-	@Override
-	public void setAnimation(String animation, boolean loop) {
-		if(animState.getData().getSkeletonData().findAnimation(animation) != null) {
-			animState.setAnimation(0, animation, loop);
-		}
 	}
 
 	@Override
@@ -307,30 +360,6 @@ public class SpineRender implements Render {
 		return sprite;
 	}
 
-	public Skeleton getSkeleton() {
-		return skeleton;
-	}
-
-	@Override
-	public void shadow() {
-		ZBody zBody = entity.getZBody();
-		float scale = 0.175f * (zBody.getGroundZ() != 0 ? (zBody.getGroundZ() - zBody.getZ()) / zBody.getGroundZ() : 1);
-		for(int i = 0; i<skeleton.drawOrder.size(); i++) {
-			if(skeleton.drawOrder.get(i).getAttachment() != null) {
-				RegionAttachment region = (RegionAttachment) skeleton.drawOrder.get(i).getAttachment();
-
-				setTransform(i);
-				transform.setY(skeleton.getY() - ((skeleton.getY() - region.getWorldVertices()[Attachment.Y3]) * scale) + zBody.getZ());
-				transform.setScaleY(scale);
-				if(zBody.getGroundZ() != 0) {
-					transform.setScaleX((zBody.getGroundZ() - zBody.getZ()) / zBody.getGroundZ());
-				}
-				transform.color = new Vector4f(0, 0, 0, 1f);
-				SpriteList.get(sprite + "/" + skeleton.drawOrder.get(i).getAttachment().getName()).draw(transform);
-			}
-		}
-	}
-
 	public void destroyBodies() {
 		for(Slot slot : skeleton.getSlots()) {
 			if (!(slot.getAttachment() instanceof Box2dAttachment)) continue;
@@ -341,12 +370,33 @@ public class SpineRender implements Render {
 		}
 	}
 	
+	public Skeleton getSkeleton() {
+		return skeleton;
+	}
+
+	public AnimationState getAnimState() {
+		return animState;
+	}
+	
 	public void setAttachment(String slotName, String attachmentName) {
 		getSkeleton().setAttachment(slotName, attachmentName);
 		buildBody(getSkeleton().findSlot(slotName), entity.getContainer().getWorld());
 	}
 
-	private class AbstractLoader implements AttachmentLoader {
+	@Override
+	public void fireEvent(EntityEvent e) {
+		if(e instanceof StateChangeEvent) {
+			processStateChangeEvent((StateChangeEvent) e);
+		}
+	}
+	
+	protected void processStateChangeEvent(StateChangeEvent e) {
+		if(stateChangeListener != null) {
+			stateChangeListener.stateChanged(e);
+		}
+	}
+
+	private class AttachmentLoaderAdapter implements AttachmentLoader {
 		@Override
 		public RegionAttachment newRegionAttachment(Skin skin, String name, String path) {
 			return null;

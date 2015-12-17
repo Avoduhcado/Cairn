@@ -1,14 +1,18 @@
-package core.entities_new;
+package core.entities_new.components;
+
+import java.io.Serializable;
 
 import org.jbox2d.collision.shapes.PolygonShape;
-import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.lwjgl.util.vector.Vector4f;
 
+import core.entities_new.Entity;
+import core.entities_new.event.EntityEvent;
 import core.render.SpriteList;
 import core.render.Transform;
+import core.setups.Stage_new;
 
-public class PlainRender implements Render {
+public class PlainRender implements Renderable, Serializable {
 
 	/**
 	 * 
@@ -40,13 +44,7 @@ public class PlainRender implements Render {
 	}
 
 	@Override
-	public void animate(float speed, Vec2 position) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setAnimation(String animation, boolean loop) {
+	public void animate(float speed) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -71,8 +69,8 @@ public class PlainRender implements Render {
 		Body body = entity.getBody();
 		PolygonShape shape = ((PolygonShape) body.getFixtureList().getShape());
 		
-		transform.x = (body.getPosition().x + shape.getVertex(0).x) * 30f;
-		transform.y = (body.getPosition().y + shape.getVertex(0).y) * 30f;
+		transform.x = (body.getPosition().x + shape.getVertex(0).x) * Stage_new.SCALE_FACTOR;
+		transform.y = (body.getPosition().y + shape.getVertex(0).y) * Stage_new.SCALE_FACTOR;
 		transform.flipX = isFlipped();
 		transform.scaleY = 1f;
 		transform.scaleX = 1f;
@@ -87,15 +85,21 @@ public class PlainRender implements Render {
 	}
 
 	@Override
-	public void shadow() {
-		Body body = entity.getBody();
-		PolygonShape shape = ((PolygonShape) body.getFixtureList().getShape());
+	public void drawShadow() {
+		//Body body = entity.getBody();
+		//PolygonShape shape = ((PolygonShape) body.getFixtureList().getShape());
 		
 		setTransform(0);
 		transform.setY(entity.getBody().getPosition().y - ((entity.getBody().getPosition().y - transform.getY()) * 0.175f));
 		transform.setScaleY(0.175f);
 		transform.color = new Vector4f(0, 0, 0, 1f);
 		SpriteList.get(sprite).draw(transform);
+	}
+
+	@Override
+	public void fireEvent(EntityEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

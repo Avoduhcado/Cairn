@@ -1,4 +1,4 @@
-package core.entities_new;
+package core.entities_new.components;
 
 import java.util.ArrayList;
 
@@ -13,9 +13,14 @@ import com.esotericsoftware.spine.Slot;
 import com.esotericsoftware.spine.attachments.Region;
 
 import core.Camera;
+import core.entities_new.CharacterState;
+import core.entities_new.Entity;
+import core.entities_new.event.ActionEventListener;
+import core.entities_new.event.EntityAction;
+import core.setups.Stage_new;
 import core.utilities.keyboard.Keybinds;
 
-public class PlayerController implements Controller {
+public class PlayerController implements Controllable {
 
 	private Entity player;
 		
@@ -24,9 +29,7 @@ public class PlayerController implements Controller {
 	private Vec2 movement = new Vec2();
 	
 	private EntityAction actionQueue;
-	
-	private ArrayList<ActionEventListener> actionEventListeners = new ArrayList<ActionEventListener>();
-	
+		
 	public PlayerController(Entity player) {
 		this.player = player;
 	}
@@ -49,13 +52,20 @@ public class PlayerController implements Controller {
 		if(Keybinds.DODGE.clicked()) {
 			dodge();
 		} else if(Keybinds.ATTACK.clicked()) {
-			attack();
+			//attack();
 		} else if(Keybinds.DEFEND.clicked()) {
-			defend();
+			//defend();
 		} else if(Keybinds.SLOT1.clicked()) {
 			changeWeapon();
 		} else if(Keybinds.SLOT2.clicked()) {
 			jump(new Vec2(0, -6f));
+		}
+		
+		if(Keybinds.DEFEND.press()) {
+			player.setFixDirection(true);
+		}
+		if(Keybinds.DEFEND.released()) {
+			player.setFixDirection(false);
 		}
 		
 		if(Keybinds.CONTROL.clicked()) {
@@ -74,9 +84,13 @@ public class PlayerController implements Controller {
 		
 		if(actionQueue != null && !player.getState().isActing()) {
 			actionQueue.act();
-			for(ActionEventListener l : actionEventListeners) {
-				l.actionPerformed(actionQueue);
-			}
+			
+			player.getContainer().getEntities()
+				.stream()
+				.filter(e -> e.getController() instanceof FollowController 
+						&& ((FollowController) e.getController()).getLeader() == player)
+				.forEach(e -> ((FollowController) e.getController()).fireEvent(actionQueue));
+			
 			setActionQueue(null);
 		}
 	}
@@ -148,8 +162,8 @@ public class PlayerController implements Controller {
 					bone.setFixDirection(true);
 					
 					BodyDef bodyDef = new BodyDef();
-					bodyDef.position.set((region.getWorldX() + (region.getWidth() / 2f)) / 30f,
-							(region.getWorldY() + (region.getHeight() / 2f)) / 30f);
+					bodyDef.position.set((region.getWorldX() + (region.getWidth() / 2f)) / Stage_new.SCALE_FACTOR,
+							(region.getWorldY() + (region.getHeight() / 2f)) / Stage_new.SCALE_FACTOR);
 					bodyDef.type = BodyType.DYNAMIC;
 					/*if(s.getSkeleton().getFlipX()) {
 						bodyDef.angle = (float) Math.toRadians(s.getBone().getWorldRotation() + region.getRotation());
@@ -159,7 +173,7 @@ public class PlayerController implements Controller {
 					bodyDef.angle = (float) Math.toRadians(region.getRotation());
 
 					PolygonShape bodyShape = new PolygonShape();
-					bodyShape.setAsBox(region.getWidth() / 30f / 2f, region.getHeight() / 30f / 2f);
+					bodyShape.setAsBox(region.getWidth() / Stage_new.SCALE_FACTOR / 2f, region.getHeight() / Stage_new.SCALE_FACTOR / 2f);
 
 					FixtureDef boxFixture = new FixtureDef();
 					boxFixture.density = 1f;
@@ -204,8 +218,8 @@ public class PlayerController implements Controller {
 				CharacterState.ATTACK.setCustomAnimation(this.getString());
 				player.changeState(CharacterState.ATTACK);
 				
-				Entity rightArm = new Entity("Right Arm", (player.getBody().getPosition().x * 30f),
-						(player.getBody().getPosition().y * 30f), player.getContainer());
+				/*Entity rightArm = new Entity("Right Arm", (player.getBody().getPosition().x * Stage_new.SCALE_FACTOR),
+						(player.getBody().getPosition().y * Stage_new.SCALE_FACTOR), player.getContainer());
 				((SpineRender) rightArm.getRender()).setAttachment("WEAPON",
 						player.getEquipment().getEquippedWeapon().getName().toUpperCase());
 				rightArm.getRender().setFlipped(player.getRender().isFlipped());
@@ -215,7 +229,7 @@ public class PlayerController implements Controller {
 				rightArm.getBody().setLinearDamping(5f);
 				player.setSubEntity(rightArm);
 
-				player.getContainer().addEntity(player.getSubEntity());
+				player.getContainer().addEntity(player.getSubEntity());*/
 			}
 			
 			@Override
@@ -243,8 +257,8 @@ public class PlayerController implements Controller {
 			public void act() {
 				player.changeState(CharacterState.DEFEND);
 
-				player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * 30f,
-						(player.getBody().getPosition().y * 30f) - 15f, player.getContainer()));
+				player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
+						(player.getBody().getPosition().y * Stage_new.SCALE_FACTOR) - 15f, player.getContainer()));
 				player.getSubEntity().changeState(CharacterState.DEFEND);
 				player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
 
@@ -272,21 +286,13 @@ public class PlayerController implements Controller {
 				player.getBody().applyLinearImpulse(impulse, player.getBody().getWorldCenter());
 				player.getBody().setGravityScale(1f);
 				player.getBody().setLinearDamping(1f);
-				player.getZBody().setGroundZ(player.getBody().getPosition().y * 30f);
+				player.getZBody().setGroundZ(player.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
 			}
 		});
 	}
 	
 	private void setActionQueue(EntityAction action) {
 		actionQueue = action;
-	}
-
-	public void addActionEventListener(ActionEventListener ael) {
-		this.actionEventListeners.add(ael);
-	}
-	
-	public boolean removeActionEventListener(ActionEventListener ael) {
-		return this.actionEventListeners.remove(ael);
 	}
 	
 }

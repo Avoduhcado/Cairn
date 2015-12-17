@@ -1,23 +1,22 @@
-package core.entities_new;
+package core.entities_new.components;
 
-import java.io.Serializable;
-
-import org.jbox2d.common.Vec2;
+import core.entities_new.event.EntityEvent;
 import core.render.Transform;
 
-public interface Render extends Serializable {
+public interface Renderable {
 	
 	public void draw();
+	public void drawShadow();
 	public void debugDraw();
 	
-	public void animate(float speed, Vec2 position);
-	public void setAnimation(String animation, boolean loop);
-	public void shadow();
+	public void animate(float delta);
 	public boolean isFlipped();
 	public void setFlipped(boolean flipped);
 	
 	public Transform getTransform();
 	public void setTransform(int index);
 	public String getSprite();
+	
+	public void fireEvent(EntityEvent e);
 		
 }
