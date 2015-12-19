@@ -33,13 +33,12 @@ import com.esotericsoftware.spine.attachments.SkinnedMeshAttachment;
 
 import core.Camera;
 import core.Theater;
-import core.entities_new.CharacterState;
+import core.entities_new.State;
 import core.entities_new.Entity;
 import core.entities_new.event.EntityEvent;
 import core.entities_new.event.StateChangeEvent;
 import core.entities_new.event.StateChangeListener;
 import core.entities_new.utils.SensorData;
-import core.entities_new.utils.SensorType;
 import core.render.DrawUtils;
 import core.render.Sprite;
 import core.render.SpriteList;
@@ -154,7 +153,7 @@ public class SpineRender implements Renderable, Serializable {
 		Body body = world.createBody(bodyDef);
 		body.createFixture(boxFixture);
 		body.setGravityScale(0);
-		body.setUserData(new SensorData(entity, SensorType.BODY));
+		body.setUserData(new SensorData(entity, SensorData.BODY));
 		attachment.setBody(body);
 	}
 
@@ -187,7 +186,7 @@ public class SpineRender implements Renderable, Serializable {
 							continue;
 						}
 						((SensorData) attachment.getBody().getUserData()).setType(event.getInt() == 1 ?
-								SensorType.WEAPON : SensorType.BODY);
+								SensorData.WEAPON : SensorData.BODY);
 						attachment.getBody().getWorld().setAllowSleep(event.getInt() == 1 ? false : true);
 						System.out.println(attachment.getBody().getUserData() + ", " + attachment.getName());
 					}
@@ -199,22 +198,6 @@ public class SpineRender implements Renderable, Serializable {
 					entity.getBody().setLinearDamping(1f);
 					System.out.println("Starting y: " + entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
 					entity.setGroundZ(entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR);*/
-					break;
-				case "SpawnFollower":
-					Entity rightArm = new Entity("Right Arm", (entity.getBody().getPosition().x * Stage_new.SCALE_FACTOR),
-							(entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR), entity.getContainer());
-					((SpineRender) rightArm.getRender()).setAttachment("WEAPON",
-							entity.getEquipment().getEquippedWeapon().getName().toUpperCase());
-					rightArm.getRender().setFlipped(entity.getRender().isFlipped());
-
-					CharacterState.ATTACK.setCustomAnimation(animState.getCurrent(0).getAnimation().getName());
-					rightArm.changeState(CharacterState.ATTACK);
-					rightArm.getBody().getFixtureList().getFilterData().categoryBits = 0;
-					rightArm.getBody().setLinearVelocity(entity.getBody().getLinearVelocity().clone());
-					rightArm.getBody().setLinearDamping(5f);
-					entity.setSubEntity(rightArm);
-
-					entity.getContainer().addEntity(entity.getSubEntity());
 					break;
 				default:
 					//System.out.println("Unhandled event: " + event.getData());
@@ -235,7 +218,7 @@ public class SpineRender implements Renderable, Serializable {
 					entity.setFixDirection(false);
 					//entity.getBody().setLinearVelocity(new Vec2());
 				case CHANGE_WEAPON:
-					entity.changeState(CharacterState.IDLE);
+					entity.fireEvent(new StateChangeEvent(State.IDLE));
 					break;
 				default:
 					break;
@@ -254,7 +237,7 @@ public class SpineRender implements Renderable, Serializable {
 
 				if(Theater.get().debug) {
 					SensorData sd = (SensorData) ((Box2dAttachment) attachment).getBody().getUserData();
-					if(sd.getType() == SensorType.WEAPON) {
+					if(sd.getType() == SensorData.WEAPON) {
 						DrawUtils.setColor(new Vector3f(0.8f, 0f, 0f));
 					} else {
 						DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));

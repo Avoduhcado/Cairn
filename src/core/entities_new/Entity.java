@@ -1,10 +1,6 @@
 package core.entities_new;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-
-import org.jbox2d.collision.RayCastInput;
-import org.jbox2d.collision.RayCastOutput;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -21,24 +17,21 @@ import org.lwjgl.util.vector.Vector3f;
 import core.Camera;
 import core.Theater;
 import core.entities_new.components.Controllable;
-import core.entities_new.components.GridRender;
-import core.entities_new.components.PlainRender;
+import core.entities_new.components.PlainStateManager;
 import core.entities_new.components.Renderable;
-import core.entities_new.components.SpineRender;
+import core.entities_new.components.StateManager;
 import core.entities_new.components.ZBody;
+import core.entities_new.event.ActionEvent;
 import core.entities_new.event.CombatEvent;
 import core.entities_new.event.CombatListener;
 import core.entities_new.event.EntityEvent;
 import core.entities_new.event.StateChangeEvent;
 import core.entities_new.utils.DepthSort;
-import core.entities_new.utils.SensorData;
-import core.entities_new.utils.SensorType;
+import core.entities_new.utils.RenderLoader;
 import core.inventory.Equipment;
 import core.render.DrawUtils;
 import core.setups.Stage_new;
 import core.setups.WorldContainer;
-import core.utilities.Resources;
-import net.lingala.zip4j.model.FileHeader;
 
 public class Entity implements DepthSort, Serializable {
 
@@ -48,43 +41,36 @@ public class Entity implements DepthSort, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private WorldContainer container;
-	// TODO Extract somehow
-	private CharacterState state;
+	private String name;
+	//private State state;
 	
 	private Renderable render;
 	private ZBody zBody;
+	private Controllable controller;
+	
 	// TODO Extract this
 	private Equipment equipment;
-
-	private Controllable controller;
 	private CombatListener combatListener;
-	
-	private ArrayList<Entity> ground = new ArrayList<Entity>();
-	// TODO Delete this
-	private Entity subEntity;
+	private StateManager stateManager;
 	
 	private boolean fixDirection;
 	
 	public Entity(String name, float x, float y, WorldContainer container) {
+		this.name = name;
 		setContainer(container);
+		
 		loadBody(container.getWorld(), x, y);
-		setRender(loadRender(name));
-		setState(CharacterState.IDLE);
+		setRender(RenderLoader.loadRender(name, this));
+		stateManager = new PlainStateManager(this, State.IDLE);
 	}
 	
-	private Renderable loadRender(String name) {
-		FileHeader dir = Resources.get().getResourceHeader(name + "/");
-		if(dir != null && dir.isDirectory()) {
-			if(Resources.get().getResourceHeader(name + "/" + name + ".json") != null) {
-				return new SpineRender(name, this);
-			} else if(Resources.get().getResourceHeader(name + "/" + name + ".avl") != null) {
-				return new GridRender(name, this);
-			}
-		} else if(Resources.get().getResourceHeader(name + ".png") != null) {
-			return new PlainRender(name, this);
-		}
+	public Entity(String name, Body body, WorldContainer container) {
+		this.name = name;
+		setContainer(container);
 		
-		return null;
+		setZBody(new ZBody(body, this));
+		setRender(RenderLoader.loadRender(name, this));
+		stateManager = new PlainStateManager(this, State.IDLE);
 	}
 	
 	private void loadBody(World world, float x, float y) {
@@ -109,7 +95,7 @@ public class Entity implements DepthSort, Serializable {
 		body.setLinearDamping(15f);
 		body.setGravityScale(0f);
 		body.setUserData(this);
-		setZBody(new ZBody(body));
+		setZBody(new ZBody(body, this));
 	}
 	
 	public void draw() {
@@ -149,16 +135,16 @@ public class Entity implements DepthSort, Serializable {
 			controller.control();
 		}
 		
-		resolveState();
-
 		if(render()) {
 			render.animate(1f);
 		}
 		
+		stateManager.resolveState();
+		
 		if(getBody().getGravityScale() > 0 && zBody.getGroundZ() != 0) {
 			zBody.setZ(zBody.getGroundZ() - (getBody().getPosition().y * Stage_new.SCALE_FACTOR));
-			if(getBody().getLinearVelocity().y > 0 && getState() == CharacterState.JUMPING) {
-				changeState(CharacterState.FALLING);
+			if(getBody().getLinearVelocity().y > 0 && getState() == State.JUMPING) {
+				fireEvent(new StateChangeEvent(State.FALLING));
 			}
 
 			if(zBody.getZ() <= 0f && getBody().getLinearVelocity().y > 2) {
@@ -167,9 +153,9 @@ public class Entity implements DepthSort, Serializable {
 				}
 				getBody().setLinearVelocity(new Vec2(getBody().getLinearVelocity().x, -getBody().getLinearVelocity().y * 0.5f));
 				getBody().applyAngularImpulse(10f);
-				changeState(CharacterState.JUMPING);
+				fireEvent(new StateChangeEvent(State.JUMPING));
 			} else if(zBody.getZ() < 0f) {
-				changeState(CharacterState.LAND);
+				fireEvent(new StateChangeEvent(State.LAND));
 				zBody.setZ(0);
 				zBody.setGroundZ(0);
 				getBody().setGravityScale(0);
@@ -181,98 +167,16 @@ public class Entity implements DepthSort, Serializable {
 		}
 	}
 	
-	private void resolveState() {
-		switch(getState()) {
-		case WALK:
-		case RUN:
-			if(getBody().getLinearVelocity().length() <= 0.25f) {
-				changeState(CharacterState.IDLE);
-			}
-			break;
-		default:
-			break;
-		}
-	}
-	
-	public void changeStateForced(CharacterState state) {
-		if(render()) {
-			render.fireEvent(new StateChangeEvent(state, this.state));
-		}
-		
-		this.state = state;
-	}
-	
-	public void changeState(CharacterState state) {
-		if(this.state != state) {
-			changeStateForced(state);
-		}
-	}
-	
-	public void stepOnGround(Entity ground) {
-		this.ground.add(ground);
-		if(this.ground.size() == 1) {
-			this.changeState(CharacterState.LAND);
-		} else {
-			this.changeState(CharacterState.IDLE);
-		}
-		getBody().setGravityScale(0f);
-		getBody().setLinearDamping(15f);
-	}
-	
-	public void stepOffGround(Entity ground) {
-		this.ground.remove(ground);
-		if(this.ground.isEmpty()) {
-			// TODO Interrupt() delete any sub entities/general state cleanup
-			this.changeState(CharacterState.FALLING);
-			getBody().setGravityScale(1f);
-			getBody().setLinearDamping(1f);
-			getBody().getFixtureList().getFilterData().categoryBits = 0;
-			
-			float closestFraction = 10;
-			for(Entity e : this.getContainer().getEntities()) {
-				Fixture fixture = e.getBody().getFixtureList();
-				if(fixture.isSensor() && fixture.getBody().getUserData() instanceof SensorData) {
-					SensorData data = (SensorData) fixture.getBody().getUserData();
-					if(data.getType() == SensorType.GROUND) {
-						RayCastOutput output = new RayCastOutput();
-						RayCastInput input = new RayCastInput();
-						input.p1.set(getBody().getPosition());
-						input.p2.set(getBody().getPosition().x, getBody().getPosition().y + (50 / Stage_new.SCALE_FACTOR));
-						input.maxFraction = closestFraction;
-						
-						if(!fixture.raycast(output, input, 0)) {
-							continue;
-						}
-						if(output.fraction < closestFraction) {
-							closestFraction = output.fraction;
-							zBody.setGroundZ(fixture.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
-							System.out.println(output.fraction + " " + output.normal);
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	private void destroyBodies() {
-		getContainer().getWorld().destroyBody(getBody());
-		if(render instanceof SpineRender) {
-			((SpineRender) render).destroyBodies();
-		}
-	}
-	
-	public Entity getSubEntity() {
-		return subEntity;
+	public String getName() {
+		return name;
 	}
 
-	public void setSubEntity(Entity subEntity) {
-		if(getSubEntity() != null) {
-			if(getContainer().removeEntity(getSubEntity())) {
-				getSubEntity().destroyBodies();
-			}
-		}
-		
-		this.subEntity = subEntity;
+	public WorldContainer getContainer() {
+		return container;
+	}
+
+	public void setContainer(WorldContainer container) {
+		this.container = container;
 	}
 
 	public boolean render() {
@@ -308,38 +212,6 @@ public class Entity implements DepthSort, Serializable {
 		getZBody().setBody(body);
 	}
 
-	public WorldContainer getContainer() {
-		return container;
-	}
-
-	public void setContainer(WorldContainer container) {
-		this.container = container;
-	}
-
-	public CharacterState getState() {
-		return state;
-	}
-
-	public void setState(CharacterState state) {
-		this.state = state;
-	}
-
-	public Equipment getEquipment() {
-		return equipment;
-	}
-
-	public void setEquipment(Equipment equipment) {
-		this.equipment = equipment;
-	}
-
-	public boolean isFixDirection() {
-		return fixDirection;
-	}
-
-	public void setFixDirection(boolean fixDirection) {
-		this.fixDirection = fixDirection;
-	}
-
 	public boolean controller() {
 		return controller != null;
 	}
@@ -350,6 +222,26 @@ public class Entity implements DepthSort, Serializable {
 
 	public void setController(Controllable controller) {
 		this.controller = controller;
+	}
+	
+	public State getState() {
+		return stateManager.getState();
+	}
+	
+	private StateManager getStateManager() {
+		return stateManager;
+	}
+	
+	public void setStateManager(StateManager stateManager) {
+		this.stateManager = stateManager;
+	}
+	
+	public Equipment getEquipment() {
+		return equipment;
+	}
+
+	public void setEquipment(Equipment equipment) {
+		this.equipment = equipment;
 	}
 	
 	public void removeCombatListener(CombatListener l) {
@@ -363,12 +255,24 @@ public class Entity implements DepthSort, Serializable {
 		this.combatListener = l;
 	}
 	
-	public void fireEvent(EntityEvent e) {
-		if(e instanceof CombatEvent) {
-			processCombatEvent((CombatEvent) e);
-		}
+	public boolean isFixDirection() {
+		return fixDirection;
 	}
 
+	public void setFixDirection(boolean fixDirection) {
+		this.fixDirection = fixDirection;
+	}
+	
+	public void fireEvent(EntityEvent e) {
+		if(e instanceof ActionEvent) {
+			
+		} else if(e instanceof CombatEvent) {
+			processCombatEvent((CombatEvent) e);
+		} else if(e instanceof StateChangeEvent) {
+			getStateManager().changeState(((StateChangeEvent) e).getNewState());
+		}
+	}
+	
 	protected void processCombatEvent(CombatEvent e) {
 		if(combatListener != null) {
 			combatListener.hit(e);
@@ -377,11 +281,7 @@ public class Entity implements DepthSort, Serializable {
 
 	@Override
 	public String toString() {
-		if(render != null) {
-			return this.render.getSprite();
-		}
-		
-		return super.toString();
+		return name;
 	}
 
 }

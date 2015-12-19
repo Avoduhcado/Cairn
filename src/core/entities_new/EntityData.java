@@ -7,7 +7,6 @@ import com.esotericsoftware.spine.attachments.Box2dAttachment;
 
 import core.entities_new.components.SpineRender;
 import core.entities_new.utils.SensorData;
-import core.entities_new.utils.SensorType;
 import core.setups.Stage_new;
 import core.setups.WorldContainer;
 
@@ -47,7 +46,7 @@ public class EntityData {
 					if(attachment == null) {
 						continue;
 					}
-					((SensorData) attachment.getBody().getUserData()).setType(SensorType.IGNORE);
+					((SensorData) attachment.getBody().getUserData()).setType(SensorData.IGNORE);
 				}
 			}
 			

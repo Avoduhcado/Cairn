@@ -5,11 +5,11 @@ import java.awt.Point;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 
-import core.entities_new.CharacterState;
+import core.entities_new.State;
 import core.entities_new.Entity;
 import core.entities_new.event.ActionEvent;
 import core.entities_new.event.ActionEventListener;
-import core.entities_new.event.EntityAction;
+import core.entities_new.event.StateChangeEvent;
 import core.setups.Stage_new;
 import core.utilities.keyboard.Keybinds;
 
@@ -31,18 +31,19 @@ public class FollowController implements Controllable {
 		this.leader = leader;
 		
 		addActionEventListener(e -> {
-			switch(e.getType()) {
+			switch(e.getState()) {
 			case ATTACK:
-				this.follower.changeStateForced(CharacterState.ATTACK);
+				attack(e);
+				//this.follower.changeStateForced(State.ATTACK);
 				break;
 			case DEFEND:
-				this.follower.changeStateForced(CharacterState.DEFEND);
+				//this.follower.changeStateForced(State.DEFEND);
 				break;
 			case QUICKSTEP:
-				this.follower.changeStateForced(CharacterState.QUICKSTEP);
+				//this.follower.changeStateForced(State.QUICKSTEP);
 				//this.follower.getBody().setLinearDamping(5f);
-				this.follower.getBody().applyLinearImpulse(leader.getBody().getLinearVelocity().mul(0.75f), follower.getBody().getWorldCenter());
-				this.follower.setFixDirection(true);
+				//this.follower.getBody().applyLinearImpulse(leader.getBody().getLinearVelocity().mul(0.75f), follower.getBody().getWorldCenter());
+				//this.follower.setFixDirection(true);
 				break;
 			default:
 				break;
@@ -63,43 +64,26 @@ public class FollowController implements Controllable {
 				if(distance > lagDistance * 1.5f) {
 					speedMod = 1.5f;
 				}
-				move(new Vec2((((leadBody.getPosition().x * Stage_new.SCALE_FACTOR) + xOffset) - followBody.getPosition().x * Stage_new.SCALE_FACTOR) / (float) distance,
-						(((leadBody.getPosition().y * Stage_new.SCALE_FACTOR) + yOffset) - followBody.getPosition().y * Stage_new.SCALE_FACTOR) / (float) distance));
+				move(new Vec2((((leadBody.getPosition().x * Stage_new.SCALE_FACTOR) + xOffset) 
+						- followBody.getPosition().x * Stage_new.SCALE_FACTOR) / (float) distance,
+						(((leadBody.getPosition().y * Stage_new.SCALE_FACTOR) + yOffset) 
+								- followBody.getPosition().y * Stage_new.SCALE_FACTOR) / (float) distance));
 			} else if(leadBody.getLinearVelocity().length() <= 0.25f && distance > lagDistance / 4f) {
 				speedMod = 0.35f;
-				move(new Vec2((((leadBody.getPosition().x * Stage_new.SCALE_FACTOR) + xOffset) - followBody.getPosition().x * Stage_new.SCALE_FACTOR) / (float) distance,
-						(((leadBody.getPosition().y * Stage_new.SCALE_FACTOR) + yOffset) - followBody.getPosition().y * Stage_new.SCALE_FACTOR) / (float) distance));
+				move(new Vec2((((leadBody.getPosition().x * Stage_new.SCALE_FACTOR) + xOffset) 
+						- followBody.getPosition().x * Stage_new.SCALE_FACTOR) / (float) distance,
+						(((leadBody.getPosition().y * Stage_new.SCALE_FACTOR) + yOffset) 
+								- followBody.getPosition().y * Stage_new.SCALE_FACTOR) / (float) distance));
 			}
 			
 			if(leadBody.getLinearVelocity().length() == 0f && (leader.getRender().isFlipped() != follower.getRender().isFlipped())) {
-				move(new Vec2((((leadBody.getPosition().x * Stage_new.SCALE_FACTOR) + xOffset) - followBody.getPosition().x * Stage_new.SCALE_FACTOR) / (float) distance,
-						(((leadBody.getPosition().y * Stage_new.SCALE_FACTOR) + yOffset) - followBody.getPosition().y * Stage_new.SCALE_FACTOR) / (float) distance));
+				move(new Vec2((((leadBody.getPosition().x * Stage_new.SCALE_FACTOR) + xOffset) 
+						- followBody.getPosition().x * Stage_new.SCALE_FACTOR) / (float) distance,
+						(((leadBody.getPosition().y * Stage_new.SCALE_FACTOR) + yOffset) 
+								- followBody.getPosition().y * Stage_new.SCALE_FACTOR) / (float) distance));
 				follower.getRender().setFlipped(leader.getRender().isFlipped());
 			}
 		//}
-		
-		if(Keybinds.ATTACK.clicked()) {
-			
-			// TODO Link Equipment to Dad skull
-			CharacterState.ATTACK.setCustomAnimation("LightAttack-1");
-			follower.changeState(CharacterState.ATTACK);
-			Entity rightArm = new Entity("Right Arm", 
-					(follower.getBody().getPosition().x * Stage_new.SCALE_FACTOR),
-					(follower.getBody().getPosition().y * Stage_new.SCALE_FACTOR),
-					follower.getContainer());
-			((SpineRender) rightArm.getRender()).setAttachment("WEAPON",
-					leader.getEquipment().getEquippedWeapon().getName().toUpperCase());
-			rightArm.getRender().setFlipped(follower.getRender().isFlipped());
-
-			//CharacterState.ATTACK.setCustomAnimation(animState.getCurrent(0).getAnimation().getName());
-			rightArm.changeState(CharacterState.ATTACK);
-			rightArm.getBody().getFixtureList().getFilterData().categoryBits = 0;
-			rightArm.getBody().setLinearVelocity(follower.getBody().getLinearVelocity().clone());
-			rightArm.getBody().setLinearDamping(5f);
-			follower.setSubEntity(rightArm);
-
-			follower.getContainer().addEntity(follower.getSubEntity());
-		}
 	}
 
 	private void move(Vec2 direction) {
@@ -108,12 +92,61 @@ public class FollowController implements Controllable {
 		}
 		follower.getBody().applyForceToCenter(direction.mul(speed * speedMod));
 		if(follower.getState().canMove()) {
-			follower.changeState(speedMod > 1 ? CharacterState.RUN : CharacterState.WALK);
+			follower.fireEvent(new StateChangeEvent(speedMod > 1 ? State.RUN : State.WALK));
 		}
 		
 		if(follower.getBody().getLinearVelocity().x != 0 && !follower.isFixDirection() && follower.getRender() != null) {
 			follower.getRender().setFlipped(follower.getBody().getLinearVelocity().x < 0);
 		}
+	}
+	
+	private void attack(ActionEvent action) {
+		//action.act();
+		
+		ActionEvent ae = new ActionEvent(action.getState(), follower.getState()) {
+			private String currentAnimation = ((SpineRender) follower.getRender()).getAnimation();
+			
+			@Override
+			public void act() {
+				follower.getBody().setLinearDamping(5f);
+				State.ATTACK.setCustomAnimation(this.getString());
+				follower.fireEvent(new StateChangeEvent(State.ATTACK));
+				
+				Entity rightArm = new Entity("Right Arm", 
+						(follower.getBody().getPosition().x * Stage_new.SCALE_FACTOR),
+						(follower.getBody().getPosition().y * Stage_new.SCALE_FACTOR),
+						follower.getContainer());
+				((SpineRender) rightArm.getRender()).setAttachment("WEAPON",
+						follower.getEquipment().getEquippedWeapon().getName().toUpperCase());
+				rightArm.getRender().setFlipped(follower.getRender().isFlipped());
+
+				rightArm.setStateManager(new SingleStateManager(rightArm, State.ATTACK));
+				rightArm.getBody().getFixtureList().getFilterData().categoryBits = 0;
+				rightArm.getBody().setLinearVelocity(follower.getBody().getLinearVelocity().clone());
+				rightArm.getBody().setLinearDamping(5f);
+
+				follower.getContainer().addEntity(rightArm);
+			}
+			
+			@Override
+			public String getString() {
+				if(getPrevState() == State.ATTACK) {
+					SpineRender render = (SpineRender) follower.getRender();
+					String[] prevAnimation = currentAnimation.split("-");
+					int currentPhase = Integer.valueOf(prevAnimation[1]);
+					
+					if(render.getSkeleton().getData().findAnimation(prevAnimation[0] + "-" + (currentPhase + 1)) != null) {
+						return prevAnimation[0] + "-" + (currentPhase + 1);
+					} else {
+						return prevAnimation[0] + "-0";
+					}
+				} else {
+					return follower.getEquipment().getEquippedWeapon().getAnimation() + "-0";
+				}				
+			}
+		};
+		
+		ae.act();
 	}
 	
 	public Entity getLeader() {
@@ -149,12 +182,12 @@ public class FollowController implements Controllable {
 	}
 	
 	public void fireEvent(ActionEvent e) {
-		if(e instanceof EntityAction) {
-			processEntityAction((EntityAction) e);
+		if(e instanceof ActionEvent) {
+			processActionEvent((ActionEvent) e);
 		}
 	}
 	
-	protected void processEntityAction(EntityAction e) {
+	protected void processActionEvent(ActionEvent e) {
 		if(actionEventListener != null) {
 			actionEventListener.actionPerformed(e);
 		}

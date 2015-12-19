@@ -2,9 +2,6 @@ package core.setups;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.HashMap;
-import org.jbox2d.collision.RayCastInput;
-import org.jbox2d.collision.RayCastOutput;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -20,10 +17,8 @@ import core.entities_new.Entity;
 import core.entities_new.EntityData;
 import core.entities_new.components.FollowController;
 import core.entities_new.components.PlayerController;
-import core.entities_new.components.ZBody;
 import core.entities_new.utils.CombatLoader;
 import core.entities_new.utils.SensorData;
-import core.entities_new.utils.SensorType;
 import core.inventory.Equipment;
 import core.inventory.Weapon;
 import core.scene.BoneWorld;
@@ -44,11 +39,10 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 		
 		ShadowMap.init();
-
+		
 		BoneWorld boneWorld = new BoneWorld();
 		boneWorld.setContainer(this);
 		world.setContactListener(boneWorld);
-		//world.setAllowSleep(false);
 		
 		Entity dream = new Entity("Test Land", 0, 0, this);
 		//Entity dream = new Entity("Ruined Sepulcher", 0, 0, this);
@@ -61,7 +55,14 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		
 		Entity player = new Entity("Skelebones", 495, 450, this);
 		player.setController(new PlayerController(player));
-		Equipment equipment = new Equipment(player);
+		addEntity(player);
+		
+		Entity dad = new Entity("Skull",
+				player.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
+				player.getBody().getPosition().y * Stage_new.SCALE_FACTOR,
+				player.getContainer());
+		dad.setController(new FollowController(dad, player));
+		Equipment equipment = new Equipment(dad);
 		Weapon weapon = new Weapon("001", "Light Mace");
 		weapon.setAnimation("LightAttack");
 		equipment.addWeapon(weapon);
@@ -71,12 +72,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		weapon = new Weapon("003", "Polearm");
 		weapon.setAnimation("ThrustAttack");
 		equipment.addWeapon(weapon);
-		player.setEquipment(equipment);
-		addEntity(player);
-		
-		Entity dad = new Entity("Skull",
-				player.getBody().getPosition().x * Stage_new.SCALE_FACTOR, player.getBody().getPosition().y * Stage_new.SCALE_FACTOR, player.getContainer());
-		dad.setController(new FollowController(dad, player));
+		dad.setEquipment(equipment);
 		for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
 			f.getFilterData().categoryBits = 0;
 		}
@@ -138,7 +134,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		}
 		addEntity(wall);*/
 		
-		Entity ground = new Entity(null, 0, 0, this);
+		Entity ground = null;
 		{
 			BodyDef bodyDef = new BodyDef();
 			bodyDef.position.set(100f / Stage_new.SCALE_FACTOR, 100f / Stage_new.SCALE_FACTOR);
@@ -154,12 +150,11 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			
 			Body body = world.createBody(bodyDef);
 			body.createFixture(boxFixture);
-			body.setUserData(new SensorData(ground, SensorType.GROUND));
-			ground.setBody(body);
+			ground = new Entity(null, body, this);
+			ground.getBody().setUserData(new SensorData(ground, SensorData.GROUND));
 		}
 		addEntity(ground);
 		
-		ground = new Entity(null, 0, 0, this);
 		{
 			BodyDef bodyDef = new BodyDef();
 			bodyDef.position.set(100f / Stage_new.SCALE_FACTOR, 550f / Stage_new.SCALE_FACTOR);
@@ -175,20 +170,10 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			
 			Body body = world.createBody(bodyDef);
 			body.createFixture(boxFixture);
-			body.setUserData(new SensorData(ground, SensorType.GROUND));
-			ground.setBody(body);
+			ground = new Entity(null, body, this);
+			ground.getBody().setUserData(new SensorData(ground, SensorData.GROUND));
 		}
 		addEntity(ground);
-		
-		RayCastOutput output = new RayCastOutput();
-		RayCastInput input = new RayCastInput();
-		input.p1.set(player.getBody().getPosition());
-		input.p2.set(player.getBody().getPosition().x, player.getBody().getPosition().y + (50 / Stage_new.SCALE_FACTOR));
-		input.maxFraction = 10;
-		
-		if(ground.getBody().getFixtureList().raycast(output, input, 0)) {
-			System.out.println(output.fraction + " " + output.normal);
-		}
 		
 		Camera.get().setFocus(player);
 	}

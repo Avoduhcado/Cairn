@@ -1,8 +1,5 @@
 package core.scene;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.jbox2d.callbacks.ContactImpulse;
 import org.jbox2d.callbacks.ContactListener;
 import org.jbox2d.collision.Manifold;
@@ -11,10 +8,8 @@ import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.contacts.Contact;
 
 import core.entities_new.Entity;
-import core.entities_new.EntityData;
 import core.entities_new.event.CombatEvent;
 import core.entities_new.utils.SensorData;
-import core.entities_new.utils.SensorType;
 import core.setups.Stage_new;
 import core.setups.WorldContainer;
 
@@ -48,17 +43,18 @@ public class BoneWorld implements ContactListener {
 		
 		if(sortSensors(contact)) {
 			switch(sensor.getType()) {
-			case GROUND:
+			case SensorData.GROUND:
 				//System.out.println("Stepping on ground");
-				entity.stepOnGround(sensor.getEntity());
+				entity.getZBody().stepOnGround(sensor.getEntity());
 				break;
-			case BODY:
+			case SensorData.BODY:
 				//System.out.println("Bodies colliding!! " + sensor.getEntity().toString() + " " + entity.toString());
 				break;
-			case WEAPON:
+			case SensorData.WEAPON:
 				System.out.println("Weapon colliding: " + sensor.getEntity() + ", " + entity);
 				// TODO Hitting ground/wall?
-				if(sensor.getEntity() != entity && sensor.getEntity() != entity.getSubEntity()) {
+				//if(sensor.getEntity() != entity && sensor.getEntity() != entity.getSubEntity()) {
+				if(sensor.getEntity() != entity) {
 					System.out.println("Hit boys!!! " + sensor.getEntity() + ", " + entity);
 					// TODO Pass in proper weapons, maybe include slots that were hit?
 					entity.fireEvent(new CombatEvent(sensor.getEntity(), null, entity));
@@ -82,13 +78,13 @@ public class BoneWorld implements ContactListener {
 		
 		if(sortSensors(contact)) {
 			switch(sensor.getType()) {
-			case GROUND:
+			case SensorData.GROUND:
 				//System.out.println("Stepping off ground");
-				entity.stepOffGround(sensor.getEntity());
+				entity.getZBody().stepOffGround(sensor.getEntity());
 				break;
-			case BODY:
+			case SensorData.BODY:
 				break;
-			case WEAPON:
+			case SensorData.WEAPON:
 				break;
 			default:
 				break;
@@ -129,17 +125,17 @@ public class BoneWorld implements ContactListener {
 	
 	private boolean fixtureIsBone(Fixture fixture) {
 		return fixture.getBody().getUserData() != null &&
-				((SensorData) fixture.getBody().getUserData()).getType() == SensorType.BODY;
+				((SensorData) fixture.getBody().getUserData()).getType() == SensorData.BODY;
 	}
 	
 	private boolean fixtureIsGround(Fixture fixture) {
 		return fixture.getBody().getUserData() != null &&
-				((SensorData) fixture.getBody().getUserData()).getType() == SensorType.GROUND;
+				((SensorData) fixture.getBody().getUserData()).getType() == SensorData.GROUND;
 	}
 
 	private boolean fixtureIsWeapon(Fixture fixture) {
 		return fixture.getBody().getUserData() != null &&
-				((SensorData) fixture.getBody().getUserData()).getType() == SensorType.WEAPON;
+				((SensorData) fixture.getBody().getUserData()).getType() == SensorData.WEAPON;
 	}
 	
 	private boolean contactIsWeaponVsBone(Contact contact) {

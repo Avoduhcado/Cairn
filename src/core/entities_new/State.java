@@ -1,6 +1,6 @@
 package core.entities_new;
 
-public enum CharacterState {
+public enum State {
 
 	IDLE ("Idle", true),
 	WALK ("Walk", true),
@@ -19,7 +19,7 @@ public enum CharacterState {
 	
 	private String customAnimation;
 	
-	CharacterState(String animation, boolean loop) {
+	State(String animation, boolean loop) {
 		this.animation = animation;
 		this.loop = loop;
 	}

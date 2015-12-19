@@ -4,10 +4,15 @@ import core.entities_new.Entity;
 
 public class SensorData {
 
+	public static final int IGNORE = -1;
+	public static final int GROUND = 1;
+	public static final int BODY = 2;
+	public static final int WEAPON = 3;
+	
 	private Entity entity;
-	private SensorType type;
+	private int type;
 		
-	public SensorData(Entity entity, SensorType type) {
+	public SensorData(Entity entity, int type) {
 		this.entity = entity;
 		this.type = type;
 	}
@@ -20,11 +25,11 @@ public class SensorData {
 		this.entity = entity;
 	}
 	
-	public SensorType getType() {
+	public int getType() {
 		return type;
 	}
 	
-	public void setType(SensorType type) {
+	public void setType(int type) {
 		this.type = type;
 	}
 

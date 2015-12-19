@@ -1,9 +1,10 @@
 package core.entities_new.utils;
 
-import core.entities_new.CharacterState;
+import core.entities_new.State;
 import core.entities_new.Entity;
 import core.entities_new.event.CombatEvent;
 import core.entities_new.event.CombatListener;
+import core.entities_new.event.StateChangeEvent;
 
 public final class CombatLoader {
 
@@ -14,7 +15,7 @@ public final class CombatLoader {
 			@Override
 			public void hit(CombatEvent e) {
 				if(prevAttacker != e.getAttacker()) {
-					e.getTarget().changeStateForced(CharacterState.HIT);
+					e.getTarget().fireEvent(new StateChangeEvent(State.HIT, true));
 					this.prevAttacker = e.getAttacker();
 					
 					/*Entity particleEmitter = new Entity("Bone Shards", 

@@ -11,9 +11,10 @@ import com.esotericsoftware.spine.Slot;
 import com.esotericsoftware.spine.attachments.Region;
 
 import core.Camera;
-import core.entities_new.CharacterState;
+import core.entities_new.State;
 import core.entities_new.Entity;
-import core.entities_new.event.EntityAction;
+import core.entities_new.event.ActionEvent;
+import core.entities_new.event.StateChangeEvent;
 import core.setups.Stage_new;
 import core.utilities.keyboard.Keybinds;
 
@@ -25,7 +26,7 @@ public class PlayerController implements Controllable {
 	private float speedMod = 1f;
 	private Vec2 movement = new Vec2();
 	
-	private EntityAction actionQueue;
+	private ActionEvent actionQueue;
 		
 	public PlayerController(Entity player) {
 		this.player = player;
@@ -49,7 +50,7 @@ public class PlayerController implements Controllable {
 		if(Keybinds.DODGE.clicked()) {
 			dodge();
 		} else if(Keybinds.ATTACK.clicked()) {
-			//attack();
+			attack();
 		} else if(Keybinds.DEFEND.clicked()) {
 			//defend();
 		} else if(Keybinds.SLOT1.clicked()) {
@@ -96,7 +97,7 @@ public class PlayerController implements Controllable {
 		if(player.getState().canMove()) {
 			direction.normalize();
 			player.getBody().applyForceToCenter(direction.mul(speed * speedMod));
-			player.changeState(speedMod > 1 ? CharacterState.RUN : CharacterState.WALK);
+			player.fireEvent(new StateChangeEvent(speedMod > 1 ? State.RUN : State.WALK));
 			
 			if(player.getBody().getLinearVelocity().x != 0 && !player.isFixDirection() && player.getRender() != null) {
 				player.getRender().setFlipped(player.getBody().getLinearVelocity().x < 0);
@@ -105,7 +106,7 @@ public class PlayerController implements Controllable {
 	}
 	
 	private void dodge() {
-		setActionQueue(new EntityAction(CharacterState.QUICKSTEP, player.getState()) {
+		setActionQueue(new ActionEvent(State.QUICKSTEP, player.getState()) {
 			@Override
 			public void act() {
 				player.getBody().setLinearDamping(5f);
@@ -118,7 +119,7 @@ public class PlayerController implements Controllable {
 							player.getBody().getWorldCenter());
 				}
 
-				player.changeState(CharacterState.QUICKSTEP);
+				player.fireEvent(new StateChangeEvent(State.QUICKSTEP));
 				player.setFixDirection(true);
 			}
 		});
@@ -188,69 +189,35 @@ public class PlayerController implements Controllable {
 	}
 	
 	private void attack() {
-		setActionQueue(new EntityAction(CharacterState.ATTACK, player.getState()) {
-			private String currentAnimation = ((SpineRender) player.getRender()).getAnimation();
-			
-			@Override
-			public void act() {
-				player.getBody().setLinearDamping(5f);
-				CharacterState.ATTACK.setCustomAnimation(this.getString());
-				player.changeState(CharacterState.ATTACK);
-				
-				/*Entity rightArm = new Entity("Right Arm", (player.getBody().getPosition().x * Stage_new.SCALE_FACTOR),
-						(player.getBody().getPosition().y * Stage_new.SCALE_FACTOR), player.getContainer());
-				((SpineRender) rightArm.getRender()).setAttachment("WEAPON",
-						player.getEquipment().getEquippedWeapon().getName().toUpperCase());
-				rightArm.getRender().setFlipped(player.getRender().isFlipped());
-				rightArm.changeState(CharacterState.ATTACK);
-				rightArm.getBody().getFixtureList().getFilterData().categoryBits = 0;
-				rightArm.getBody().setLinearVelocity(player.getBody().getLinearVelocity().clone());
-				rightArm.getBody().setLinearDamping(5f);
-				player.setSubEntity(rightArm);
-
-				player.getContainer().addEntity(player.getSubEntity());*/
-			}
-			
-			@Override
-			public String getString() {
-				if(getPrevState() == CharacterState.ATTACK) {
-					SpineRender render = (SpineRender) player.getRender();
-					String[] prevAnimation = currentAnimation.split("-");
-					int currentPhase = Integer.valueOf(prevAnimation[1]);
-					
-					if(render.getSkeleton().getData().findAnimation(prevAnimation[0] + "-" + (currentPhase + 1)) != null) {
-						return prevAnimation[0] + "-" + (currentPhase + 1);
-					} else {
-						return prevAnimation[0] + "-0";
-					}
-				} else {
-					return player.getEquipment().getEquippedWeapon().getAnimation() + "-0";
-				}				
-			}
-		});
+		player.getContainer().getEntities()
+			.stream()
+			.filter(e -> e.getController() instanceof FollowController 
+					&& ((FollowController) e.getController()).getLeader() == player)
+			.forEach(e -> ((FollowController) e.getController()).fireEvent(
+					new ActionEvent(State.ATTACK, null)));
 	}
 	
 	private void defend() {
-		setActionQueue(new EntityAction(CharacterState.DEFEND, player.getState()) {
+		setActionQueue(new ActionEvent(State.DEFEND, player.getState()) {
 			@Override
 			public void act() {
-				player.changeState(CharacterState.DEFEND);
+				player.fireEvent(new StateChangeEvent(State.DEFEND));
 
-				player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
+				/*player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
 						(player.getBody().getPosition().y * Stage_new.SCALE_FACTOR) - 15f, player.getContainer()));
 				player.getSubEntity().changeState(CharacterState.DEFEND);
 				player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
 
-				player.getContainer().addEntity(player.getSubEntity());
+				player.getContainer().addEntity(player.getSubEntity());*/
 			}
 		});
 	}
 
 	private void changeWeapon() {
-		setActionQueue(new EntityAction(CharacterState.CHANGE_WEAPON, player.getState()) {
+		setActionQueue(new ActionEvent(State.CHANGE_WEAPON, player.getState()) {
 			@Override
 			public void act() {
-				player.changeState(CharacterState.CHANGE_WEAPON);
+				player.fireEvent(new StateChangeEvent(State.CHANGE_WEAPON));
 				
 				player.getEquipment().cycleEquippedWeapon();
 			}
@@ -258,10 +225,10 @@ public class PlayerController implements Controllable {
 	}
 	
 	private void jump(Vec2 impulse) {
-		setActionQueue(new EntityAction(CharacterState.JUMPING, player.getState()) {
+		setActionQueue(new ActionEvent(State.JUMPING, player.getState()) {
 			@Override
 			public void act() {
-				player.changeState(getType());
+				player.fireEvent(new StateChangeEvent(getState()));
 				player.getBody().applyLinearImpulse(impulse, player.getBody().getWorldCenter());
 				player.getBody().setGravityScale(1f);
 				player.getBody().setLinearDamping(1f);
@@ -270,7 +237,7 @@ public class PlayerController implements Controllable {
 		});
 	}
 	
-	private void setActionQueue(EntityAction action) {
+	private void setActionQueue(ActionEvent action) {
 		actionQueue = action;
 	}
 	
