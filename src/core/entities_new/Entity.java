@@ -146,9 +146,10 @@ public class Entity implements DepthSort, Serializable {
 	
 	public void update() {
 		if(controller()) {
-			controller.collectInput();
-			controller.resolveState();
+			controller.control();
 		}
+		
+		resolveState();
 
 		if(render()) {
 			render.animate(1f);
@@ -177,6 +178,19 @@ public class Entity implements DepthSort, Serializable {
 				getBody().getFixtureList().getFilterData().categoryBits = 1;
 				//body.getFixtureList().getFilterData().groupIndex = 0;
 			}
+		}
+	}
+	
+	private void resolveState() {
+		switch(getState()) {
+		case WALK:
+		case RUN:
+			if(getBody().getLinearVelocity().length() <= 0.25f) {
+				changeState(CharacterState.IDLE);
+			}
+			break;
+		default:
+			break;
 		}
 	}
 	

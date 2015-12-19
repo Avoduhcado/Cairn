@@ -51,7 +51,7 @@ public class FollowController implements Controllable {
 	}
 	
 	@Override
-	public void collectInput() {
+	public void control() {
 		//if(follower.getState().canMove()) {
 			speedMod = 1f;
 			Body leadBody = leader.getBody();
@@ -102,26 +102,7 @@ public class FollowController implements Controllable {
 		}
 	}
 
-	@Override
-	public void resolveState() {
-		switch(follower.getState()) {
-		case IDLE:
-			break;
-		case WALK:
-		case RUN:
-			if(follower.getBody().getLinearVelocity().length() <= 0.25f) {
-				follower.changeState(CharacterState.IDLE);
-			}
-			break;
-		case QUICKSTEP:
-			break;
-		default:
-			break;
-		}
-	}
-
-	@Override
-	public void move(Vec2 direction) {
+	private void move(Vec2 direction) {
 		if(!follower.getBody().isFixedRotation()) {
 			follower.getBody().applyTorque(90 * (direction.x < 0 ? -1f : 1f));
 		}
@@ -133,30 +114,6 @@ public class FollowController implements Controllable {
 		if(follower.getBody().getLinearVelocity().x != 0 && !follower.isFixDirection() && follower.getRender() != null) {
 			follower.getRender().setFlipped(follower.getBody().getLinearVelocity().x < 0);
 		}
-	}
-
-	@Override
-	public void dodge() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void collapse(Vec2 force) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void attack() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void defend() {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	public Entity getLeader() {

@@ -1,7 +1,5 @@
 package core.entities_new.components;
 
-import java.util.ArrayList;
-
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -15,7 +13,6 @@ import com.esotericsoftware.spine.attachments.Region;
 import core.Camera;
 import core.entities_new.CharacterState;
 import core.entities_new.Entity;
-import core.entities_new.event.ActionEventListener;
 import core.entities_new.event.EntityAction;
 import core.setups.Stage_new;
 import core.utilities.keyboard.Keybinds;
@@ -35,7 +32,7 @@ public class PlayerController implements Controllable {
 	}
 
 	@Override
-	public void collectInput() {
+	public void control() {
 		speedMod = 1f;
 		if(Keybinds.RUN.held()) {
 			speedMod = 1.5f;
@@ -94,23 +91,8 @@ public class PlayerController implements Controllable {
 			setActionQueue(null);
 		}
 	}
-	
-	@Override
-	public void resolveState() {
-		switch(player.getState()) {
-		case WALK:
-		case RUN:
-			if(player.getBody().getLinearVelocity().length() <= 0.25f) {
-				player.changeState(CharacterState.IDLE);
-			}
-			break;
-		default:
-			break;
-		}
-	}
 
-	@Override
-	public void move(Vec2 direction) {
+	private void move(Vec2 direction) {
 		if(player.getState().canMove()) {
 			direction.normalize();
 			player.getBody().applyForceToCenter(direction.mul(speed * speedMod));
@@ -122,8 +104,7 @@ public class PlayerController implements Controllable {
 		}
 	}
 	
-	@Override
-	public void dodge() {
+	private void dodge() {
 		setActionQueue(new EntityAction(CharacterState.QUICKSTEP, player.getState()) {
 			@Override
 			public void act() {
@@ -143,8 +124,7 @@ public class PlayerController implements Controllable {
 		});
 	}
 
-	@Override
-	public void collapse(Vec2 force) {
+	private void collapse(Vec2 force) {
 		if(player.getRender() instanceof SpineRender) {
 			SpineRender render = (SpineRender) player.getRender();
 			
@@ -207,8 +187,7 @@ public class PlayerController implements Controllable {
 		}
 	}
 	
-	@Override
-	public void attack() {
+	private void attack() {
 		setActionQueue(new EntityAction(CharacterState.ATTACK, player.getState()) {
 			private String currentAnimation = ((SpineRender) player.getRender()).getAnimation();
 			
@@ -251,7 +230,7 @@ public class PlayerController implements Controllable {
 		});
 	}
 	
-	public void defend() {
+	private void defend() {
 		setActionQueue(new EntityAction(CharacterState.DEFEND, player.getState()) {
 			@Override
 			public void act() {
@@ -278,7 +257,7 @@ public class PlayerController implements Controllable {
 		});
 	}
 	
-	public void jump(Vec2 impulse) {
+	private void jump(Vec2 impulse) {
 		setActionQueue(new EntityAction(CharacterState.JUMPING, player.getState()) {
 			@Override
 			public void act() {
