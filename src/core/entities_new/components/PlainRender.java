@@ -102,4 +102,16 @@ public class PlainRender implements Renderable, Serializable {
 		
 	}
 
+	@Override
+	public String getAnimation() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean hasAnimation(String animation) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

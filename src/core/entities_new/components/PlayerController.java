@@ -1,5 +1,7 @@
 package core.entities_new.components;
 
+import java.util.ArrayList;
+
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -189,12 +191,19 @@ public class PlayerController implements Controllable {
 	}
 	
 	private void attack() {
-		player.getContainer().getEntities()
-			.stream()
+		player.getContainer().getEntities().stream()
 			.filter(e -> e.getController() instanceof FollowController 
 					&& ((FollowController) e.getController()).getLeader() == player)
-			.forEach(e -> ((FollowController) e.getController()).fireEvent(
-					new ActionEvent(State.ATTACK, null)));
+			.map(e -> (FollowController) e.getController())
+			.forEach(e -> e.fireEvent(new ActionEvent(State.ATTACK, e.getFollower().getState())));
+		
+		/*ArrayList<Entity> entities = player.getContainer().getEntities();
+		for(int x = 0; x < entities.size(); x++) {
+			Entity e = entities.get(x);
+			if(e.getController() instanceof FollowController && ((FollowController) e.getController()).getLeader() == player) {
+				((FollowController) e.getController()).fireEvent(new ActionEvent(State.ATTACK, e.getState()));
+			}
+		}*/
 	}
 	
 	private void defend() {

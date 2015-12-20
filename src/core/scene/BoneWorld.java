@@ -30,7 +30,7 @@ public class BoneWorld implements ContactListener {
 				Vec2 collisionPoint = new Vec2(aPosition.x - ((aPosition.x - bPosition.x) / 2f),
 						aPosition.y + ((aPosition.y - bPosition.y) / 2f));
 				
-				System.out.println("DICKS");
+				//System.out.println("DICKS");
 				/*container.queueEntity(new EntityData("Skelebones",
 						collisionPoint.x,
 						collisionPoint.y,

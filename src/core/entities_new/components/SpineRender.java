@@ -188,7 +188,7 @@ public class SpineRender implements Renderable, Serializable {
 						((SensorData) attachment.getBody().getUserData()).setType(event.getInt() == 1 ?
 								SensorData.WEAPON : SensorData.BODY);
 						attachment.getBody().getWorld().setAllowSleep(event.getInt() == 1 ? false : true);
-						System.out.println(attachment.getBody().getUserData() + ", " + attachment.getName());
+						//System.out.println(attachment.getBody().getUserData() + ", " + attachment.getName());
 					}
 					break;
 				case "SFX":
@@ -300,12 +300,19 @@ public class SpineRender implements Renderable, Serializable {
 				rotation = -rotation;
 			}
 
-			attachment.getBody().setTransform(new Vec2(x / Stage_new.SCALE_FACTOR, y / Stage_new.SCALE_FACTOR), rotation * MathUtils.degRad);
+			attachment.getBody().setTransform(new Vec2(x / Stage_new.SCALE_FACTOR, y / Stage_new.SCALE_FACTOR),
+					rotation * MathUtils.degRad);
 		}
 	}
 	
+	@Override
 	public String getAnimation() {
 		return animState.getCurrent(0).getAnimation().getName();
+	}
+	
+	@Override
+	public boolean hasAnimation(String animation) {
+		return animState.getData().getSkeletonData().findAnimation(animation) != null;
 	}
 
 	@Override

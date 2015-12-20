@@ -18,7 +18,7 @@ public class StateChangeEvent extends EntityEvent {
 		this.setOldState(null);
 	}
 
-	public StateChangeEvent(State hit, boolean forced) {
+	public StateChangeEvent(State newState, boolean forced) {
 		this.setNewState(newState);
 		this.setOldState(null);
 		this.setForced(forced);

@@ -16,6 +16,8 @@ public interface Renderable {
 	public Transform getTransform();
 	public void setTransform(int index);
 	public String getSprite();
+	public String getAnimation();
+	public boolean hasAnimation(String animation);
 	
 	public void fireEvent(EntityEvent e);
 		

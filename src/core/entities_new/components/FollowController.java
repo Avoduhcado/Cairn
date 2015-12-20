@@ -24,6 +24,8 @@ public class FollowController implements Controllable {
 	private float speed = 20f;
 	private float speedMod = 1f;
 	
+	private ActionEvent actionQueue;
+	
 	private ActionEventListener actionEventListener;
 	
 	public FollowController(Entity follower, Entity leader) {
@@ -33,7 +35,7 @@ public class FollowController implements Controllable {
 		addActionEventListener(e -> {
 			switch(e.getState()) {
 			case ATTACK:
-				attack(e);
+				actionQueue = attack(e);
 				//this.follower.changeStateForced(State.ATTACK);
 				break;
 			case DEFEND:
@@ -84,6 +86,11 @@ public class FollowController implements Controllable {
 				follower.getRender().setFlipped(leader.getRender().isFlipped());
 			}
 		//}
+			
+		if(actionQueue != null && !follower.getState().isActing()) {
+			actionQueue.act();
+			actionQueue = null;
+		}
 	}
 
 	private void move(Vec2 direction) {
@@ -100,15 +107,13 @@ public class FollowController implements Controllable {
 		}
 	}
 	
-	private void attack(ActionEvent action) {
-		//action.act();
-		
-		ActionEvent ae = new ActionEvent(action.getState(), follower.getState()) {
-			private String currentAnimation = ((SpineRender) follower.getRender()).getAnimation();
+	private ActionEvent attack(ActionEvent action) {
+		ActionEvent ae = new ActionEvent(action.getState(), action.getPrevState()) {
+			private String currentAnimation = follower.getRender().getAnimation();
 			
 			@Override
 			public void act() {
-				follower.getBody().setLinearDamping(5f);
+				//follower.getBody().setLinearDamping(5f);
 				State.ATTACK.setCustomAnimation(this.getString());
 				follower.fireEvent(new StateChangeEvent(State.ATTACK));
 				
@@ -131,11 +136,10 @@ public class FollowController implements Controllable {
 			@Override
 			public String getString() {
 				if(getPrevState() == State.ATTACK) {
-					SpineRender render = (SpineRender) follower.getRender();
 					String[] prevAnimation = currentAnimation.split("-");
 					int currentPhase = Integer.valueOf(prevAnimation[1]);
 					
-					if(render.getSkeleton().getData().findAnimation(prevAnimation[0] + "-" + (currentPhase + 1)) != null) {
+					if(follower.getRender().hasAnimation(prevAnimation[0] + "-" + (currentPhase + 1))) {
 						return prevAnimation[0] + "-" + (currentPhase + 1);
 					} else {
 						return prevAnimation[0] + "-0";
@@ -146,7 +150,11 @@ public class FollowController implements Controllable {
 			}
 		};
 		
-		ae.act();
+		return ae;
+	}
+	
+	public Entity getFollower() {
+		return follower;
 	}
 	
 	public Entity getLeader() {
@@ -192,5 +200,5 @@ public class FollowController implements Controllable {
 			actionEventListener.actionPerformed(e);
 		}
 	}
-	
+
 }
