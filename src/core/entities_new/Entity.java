@@ -136,7 +136,11 @@ public class Entity implements DepthSort, Serializable {
 		}
 		
 		if(render()) {
-			render.animate(1f);
+			if(isWalkingBackwards()) {
+				render.animate(-1f);
+			} else {
+				render.animate(1f);
+			}
 		}
 		
 		stateManager.resolveState();
@@ -261,6 +265,17 @@ public class Entity implements DepthSort, Serializable {
 
 	public void setFixDirection(boolean fixDirection) {
 		this.fixDirection = fixDirection;
+	}
+	
+	public boolean isWalkingBackwards() {
+		if(isFixDirection() && getBody().getLinearVelocity().x != 0 && render()) {
+			if(render.isFlipped()) {
+				return getBody().getLinearVelocity().x > 0;
+			}
+			return getBody().getLinearVelocity().x < 0;
+		}
+		
+		return false;
 	}
 	
 	public void fireEvent(EntityEvent e) {

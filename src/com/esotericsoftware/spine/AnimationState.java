@@ -61,8 +61,10 @@ public class AnimationState {
 			if (current == null) continue;
 
 			current.time += delta * current.timeScale;
+			
 			if (current.previous != null) {
-				float previousDelta = delta * current.previous.timeScale;
+				// Delta must be absolute value to ensure reverse animations work
+				float previousDelta = Math.abs(delta) * current.previous.timeScale;
 				current.previous.time += previousDelta;
 				current.mixTime += previousDelta;
 			}
@@ -89,17 +91,18 @@ public class AnimationState {
 			//events.size = 0;
 			events.clear();
 
-			float time = current.time;
+			float time = current.time < 0 ? (current.time % current.endTime) + current.endTime : current.time;
 			float lastTime = current.lastTime;
 			float endTime = current.endTime;
 			boolean loop = current.loop;
 			if (!loop && time > endTime) time = endTime;
 
 			TrackEntry previous = current.previous;
-			if (previous == null)
+			if (previous == null) {
 				current.animation.mix(skeleton, lastTime, time, loop, events, current.mix);
-			else {
-				float previousTime = previous.time;
+			} else {
+				float previousTime = previous.time < 0 ? (previous.time % previous.endTime) + previous.endTime :
+					previous.time;//previous.time;
 				if (!previous.loop && previousTime > previous.endTime) previousTime = previous.endTime;
 				previous.animation.apply(skeleton, previousTime, previousTime, previous.loop, null);
 
@@ -127,7 +130,7 @@ public class AnimationState {
 					listeners.get(ii).complete(i, count);
 			}
 
-			current.lastTime = current.time;
+			current.lastTime = current.time < 0 ? (current.time % current.endTime) + current.endTime : current.time;//current.time;
 		}
 	}
 

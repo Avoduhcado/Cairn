@@ -77,8 +77,8 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			f.getFilterData().categoryBits = 0;
 		}
 		dad.getZBody().setZ(player.getBody().getPosition().y);
-		addEntity(dad);
-		ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
+		//addEntity(dad);
+		//ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
 		
 		//Entity shp = new Entity("Shepherd", 900, 455, this);
 		//((SpineRender) shp.getRender()).getSkeleton().findSlot("CROOK").setAttachment(null);
@@ -89,13 +89,13 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		collector.getBody().setLinearDamping(1f);
 		collector.getZBody().setGroundZ(455);
 		collector.addCombatListener(CombatLoader.plainCombatant());
-		addEntity(collector);
+		//addEntity(collector);
 		
 		Entity light = new Entity("Hanging Light", 690, 185, this);
 		//light.getBody().setType(BodyType.STATIC);
 		light.getBody().getFixtureList().getFilterData().categoryBits = 0;
-		addEntity(light);
-		ShadowMap.get().addIllumination(light, null, 225f);
+		//addEntity(light);
+		//ShadowMap.get().addIllumination(light, null, 225f);
 		
 		/*Entity wall = new Entity(null, 0, 300, this);
 		{
@@ -207,7 +207,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			entities.get(i).draw();
 		}
 		
-		ShadowMap.get().drawIllumination();
+		//ShadowMap.get().drawIllumination();
 	}
 
 	@Override

@@ -54,6 +54,7 @@ public class PlayerController implements Controllable {
 		} else if(Keybinds.ATTACK.clicked()) {
 			attack();
 		} else if(Keybinds.DEFEND.clicked()) {
+			player.setFixDirection(true);
 			//defend();
 		} else if(Keybinds.SLOT1.clicked()) {
 			changeWeapon();
@@ -61,9 +62,6 @@ public class PlayerController implements Controllable {
 			jump(new Vec2(0, -6f));
 		}
 		
-		if(Keybinds.DEFEND.press()) {
-			player.setFixDirection(true);
-		}
 		if(Keybinds.DEFEND.released()) {
 			player.setFixDirection(false);
 		}
