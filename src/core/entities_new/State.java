@@ -1,7 +1,7 @@
 package core.entities_new;
 
 public enum State {
-
+	
 	IDLE ("Idle", true),
 	WALK ("Walk", true),
 	RUN ("Run", true), 
@@ -13,6 +13,7 @@ public enum State {
 	DEFEND ("Defend", false), 
 	HIT ("Hit", false),
 	CHANGE_WEAPON ("ChangeWeapon", false);
+	
 	
 	public String animation;
 	public boolean loop;
@@ -32,7 +33,7 @@ public enum State {
 	 * @return Whether quick-stepping, attacking, or defending
 	 */
 	public boolean isActing() {
-		return this == QUICKSTEP || this == ATTACK || this == DEFEND;
+		return this == QUICKSTEP || this == ATTACK;
 	}
 	
 	public String getAnimation() {

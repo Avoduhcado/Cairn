@@ -55,7 +55,7 @@ public class PlayerController implements Controllable {
 			attack();
 		} else if(Keybinds.DEFEND.clicked()) {
 			player.setFixDirection(true);
-			//defend();
+			defend(false);
 		} else if(Keybinds.SLOT1.clicked()) {
 			changeWeapon();
 		} else if(Keybinds.SLOT2.clicked()) {
@@ -64,6 +64,7 @@ public class PlayerController implements Controllable {
 		
 		if(Keybinds.DEFEND.released()) {
 			player.setFixDirection(false);
+			defend(true);
 		}
 		
 		if(Keybinds.CONTROL.clicked()) {
@@ -204,20 +205,12 @@ public class PlayerController implements Controllable {
 		}*/
 	}
 	
-	private void defend() {
-		setActionQueue(new ActionEvent(State.DEFEND, player.getState()) {
-			@Override
-			public void act() {
-				player.fireEvent(new StateChangeEvent(State.DEFEND));
-
-				/*player.setSubEntity(new Entity("Left Arm", player.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
-						(player.getBody().getPosition().y * Stage_new.SCALE_FACTOR) - 15f, player.getContainer()));
-				player.getSubEntity().changeState(CharacterState.DEFEND);
-				player.getSubEntity().getRender().setFlipped(player.getRender().isFlipped());
-
-				player.getContainer().addEntity(player.getSubEntity());*/
-			}
-		});
+	private void defend(boolean release) {
+		player.getContainer().getEntities().stream()
+			.filter(e -> e.getController() instanceof FollowController 
+					&& ((FollowController) e.getController()).getLeader() == player)
+			.map(e -> (FollowController) e.getController())
+			.forEach(e -> e.fireEvent(new ActionEvent(State.DEFEND, release ? State.IDLE : State.DEFEND)));
 	}
 
 	private void changeWeapon() {

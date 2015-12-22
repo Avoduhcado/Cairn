@@ -268,7 +268,7 @@ public class Entity implements DepthSort, Serializable {
 	}
 	
 	public boolean isWalkingBackwards() {
-		if(isFixDirection() && getBody().getLinearVelocity().x != 0 && render()) {
+		if(isFixDirection() && getBody().getLinearVelocity().x != 0 && getState() == State.WALK && render()) {
 			if(render.isFlipped()) {
 				return getBody().getLinearVelocity().x > 0;
 			}

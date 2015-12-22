@@ -39,6 +39,7 @@ public class FollowController implements Controllable {
 				//this.follower.changeStateForced(State.ATTACK);
 				break;
 			case DEFEND:
+				actionQueue = defend(e);
 				//this.follower.changeStateForced(State.DEFEND);
 				break;
 			case QUICKSTEP:
@@ -86,7 +87,7 @@ public class FollowController implements Controllable {
 				follower.getRender().setFlipped(leader.getRender().isFlipped());
 			}
 		//}
-			
+		
 		if(actionQueue != null && !follower.getState().isActing()) {
 			actionQueue.act();
 			actionQueue = null;
@@ -102,7 +103,7 @@ public class FollowController implements Controllable {
 			follower.fireEvent(new StateChangeEvent(speedMod > 1 ? State.RUN : State.WALK));
 		}
 		
-		if(follower.getBody().getLinearVelocity().x != 0 && !follower.isFixDirection() && follower.getRender() != null) {
+		if(follower.getBody().getLinearVelocity().x != 0 && !follower.isFixDirection() && follower.render()) {
 			follower.getRender().setFlipped(follower.getBody().getLinearVelocity().x < 0);
 		}
 	}
@@ -152,7 +153,27 @@ public class FollowController implements Controllable {
 		
 		return ae;
 	}
-	
+
+	private ActionEvent defend(ActionEvent action) {
+		ActionEvent ae = new ActionEvent(action.getState(), action.getPrevState()) {
+			@Override
+			public void act() {
+				System.out.println(getPrevState());
+				if(getPrevState() == State.DEFEND) {
+					follower.fireEvent(new StateChangeEvent(State.DEFEND));
+					follower.getRender().setFlipped(leader.getRender().isFlipped());
+					follower.setFixDirection(true);
+				} else {
+					System.out.println("SDFSDF");
+					follower.fireEvent(new StateChangeEvent(State.IDLE));
+					follower.setFixDirection(false);
+				}
+			}
+		};
+		
+		return ae;
+	}
+
 	public Entity getFollower() {
 		return follower;
 	}

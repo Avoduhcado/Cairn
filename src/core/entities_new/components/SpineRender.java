@@ -207,9 +207,12 @@ public class SpineRender implements Renderable, Serializable {
 			@Override
 			public void complete(int trackIndex, int totalLoops) {
 				switch(entity.getState()) {
-				case ATTACK:
 				case DEFEND:
-					//entity.setSubEntity(null);
+					if(animState.getCurrent(trackIndex).getAnimation().getName().matches(State.DEFEND.animation)) {
+						animState.setAnimation(trackIndex, "Defending", true);
+					}
+					break;
+				case ATTACK:
 				case QUICKSTEP:
 					//entity.getBody().setLinearDamping(15f);
 				case LAND:
