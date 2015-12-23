@@ -149,4 +149,10 @@ public class GridRender implements Renderable, Serializable {
 		return false;
 	}
 
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -67,15 +67,15 @@ public class PlainRender implements Renderable, Serializable {
 	@Override
 	public void setTransform(int index) {
 		Body body = entity.getBody();
-		PolygonShape shape = ((PolygonShape) body.getFixtureList().getShape());
+		//PolygonShape shape = ((PolygonShape) body.getFixtureList().getShape());
 		
-		transform.x = (body.getPosition().x + shape.getVertex(0).x) * Stage_new.SCALE_FACTOR;
-		transform.y = (body.getPosition().y + shape.getVertex(0).y) * Stage_new.SCALE_FACTOR;
+		transform.x = (body.getPosition().x) * Stage_new.SCALE_FACTOR;
+		transform.y = (body.getPosition().y) * Stage_new.SCALE_FACTOR;
 		transform.flipX = isFlipped();
 		transform.scaleY = 1f;
 		transform.scaleX = 1f;
 		transform.centerRotate = true;
-		transform.rotation = (float) body.getAngle();
+		transform.rotation = (float) Math.toDegrees(body.getAngle());
 		transform.color = new Vector4f(1f, 1f, 1f, 1f);
 	}
 
@@ -112,6 +112,12 @@ public class PlainRender implements Renderable, Serializable {
 	public boolean hasAnimation(String animation) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

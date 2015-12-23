@@ -1,5 +1,8 @@
 package core.scene;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jbox2d.callbacks.ContactImpulse;
 import org.jbox2d.callbacks.ContactListener;
 import org.jbox2d.collision.Manifold;
@@ -8,6 +11,7 @@ import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.contacts.Contact;
 
 import core.entities_new.Entity;
+import core.entities_new.EntityData;
 import core.entities_new.event.CombatEvent;
 import core.entities_new.utils.SensorData;
 import core.setups.Stage_new;
@@ -20,22 +24,29 @@ public class BoneWorld implements ContactListener {
 	// TODO Enable multiple types of sensors
 	private SensorData sensor = null;
 	private Entity entity = null;
+	
+	public Set<Contact> weaponVsBone = new HashSet<Contact>();
 
 	@Override
 	public void beginContact(Contact contact) {
 		if(contact.getFixtureA().isSensor() && contact.getFixtureB().isSensor()) {
 			if(contactIsWeaponVsBone(contact)) {
+			//if(contactIsBoneVsBone(contact)) {
 				Vec2 aPosition = contact.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR);
 				Vec2 bPosition = contact.getFixtureB().getBody().getPosition().mul(Stage_new.SCALE_FACTOR);
 				Vec2 collisionPoint = new Vec2(aPosition.x - ((aPosition.x - bPosition.x) / 2f),
 						aPosition.y + ((aPosition.y - bPosition.y) / 2f));
 				
 				//System.out.println("DICKS");
-				/*container.queueEntity(new EntityData("Skelebones",
-						collisionPoint.x,
-						collisionPoint.y,
-						container, contact));*/
-				//weaponVsBone.add(contact);
+				
+				for(int x = 0; x<2; x++) {
+					container.queueEntity(new EntityData("Bone Shards",
+							collisionPoint.x + (int) (Math.random() * 15f),
+							collisionPoint.y - (int) (Math.random() * 15f),
+							container, contact));
+				}
+				//System.out.println("Added " + contact);
+				weaponVsBone.add(contact);
 			} else if(contactIsWeaponVsGround(contact)) {
 				//weaponVsGround.add(contact);
 			}
@@ -70,7 +81,9 @@ public class BoneWorld implements ContactListener {
 	public void endContact(Contact contact) {
 		if(contact.getFixtureA().isSensor() && contact.getFixtureB().isSensor()) {
 			if(contactIsWeaponVsBone(contact)) {
-				//weaponVsBone.remove(contact);
+			//if(contactIsBoneVsBone(contact)) {
+				//System.out.println("Removed " + contact);
+				weaponVsBone.remove(contact);
 			} else if(contactIsWeaponVsGround(contact)) {
 				//weaponVsGround.remove(contact);
 			}
@@ -136,6 +149,18 @@ public class BoneWorld implements ContactListener {
 	private boolean fixtureIsWeapon(Fixture fixture) {
 		return fixture.getBody().getUserData() != null &&
 				((SensorData) fixture.getBody().getUserData()).getType() == SensorData.WEAPON;
+	}
+	
+	private boolean contactIsBoneVsBone(Contact contact) {
+		Fixture fA = contact.getFixtureA();
+		Fixture fB = contact.getFixtureB();
+		if(fixtureIsBone(fA) && fixtureIsBone(fB)) {
+			return true;
+		}
+		/*if(fixtureIsWeapon(fB) && fixtureIsBone(fA)) {
+			return true;
+		}*/
+		return false;
 	}
 	
 	private boolean contactIsWeaponVsBone(Contact contact) {

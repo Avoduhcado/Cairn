@@ -1,7 +1,11 @@
 package core.setups;
 
 import java.awt.Point;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.jbox2d.collision.WorldManifold;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -10,6 +14,7 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.contacts.Contact;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
@@ -21,42 +26,44 @@ import core.entities_new.utils.CombatLoader;
 import core.entities_new.utils.SensorData;
 import core.inventory.Equipment;
 import core.inventory.Weapon;
+import core.render.DrawUtils;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
 public class Stage_new extends GameSetup implements WorldContainer {
-	
+
 	private ArrayList<Entity> background = new ArrayList<Entity>();
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	private World world = new World(new Vec2(0, 15f));
-	
+
+	private BoneWorld boneWorld;
 	private ArrayList<EntityData> queuedEntities = new ArrayList<EntityData>();
-	
+
 	public static final float SCALE_FACTOR = 30f;
-		
+
 	public Stage_new() {
 		Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
-		
+
 		ShadowMap.init();
-		
-		BoneWorld boneWorld = new BoneWorld();
+
+		boneWorld = new BoneWorld();
 		boneWorld.setContainer(this);
 		world.setContactListener(boneWorld);
-		
+
 		Entity dream = new Entity("Test Land", 0, 0, this);
 		//Entity dream = new Entity("Ruined Sepulcher", 0, 0, this);
 		dream.getBody().setType(BodyType.STATIC);
 		dream.getBody().getFixtureList().getFilterData().categoryBits = 0;
 		// TODO addBackground function
 		background.add(dream);
-		
+
 		Camera.get().setFillColor(new Vector4f(0, 0, 0, 1));
-		
+
 		Entity player = new Entity("Skelebones", 495, 450, this);
 		player.setController(new PlayerController(player));
 		addEntity(player);
-		
+
 		Entity dad = new Entity("Skull",
 				player.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
 				player.getBody().getPosition().y * Stage_new.SCALE_FACTOR,
@@ -79,24 +86,24 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		dad.getZBody().setZ(player.getBody().getPosition().y);
 		addEntity(dad);
 		ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
-		
+
 		//Entity shp = new Entity("Shepherd", 900, 455, this);
 		//((SpineRender) shp.getRender()).getSkeleton().findSlot("CROOK").setAttachment(null);
 		//addEntity(shp);
-		
+
 		Entity collector = new Entity("Collector", 775, -455, this);
 		collector.getBody().setGravityScale(2f);
 		collector.getBody().setLinearDamping(1f);
 		collector.getZBody().setGroundZ(455);
 		collector.addCombatListener(CombatLoader.plainCombatant());
 		addEntity(collector);
-		
+
 		Entity light = new Entity("Hanging Light", 690, 185, this);
 		//light.getBody().setType(BodyType.STATIC);
 		light.getBody().getFixtureList().getFilterData().categoryBits = 0;
 		addEntity(light);
 		ShadowMap.get().addIllumination(light, null, 225f);
-		
+
 		/*Entity wall = new Entity(null, 0, 300, this);
 		{
 			BodyDef bodyDef = new BodyDef();
@@ -109,7 +116,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			FixtureDef boxFixture = new FixtureDef();
 			boxFixture.density = 1f;
 			boxFixture.shape = bodyShape;
-			
+
 			Body body = world.createBody(bodyDef);
 			body.createFixture(boxFixture);
 			wall.setBody(body);
@@ -127,13 +134,13 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			FixtureDef boxFixture = new FixtureDef();
 			boxFixture.density = 1f;
 			boxFixture.shape = bodyShape;
-			
+
 			Body body = world.createBody(bodyDef);
 			body.createFixture(boxFixture);
 			wall.setBody(body);
 		}
 		addEntity(wall);*/
-		
+
 		Entity ground = null;
 		{
 			BodyDef bodyDef = new BodyDef();
@@ -147,14 +154,14 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			boxFixture.density = 1f;
 			boxFixture.shape = bodyShape;
 			boxFixture.isSensor = true;
-			
+
 			Body body = world.createBody(bodyDef);
 			body.createFixture(boxFixture);
 			ground = new Entity(null, body, this);
 			ground.getBody().setUserData(new SensorData(ground, SensorData.GROUND));
 		}
 		addEntity(ground);
-		
+
 		{
 			BodyDef bodyDef = new BodyDef();
 			bodyDef.position.set(100f / Stage_new.SCALE_FACTOR, 550f / Stage_new.SCALE_FACTOR);
@@ -167,28 +174,28 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			boxFixture.density = 1f;
 			boxFixture.shape = bodyShape;
 			boxFixture.isSensor = true;
-			
+
 			Body body = world.createBody(bodyDef);
 			body.createFixture(boxFixture);
 			ground = new Entity(null, body, this);
 			ground.getBody().setUserData(new SensorData(ground, SensorData.GROUND));
 		}
 		addEntity(ground);
-		
+
 		Camera.get().setFocus(player);
 	}
 
 	@Override
 	public void update() {
 		world.step(1 / 60f, 8, 3);
-		
+
 		if(!queuedEntities.isEmpty()) {
 			for(EntityData e : queuedEntities) {
 				entities.add(e.createEntity());
 			}
 			queuedEntities.clear();
 		}
-		
+
 		for(int i = 0; i<entities.size(); i++) {
 			entities.get(i).update();
 		}
@@ -199,14 +206,19 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		for(int i = 0; i<background.size(); i++) {
 			background.get(i).draw();
 		}
-		
+
 		ShadowMap.get().drawShadows(entities);
-		
+
 		entities.sort((o1, o2) -> (int) (o1.getZBody().getScreenY() - o2.getZBody().getScreenY()));
 		for(int i = 0; i<entities.size(); i++) {
 			entities.get(i).draw();
 		}
-		
+
+		/*boneWorld.weaponVsBone.stream()
+		.forEach(e -> DrawUtils.fillRect(1, 0, 1, 1,
+				new Rectangle2D.Double(e.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR).x,
+						e.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR).y, 15, 15)));*/
+
 		ShadowMap.get().drawIllumination();
 	}
 
@@ -241,7 +253,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	public boolean removeEntity(Entity entity) {
 		return entities.remove(entity);
 	}
-	
+
 	public void addPlayer(Entity player) {
 		entities.add(player);
 		// TODO Link assorted player controllers

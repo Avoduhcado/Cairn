@@ -19,6 +19,7 @@ import core.Theater;
 import core.entities_new.components.Controllable;
 import core.entities_new.components.PlainStateManager;
 import core.entities_new.components.Renderable;
+import core.entities_new.components.SpineRender;
 import core.entities_new.components.StateManager;
 import core.entities_new.components.ZBody;
 import core.entities_new.event.ActionEvent;
@@ -143,8 +144,6 @@ public class Entity implements DepthSort, Serializable {
 			}
 		}
 		
-		stateManager.resolveState();
-		
 		if(getBody().getGravityScale() > 0 && zBody.getGroundZ() != 0) {
 			zBody.setZ(zBody.getGroundZ() - (getBody().getPosition().y * Stage_new.SCALE_FACTOR));
 			if(getBody().getLinearVelocity().y > 0 && getState() == State.JUMPING) {
@@ -169,6 +168,14 @@ public class Entity implements DepthSort, Serializable {
 				//body.getFixtureList().getFilterData().groupIndex = 0;
 			}
 		}
+		
+		stateManager.resolveState();
+	}
+	
+	public void destroy() {
+		render.destroy();
+		container.getWorld().destroyBody(getBody());
+		container.removeEntity(this);
 	}
 	
 	public String getName() {

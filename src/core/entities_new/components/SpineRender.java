@@ -154,6 +154,7 @@ public class SpineRender implements Renderable, Serializable {
 		body.createFixture(boxFixture);
 		body.setGravityScale(0);
 		body.setUserData(new SensorData(entity, SensorData.BODY));
+		body.setSleepingAllowed(false);
 		attachment.setBody(body);
 	}
 
@@ -187,7 +188,7 @@ public class SpineRender implements Renderable, Serializable {
 						}
 						((SensorData) attachment.getBody().getUserData()).setType(event.getInt() == 1 ?
 								SensorData.WEAPON : SensorData.BODY);
-						attachment.getBody().getWorld().setAllowSleep(event.getInt() == 1 ? false : true);
+						//attachment.getBody().getWorld().setAllowSleep(event.getInt() == 1 ? false : true);
 						//System.out.println(attachment.getBody().getUserData() + ", " + attachment.getName());
 					}
 					break;
@@ -353,16 +354,6 @@ public class SpineRender implements Renderable, Serializable {
 		return sprite;
 	}
 
-	public void destroyBodies() {
-		for(Slot slot : skeleton.getSlots()) {
-			if (!(slot.getAttachment() instanceof Box2dAttachment)) continue;
-			Box2dAttachment attachment = (Box2dAttachment) slot.getAttachment();
-			if (attachment.getBody() == null) continue;
-			
-			entity.getContainer().getWorld().destroyBody(attachment.getBody());
-		}
-	}
-	
 	public Skeleton getSkeleton() {
 		return skeleton;
 	}
@@ -376,6 +367,17 @@ public class SpineRender implements Renderable, Serializable {
 		buildBody(getSkeleton().findSlot(slotName), entity.getContainer().getWorld());
 	}
 
+	@Override
+	public void destroy() {
+		for(Slot slot : skeleton.getSlots()) {
+			if (!(slot.getAttachment() instanceof Box2dAttachment)) continue;
+			Box2dAttachment attachment = (Box2dAttachment) slot.getAttachment();
+			if (attachment.getBody() == null) continue;
+			
+			entity.getContainer().getWorld().destroyBody(attachment.getBody());
+		}
+	}
+	
 	@Override
 	public void fireEvent(EntityEvent e) {
 		if(e instanceof StateChangeEvent) {

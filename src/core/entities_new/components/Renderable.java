@@ -19,6 +19,7 @@ public interface Renderable {
 	public String getAnimation();
 	public boolean hasAnimation(String animation);
 	
+	public void destroy();
 	public void fireEvent(EntityEvent e);
 		
 }

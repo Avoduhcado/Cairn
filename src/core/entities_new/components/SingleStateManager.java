@@ -28,7 +28,7 @@ public class SingleStateManager implements StateManager {
 
 	@Override
 	public void changeStateForced(State state) {
-		entity.getContainer().removeEntity(entity);
+		entity.destroy();
 	}
 
 	@Override
