@@ -9,6 +9,8 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.lwjgl.util.vector.Vector2f;
 
+import com.esotericsoftware.spine.Slot;
+
 import core.entities_new.Entity;
 import core.entities_new.State;
 import core.entities_new.event.StateChangeEvent;
@@ -26,6 +28,32 @@ public class ZBody implements Geometric {
 	public ZBody(Body body, Entity entity) {
 		this.body = body;
 		this.entity = entity;
+	}
+	
+	public void setWalkThrough(boolean walkthrough) {
+		body.setSleepingAllowed(walkthrough);
+		if(walkthrough) {
+			for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {
+				f.getFilterData().categoryBits = 0;
+				f.getFilterData().maskBits = 0;
+			}
+		} else {
+			for(Fixture f = body.getFixtureList(); f != null; f = f.getNext()) {
+				if(f.getUserData() != null && f.getUserData() instanceof SensorData) {
+					switch(((SensorData) f.getUserData()).getType()) {
+					case 1:
+					case 2:
+						f.getFilterData().categoryBits = 0b0001;
+						break;
+					case 3:
+						f.getFilterData().categoryBits = 0b0011;
+						break;
+					}
+				} else {
+					System.out.println(entity + " " + f + " " + f.getUserData());
+				}
+			}
+		}
 	}
 	
 	public void stepOnGround(Entity ground) {
@@ -128,7 +156,7 @@ public class ZBody implements Geometric {
 	public void setBody(Body body) {
 		this.body = body;
 	}
-
+	
 	public float getZ() {
 		return z;
 	}

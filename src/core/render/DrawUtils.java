@@ -8,6 +8,7 @@ import java.awt.geom.Rectangle2D;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.lwjgl.opengl.GL11;
@@ -363,6 +364,22 @@ public class DrawUtils {
 		
 		// Reset color
 		reset();
+	}
+
+	public static void drawBox2DShape(Body body, Shape shape) {
+		switch(shape.getType()) {
+		case POLYGON:
+			drawBox2DPoly(body, (PolygonShape) shape);
+			break;
+		case CIRCLE:
+			drawBox2DCircle(body, (CircleShape) shape);
+			break;
+		case EDGE:
+			//drawBox2DEdge(body, (EdgeShape) shape);
+			break;
+		case CHAIN:
+			break;
+		}
 	}
 	
 	/**

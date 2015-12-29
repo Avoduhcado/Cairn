@@ -33,9 +33,7 @@ package com.esotericsoftware.spine.attachments;
 abstract public class Attachment {
 	final String name;
 	
-	/* Added from gdx.graphics.g2d.Batch
-	 * for some inane reason we can't just use a real structure or plain numbers
-	 */
+	/** Added from gdx.graphics.g2d.Batch */
 	static public final int X1 = 0;
 	static public final int Y1 = 1;
 	static public final int C1 = 2;

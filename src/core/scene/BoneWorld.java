@@ -6,6 +6,7 @@ import java.util.Set;
 import org.jbox2d.callbacks.ContactImpulse;
 import org.jbox2d.callbacks.ContactListener;
 import org.jbox2d.collision.Manifold;
+import org.jbox2d.collision.WorldManifold;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.contacts.Contact;
@@ -29,28 +30,10 @@ public class BoneWorld implements ContactListener {
 
 	@Override
 	public void beginContact(Contact contact) {
-		if(contact.getFixtureA().isSensor() && contact.getFixtureB().isSensor()) {
-			if(contactIsWeaponVsBone(contact)) {
-			//if(contactIsBoneVsBone(contact)) {
-				Vec2 aPosition = contact.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR);
-				Vec2 bPosition = contact.getFixtureB().getBody().getPosition().mul(Stage_new.SCALE_FACTOR);
-				Vec2 collisionPoint = new Vec2(aPosition.x - ((aPosition.x - bPosition.x) / 2f),
-						aPosition.y + ((aPosition.y - bPosition.y) / 2f));
-				
-				//System.out.println("DICKS");
-				
-				for(int x = 0; x<2; x++) {
-					container.queueEntity(new EntityData("Bone Shards",
-							collisionPoint.x + (int) (Math.random() * 15f),
-							collisionPoint.y - (int) (Math.random() * 15f),
-							container, contact));
-				}
-				//System.out.println("Added " + contact);
-				weaponVsBone.add(contact);
-			} else if(contactIsWeaponVsGround(contact)) {
-				//weaponVsGround.add(contact);
-			}
-		}
+		System.out.println(contact.getFixtureA().getUserData() + 
+				"(" + contact.getFixtureA().getFilterData().categoryBits + ", " + contact.getFixtureA().getFilterData().maskBits + ")" +
+				" vs. " + contact.getFixtureB().getUserData() + 
+				"(" + contact.getFixtureB().getFilterData().categoryBits + ", " + contact.getFixtureB().getFilterData().maskBits + ")");
 		
 		if(sortSensors(contact)) {
 			switch(sensor.getType()) {
@@ -64,7 +47,6 @@ public class BoneWorld implements ContactListener {
 			case SensorData.WEAPON:
 				System.out.println("Weapon colliding: " + sensor.getEntity() + ", " + entity);
 				// TODO Hitting ground/wall?
-				//if(sensor.getEntity() != entity && sensor.getEntity() != entity.getSubEntity()) {
 				if(sensor.getEntity() != entity) {
 					System.out.println("Hit boys!!! " + sensor.getEntity() + ", " + entity);
 					// TODO Pass in proper weapons, maybe include slots that were hit?
@@ -75,11 +57,32 @@ public class BoneWorld implements ContactListener {
 				break;
 			}
 		}
+		/*if(contact.getFixtureA().isSensor() && contact.getFixtureB().isSensor()) {
+			if(contactIsWeaponVsBone(contact)) {
+			//if(contactIsBoneVsBone(contact)) {
+				Vec2 aPosition = contact.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR);
+				Vec2 bPosition = contact.getFixtureB().getBody().getPosition().mul(Stage_new.SCALE_FACTOR);
+				Vec2 collisionPoint = new Vec2(aPosition.x - ((aPosition.x - bPosition.x) / 2f),
+						aPosition.y + ((aPosition.y - bPosition.y) / 2f));
+				
+				//System.out.println("DICKS");
+				
+				container.queueEntity(new EntityData("Bone Shards",
+						collisionPoint.x + (int) (Math.random() * 15f),
+						collisionPoint.y - (int) (Math.random() * 15f),
+						container, contact));
+				//System.out.println("Added " + contact);
+				weaponVsBone.add(contact);
+			} else if(contactIsWeaponVsGround(contact)) {
+				//weaponVsGround.add(contact);
+			}
+		}*/
 	}
 
 	@Override
 	public void endContact(Contact contact) {
-		if(contact.getFixtureA().isSensor() && contact.getFixtureB().isSensor()) {
+		System.out.println("Ended: " + contact.getFixtureA().getUserData() + " vs. " + contact.getFixtureB().getUserData());
+		/*if(contact.getFixtureA().isSensor() && contact.getFixtureB().isSensor()) {
 			if(contactIsWeaponVsBone(contact)) {
 			//if(contactIsBoneVsBone(contact)) {
 				//System.out.println("Removed " + contact);
@@ -102,7 +105,7 @@ public class BoneWorld implements ContactListener {
 			default:
 				break;
 			}
-		}
+		}*/
 	}
 
 	@Override
@@ -126,11 +129,11 @@ public class BoneWorld implements ContactListener {
 		}
 				
 		if(sensorA) {
-			sensor = (SensorData) fixtureA.getBody().getUserData();
-			entity = (Entity) fixtureB.getBody().getUserData();
+			sensor = (SensorData) fixtureA.getUserData();
+			entity = (Entity) ((SensorData) fixtureB.getUserData()).getEntity();
 		} else {
-			sensor = (SensorData) fixtureB.getBody().getUserData();
-			entity = (Entity) fixtureA.getBody().getUserData();
+			sensor = (SensorData) fixtureB.getUserData();
+			entity = (Entity) ((SensorData) fixtureA.getUserData()).getEntity();
 		}
 		
 		return true;

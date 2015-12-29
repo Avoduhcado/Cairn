@@ -29,6 +29,7 @@ import core.entities_new.event.EntityEvent;
 import core.entities_new.event.StateChangeEvent;
 import core.entities_new.utils.DepthSort;
 import core.entities_new.utils.RenderLoader;
+import core.entities_new.utils.SensorData;
 import core.inventory.Equipment;
 import core.render.DrawUtils;
 import core.setups.Stage_new;
@@ -88,7 +89,11 @@ public class Entity implements DepthSort, Serializable {
 
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 1f;
+		boxFixture.filter.categoryBits = 0b0011;
+		boxFixture.filter.maskBits = 0b1110;
+		System.out.println(getName() + " " + boxFixture.filter.categoryBits + " " + boxFixture.filter.maskBits + " " + boxFixture.filter.groupIndex);
 		boxFixture.shape = bodyShape;
+		boxFixture.userData = new SensorData(this, "Base", SensorData.CHARACTER);
 		
 		Body body = world.createBody(bodyDef);
 		body.createFixture(boxFixture);
@@ -96,6 +101,7 @@ public class Entity implements DepthSort, Serializable {
 		body.setLinearDamping(15f);
 		body.setGravityScale(0f);
 		body.setUserData(this);
+		body.setSleepingAllowed(false);
 		setZBody(new ZBody(body, this));
 	}
 	
@@ -105,23 +111,11 @@ public class Entity implements DepthSort, Serializable {
 		}
 		
 		if(Theater.get().debug) {
-			for(Fixture f = zBody.getBody().getFixtureList(); f != null; f = f.getNext()) {
-				switch(f.getShape().m_type) {
-				case CIRCLE:
-					DrawUtils.setColor(new Vector3f(0f, 0f, 0.6f));
-					DrawUtils.drawBox2DCircle(zBody.getBody(), (CircleShape) f.m_shape);
-					break;
-				case EDGE:
-					DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
-					DrawUtils.drawBox2DEdge(zBody.getBody().getPosition(), (EdgeShape) f.m_shape);
-					break;
-				case POLYGON:
-					DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
-					DrawUtils.drawBox2DPoly(zBody.getBody(), (PolygonShape) f.m_shape);
-					break;
-				case CHAIN:
-					break;
-				}
+			if(render()) {
+				render.debugDraw();
+			} else {
+				DrawUtils.setColor(new Vector3f(1, 0, 0));
+				DrawUtils.drawBox2DShape(getBody(), getBody().getFixtureList().getShape());
 			}
 		}
 	}
@@ -164,7 +158,7 @@ public class Entity implements DepthSort, Serializable {
 				getBody().setGravityScale(0);
 				getBody().setLinearDamping(15f);
 				getBody().setLinearVelocity(new Vec2());
-				getBody().getFixtureList().getFilterData().categoryBits = 1;
+				//getBody().getFixtureList().getFilterData().categoryBits = 1;
 				//body.getFixtureList().getFilterData().groupIndex = 0;
 			}
 		}
@@ -173,7 +167,6 @@ public class Entity implements DepthSort, Serializable {
 	}
 	
 	public void destroy() {
-		render.destroy();
 		container.getWorld().destroyBody(getBody());
 		container.removeEntity(this);
 	}

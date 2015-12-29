@@ -2,11 +2,15 @@ package core.entities_new.components;
 
 import java.io.Serializable;
 
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Filter;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector2f;
@@ -17,7 +21,6 @@ import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Bone;
 import com.esotericsoftware.spine.Event;
-import com.esotericsoftware.spine.MathUtils;
 import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonJson;
 import com.esotericsoftware.spine.Skin;
@@ -56,7 +59,7 @@ public class SpineRender implements Renderable, Serializable {
 	private transient Skeleton skeleton;
 	private transient AnimationState animState;
 	private transient AnimationStateData animStateData;
-
+	
 	private Entity entity;
 
 	private Transform transform;
@@ -77,7 +80,7 @@ public class SpineRender implements Renderable, Serializable {
 		
 		this.sprite = ref;
 		buildSkeleton(ref);
-		buildBodies(entity.getContainer().getWorld());
+		buildBodies();
 		buildAnimationEvents();
 		this.transform = new Transform();
 	}
@@ -114,48 +117,41 @@ public class SpineRender implements Renderable, Serializable {
 		animState.setAnimation(0, "Idle", true);
 	}
 
-	private void buildBodies(World world) {
+	private void buildBodies() {
 		for(Slot s : skeleton.drawOrder) {
 			if(s.getAttachment() != null && s.getAttachment() instanceof Box2dAttachment) {
-				buildBody(s, world);
+				buildFixture(s, entity.getBody());
 			}
 		}
 	}
 	
-	private void buildBody(Slot slot, World world) {
+	private void buildFixture(Slot slot, Body body) {
 		Box2dAttachment attachment = (Box2dAttachment) slot.getAttachment();
 		attachment.updateWorldVertices(slot, false);
-
-		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(attachment.getWorldVertices()[Attachment.X3] / Stage_new.SCALE_FACTOR,
-				attachment.getWorldVertices()[Attachment.Y3] / Stage_new.SCALE_FACTOR);
-		bodyDef.angle = (float) Math.toRadians(-slot.getBone().getWorldRotation() - attachment.getRotation());
-		bodyDef.type = BodyType.DYNAMIC;
-
+		float[] attVerts = attachment.getWorldVertices();
+		
 		PolygonShape bodyShape = new PolygonShape();
 		Vec2[] verts = new Vec2[] {
-				new Vec2(attachment.getWorldVertices()[Attachment.U4] / Stage_new.SCALE_FACTOR, attachment.getWorldVertices()[Attachment.V4] / Stage_new.SCALE_FACTOR),
-				new Vec2(attachment.getWorldVertices()[Attachment.U1] / Stage_new.SCALE_FACTOR, attachment.getWorldVertices()[Attachment.V1] / Stage_new.SCALE_FACTOR),
-				new Vec2(attachment.getWorldVertices()[Attachment.U2] / Stage_new.SCALE_FACTOR, attachment.getWorldVertices()[Attachment.V2] / Stage_new.SCALE_FACTOR),
-				new Vec2(attachment.getWorldVertices()[Attachment.U3] / Stage_new.SCALE_FACTOR, attachment.getWorldVertices()[Attachment.V3] / Stage_new.SCALE_FACTOR),
+				new Vec2((attVerts[Attachment.X1] - skeleton.getX()) / Stage_new.SCALE_FACTOR,
+						(attVerts[Attachment.Y1] - skeleton.getY()) / Stage_new.SCALE_FACTOR),
+				new Vec2((attVerts[Attachment.X2] - skeleton.getX()) / Stage_new.SCALE_FACTOR,
+						(attVerts[Attachment.Y2] - skeleton.getY()) / Stage_new.SCALE_FACTOR),
+				new Vec2((attVerts[Attachment.X3] - skeleton.getX()) / Stage_new.SCALE_FACTOR,
+						(attVerts[Attachment.Y3] - skeleton.getY()) / Stage_new.SCALE_FACTOR),
+				new Vec2((attVerts[Attachment.X4] - skeleton.getX()) / Stage_new.SCALE_FACTOR,
+						(attVerts[Attachment.Y4] - skeleton.getY()) / Stage_new.SCALE_FACTOR)	
 		};
-		for(Vec2 v : verts) {
-			v.mulLocal(Camera.ASPECT_RATIO);
-		}
 		bodyShape.set(verts, 4);
 
 		FixtureDef boxFixture = new FixtureDef();
-		boxFixture.density = 1f;
+		boxFixture.density = 0f;
 		boxFixture.shape = bodyShape;
-		boxFixture.isSensor = true;
-		boxFixture.userData = attachment.getName();
-
-		Body body = world.createBody(bodyDef);
-		body.createFixture(boxFixture);
-		body.setGravityScale(0);
-		body.setUserData(new SensorData(entity, SensorData.BODY));
-		body.setSleepingAllowed(false);
-		attachment.setBody(body);
+		boxFixture.filter.categoryBits = 0b0001;
+		boxFixture.filter.maskBits = 0b1110;
+		boxFixture.userData = new SensorData(entity, slot.getData().getName(), SensorData.BODY);
+		//boxFixture.userData = slot;
+				
+		attachment.setFixture(body.createFixture(boxFixture));
 	}
 
 	private void buildAnimationEvents() {
@@ -186,10 +182,16 @@ public class SpineRender implements Renderable, Serializable {
 						if(attachment == null) {
 							continue;
 						}
-						((SensorData) attachment.getBody().getUserData()).setType(event.getInt() == 1 ?
-								SensorData.WEAPON : SensorData.BODY);
-						//attachment.getBody().getWorld().setAllowSleep(event.getInt() == 1 ? false : true);
-						//System.out.println(attachment.getBody().getUserData() + ", " + attachment.getName());
+						
+						if(event.getInt() == 1) {
+							attachment.getFixture().getFilterData().categoryBits = 0b0011;
+							attachment.getFixture().getFilterData().maskBits = 0xFFFF;
+							attachment.getFixture().setSensor(true);
+						} else {
+							attachment.getFixture().getFilterData().categoryBits = 0b0001;
+							attachment.getFixture().getFilterData().maskBits = 0b1110;
+							attachment.getFixture().setSensor(false);
+						}
 					}
 					break;
 				case "SFX":
@@ -238,17 +240,6 @@ public class SpineRender implements Renderable, Serializable {
 			if(attachment != null) {
 				setTransform(i);
 				SpriteList.get(sprite + "/" + attachment.getName()).draw(transform);
-
-				if(Theater.get().debug) {
-					SensorData sd = (SensorData) ((Box2dAttachment) attachment).getBody().getUserData();
-					if(sd.getType() == SensorData.WEAPON) {
-						DrawUtils.setColor(new Vector3f(0.8f, 0f, 0f));
-					} else {
-						DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
-					}
-					DrawUtils.drawBox2DPoly(((Box2dAttachment) attachment).getBody(),
-							(PolygonShape) ((Box2dAttachment) attachment).getBody().m_fixtureList.m_shape);
-				}
 			}
 		}
 	}
@@ -276,8 +267,24 @@ public class SpineRender implements Renderable, Serializable {
 
 	@Override
 	public void debugDraw() {
-		// TODO Auto-generated method stub
-
+		for(Fixture f = entity.getBody().getFixtureList(); f != null; f = f.getNext()) {
+			switch(f.getShape().m_type) {
+			case CIRCLE:
+				DrawUtils.setColor(new Vector3f(0f, 0f, 0.6f));
+				DrawUtils.drawBox2DCircle(entity.getBody(), (CircleShape) f.m_shape);
+				break;
+			case EDGE:
+				DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
+				DrawUtils.drawBox2DEdge(entity.getBody().getPosition(), (EdgeShape) f.m_shape);
+				break;
+			case POLYGON:
+				DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
+				DrawUtils.drawBox2DPoly(entity.getBody(), (PolygonShape) f.m_shape);
+				break;
+			case CHAIN:
+				break;
+			}
+		}
 	}
 
 	@Override
@@ -289,23 +296,20 @@ public class SpineRender implements Renderable, Serializable {
 				entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
 		skeleton.updateWorldTransform();
 
-		for(Slot slot : skeleton.getSlots()) {
-			if (!(slot.getAttachment() instanceof Box2dAttachment)) continue;
-			Box2dAttachment attachment = (Box2dAttachment) slot.getAttachment();
-			if (attachment.getBody() == null) continue;
+		for(Slot slot : skeleton.getDrawOrder()) {
+			if(slot.getAttachment() != null) {
+				Box2dAttachment attachment = (Box2dAttachment) slot.getAttachment();
+				Fixture f = attachment.getFixture();
+				float[] attVerts = attachment.getWorldVertices();
 
-			float rotation = -slot.getBone().getWorldRotation() - attachment.getRotation();
-			float x = attachment.getWorldVertices()[Attachment.X3];
-			float y = attachment.getWorldVertices()[Attachment.Y3];
-
-			if(skeleton.getFlipX()) {
-				x = attachment.getWorldVertices()[Attachment.X4];
-				y = attachment.getWorldVertices()[Attachment.Y4];
-				rotation = -rotation;
+				if(f.getShape() instanceof PolygonShape) {
+					PolygonShape shape = (PolygonShape) f.getShape();
+					for(int i = 0; i < shape.getVertexCount(); i++) {
+						shape.getVertex(i).set((attVerts[Attachment.X2 * i] - skeleton.getX()) / Stage_new.SCALE_FACTOR,
+								(attVerts[(Attachment.X2 * i) + 1] - skeleton.getY()) / Stage_new.SCALE_FACTOR);
+					}
+				}
 			}
-
-			attachment.getBody().setTransform(new Vec2(x / Stage_new.SCALE_FACTOR, y / Stage_new.SCALE_FACTOR),
-					rotation * MathUtils.degRad);
 		}
 	}
 	
@@ -364,18 +368,13 @@ public class SpineRender implements Renderable, Serializable {
 	
 	public void setAttachment(String slotName, String attachmentName) {
 		getSkeleton().setAttachment(slotName, attachmentName);
-		buildBody(getSkeleton().findSlot(slotName), entity.getContainer().getWorld());
-	}
-
-	@Override
-	public void destroy() {
-		for(Slot slot : skeleton.getSlots()) {
-			if (!(slot.getAttachment() instanceof Box2dAttachment)) continue;
-			Box2dAttachment attachment = (Box2dAttachment) slot.getAttachment();
-			if (attachment.getBody() == null) continue;
-			
-			entity.getContainer().getWorld().destroyBody(attachment.getBody());
-		}
+		/*if(skeleton.findSlot(slotName).getAttachment() != null) {
+			Box2dAttachment attachment = (Box2dAttachment) skeleton.findSlot(slotName).getAttachment();
+			if(attachment.getFixture() != null) {
+				entity.getBody().destroyFixture(attachment.getFixture());
+			}
+		}*/
+		buildFixture(getSkeleton().findSlot(slotName), entity.getBody());
 	}
 	
 	@Override

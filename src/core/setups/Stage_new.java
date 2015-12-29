@@ -1,11 +1,7 @@
 package core.setups;
 
 import java.awt.Point;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Iterator;
-
-import org.jbox2d.collision.WorldManifold;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -14,7 +10,6 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
-import org.jbox2d.dynamics.contacts.Contact;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
@@ -26,7 +21,6 @@ import core.entities_new.utils.CombatLoader;
 import core.entities_new.utils.SensorData;
 import core.inventory.Equipment;
 import core.inventory.Weapon;
-import core.render.DrawUtils;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
@@ -55,7 +49,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		//Entity dream = new Entity("Ruined Sepulcher", 0, 0, this);
 		dream.getBody().setType(BodyType.STATIC);
 		dream.getBody().getFixtureList().getFilterData().categoryBits = 0;
-		// TODO addBackground function
+		/** TODO addBackground function
+		 * Create a body specific for backgrounds to pass in rather than do this
+		 */
 		background.add(dream);
 
 		Camera.get().setFillColor(new Vector4f(0, 0, 0, 1));
@@ -80,10 +76,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		weapon.setAnimation("ThrustAttack");
 		equipment.addWeapon(weapon);
 		dad.setEquipment(equipment);
-		for(Fixture f = dad.getBody().getFixtureList(); f != null; f = f.getNext()) {
-			f.getFilterData().categoryBits = 0;
-		}
-		dad.getZBody().setZ(player.getBody().getPosition().y);
+		dad.getZBody().setWalkThrough(true);
 		addEntity(dad);
 		ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
 
@@ -91,16 +84,15 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		//((SpineRender) shp.getRender()).getSkeleton().findSlot("CROOK").setAttachment(null);
 		//addEntity(shp);
 
-		Entity collector = new Entity("Collector", 775, -455, this);
-		collector.getBody().setGravityScale(2f);
-		collector.getBody().setLinearDamping(1f);
-		collector.getZBody().setGroundZ(455);
+		Entity collector = new Entity("Collector", 575, 455, this);
+		//collector.getBody().setGravityScale(2f);
+		//collector.getBody().setLinearDamping(1f);
+		//collector.getZBody().setGroundZ(455);
 		collector.addCombatListener(CombatLoader.plainCombatant());
 		addEntity(collector);
 
 		Entity light = new Entity("Hanging Light", 690, 185, this);
-		//light.getBody().setType(BodyType.STATIC);
-		light.getBody().getFixtureList().getFilterData().categoryBits = 0;
+		light.getZBody().setWalkThrough(true);
 		addEntity(light);
 		ShadowMap.get().addIllumination(light, null, 225f);
 
@@ -158,7 +150,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			Body body = world.createBody(bodyDef);
 			body.createFixture(boxFixture);
 			ground = new Entity(null, body, this);
-			ground.getBody().setUserData(new SensorData(ground, SensorData.GROUND));
+			ground.getBody().getFixtureList().setUserData(new SensorData(ground, "Ground1", SensorData.GROUND));
+			ground.getBody().setUserData(ground);
+			//ground.getBody().setUserData(new SensorData(ground, SensorData.GROUND));
 		}
 		addEntity(ground);
 
@@ -174,11 +168,15 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			boxFixture.density = 1f;
 			boxFixture.shape = bodyShape;
 			boxFixture.isSensor = true;
+			//boxFixture.userData = "Ground2";
 
 			Body body = world.createBody(bodyDef);
+			body.setGravityScale(0f);
 			body.createFixture(boxFixture);
 			ground = new Entity(null, body, this);
-			ground.getBody().setUserData(new SensorData(ground, SensorData.GROUND));
+			ground.getBody().getFixtureList().setUserData(new SensorData(ground, "Ground2", SensorData.GROUND));
+			ground.getBody().setUserData(ground);
+			//ground.getBody().setUserData(new SensorData(ground, SensorData.GROUND));
 		}
 		addEntity(ground);
 
@@ -219,7 +217,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 				new Rectangle2D.Double(e.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR).x,
 						e.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR).y, 15, 15)));*/
 
-		ShadowMap.get().drawIllumination();
+		//ShadowMap.get().drawIllumination();
 	}
 
 	@Override

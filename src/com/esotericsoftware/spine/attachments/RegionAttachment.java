@@ -184,6 +184,38 @@ public class RegionAttachment extends Attachment {
 		vertices[Y4] = offsetX * m10 + offsetY * m11 + y;
 		vertices[C4] = color;
 	}
+	
+	public float[] getLocalVertices(Slot slot) {
+		float[] offset = this.offset;
+		Bone bone = slot.getBone();
+		float x = bone.getWorldX(), y = bone.getWorldY();
+		float m00 = bone.getM00(), m01 = bone.getM01(), m10 = bone.getM10(), m11 = bone.getM11();
+		float offsetX, offsetY;
+		
+		float[] localVertices = new float[8];
+		
+		offsetX = offset[BRX];
+		offsetY = offset[BRY];
+		localVertices[BRX] = offsetX * m00 + offsetY * m01 + x; // br
+		localVertices[BRY] = offsetX * m10 + offsetY * m11 + y;
+
+		offsetX = offset[BLX];
+		offsetY = offset[BLY];
+		localVertices[BLX] = offsetX * m00 + offsetY * m01 + x; // bl
+		localVertices[BLY] = offsetX * m10 + offsetY * m11 + y;
+
+		offsetX = offset[ULX];
+		offsetY = offset[ULY];
+		localVertices[ULX] = offsetX * m00 + offsetY * m01 + x; // ul
+		localVertices[ULY] = offsetX * m10 + offsetY * m11 + y;
+
+		offsetX = offset[URX];
+		offsetY = offset[URY];
+		localVertices[URX] = offsetX * m00 + offsetY * m01 + x; // ur
+		localVertices[URY] = offsetX * m10 + offsetY * m11 + y;
+		
+		return localVertices;
+	}
 
 	public float[] getWorldVertices () {
 		return vertices;

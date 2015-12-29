@@ -58,7 +58,7 @@ public class EntityData {
 					if(attachment == null) {
 						continue;
 					}
-					((SensorData) attachment.getBody().getUserData()).setType(SensorData.IGNORE);
+					//((SensorData) attachment.getBody().getUserData()).setType(SensorData.IGNORE);
 				}
 			}
 			
@@ -91,7 +91,6 @@ public class EntityData {
 				FixtureDef boxFixture = new FixtureDef();
 				boxFixture.density = 1f;
 				boxFixture.shape = bodyShape;
-				boxFixture.filter.categoryBits = -1;
 				
 				Body body = entity.getContainer().getWorld().createBody(bodyDef);
 				body.createFixture(boxFixture);

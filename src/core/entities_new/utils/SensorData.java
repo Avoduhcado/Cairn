@@ -5,15 +5,18 @@ import core.entities_new.Entity;
 public class SensorData {
 
 	public static final int IGNORE = -1;
+	public static final int CHARACTER = 0;
 	public static final int GROUND = 1;
 	public static final int BODY = 2;
 	public static final int WEAPON = 3;
 	
 	private Entity entity;
+	private String slot;
 	private int type;
 		
-	public SensorData(Entity entity, int type) {
+	public SensorData(Entity entity, String slot, int type) {
 		this.entity = entity;
+		this.slot = slot;
 		this.type = type;
 	}
 	
@@ -35,7 +38,7 @@ public class SensorData {
 
 	@Override
 	public String toString() {
-		return entity.toString() + ": " + type;
+		return entity.toString() + " [" + slot + "]: " + type;
 	}
 	
 }

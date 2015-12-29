@@ -1,19 +1,19 @@
 package com.esotericsoftware.spine.attachments;
 
-import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.Fixture;
 
 public class Box2dAttachment extends RegionAttachment {
-	private Body body;
+	private Fixture fixture;
 
 	public Box2dAttachment(String name) {
 		super(name);
 	}
 	
-	public Body getBody() {
-		return body;
+	public Fixture getFixture() {
+		return fixture;
 	}
 	
-	public void setBody(Body body) {
-		this.body = body;
+	public void setFixture(Fixture fixture) {
+		this.fixture = fixture;
 	}
 }

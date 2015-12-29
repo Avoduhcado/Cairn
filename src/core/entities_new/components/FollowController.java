@@ -4,6 +4,10 @@ import java.awt.Point;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.Filter;
+import org.jbox2d.dynamics.Fixture;
+
+import com.esotericsoftware.spine.Slot;
 
 import core.entities_new.State;
 import core.entities_new.Entity;
@@ -114,7 +118,8 @@ public class FollowController implements Controllable {
 			
 			@Override
 			public void act() {
-				//follower.getBody().setLinearDamping(5f);
+				follower.getRender().setFlipped(leader.getRender().isFlipped());
+				
 				State.ATTACK.setCustomAnimation(this.getString());
 				follower.fireEvent(new StateChangeEvent(State.ATTACK));
 				
@@ -122,14 +127,11 @@ public class FollowController implements Controllable {
 						(follower.getBody().getPosition().x * Stage_new.SCALE_FACTOR),
 						(follower.getBody().getPosition().y * Stage_new.SCALE_FACTOR),
 						follower.getContainer());
-				((SpineRender) rightArm.getRender()).setAttachment("WEAPON",
-						follower.getEquipment().getEquippedWeapon().getName().toUpperCase());
+								
+				rightArm.getZBody().setWalkThrough(true);
 				rightArm.getRender().setFlipped(follower.getRender().isFlipped());
 
 				rightArm.setStateManager(new SingleStateManager(rightArm, State.ATTACK));
-				rightArm.getBody().getFixtureList().getFilterData().categoryBits = 0;
-				rightArm.getBody().setLinearVelocity(follower.getBody().getLinearVelocity().clone());
-				rightArm.getBody().setLinearDamping(5f);
 
 				follower.getContainer().addEntity(rightArm);
 			}

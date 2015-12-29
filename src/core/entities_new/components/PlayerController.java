@@ -7,6 +7,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 
 import com.esotericsoftware.spine.Slot;
@@ -77,8 +78,13 @@ public class PlayerController implements Controllable {
 		}
 		
 		if(Keybinds.SLOT3.clicked()) {
-			player.getBody().getFixtureList().setSensor(!player.getBody().getFixtureList().isSensor());
-			System.out.println("Is player a sensor? " + player.getBody().getFixtureList().isSensor());
+			for(Fixture f = player.getBody().getFixtureList(); f != null; f = f.getNext()) {
+					f.getFilterData().categoryBits = -1;
+					f.getFilterData().maskBits = 0x0000;
+			}
+			System.out.println("PLAYER filter: " + player.getBody().getFixtureList().getFilterData().categoryBits);
+			//player.getBody().getFixtureList().setSensor(!player.getBody().getFixtureList().isSensor());
+			//System.out.println("Is player a sensor? " + player.getBody().getFixtureList().isSensor());
 		}
 		
 		if(actionQueue != null && !player.getState().isActing()) {
