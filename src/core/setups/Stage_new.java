@@ -1,13 +1,11 @@
 package core.setups;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector4f;
@@ -15,12 +13,13 @@ import org.lwjgl.util.vector.Vector4f;
 import core.Camera;
 import core.entities_new.Entity;
 import core.entities_new.EntityData;
-import core.entities_new.components.FollowController;
+import core.entities_new.components.Combatant;
+import core.entities_new.components.Inventory;
 import core.entities_new.components.PlayerController;
+import core.entities_new.utils.BodyData;
+import core.entities_new.utils.BodyLoader;
 import core.entities_new.utils.CombatLoader;
 import core.entities_new.utils.SensorData;
-import core.inventory.Equipment;
-import core.inventory.Weapon;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
@@ -45,10 +44,8 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		boneWorld.setContainer(this);
 		world.setContactListener(boneWorld);
 
-		Entity dream = new Entity("Test Land", 0, 0, this);
+		Entity dream = new Entity("Test Land", new BodyData(), this);
 		//Entity dream = new Entity("Ruined Sepulcher", 0, 0, this);
-		dream.getBody().setType(BodyType.STATIC);
-		dream.getBody().getFixtureList().getFilterData().categoryBits = 0;
 		/** TODO addBackground function
 		 * Create a body specific for backgrounds to pass in rather than do this
 		 */
@@ -56,11 +53,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 		Camera.get().setFillColor(new Vector4f(0, 0, 0, 1));
 
-		Entity player = new Entity("Skelebones", 495, 450, this);
-		player.setController(new PlayerController(player));
-		addEntity(player);
+		addPlayer(new Entity("Skelebones", new BodyData(495, 450, BodyLoader.PLAIN_ENTITY), this));
 
-		Entity dad = new Entity("Skull",
+		/*Entity dad = new Entity("Skull",
 				player.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
 				player.getBody().getPosition().y * Stage_new.SCALE_FACTOR,
 				player.getContainer());
@@ -78,21 +73,21 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		dad.setEquipment(equipment);
 		dad.getZBody().setWalkThrough(true);
 		addEntity(dad);
-		ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);
+		ShadowMap.get().addIllumination(dad, new Point(0, -105), 500f);*/
 
 		//Entity shp = new Entity("Shepherd", 900, 455, this);
 		//((SpineRender) shp.getRender()).getSkeleton().findSlot("CROOK").setAttachment(null);
 		//addEntity(shp);
 
-		Entity collector = new Entity("Collector", 575, 455, this);
+		Entity collector = new Entity("Collector", new BodyData(575, 455, BodyLoader.PLAIN_ENTITY), this);
 		//collector.getBody().setGravityScale(2f);
 		//collector.getBody().setLinearDamping(1f);
 		//collector.getZBody().setGroundZ(455);
-		collector.addCombatListener(CombatLoader.plainCombatant());
+		//collector.addCombatListener(CombatLoader.plainCombatant());
+		collector.addComponent(Combatant.class, CombatLoader.plainCombatant());
 		addEntity(collector);
 
-		Entity light = new Entity("Hanging Light", 690, 185, this);
-		light.getZBody().setWalkThrough(true);
+		Entity light = new Entity("Hanging Light", new BodyData(690, 185, BodyLoader.FLOATING_ENTITY), this);
 		addEntity(light);
 		ShadowMap.get().addIllumination(light, null, 225f);
 
@@ -133,56 +128,10 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		}
 		addEntity(wall);*/
 
-		Entity ground = null;
-		{
-			BodyDef bodyDef = new BodyDef();
-			bodyDef.position.set(100f / Stage_new.SCALE_FACTOR, 100f / Stage_new.SCALE_FACTOR);
-			bodyDef.type = BodyType.STATIC;
-
-			PolygonShape bodyShape = new PolygonShape();
-			bodyShape.setAsBox(50f / Stage_new.SCALE_FACTOR, 50f / Stage_new.SCALE_FACTOR);
-
-			FixtureDef boxFixture = new FixtureDef();
-			boxFixture.density = 1f;
-			boxFixture.shape = bodyShape;
-			boxFixture.isSensor = true;
-
-			Body body = world.createBody(bodyDef);
-			body.createFixture(boxFixture);
-			ground = new Entity(null, body, this);
-			ground.getBody().getFixtureList().setUserData(new SensorData(ground, "Ground1", SensorData.GROUND));
-			ground.getBody().setUserData(ground);
-			//ground.getBody().setUserData(new SensorData(ground, SensorData.GROUND));
-		}
-		addEntity(ground);
-
-		{
-			BodyDef bodyDef = new BodyDef();
-			bodyDef.position.set(100f / Stage_new.SCALE_FACTOR, 550f / Stage_new.SCALE_FACTOR);
-			bodyDef.type = BodyType.STATIC;
-
-			PolygonShape bodyShape = new PolygonShape();
-			bodyShape.setAsBox(500f / Stage_new.SCALE_FACTOR, 50f / Stage_new.SCALE_FACTOR);
-
-			FixtureDef boxFixture = new FixtureDef();
-			boxFixture.density = 1f;
-			boxFixture.shape = bodyShape;
-			boxFixture.isSensor = true;
-			//boxFixture.userData = "Ground2";
-
-			Body body = world.createBody(bodyDef);
-			body.setGravityScale(0f);
-			body.createFixture(boxFixture);
-			ground = new Entity(null, body, this);
-			ground.getBody().getFixtureList().setUserData(new SensorData(ground, "Ground2", SensorData.GROUND));
-			ground.getBody().setUserData(ground);
-			//ground.getBody().setUserData(new SensorData(ground, SensorData.GROUND));
-		}
-		addEntity(ground);
-
-		Camera.get().setFocus(player);
+		addEntity(new Entity("Ground1", new BodyData(100f, 100f, 50f, 50f, BodyLoader.GROUND), this));
+		addEntity(new Entity("Ground2", new BodyData(100f, 550f, 500f, 50f, BodyLoader.GROUND), this));
 	}
-
+	
 	@Override
 	public void update() {
 		world.step(1 / 60f, 8, 3);
@@ -193,10 +142,14 @@ public class Stage_new extends GameSetup implements WorldContainer {
 			}
 			queuedEntities.clear();
 		}
+		
+		entities.stream()
+			.filter(e -> e.controller())
+			.map(e -> e.getController())
+			.forEach(e -> e.control());
 
-		for(int i = 0; i<entities.size(); i++) {
-			entities.get(i).update();
-		}
+		entities.stream()
+			.forEach(e -> e.updateBodyAndState());
 	}
 
 	@Override
@@ -207,10 +160,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 		ShadowMap.get().drawShadows(entities);
 
-		entities.sort((o1, o2) -> (int) (o1.getZBody().getScreenY() - o2.getZBody().getScreenY()));
-		for(int i = 0; i<entities.size(); i++) {
-			entities.get(i).draw();
-		}
+		entities.stream()
+			.sorted()
+			.forEach(e -> e.draw());
 
 		/*boneWorld.weaponVsBone.stream()
 		.forEach(e -> DrawUtils.fillRect(1, 0, 1, 1,
@@ -252,9 +204,16 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		return entities.remove(entity);
 	}
 
+	/** TODO
+	 * Is this necessary? Could be useful for insuring there's a single player character.
+	 * @param player
+	 */
 	public void addPlayer(Entity player) {
-		entities.add(player);
-		// TODO Link assorted player controllers
+		player.setController(new PlayerController(player));
+		player.addComponent(Inventory.class, new Inventory(player));
+		addEntity(player);
+		
+		Camera.get().setFocus(player);
 	}
 
 	@Override

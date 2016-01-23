@@ -30,15 +30,12 @@ public class BoneWorld implements ContactListener {
 
 	@Override
 	public void beginContact(Contact contact) {
-		System.out.println(contact.getFixtureA().getUserData() + 
-				"(" + contact.getFixtureA().getFilterData().categoryBits + ", " + contact.getFixtureA().getFilterData().maskBits + ")" +
-				" vs. " + contact.getFixtureB().getUserData() + 
-				"(" + contact.getFixtureB().getFilterData().categoryBits + ", " + contact.getFixtureB().getFilterData().maskBits + ")");
+		System.out.println("Begin: " + getContactData(contact));
 		
 		if(sortSensors(contact)) {
 			switch(sensor.getType()) {
 			case SensorData.GROUND:
-				//System.out.println("Stepping on ground");
+				System.out.println("Stepping on ground");
 				entity.getZBody().stepOnGround(sensor.getEntity());
 				break;
 			case SensorData.BODY:
@@ -46,7 +43,7 @@ public class BoneWorld implements ContactListener {
 				break;
 			case SensorData.WEAPON:
 				System.out.println("Weapon colliding: " + sensor.getEntity() + ", " + entity);
-				// TODO Hitting ground/wall?
+				// TODO Hitting ground/wall? Check for hitting friendlies
 				if(sensor.getEntity() != entity) {
 					System.out.println("Hit boys!!! " + sensor.getEntity() + ", " + entity);
 					// TODO Pass in proper weapons, maybe include slots that were hit?
@@ -81,16 +78,7 @@ public class BoneWorld implements ContactListener {
 
 	@Override
 	public void endContact(Contact contact) {
-		System.out.println("Ended: " + contact.getFixtureA().getUserData() + " vs. " + contact.getFixtureB().getUserData());
-		/*if(contact.getFixtureA().isSensor() && contact.getFixtureB().isSensor()) {
-			if(contactIsWeaponVsBone(contact)) {
-			//if(contactIsBoneVsBone(contact)) {
-				//System.out.println("Removed " + contact);
-				weaponVsBone.remove(contact);
-			} else if(contactIsWeaponVsGround(contact)) {
-				//weaponVsGround.remove(contact);
-			}
-		}
+		System.out.println("Ended: " + getContactData(contact));
 		
 		if(sortSensors(contact)) {
 			switch(sensor.getType()) {
@@ -104,6 +92,15 @@ public class BoneWorld implements ContactListener {
 				break;
 			default:
 				break;
+			}
+		}
+		/*if(contact.getFixtureA().isSensor() && contact.getFixtureB().isSensor()) {
+			if(contactIsWeaponVsBone(contact)) {
+			//if(contactIsBoneVsBone(contact)) {
+				//System.out.println("Removed " + contact);
+				weaponVsBone.remove(contact);
+			} else if(contactIsWeaponVsGround(contact)) {
+				//weaponVsGround.remove(contact);
 			}
 		}*/
 	}
@@ -130,10 +127,10 @@ public class BoneWorld implements ContactListener {
 				
 		if(sensorA) {
 			sensor = (SensorData) fixtureA.getUserData();
-			entity = (Entity) ((SensorData) fixtureB.getUserData()).getEntity();
+			entity = ((SensorData) fixtureB.getUserData()).getEntity();
 		} else {
 			sensor = (SensorData) fixtureB.getUserData();
-			entity = (Entity) ((SensorData) fixtureA.getUserData()).getEntity();
+			entity = ((SensorData) fixtureA.getUserData()).getEntity();
 		}
 		
 		return true;
@@ -188,6 +185,13 @@ public class BoneWorld implements ContactListener {
 			return true;
 		}
 		return false;
+	}
+	
+	private String getContactData(Contact contact) {
+		return contact.getFixtureA().getUserData() + 
+				"(" + contact.getFixtureA().getFilterData().categoryBits + ", " + contact.getFixtureA().getFilterData().maskBits + ")" +
+				" vs. " + contact.getFixtureB().getUserData() + 
+				"(" + contact.getFixtureB().getFilterData().categoryBits + ", " + contact.getFixtureB().getFilterData().maskBits + ")";
 	}
 	
 	public void setContainer(WorldContainer container) {

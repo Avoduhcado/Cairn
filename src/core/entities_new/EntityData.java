@@ -1,6 +1,5 @@
 package core.entities_new;
 
-import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -10,7 +9,6 @@ import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.contacts.Contact;
 
 import com.esotericsoftware.spine.Slot;
-import com.esotericsoftware.spine.attachments.Attachment;
 import com.esotericsoftware.spine.attachments.Box2dAttachment;
 
 import core.Camera;
@@ -18,7 +16,8 @@ import core.entities_new.components.PlainRender;
 import core.entities_new.components.SpineRender;
 import core.entities_new.components.TimedStateManager;
 import core.entities_new.components.ZBody;
-import core.entities_new.utils.SensorData;
+import core.entities_new.utils.BodyData;
+import core.entities_new.utils.BodyLoader;
 import core.setups.Stage_new;
 import core.setups.WorldContainer;
 
@@ -38,7 +37,7 @@ public class EntityData {
 	}
 	
 	public Entity createEntity() {
-		Entity entity = new Entity(name, x, y, container);
+		Entity entity = new Entity(name, new BodyData(x, y, BodyLoader.PLAIN_ENTITY), container);
 		
 		applyContact(entity);
 		

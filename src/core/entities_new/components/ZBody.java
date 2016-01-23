@@ -11,6 +11,7 @@ import org.lwjgl.util.vector.Vector2f;
 
 import com.esotericsoftware.spine.Slot;
 
+import core.Camera;
 import core.entities_new.Entity;
 import core.entities_new.State;
 import core.entities_new.event.StateChangeEvent;
@@ -28,6 +29,34 @@ public class ZBody implements Geometric {
 	public ZBody(Body body, Entity entity) {
 		this.body = body;
 		this.entity = entity;
+	}
+	
+	@Override
+	public void move() {
+		if(getBody().getGravityScale() > 0 && getGroundZ() != 0) {
+			setZ(getGroundZ() - (getBody().getPosition().y * Stage_new.SCALE_FACTOR));
+			if(getBody().getLinearVelocity().y > 0 && entity.getState() == State.JUMPING) {
+				entity.fireEvent(new StateChangeEvent(State.FALLING));
+			}
+
+			if(getZ() <= 0f && getBody().getLinearVelocity().y > 2) {
+				if(getBody().getLinearVelocity().y > 8 && getBody().getMass() > 1f) {
+					Camera.get().setShake(new Vector2f(5, 10), 5.5f, 0.65f);
+				}
+				getBody().setLinearVelocity(new Vec2(getBody().getLinearVelocity().x, -getBody().getLinearVelocity().y * 0.5f));
+				//getBody().applyAngularImpulse(1.5f);
+				entity.fireEvent(new StateChangeEvent(State.JUMPING));
+			} else if(getZ() < 0f) {
+				entity.fireEvent(new StateChangeEvent(State.LAND));
+				setZ(0);
+				setGroundZ(0);
+				getBody().setGravityScale(0);
+				getBody().setLinearDamping(15f);
+				getBody().setLinearVelocity(new Vec2());
+				//getBody().getFixtureList().getFilterData().categoryBits = 1;
+				//body.getFixtureList().getFilterData().groupIndex = 0;
+			}
+		}
 	}
 	
 	public void setWalkThrough(boolean walkthrough) {
@@ -87,11 +116,11 @@ public class ZBody implements Geometric {
 		return false;
 	}
 	
-	private void fall() {
+	public void fall() {
 		entity.fireEvent(new StateChangeEvent(State.FALLING));
 		getBody().setGravityScale(1f);
 		getBody().setLinearDamping(1f);
-		getBody().getFixtureList().getFilterData().categoryBits = 0;
+		//getBody().getFixtureList().getFilterData().categoryBits = 0;
 		
 		setGroundZ(searchForGround());
 	}
@@ -125,6 +154,8 @@ public class ZBody implements Geometric {
 		
 		return closestGroundY;
 	}
+	
+	
 
 	@Override
 	public Vector2f getPosition() {

@@ -10,6 +10,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -263,7 +265,11 @@ public class Camera {
 		zoom.x = scale;
 		zoom.y = change;
 	}
-	
+
+	public boolean isZooming() {
+		return zoomTime != 0;
+	}
+
 	public void zoomTo(float duration, float target) {
 		zoomTime = 0;
 		zoomDuration = duration;

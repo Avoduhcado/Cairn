@@ -1,38 +1,29 @@
 package core.entities_new;
 
 import java.io.Serializable;
-import org.jbox2d.collision.shapes.CircleShape;
-import org.jbox2d.collision.shapes.EdgeShape;
-import org.jbox2d.collision.shapes.PolygonShape;
-import org.jbox2d.common.Vec2;
+import java.util.HashMap;
+
 import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.Fixture;
-import org.jbox2d.dynamics.FixtureDef;
-import org.jbox2d.dynamics.World;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import core.Camera;
 import core.Theater;
+import core.entities_new.components.Combatant;
 import core.entities_new.components.Controllable;
+import core.entities_new.components.Inventory;
 import core.entities_new.components.PlainStateManager;
 import core.entities_new.components.Renderable;
-import core.entities_new.components.SpineRender;
 import core.entities_new.components.StateManager;
 import core.entities_new.components.ZBody;
 import core.entities_new.event.ActionEvent;
 import core.entities_new.event.CombatEvent;
-import core.entities_new.event.CombatListener;
 import core.entities_new.event.EntityEvent;
+import core.entities_new.event.InventoryEvent;
 import core.entities_new.event.StateChangeEvent;
+import core.entities_new.utils.BodyData;
+import core.entities_new.utils.BodyLoader;
 import core.entities_new.utils.DepthSort;
 import core.entities_new.utils.RenderLoader;
-import core.entities_new.utils.SensorData;
-import core.inventory.Equipment;
 import core.render.DrawUtils;
-import core.setups.Stage_new;
 import core.setups.WorldContainer;
 
 public class Entity implements DepthSort, Serializable {
@@ -43,70 +34,45 @@ public class Entity implements DepthSort, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private WorldContainer container;
-	private String name;
-	//private State state;
+	private final String name;
 	
 	private Renderable render;
 	private ZBody zBody;
 	private Controllable controller;
-	
-	// TODO Extract this
-	private Equipment equipment;
-	private CombatListener combatListener;
 	private StateManager stateManager;
+	
+	private HashMap<Class<?>, EntityComponent> components = new HashMap<Class<?>, EntityComponent>();
 	
 	private boolean fixDirection;
 	
-	public Entity(String name, float x, float y, WorldContainer container) {
+	public Entity(String name, BodyData bodyData, WorldContainer container) {
 		this.name = name;
 		setContainer(container);
 		
-		loadBody(container.getWorld(), x, y);
+		setZBody(new ZBody(BodyLoader.loadBody(bodyData, this, container.getWorld()), this));
 		setRender(RenderLoader.loadRender(name, this));
-		stateManager = new PlainStateManager(this, State.IDLE);
+		setStateManager(new PlainStateManager(this, State.IDLE));
 	}
 	
+	// TODO Remove this and refactor controller.collapse()
 	public Entity(String name, Body body, WorldContainer container) {
 		this.name = name;
 		setContainer(container);
-		
+
+		body.setUserData(this);
 		setZBody(new ZBody(body, this));
 		setRender(RenderLoader.loadRender(name, this));
 		stateManager = new PlainStateManager(this, State.IDLE);
 	}
-	
-	private void loadBody(World world, float x, float y) {
-		if(zBody != null) {
-			world.destroyBody(getBody());
-		}
-		
-		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(x / Stage_new.SCALE_FACTOR, y / Stage_new.SCALE_FACTOR);
-		bodyDef.type = BodyType.DYNAMIC;
 
-		CircleShape bodyShape = new CircleShape();
-		bodyShape.m_radius = 15f / Stage_new.SCALE_FACTOR / 2f;
-
-		FixtureDef boxFixture = new FixtureDef();
-		boxFixture.density = 1f;
-		boxFixture.filter.categoryBits = 0b0011;
-		boxFixture.filter.maskBits = 0b1110;
-		System.out.println(getName() + " " + boxFixture.filter.categoryBits + " " + boxFixture.filter.maskBits + " " + boxFixture.filter.groupIndex);
-		boxFixture.shape = bodyShape;
-		boxFixture.userData = new SensorData(this, "Base", SensorData.CHARACTER);
-		
-		Body body = world.createBody(bodyDef);
-		body.createFixture(boxFixture);
-		body.setFixedRotation(true);
-		body.setLinearDamping(15f);
-		body.setGravityScale(0f);
-		body.setUserData(this);
-		body.setSleepingAllowed(false);
-		setZBody(new ZBody(body, this));
-	}
-	
 	public void draw() {
 		if(render()) {
+			if(isWalkingBackwards()) {
+				render.animate(-0.75f);
+			} else {
+				render.animate(1f);
+			}
+			
 			render.draw();
 		}
 		
@@ -122,48 +88,23 @@ public class Entity implements DepthSort, Serializable {
 	
 	@Override
 	public int compareTo(Entity e) {
-		return (int) ((this.getBody().getPosition().y * Stage_new.SCALE_FACTOR) - (e.getBody().getPosition().y * Stage_new.SCALE_FACTOR));
+		return (int) (this.getZBody().getScreenY() - e.getZBody().getScreenY());
+	}
+
+	public void updateBodyAndState() {
+		zBody.move();
+		stateManager.resolveState();
 	}
 	
-	public void update() {
-		if(controller()) {
-			controller.control();
+	public boolean isWalkingBackwards() {
+		if(isFixDirection() && getBody().getLinearVelocity().x != 0 && getState() == State.WALK && render()) {
+			if(render.isFlipped()) {
+				return getBody().getLinearVelocity().x > 0;
+			}
+			return getBody().getLinearVelocity().x < 0;
 		}
 		
-		if(render()) {
-			if(isWalkingBackwards()) {
-				render.animate(-1f);
-			} else {
-				render.animate(1f);
-			}
-		}
-		
-		if(getBody().getGravityScale() > 0 && zBody.getGroundZ() != 0) {
-			zBody.setZ(zBody.getGroundZ() - (getBody().getPosition().y * Stage_new.SCALE_FACTOR));
-			if(getBody().getLinearVelocity().y > 0 && getState() == State.JUMPING) {
-				fireEvent(new StateChangeEvent(State.FALLING));
-			}
-
-			if(zBody.getZ() <= 0f && getBody().getLinearVelocity().y > 2) {
-				if(getBody().getLinearVelocity().y > 8) {
-					Camera.get().setShake(new Vector2f(5, 10), 5.5f, 0.65f);
-				}
-				getBody().setLinearVelocity(new Vec2(getBody().getLinearVelocity().x, -getBody().getLinearVelocity().y * 0.5f));
-				getBody().applyAngularImpulse(10f);
-				fireEvent(new StateChangeEvent(State.JUMPING));
-			} else if(zBody.getZ() < 0f) {
-				fireEvent(new StateChangeEvent(State.LAND));
-				zBody.setZ(0);
-				zBody.setGroundZ(0);
-				getBody().setGravityScale(0);
-				getBody().setLinearDamping(15f);
-				getBody().setLinearVelocity(new Vec2());
-				//getBody().getFixtureList().getFilterData().categoryBits = 1;
-				//body.getFixtureList().getFilterData().groupIndex = 0;
-			}
-		}
-		
-		stateManager.resolveState();
+		return false;
 	}
 	
 	public void destroy() {
@@ -204,6 +145,10 @@ public class Entity implements DepthSort, Serializable {
 	}
 	
 	public void setZBody(ZBody body) {
+		if(zBody != null) {
+			getContainer().getWorld().destroyBody(getBody());
+		}
+		
 		this.zBody = body;
 	}
 	
@@ -228,35 +173,36 @@ public class Entity implements DepthSort, Serializable {
 		this.controller = controller;
 	}
 	
+	public HashMap<Class<?>, EntityComponent> getComponents() {
+		return components;
+	}
+
+	public void setComponents(HashMap<Class<?>, EntityComponent> components) {
+		this.components = components;
+	}
+	
+	public void addComponent(Class<?> clazz, EntityComponent component) {
+		components.put(clazz, component);
+	}
+	
+	public EntityComponent removeComponent(Class<?> clazz) {
+		return components.remove(clazz);
+	}
+
 	public State getState() {
 		return stateManager.getState();
 	}
 	
-	private StateManager getStateManager() {
+	public boolean stateManager() {
+		return stateManager != null;
+	}
+	
+	public StateManager getStateManager() {
 		return stateManager;
 	}
 	
 	public void setStateManager(StateManager stateManager) {
 		this.stateManager = stateManager;
-	}
-	
-	public Equipment getEquipment() {
-		return equipment;
-	}
-
-	public void setEquipment(Equipment equipment) {
-		this.equipment = equipment;
-	}
-	
-	public void removeCombatListener(CombatListener l) {
-		if(l == null) {
-			return;
-		}
-		combatListener = null;
-	}
-	
-	public void addCombatListener(CombatListener l) {
-		this.combatListener = l;
 	}
 	
 	public boolean isFixDirection() {
@@ -267,17 +213,6 @@ public class Entity implements DepthSort, Serializable {
 		this.fixDirection = fixDirection;
 	}
 	
-	public boolean isWalkingBackwards() {
-		if(isFixDirection() && getBody().getLinearVelocity().x != 0 && getState() == State.WALK && render()) {
-			if(render.isFlipped()) {
-				return getBody().getLinearVelocity().x > 0;
-			}
-			return getBody().getLinearVelocity().x < 0;
-		}
-		
-		return false;
-	}
-	
 	public void fireEvent(EntityEvent e) {
 		if(e instanceof ActionEvent) {
 			
@@ -285,12 +220,24 @@ public class Entity implements DepthSort, Serializable {
 			processCombatEvent((CombatEvent) e);
 		} else if(e instanceof StateChangeEvent) {
 			getStateManager().changeState(((StateChangeEvent) e).getNewState());
+		} else if(e instanceof InventoryEvent) {
+			processEquipmentEvent((InventoryEvent) e);
 		}
 	}
 	
 	protected void processCombatEvent(CombatEvent e) {
-		if(combatListener != null) {
-			combatListener.hit(e);
+		if(components.containsKey(Combatant.class)) {
+			((Combatant) components.get(Combatant.class)).hit(e);
+		}
+	}
+	
+	protected void processEquipmentEvent(InventoryEvent e) {
+		if(components.containsKey(Inventory.class)) {
+			switch(e.getEventType()) {
+			case InventoryEvent.CYCLE:
+				((Inventory) components.get(Inventory.class)).cycle(e);
+				break;
+			}
 		}
 	}
 

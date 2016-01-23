@@ -36,11 +36,11 @@ public class Sprite {
 			System.err.println("Resources folder may be missing.");
 		}
 	}
-	
+
 	public void draw(Transform transform) {
 		texture.bind();
 		updateTextureOffsets(transform);
-		
+
 		GL11.glPushMatrix();
 		
 		if(transform.still) {
@@ -65,7 +65,7 @@ public class Sprite {
 		}
 		
 		GL11.glColor4f(transform.color.x, transform.color.y, transform.color.z, transform.color.w);
-		
+
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);

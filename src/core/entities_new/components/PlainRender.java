@@ -2,12 +2,19 @@ package core.entities_new.components;
 
 import java.io.Serializable;
 
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.Fixture;
+import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+
+import com.esotericsoftware.spine.attachments.Attachment;
 
 import core.entities_new.Entity;
 import core.entities_new.event.EntityEvent;
+import core.render.DrawUtils;
 import core.render.SpriteList;
 import core.render.Transform;
 import core.setups.Stage_new;
@@ -39,8 +46,24 @@ public class PlainRender implements Renderable, Serializable {
 
 	@Override
 	public void debugDraw() {
-		// TODO Auto-generated method stub
-		
+		for(Fixture f = entity.getBody().getFixtureList(); f != null; f = f.getNext()) {
+			switch(f.getShape().m_type) {
+			case CIRCLE:
+				DrawUtils.setColor(new Vector3f(0f, 0f, 0.6f));
+				DrawUtils.drawBox2DCircle(entity.getBody(), (CircleShape) f.m_shape);
+				break;
+			case EDGE:
+				DrawUtils.setColor(new Vector3f(1f, 0f, 0f));
+				DrawUtils.drawBox2DEdge(entity.getBody().getPosition(), (EdgeShape) f.m_shape);
+				break;
+			case POLYGON:
+				DrawUtils.setColor(new Vector3f(0f, 0.8f, 0f));
+				DrawUtils.drawBox2DPoly(entity.getBody(), (PolygonShape) f.m_shape);
+				break;
+			case CHAIN:
+				break;
+			}
+		}
 	}
 
 	@Override
@@ -67,10 +90,10 @@ public class PlainRender implements Renderable, Serializable {
 	@Override
 	public void setTransform(int index) {
 		Body body = entity.getBody();
-		//PolygonShape shape = ((PolygonShape) body.getFixtureList().getShape());
+		PolygonShape shape = ((PolygonShape) body.getFixtureList().getShape());
 		
-		transform.x = (body.getPosition().x) * Stage_new.SCALE_FACTOR;
-		transform.y = (body.getPosition().y) * Stage_new.SCALE_FACTOR;
+		transform.x = (body.getPosition().x + shape.getVertex(0).x) * Stage_new.SCALE_FACTOR;
+		transform.y = (body.getPosition().y + shape.getVertex(0).y) * Stage_new.SCALE_FACTOR;
 		transform.flipX = isFlipped();
 		transform.scaleY = 1f;
 		transform.scaleX = 1f;

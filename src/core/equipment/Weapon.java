@@ -3,6 +3,7 @@ package core.equipment;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 
+@Deprecated
 public class Weapon implements Serializable {
 
 	/**

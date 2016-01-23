@@ -123,6 +123,10 @@ public enum Keybinds {
 			k.key.setDisabled(false);
 		}
 	}
+	
+	public static boolean movement() {
+		return RIGHT.press() || LEFT.press() || UP.press() || DOWN.press();
+	}
 
 	/**
 	 * Change a key binding.

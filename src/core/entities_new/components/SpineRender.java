@@ -146,8 +146,8 @@ public class SpineRender implements Renderable, Serializable {
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 0f;
 		boxFixture.shape = bodyShape;
-		boxFixture.filter.categoryBits = 0b0001;
-		boxFixture.filter.maskBits = 0b1110;
+		boxFixture.filter.categoryBits = 0b1000;
+		boxFixture.filter.maskBits = 0b0110;
 		boxFixture.userData = new SensorData(entity, slot.getData().getName(), SensorData.BODY);
 		//boxFixture.userData = slot;
 				
@@ -187,10 +187,12 @@ public class SpineRender implements Renderable, Serializable {
 							attachment.getFixture().getFilterData().categoryBits = 0b0011;
 							attachment.getFixture().getFilterData().maskBits = 0xFFFF;
 							attachment.getFixture().setSensor(true);
+							((SensorData) attachment.getFixture().getUserData()).setType(SensorData.WEAPON);
 						} else {
-							attachment.getFixture().getFilterData().categoryBits = 0b0001;
-							attachment.getFixture().getFilterData().maskBits = 0b1110;
+							attachment.getFixture().getFilterData().categoryBits = 0b1000;
+							attachment.getFixture().getFilterData().maskBits = 0b0110;
 							attachment.getFixture().setSensor(false);
+							((SensorData) attachment.getFixture().getUserData()).setType(SensorData.BODY);
 						}
 					}
 					break;
@@ -375,6 +377,7 @@ public class SpineRender implements Renderable, Serializable {
 			}
 		}*/
 		buildFixture(getSkeleton().findSlot(slotName), entity.getBody());
+		
 	}
 	
 	@Override

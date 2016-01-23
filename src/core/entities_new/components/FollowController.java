@@ -13,11 +13,14 @@ import core.entities_new.State;
 import core.entities_new.Entity;
 import core.entities_new.event.ActionEvent;
 import core.entities_new.event.ActionEventListener;
+import core.entities_new.event.ControllerEvent;
 import core.entities_new.event.StateChangeEvent;
+import core.entities_new.utils.BodyData;
+import core.entities_new.utils.BodyLoader;
 import core.setups.Stage_new;
 import core.utilities.keyboard.Keybinds;
 
-public class FollowController implements Controllable {
+public class FollowController extends EntityController {
 
 	private Entity leader;
 	private Entity follower;
@@ -33,6 +36,7 @@ public class FollowController implements Controllable {
 	private ActionEventListener actionEventListener;
 	
 	public FollowController(Entity follower, Entity leader) {
+		super(follower);
 		this.follower = follower;
 		this.leader = leader;
 		
@@ -67,7 +71,7 @@ public class FollowController implements Controllable {
 			double distance = Point.distance((leadBody.getPosition().x * Stage_new.SCALE_FACTOR) + xOffset, (leadBody.getPosition().y * Stage_new.SCALE_FACTOR) + yOffset,
 					followBody.getPosition().x * Stage_new.SCALE_FACTOR, followBody.getPosition().y * Stage_new.SCALE_FACTOR);
 			
-			if(distance > lagDistance) {
+			/*if(distance > lagDistance) {
 				if(distance > lagDistance * 1.5f) {
 					speedMod = 1.5f;
 				}
@@ -89,7 +93,7 @@ public class FollowController implements Controllable {
 						(((leadBody.getPosition().y * Stage_new.SCALE_FACTOR) + yOffset) 
 								- followBody.getPosition().y * Stage_new.SCALE_FACTOR) / (float) distance));
 				follower.getRender().setFlipped(leader.getRender().isFlipped());
-			}
+			}*/
 		//}
 		
 		if(actionQueue != null && !follower.getState().isActing()) {
@@ -98,11 +102,14 @@ public class FollowController implements Controllable {
 		}
 	}
 
-	private void move(Vec2 direction) {
+	@Override
+	public void move(ControllerEvent e) {
+		Vec2 movement = (Vec2) e.getData();
+		
 		if(!follower.getBody().isFixedRotation()) {
-			follower.getBody().applyTorque(90 * (direction.x < 0 ? -1f : 1f));
+			follower.getBody().applyTorque(90 * (movement.x < 0 ? -1f : 1f));
 		}
-		follower.getBody().applyForceToCenter(direction.mul(speed * speedMod));
+		follower.getBody().applyForceToCenter(movement.mul(speed * speedMod));
 		if(follower.getState().canMove()) {
 			follower.fireEvent(new StateChangeEvent(speedMod > 1 ? State.RUN : State.WALK));
 		}
@@ -124,9 +131,9 @@ public class FollowController implements Controllable {
 				follower.fireEvent(new StateChangeEvent(State.ATTACK));
 				
 				Entity rightArm = new Entity("Right Arm", 
-						(follower.getBody().getPosition().x * Stage_new.SCALE_FACTOR),
+						new BodyData((follower.getBody().getPosition().x * Stage_new.SCALE_FACTOR),
 						(follower.getBody().getPosition().y * Stage_new.SCALE_FACTOR),
-						follower.getContainer());
+						BodyLoader.FLOATING_ENTITY), follower.getContainer());
 								
 				rightArm.getZBody().setWalkThrough(true);
 				rightArm.getRender().setFlipped(follower.getRender().isFlipped());
@@ -148,7 +155,9 @@ public class FollowController implements Controllable {
 						return prevAnimation[0] + "-0";
 					}
 				} else {
-					return follower.getEquipment().getEquippedWeapon().getAnimation() + "-0";
+					// TODO
+					return null;
+					//return follower.getEquipment().getEquippedWeapon().getAnimation() + "-0";
 				}				
 			}
 		};
@@ -166,7 +175,6 @@ public class FollowController implements Controllable {
 					follower.getRender().setFlipped(leader.getRender().isFlipped());
 					follower.setFixDirection(true);
 				} else {
-					System.out.println("SDFSDF");
 					follower.fireEvent(new StateChangeEvent(State.IDLE));
 					follower.setFixDirection(false);
 				}
