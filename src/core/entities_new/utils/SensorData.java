@@ -10,6 +10,7 @@ public class SensorData {
 	public static final int BODY = 2;
 	public static final int WEAPON = 3;
 	public static final int WALL = 4;
+	public static final int INTERACTION = 5;
 	
 	private Entity entity;
 	private String slot;

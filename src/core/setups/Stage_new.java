@@ -13,9 +13,14 @@ import org.lwjgl.util.vector.Vector4f;
 import core.Camera;
 import core.entities_new.Entity;
 import core.entities_new.EntityData;
+import core.entities_new.components.ActivateInteraction;
+import core.entities_new.components.AutorunInteraction;
 import core.entities_new.components.Combatant;
 import core.entities_new.components.Inventory;
 import core.entities_new.components.PlayerController;
+import core.entities_new.components.Script;
+import core.entities_new.components.TouchInteraction;
+import core.entities_new.event.InteractEvent;
 import core.entities_new.utils.BodyData;
 import core.entities_new.utils.BodyLoader;
 import core.entities_new.utils.CombatLoader;
@@ -85,6 +90,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		//collector.getZBody().setGroundZ(455);
 		//collector.addCombatListener(CombatLoader.plainCombatant());
 		collector.addComponent(Combatant.class, CombatLoader.plainCombatant());
+		//collector.addComponent(AutorunInteraction.class, new AutorunInteraction(collector, new Script(collector, "")));
+		collector.addComponent(TouchInteraction.class, new TouchInteraction(collector, new Script(collector, "")));
+		collector.addComponent(ActivateInteraction.class, new ActivateInteraction(collector, new Script(collector, "")));
 		addEntity(collector);
 
 		Entity light = new Entity("Hanging Light", new BodyData(690, 185, BodyLoader.FLOATING_ENTITY), this);
@@ -130,6 +138,11 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 		addEntity(new Entity("Ground1", new BodyData(100f, 100f, 50f, 50f, BodyLoader.GROUND), this));
 		addEntity(new Entity("Ground2", new BodyData(100f, 550f, 500f, 50f, BodyLoader.GROUND), this));
+		
+		// TODO Put inside of a loadlevel function
+		for(Entity e : entities) {
+			e.fireEvent(new InteractEvent(InteractEvent.AUTORUN, null));
+		}
 	}
 	
 	@Override
@@ -150,6 +163,8 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 		entities.stream()
 			.forEach(e -> e.updateBodyAndState());
+		
+		uiElements.stream().forEach(e -> e.update());
 	}
 
 	@Override
@@ -174,8 +189,9 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 	@Override
 	public void drawUI() {
-		// TODO Auto-generated method stub
-
+		for(int x = 0; x<uiElements.size(); x++) {
+			getElement(x).draw();
+		}
 	}
 
 	@Override

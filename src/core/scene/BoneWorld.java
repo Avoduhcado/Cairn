@@ -14,6 +14,7 @@ import org.jbox2d.dynamics.contacts.Contact;
 import core.entities_new.Entity;
 import core.entities_new.EntityData;
 import core.entities_new.event.CombatEvent;
+import core.entities_new.event.InteractEvent;
 import core.entities_new.utils.SensorData;
 import core.setups.Stage_new;
 import core.setups.WorldContainer;
@@ -39,6 +40,7 @@ public class BoneWorld implements ContactListener {
 				entity.getZBody().stepOnGround(sensor.getEntity());
 				break;
 			case SensorData.BODY:
+				sensor.getEntity().fireEvent(new InteractEvent(InteractEvent.ON_TOUCH, entity));
 				//System.out.println("Bodies colliding!! " + sensor.getEntity().toString() + " " + entity.toString());
 				break;
 			case SensorData.WEAPON:
@@ -49,6 +51,9 @@ public class BoneWorld implements ContactListener {
 					// TODO Pass in proper weapons, maybe include slots that were hit?
 					entity.fireEvent(new CombatEvent(sensor.getEntity(), null, entity));
 				}
+				break;
+			case SensorData.INTERACTION:
+				entity.getZBody().addInteractable(sensor.getEntity());
 				break;
 			default:
 				break;
@@ -89,6 +94,9 @@ public class BoneWorld implements ContactListener {
 			case SensorData.BODY:
 				break;
 			case SensorData.WEAPON:
+				break;
+			case SensorData.INTERACTION:
+				entity.getZBody().removeInteractable(sensor.getEntity());
 				break;
 			default:
 				break;

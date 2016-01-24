@@ -7,16 +7,21 @@ import org.jbox2d.dynamics.Body;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Theater;
+import core.entities_new.components.ActivateInteraction;
+import core.entities_new.components.AutorunInteraction;
 import core.entities_new.components.Combatant;
 import core.entities_new.components.Controllable;
+import core.entities_new.components.Interaction;
 import core.entities_new.components.Inventory;
 import core.entities_new.components.PlainStateManager;
 import core.entities_new.components.Renderable;
 import core.entities_new.components.StateManager;
+import core.entities_new.components.TouchInteraction;
 import core.entities_new.components.ZBody;
 import core.entities_new.event.ActionEvent;
 import core.entities_new.event.CombatEvent;
 import core.entities_new.event.EntityEvent;
+import core.entities_new.event.InteractEvent;
 import core.entities_new.event.InventoryEvent;
 import core.entities_new.event.StateChangeEvent;
 import core.entities_new.utils.BodyData;
@@ -222,6 +227,8 @@ public class Entity implements DepthSort, Serializable {
 			getStateManager().changeState(((StateChangeEvent) e).getNewState());
 		} else if(e instanceof InventoryEvent) {
 			processEquipmentEvent((InventoryEvent) e);
+		} else if(e instanceof InteractEvent) {
+			processInteractEvent((InteractEvent) e);
 		}
 	}
 	
@@ -238,6 +245,26 @@ public class Entity implements DepthSort, Serializable {
 				((Inventory) components.get(Inventory.class)).cycle(e);
 				break;
 			}
+		}
+	}
+	
+	protected void processInteractEvent(InteractEvent e) {
+		switch(e.getInteractType()) {
+		case InteractEvent.AUTORUN:
+			if(components.containsKey(AutorunInteraction.class)) {
+				((Interaction) components.get(AutorunInteraction.class)).interact(e);
+			}
+			break;
+		case InteractEvent.ON_TOUCH:
+			if(components.containsKey(TouchInteraction.class)) {
+				((Interaction) components.get(TouchInteraction.class)).interact(e);
+			}
+			break;
+		case InteractEvent.ON_ACTIVATE:
+			if(components.containsKey(ActivateInteraction.class)) {
+				((Interaction) components.get(ActivateInteraction.class)).interact(e);
+			}
+			break;
 		}
 	}
 

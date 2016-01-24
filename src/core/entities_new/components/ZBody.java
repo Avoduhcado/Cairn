@@ -25,6 +25,7 @@ public class ZBody implements Geometric {
 	private float z, groundZ;
 	
 	private ArrayList<Entity> ground = new ArrayList<Entity>();
+	private ArrayList<Entity> interactables = new ArrayList<Entity>();
 
 	public ZBody(Body body, Entity entity) {
 		this.body = body;
@@ -155,7 +156,18 @@ public class ZBody implements Geometric {
 		return closestGroundY;
 	}
 	
+	public ArrayList<Entity> getInteractables() {
+		return interactables;
+	}
 	
+	public void addInteractable(Entity interactable) {
+		// TODO Pop up interaction dialog, also enable cycling between available interactions?
+		this.interactables.add(interactable);
+	}
+	
+	public void removeInteractable(Entity interactable) {
+		this.interactables.remove(interactable);
+	}
 
 	@Override
 	public Vector2f getPosition() {

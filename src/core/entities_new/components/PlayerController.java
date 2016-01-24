@@ -5,6 +5,7 @@ import core.entities_new.State;
 import core.entities_new.Entity;
 import core.entities_new.event.ActionEvent;
 import core.entities_new.event.ControllerEvent;
+import core.entities_new.event.InteractEvent;
 import core.entities_new.event.StateChangeEvent;
 import core.utilities.keyboard.Keybinds;
 
@@ -38,6 +39,12 @@ public class PlayerController extends EntityController {
 			setEventQueue(new ControllerEvent(ControllerEvent.JUMP) {{
 				setData(new Vec2(0, -6f));
 			}});
+		} else if(Keybinds.CONFIRM.clicked()) {
+			if(!entity.getZBody().getInteractables().isEmpty()) {
+				entity.getZBody().getInteractables().get(0).fireEvent(new InteractEvent(InteractEvent.ON_ACTIVATE, entity));
+			}
+			//entity.getZBody().getInteractables().stream()
+				//.forEach(e -> e.fireEvent(new InteractEvent(InteractEvent.ON_ACTIVATE, entity)));
 		}
 	}
 

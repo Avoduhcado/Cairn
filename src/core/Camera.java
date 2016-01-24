@@ -10,8 +10,6 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -363,14 +361,17 @@ public class Camera {
 			case Rectangle2D.OUT_LEFT | Rectangle2D.OUT_BOTTOM:
 			case Rectangle2D.OUT_LEFT | Rectangle2D.OUT_TOP:
 				frameSpeed.set(focus.getBody().getLinearVelocity().mul(0.5f).x, focus.getBody().getLinearVelocity().mul(0.5f).y);
+				//frameSpeed.set(focus.getBody().getLinearVelocity().x, focus.getBody().getLinearVelocity().y);
 				break;
 			case Rectangle2D.OUT_RIGHT:
 			case Rectangle2D.OUT_LEFT:
 				frameSpeed.setX(focus.getBody().getLinearVelocity().mul(0.5f).x);
+				//frameSpeed.setX(focus.getBody().getLinearVelocity().x);
 				break;
 			case Rectangle2D.OUT_BOTTOM:
 			case Rectangle2D.OUT_TOP:
 				frameSpeed.setY(focus.getBody().getLinearVelocity().mul(0.5f).y);
+				//frameSpeed.setY(focus.getBody().getLinearVelocity().y);
 				break;
 			}
 		}
