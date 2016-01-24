@@ -4,11 +4,6 @@ import java.awt.Point;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.Filter;
-import org.jbox2d.dynamics.Fixture;
-
-import com.esotericsoftware.spine.Slot;
-
 import core.entities_new.State;
 import core.entities_new.Entity;
 import core.entities_new.event.ActionEvent;
@@ -18,7 +13,6 @@ import core.entities_new.event.StateChangeEvent;
 import core.entities_new.utils.BodyData;
 import core.entities_new.utils.BodyLoader;
 import core.setups.Stage_new;
-import core.utilities.keyboard.Keybinds;
 
 public class FollowController extends EntityController {
 

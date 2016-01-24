@@ -1,22 +1,25 @@
-package core.ui.utils;
+package core.ui.event;
 
-import core.entities.interfaces.Scriptable;
 import core.ui.UIElement;
 
 enum InteractType {
 	KEYPRESS, PLAYER_TOUCH, ENTITY_TOUCH, AUTO, PARALLEL;
 }
 
-public abstract class ScriptEvent extends UIEvent implements UIAction {
+public abstract class ScriptEvent extends UIEvent {
 
-	private Scriptable scriptHost;
+	//private Scriptable scriptHost;
 	private InteractType type;
 	
-	public ScriptEvent(UIElement parent, Scriptable scriptHost, InteractType type) {
+	public ScriptEvent(UIElement parent) {
+		// TODO Auto-generated constructor stub
+	}
+	
+	/*public ScriptEvent(UIElement parent, Scriptable scriptHost, InteractType type) {
 		super(parent);
 		this.scriptHost = scriptHost;
 		this.type = type;
-	}
+	}*/
 	
 	public abstract void read();
 	

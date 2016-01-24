@@ -1,43 +1,17 @@
 package core.ui;
 
-import java.awt.Color;
+import core.ui.event.ActionEvent;
+import core.ui.event.MouseEvent;
+import core.ui.event.MouseListener;
 
-import org.lwjgl.util.vector.Vector3f;
-
-import core.render.DrawUtils;
-import core.utilities.text.Text;
-
-public class CheckBox extends UIElement {
+public class CheckBox extends Button {
 
 	private boolean checked;
-	private String text;
 	
-	public CheckBox(String text, float x, float y, String image) {		
-		this.text = text;
-		setBounds(x, y, Text.getDefault().getWidth(text), Text.getDefault().getHeight(text));
-	}
-	
-	@Override
-	public void update() {
-		if(isClicked()) {
-			checked = !checked;
-		}
+	public CheckBox(float x, float y, String frame, String text) {
+		super(x, y, frame, text);
 		
-		super.update();
-	}
-
-	@Override
-	public void draw() {
-		super.draw();
-
-		if(isHovering()) {
-			DrawUtils.setColor(new Vector3f(1f, 1f, 1f));
-			DrawUtils.setStill(true);
-			DrawUtils.drawRect((float) bounds.getX(), (float) bounds.getY(), bounds);
-		}
-		Text.getDefault().setStill(still);
-		Text.getDefault().setColor(checked ? Color.white : Color.gray);
-		Text.getDefault().drawString(text, (float) bounds.getX(), (float) bounds.getY());
+		addMouseListener(new DefaultCheckBoxAdapter());
 	}
 	
 	public boolean isChecked() {
@@ -48,8 +22,38 @@ public class CheckBox extends UIElement {
 		this.checked = checked;
 	}
 
-	public String getText() {
-		return text;
+	/**
+	 * Handle the default actions for mouse events on a button
+	 */
+	class DefaultCheckBoxAdapter implements MouseListener {
+
+		public void mouseClicked(MouseEvent e) {
+			checked = !checked;
+			if(checked) {
+				textColor = "white";
+			}
+			CheckBox.this.fireEvent(new ActionEvent());
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+		}
+		
+		@Override
+		public void mouseReleased(MouseEvent e) {
+		}
+		
+		public void mouseEntered(MouseEvent e) {
+			textColor = "lightGray";
+		}
+		
+		public void mouseExited(MouseEvent e) {
+			if(!checked) {
+				textColor = "gray";
+			} else {
+				textColor = "white";
+			}
+		}
 	}
 
 }

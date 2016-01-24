@@ -22,7 +22,6 @@ import core.render.DrawUtils;
 import core.setups.GameSetup;
 import core.setups.Stage_new;
 import core.utilities.MathFunctions;
-import core.utilities.mouse.MouseInput;
 import core.utilities.text.Text;
 
 public class Camera {
@@ -215,13 +214,19 @@ public class Camera {
 		fade();
 		
 		if(Theater.get().paused) {
-			Text.getDefault().setStill(true);
+			/*Text.getDefault().setStill(true);
 			Text.getDefault().setCentered(true);
-			Text.getDefault().drawString("Paused", getDisplayWidth(0.5f), getDisplayHeight(0.5f));
+			Text.getDefault().drawString("Paused", getDisplayWidth(0.5f), getDisplayHeight(0.5f));*/
 		}
 		
 		// Draw debug info
 		if(Theater.get().debug) {
+			Text.drawString("Current Setup: " + Theater.get().getSetup().getClass().getName(), 15, 15, "t+,cwhite,d-");
+			Text.drawString("Avogine v" + Theater.AVOGINE_VERSION, 15, 45, "t+,cwhite,d-");
+		}
+		
+		// Draw debug info
+		/*if(Theater.get().debug) {
 			Text.getFont("DEBUG").setStill(true);
 			//Text.getFont("DEBUG").setSize(0.3f);
 			Text.getFont("DEBUG").drawString("Current Setup: " + Theater.get().getSetup().getClass().getName(), 15, 15);
@@ -238,7 +243,7 @@ public class Camera {
 			Text.getFont("DEBUG").setColor(Color.lightGray);
 			Text.getFont("DEBUG").drawString(MouseInput.getScreenMouseX() + ", " + MouseInput.getScreenMouseY(),
 					MouseInput.getMouseX(), MouseInput.getMouseY() - 32);
-		}
+		}*/
 	}
 	
 	public boolean getUpscale() {
@@ -320,7 +325,6 @@ public class Camera {
 		} else {
 			// Increase view window
 			GL11.glOrtho(0, displayWidth, displayHeight, 0, -1, 1);
-			Theater.get().getSetup().resizeRefresh();
 		}
 	}
 	

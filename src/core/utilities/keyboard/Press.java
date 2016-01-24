@@ -1,7 +1,6 @@
 package core.utilities.keyboard;
 
-import core.Theater;
-
+import org.lwjgl.input.Keyboard;
 
 public class Press {
 
@@ -15,8 +14,6 @@ public class Press {
 	private boolean released;
 	/** True if key presses are to be ignored */
 	private boolean disabled;
-	/** Time since last key press */
-	private float pressDelay = -1f;
 	
 	/**
 	 * Manage key mappings for button input.
@@ -24,15 +21,15 @@ public class Press {
 	 */
 	public Press(int k) {
 		setKey(k);
-		setPressed(Keyboard.isPressed(k));
-		setHeld(Keyboard.isPressed(k));
+		setPressed(Keyboard.isKeyDown(k));
+		setHeld(Keyboard.isKeyDown(k));
 	}
 	
 	/**
 	 * Check for key interactions
 	 */
 	public void update() {
-		if(Keyboard.isPressed(getKey())) {
+		if(Keyboard.isKeyDown(getKey())) {
 			setPressed(true);
 			setReleased(false);
 		} else {
@@ -43,13 +40,7 @@ public class Press {
 			setPressed(false);
 			setHeld(false);
 		}
-
-		if(pressDelay >= 0f) {
-			pressDelay += Theater.getDeltaSpeed(0.025f);
-			if(pressDelay > 0.3f) {
-				pressDelay = -1f;
-			}
-		}
+			
 	}
 
 	/**
@@ -85,9 +76,6 @@ public class Press {
 	 */
 	public void setPressed(boolean pressed) {
 		this.pressed = pressed;
-		if(pressed && pressDelay == -1f) {
-			pressDelay = 0;
-		}
 	}
 
 	/**
@@ -140,9 +128,5 @@ public class Press {
 	 */
 	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
-	}
-	
-	public float getPressDelay() {
-		return pressDelay;
 	}
 }

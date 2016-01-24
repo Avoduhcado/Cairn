@@ -45,7 +45,7 @@ import core.entities_new.utils.SensorData;
 import core.render.DrawUtils;
 import core.render.Sprite;
 import core.render.SpriteList;
-import core.render.Transform;
+import core.render.transform.Transform;
 import core.setups.Stage_new;
 
 public class SpineRender implements Renderable, Serializable {

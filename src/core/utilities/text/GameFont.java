@@ -14,21 +14,12 @@ public class GameFont {
 	private String fontName;
 	
 	public static final float defaultSize = 0.5f;
-	private static final Color defaultColor = Color.white;
-	
-	private float size;
-	private Color color;
-	private Color dropColor;
-	private boolean dropShadow = true;
-	private boolean still = false;
-	private boolean centered = false;
+	public static final Color defaultColor = Color.white;
 	
 	public GameFont(String fontName) {
 		this.fontName = fontName;
-		this.size = defaultSize;
-		this.color = defaultColor;
-		this.dropColor = Color.black;
 
+		// TODO Resource loading
 		try (FileInputStream fis = new FileInputStream(System.getProperty("resources") + "/fonts/" + fontName + ".fnt")) {
 			byte[] byteArray = new byte[fis.available()];
 			int offset = 0;
@@ -103,7 +94,7 @@ public class GameFont {
 		}
 	}
 	
-	private void drawText(String text, float x, float y) {
+	/*private void drawText(String text, float x, float y) {
 		float advance = 0;
 		if(centered) {
 			x -= (getWidth(text) / 2f);
@@ -122,25 +113,23 @@ public class GameFont {
 			getChar(text.charAt(i)).draw(x + advance, y);
 			advance += getChar(text.charAt(i)).getXAdvance();
 		}
+	}*/
+	
+	public void drawString(String text, float x, float y, TextModifier modifier) {
+		float advance = 0;
+		
+		for(int i = 0; i<text.length(); i++) {			
+			if(modifier.dropShadow) {
+				getChar(text.charAt(i)).draw(x + advance + 2, y + 2, modifier, modifier.dropColor);
+			}
+						
+			getChar(text.charAt(i)).draw(x + advance, y, modifier);
+			advance += getChar(text.charAt(i)).getXAdvance();
+		}
 	}
 	
-	public void drawString(String text, float x, float y) {
-		drawText(text, x, y);
-		reset();
-	}
-	
-	public void drawStringSegment(String text, float x, float y, int start, int end) {
-		drawText(text.substring(start, end), x, y);
-		reset();
-	}
-	
-	private void reset() {
-		setSize(defaultSize);
-		setColor(defaultColor);
-		setDropColor(Color.black);
-		setDropShadow(true);
-		setStill(false);
-		setCentered(false);
+	public void drawStringSegment(String text, float x, float y, int start, int end, TextModifier modifier) {
+		drawString(text.substring(start, end), x, y, modifier);
 	}
 
 	public Glyph getChar(Character c) {
@@ -154,7 +143,7 @@ public class GameFont {
 	public float getWidth(String text) {
 		float width = 0;
 		for(int i = 0; i<text.length(); i++) {
-			getChar(text.charAt(i)).setSize(size);
+			getChar(text.charAt(i)).setScale(defaultSize);
 			width += getChar(text.charAt(i)).getXAdvance();
 		}
 		
@@ -164,7 +153,7 @@ public class GameFont {
 	public float getHeight(String text) {
 		float height = 0;
 		for(int i = 0; i<text.length(); i++) {
-			getChar(text.charAt(i)).setSize(size);
+			getChar(text.charAt(i)).setScale(defaultSize);
 			if(getChar(text.charAt(i)).getLineHeight() > height) {
 				height = getChar(text.charAt(i)).getLineHeight();
 			}
@@ -173,57 +162,8 @@ public class GameFont {
 		return height;
 	}
 	
-	public void setAll(float size, Color color, boolean dropShadow, Color dropColor, boolean still, boolean centered) {
-		setSize(size);
-		setColor(color);
-		setDropShadow(dropShadow);
-		setDropColor(dropColor);
-		setStill(still);
-		setCentered(centered);
-	}
-	
 	public String getName() {
 		return fontName;
-	}
-	
-	public float getSize() {
-		return size;
-	}
-	
-	public void setSize(float size) {
-		this.size = size;
-	}
-
-	public Color getColor() {
-		return color;
-	}
-	
-	public void setColor(Color color) {
-		this.color = color;
-	}
-	
-	public Color getDropColor() {
-		return dropColor;
-	}
-	
-	public void setDropColor(Color dropColor) {
-		this.dropColor = dropColor;
-	}
-	
-	public boolean hasDropShadow() {
-		return dropShadow;
-	}
-	
-	public void setDropShadow(boolean dropShadow) {
-		this.dropShadow = dropShadow;
-	}
-
-	public void setStill(boolean still) {
-		this.still = still;
-	}
-	
-	public void setCentered(boolean centered) {
-		this.centered = centered;
 	}
 
 }

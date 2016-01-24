@@ -11,7 +11,7 @@ import java.io.IOException;
 import org.newdawn.slick.openal.SoundStore;
 
 import core.Camera;
-import core.utilities.keyboard.Keybinds;
+import core.utilities.keyboard.Keybind;
 
 public class Config {
 	
@@ -41,7 +41,7 @@ public class Config {
 	    			// TODO Custom video settings
 	    		} else if(line.matches("<KEYS>")) {
 	    			while((line = reader.readLine()) != null && !line.matches("<END>")) {
-	    				Keybinds.changeBind(line);
+	    				Keybind.changeBind(line);
 	    			}
 	    		}
 	    	}
@@ -99,8 +99,8 @@ public class Config {
 			
 			writer.write("<KEYS>");
 			writer.newLine();
-			for(int x = 0; x<Keybinds.values().length; x++) {
-				writer.write(Keybinds.values()[x].name() + "=" + Keybinds.values()[x].getKey());
+			for(int x = 0; x<Keybind.values().length; x++) {
+				writer.write(Keybind.values()[x].name() + "=" + Keybind.values()[x].getKey());
 				writer.newLine();
 			}
 			writer.write("<END>");

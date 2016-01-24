@@ -1,87 +1,131 @@
 package core.ui;
 
-import java.awt.geom.Rectangle2D;
-
-import org.lwjgl.input.Mouse;
-import org.lwjgl.util.vector.Vector3f;
-
-import core.render.textured.Sprite;
-import core.utilities.MathFunctions;
-import core.utilities.mouse.MouseInput;
+import core.render.SpriteList;
+import core.render.transform.Transform;
+import core.ui.event.MouseEvent;
+import core.ui.event.MouseListener;
+import core.ui.event.MouseMotionListener;
+import core.ui.event.UIEvent;
+import core.ui.event.ValueChangeEvent;
+import core.ui.event.ValueChangeListener;
+import core.utilities.MathUtils;
 
 public class Slider extends UIElement {
 
 	private float value;
-	private Rectangle2D valueBox;
-	private boolean held;
-	private boolean valueChanged;
 	
-	private Sprite background;
-	private Sprite valueIcon;
+	private String slideBar;
+	private Transform slideTransform;
+	private String sliderKnob;
 	
-	public Slider(float x, float y, float scale, float value, String background, String valueIcon) {		
+	private ValueChangeListener valueChangeListener;
+	
+	public Slider(float x, float y, float value) {
 		this.value = value;
-		// TODO Remove fixed values
-		setBounds(x, y, 100f * scale, 15f * scale);
-		valueBox = new Rectangle2D.Double(bounds.getX() + (bounds.getWidth() * value) - 5f, bounds.getY(), 10f * scale, 15f * scale);
 		
-		this.background = new Sprite(background);
-		this.background.setScale(new Vector3f(scale, scale, 1f));
-		this.valueIcon = new Sprite(valueIcon);
-		this.valueIcon.setScale(new Vector3f(scale, scale, 1f));
-	}
-	
-	public void update() {
-		super.update();
+		this.slideBar = "SliderBG";
+		this.sliderKnob = "SliderValue";
+		this.slideTransform = new Transform();
+		setBounds(x, y, SpriteList.get(slideBar).getWidth(), SpriteList.get(slideBar).getHeight());
 		
-		if(isClicked() || held) {
-			held = true;
-			setValue(MathFunctions.clamp((float) ((MouseInput.getMouseX() - bounds.getX()) / (bounds.getMaxX() - bounds.getX())), 0f, 1f));
-
-			valueBox.setFrame(bounds.getX() + (bounds.getWidth() * value) - (valueBox.getWidth() / 2f),
-					valueBox.getY(), valueBox.getWidth(), valueBox.getHeight());
-		}
-		
-		if(!Mouse.isButtonDown(0)) {
-			held = false;
-			valueChanged = false;
-		}
+		addMouseListener(new DefaultSliderAdapter());
+		addMouseMotionListener(new DefaultSliderMotionAdapter());
 	}
 	
 	@Override
 	public void draw() {
-		background.draw((float) bounds.getX(), (float) bounds.getY());
-		valueIcon.draw((float) valueBox.getX(), (float) valueBox.getY());
+		super.draw();
+		
+		setTransform(true);
+		SpriteList.get(slideBar).draw(slideTransform);
+		setTransform(false);
+		SpriteList.get(sliderKnob).draw(slideTransform);
 	}
 
-	@Override
-	public boolean isClicked() {
-		return bounds.contains(MouseInput.getMouse()) && Mouse.isButtonDown(0);
-	}
-	
 	public float getValue() {
 		return value;
 	}
 	
 	public void setValue(float value) {
 		if(this.value != value) {
+			fireEvent(new ValueChangeEvent(value, value - this.value));
 			this.value = value;
-			valueChanged = true;
-		} else {
-			valueChanged = false;
 		}
 	}
 	
-	@Override
-	public boolean isValueChanged() {
-		return valueChanged;
+	private void setTransform(boolean slide) {
+		if(slide) {
+			slideTransform.x = getX();
+			slideTransform.y = getY();
+		} else {
+			slideTransform.x = (float) (getX() + (bounds.getWidth() * value) - (SpriteList.get(sliderKnob).getWidth() / 2f));
+			slideTransform.y = getY();
+		}
+	}
+	
+	public void removeValueChangeListener(ValueChangeListener l) {
+		if(l == null) {
+			return;
+		}
+		
+		valueChangeListener = null;
+	}
+	
+	public void addValueChangeListener(ValueChangeListener l) {
+		this.valueChangeListener = l;
 	}
 	
 	@Override
-	public void setStill(boolean still) {
-		super.setStill(still);
-		background.setStill(still);
-		valueIcon.setStill(still);
+	public void fireEvent(UIEvent e) {
+		super.fireEvent(e);
+		
+		if(e instanceof ValueChangeEvent) {
+			processValueChangeEvent((ValueChangeEvent) e);
+		}
 	}
 	
+	protected void processValueChangeEvent(ValueChangeEvent e) {
+		if(valueChangeListener != null) {
+			valueChangeListener.valueChanged(e);
+		}
+	}
+	
+	class DefaultSliderAdapter implements MouseListener {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			setValue(MathUtils.clamp((float) ((e.getX() - bounds.getX()) / (bounds.getMaxX() - bounds.getX())), 0f, 1f));
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			setValue(MathUtils.clamp((float) ((e.getX() - bounds.getX()) / (bounds.getMaxX() - bounds.getX())), 0f, 1f));
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+		}
+
+	}
+	
+	class DefaultSliderMotionAdapter implements MouseMotionListener {
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+		}
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			setValue(MathUtils.clamp((float) ((e.getX() - getX()) / bounds.getWidth()), 0f, 1f));
+		}
+	}
+
 }

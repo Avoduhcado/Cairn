@@ -1,4 +1,4 @@
-package core.render;
+package core.render.transform;
 
 import org.lwjgl.util.vector.Vector4f;
 
@@ -7,27 +7,21 @@ import com.esotericsoftware.spine.utils.Color;
 public class Transform {
 
 	public float x, y;
+	public float width, height;
 	public float rotation;
 	public float scaleX, scaleY;
 	public boolean flipX;
 	public Vector4f color = new Vector4f();
 	public boolean still;
 	public boolean centerRotate;
+	public Vector4f textureOffsets;
 	
 	public Transform() {
-		setX(0);
-		setY(0);
-		setRotation(0);
-		setScaleX(1);
-		setScaleY(1);
-		setFlipX(false);
-		setColor(new Vector4f(1f,1f,1f,1f));
-		setStill(false);
-		setCenterRotate(false);
+		clear();
 	}
 	
 	public Transform(float x, float y, float rotation, float scaleX, float scaleY,
-			boolean flipX, Vector4f color, boolean still, boolean centerRotate) {
+			boolean flipX, Vector4f color, boolean still, boolean centerRotate, Vector4f textureOffsets) {
 		setX(x);
 		setY(y);
 		setRotation(rotation);
@@ -37,8 +31,26 @@ public class Transform {
 		setColor(color != null ? color : new Vector4f(1f,1f,1f,1f));
 		setStill(still);
 		setCenterRotate(centerRotate);
+		setTextureOffsets(textureOffsets);
+	}
+	
+	public void clear() {
+		setX(0);
+		setY(0);
+		setRotation(0);
+		setScaleX(1);
+		setScaleY(1);
+		setFlipX(false);
+		setColor(new Vector4f(1f,1f,1f,1f));
+		setStill(false);
+		setCenterRotate(false);
+		setTextureOffsets(null);
 	}
 
+	public boolean isScaled() {
+		return width == 0 && height == 0;
+	}
+	
 	public float getX() {
 		return x;
 	}
@@ -94,11 +106,11 @@ public class Transform {
 	public void setColor(Vector4f color) {
 		this.color = (color != null ? color : new Vector4f(1f,1f,1f,1f));
 	}
-	
-	public void setColor(Color color) {
-		this.color = (color != null ? new Vector4f(color.r, color.b, color.g, color.a) : new Vector4f(1f,1f,1f,1f));
-	}
 
+	public void setColor(Color color) {
+		this.color = new Vector4f(color.r, color.g, color.b, color.a);
+	}
+	
 	public boolean isStill() {
 		return still;
 	}
@@ -113,6 +125,14 @@ public class Transform {
 
 	public void setCenterRotate(boolean centerRotate) {
 		this.centerRotate = centerRotate;
+	}
+
+	public Vector4f getTextureOffsets() {
+		return textureOffsets;
+	}
+
+	public void setTextureOffsets(Vector4f textureOffsets) {
+		this.textureOffsets = textureOffsets;
 	}
 	
 }

@@ -1,12 +1,7 @@
 package core.setups;
 
 import java.util.ArrayList;
-import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector4f;
 
@@ -14,7 +9,6 @@ import core.Camera;
 import core.entities_new.Entity;
 import core.entities_new.EntityData;
 import core.entities_new.components.ActivateInteraction;
-import core.entities_new.components.AutorunInteraction;
 import core.entities_new.components.Combatant;
 import core.entities_new.components.Inventory;
 import core.entities_new.components.PlayerController;
@@ -24,7 +18,6 @@ import core.entities_new.event.InteractEvent;
 import core.entities_new.utils.BodyData;
 import core.entities_new.utils.BodyLoader;
 import core.entities_new.utils.CombatLoader;
-import core.entities_new.utils.SensorData;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
@@ -163,8 +156,6 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 		entities.stream()
 			.forEach(e -> e.updateBodyAndState());
-		
-		uiElements.stream().forEach(e -> e.update());
 	}
 
 	@Override
@@ -185,19 +176,6 @@ public class Stage_new extends GameSetup implements WorldContainer {
 						e.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR).y, 15, 15)));*/
 
 		//ShadowMap.get().drawIllumination();
-	}
-
-	@Override
-	public void drawUI() {
-		for(int x = 0; x<uiElements.size(); x++) {
-			getElement(x).draw();
-		}
-	}
-
-	@Override
-	public void resizeRefresh() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

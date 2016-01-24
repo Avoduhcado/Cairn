@@ -4,14 +4,14 @@ import java.awt.geom.Rectangle2D;
 
 public class EmptyFrame extends UIElement {
 
-	public EmptyFrame(float x, float y, float width, float height, String image) {
+	public EmptyFrame(float x, float y, String frame, float width, float height) {
 		setBounds(x, y, width, height);
-		setFrame(image);
+		setFrame(frame);
 	}
 	
-	public EmptyFrame(Rectangle2D bounds, String image) {
-		setBounds((float) bounds.getX(), (float) bounds.getY(), (float) bounds.getWidth(), (float) bounds.getHeight());
-		setFrame(image);
+	public EmptyFrame(Rectangle2D bounds, String frame) {
+		setBounds(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+		setFrame(frame);
 	}
 	
 }

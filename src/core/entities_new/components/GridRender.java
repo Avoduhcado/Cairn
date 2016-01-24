@@ -12,7 +12,7 @@ import core.Camera;
 import core.entities_new.Entity;
 import core.entities_new.event.EntityEvent;
 import core.render.SpriteList;
-import core.render.Transform;
+import core.render.transform.Transform;
 import core.setups.Stage_new;
 import core.utilities.AvoFileDecoder;
 import core.utilities.Resources;

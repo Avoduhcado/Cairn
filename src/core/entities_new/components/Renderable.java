@@ -1,7 +1,7 @@
 package core.entities_new.components;
 
 import core.entities_new.event.EntityEvent;
-import core.render.Transform;
+import core.render.transform.Transform;
 
 public interface Renderable {
 	

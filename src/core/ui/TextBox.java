@@ -2,10 +2,13 @@ package core.ui;
 
 import java.util.ArrayList;
 
-import core.Theater;
+import core.ui.event.KeybindEvent;
+import core.ui.event.KeybindListener;
+import core.ui.event.TimeEvent;
+import core.ui.event.TimeListener;
+import core.ui.event.UIEvent;
 import core.ui.utils.Align;
-import core.utilities.keyboard.Keybinds;
-import core.utilities.scripts.ScriptEvent;
+import core.utilities.keyboard.Keybind;
 import core.utilities.text.Text;
 import core.utilities.text.TextModifier;
 
@@ -13,53 +16,39 @@ public class TextBox extends UIElement {
 
 	protected ArrayList<TextLine> lines = new ArrayList<TextLine>();
 
-	protected float textFill;
-	private float fillSpeed = 0.5f;
-	private float killTimer;
-	protected ScriptEvent scriptEvent;
+	protected float textFill = 0f;
+	protected float fillSpeed = 12.5f;
 	
+	private KeybindListener keybindListener;
+		
 	/**
 	 * A simple box to display a block of text.
 	 * @param text The text to be written, including any text modifiers
 	 * @param x X position
 	 * @param y Y position
-	 * @param image The textbox background, or null for no background
+	 * @param image The text box background, or null for no background
 	 */
-	public TextBox(String text, float x, float y, String image, boolean fill) {		
+	public TextBox(float x, float y, String frame, String text, boolean fill) {
 		parseText(text);
 		
 		if(fill) {
-			textFill = 0f;
+			addTimeListener(new TimeListener() {
+				public void timeStep(TimeEvent e) {
+					textFill += e.getDelta() * fillSpeed;
+					
+					if(textFill >= TextBox.this.getLength()) {
+						TextBox.this.removeTimeListener(this);
+					}
+				}
+			});
 		} else {
 			textFill = getLength();
 		}
 		
 		setBounds(x, y, getWidth(), getHeight());
-		setFrame(image);
-	}
-
-	@Override
-	public void update() {
-		if(textFill < getLength()) {
-			fill();
-		}
+		setFrame(frame);
 		
-		if(Keybinds.CONFIRM.clicked() && scriptEvent != null) {
-			if(textFill < getLength()) {
-				textFill = getLength();
-				bounds.setFrame(bounds.getX(), bounds.getY(), getWidth((int) textFill + 1), getHeight((int) textFill + 1));
-			} else {
-				scriptEvent.processed();
-			}
-		}
-		
-		if(killTimer > 0) {
-			killTimer -= Theater.getDeltaSpeed(0.025f);
-			if(killTimer <= 0) {
-				// TODO Extend to all UI classes, maybe add a fancy fade effect
-				setDead(true);
-			}
-		}
+		addKeybindListener(new DefaultKeybindAdapter());
 	}
 	
 	@Override
@@ -68,8 +57,7 @@ public class TextBox extends UIElement {
 			if(textFill < getLength()) {
 				bounds.setFrame(bounds.getX(), bounds.getY(), getWidth((int) textFill + 1), getHeight((int) textFill + 1));
 			}
-			frame.setStill(still);
-			frame.draw((float) bounds.getX(), (float) bounds.getY(), bounds);
+			frame.draw(bounds);
 		}
 
 		if(!lines.isEmpty()) {
@@ -94,40 +82,7 @@ public class TextBox extends UIElement {
 			}
 		}
 	}
-	
-	@Override
-	public void draw(float x, float y) {
-		if(frame != null) {
-			if(textFill < getLength()) {
-				bounds.setFrame(x, y, getWidth((int) textFill + 1), getHeight((int) textFill + 1));
-			}
-			frame.setStill(still);
-			frame.draw(x, y, bounds);
-		}
 
-		if(!lines.isEmpty()) {
-			// Draw first line
-			lines.get(0).draw(x, y, (int) textFill);
-			// Text limit for subsequent lines
-			int limit = (int) textFill - lines.get(0).getLength();
-			if(limit > 0) {
-				// Text y offset for subsequent lines
-				float yOffset = lines.get(0).getHeight();
-				for(int i = 1; i < lines.size(); i++) {
-					// Draw line
-					lines.get(i).draw(x, y + yOffset, limit);
-					// Increment y offset
-					yOffset += lines.get(i).getHeight();
-					// Decrement limit
-					limit -= lines.get(i).getLength();
-					// End draw if you've run out of available text
-					if(limit <= 0)
-						break;
-				}
-			}
-		}
-	}
-	
 	private void parseText(String text) {
 		if(text.contains(";")) {
 			String[] lineArray = text.split(";");
@@ -150,14 +105,6 @@ public class TextBox extends UIElement {
 		}
 	}
 	
-	public void setScriptEvent(ScriptEvent script) {
-		this.scriptEvent = script;
-	}
-	
-	public void fill() {
-		textFill += Theater.getDeltaSpeed(fillSpeed);
-	}
-	
 	public float getTextFill() {
 		return textFill;
 	}
@@ -173,10 +120,61 @@ public class TextBox extends UIElement {
 		this.fillSpeed = fillSpeed;
 	}
 	
-	public void setKillTimer(float killTimer) {
-		this.killTimer = killTimer;
+	public void setKillTimer(float countdown) {
+		addTimeListener(new TimeListener() {
+			private float killTimer = countdown;
+			
+			@Override
+			public void timeStep(TimeEvent e) {
+				killTimer -= e.getDelta();
+				
+				if(killTimer <= 0) {
+					setState(UIElement.KILL_FLAG);
+				}
+			}
+		});
 	}
 
+	public void removeKeybindListener(KeybindListener l) {
+		if(l == null) {
+			return;
+		}
+		keybindListener = null;
+	}
+	
+	public void addKeybindListener(KeybindListener l) {
+		keybindListener = l;
+	}
+	
+	@Override
+	public void fireEvent(UIEvent e) {
+		super.fireEvent(e);
+		
+		if(e instanceof KeybindEvent) {
+			processKeybindEvent((KeybindEvent) e);
+		}
+	}
+
+	protected void processKeybindEvent(KeybindEvent e) {
+		if(keybindListener != null) {
+			keybindListener.KeybindTouched(e);
+		}
+	}
+	
+	class DefaultKeybindAdapter implements KeybindListener {
+		@Override
+		public void KeybindTouched(KeybindEvent e) {
+			if(e.getKeybind().equals(Keybind.CONFIRM) && e.getKeybind().clicked()) {
+				if(textFill < getLength()) {
+					textFill = getLength();
+					bounds.setFrame(bounds.getX(), bounds.getY(), getWidth((int) textFill + 1), getHeight((int) textFill + 1));
+					
+					removeTimeListener(timeListener);
+				}
+			}
+		}
+	}
+	
 	public void setText(String text) {
 		parseText(text);		
 	}
@@ -345,9 +343,8 @@ public class TextBox extends UIElement {
 			}
 			
 			public void draw(float x, float y, int limit) {
-				modifier.apply();
-				Text.getFont(modifier.getFontFace()).drawStringSegment(modifier.getAddIn() + text, x, y, 0,
-						limit > getLength() ? getLength() : limit);
+				Text.getFont(modifier.fontFace).drawStringSegment(modifier.addIn + text, x, y, 0,
+						limit > getLength() ? getLength() : limit, modifier);
 			}
 			
 			public void addModifier(String modifier) {
@@ -355,33 +352,29 @@ public class TextBox extends UIElement {
 			}
 			
 			public float getWidth() {
-				modifier.apply();
-				return Text.getFont(modifier.getFontFace()).getWidth(modifier.getAddIn() + text);
+				return Text.getFont(modifier.fontFace).getWidth(modifier.addIn + text);
 			}
 			
 			public float getHeight() {
-				modifier.apply();
-				return Text.getFont(modifier.getFontFace()).getHeight(modifier.getAddIn() + text);
+				return Text.getFont(modifier.fontFace).getHeight(modifier.addIn + text);
 			}
 			
 			public float getWidth(int limit) {
-				modifier.apply();
-				return Text.getFont(modifier.getFontFace()).getWidth((modifier.getAddIn() + text)
+				return Text.getFont(modifier.fontFace).getWidth((modifier.addIn + text)
 						.substring(0, limit > getLength() ? getLength() : limit));
 			}
 			
 			public float getHeight(int limit) {
-				modifier.apply();
-				return Text.getFont(modifier.getFontFace()).getHeight((modifier.getAddIn() + text)
+				return Text.getFont(modifier.fontFace).getHeight((modifier.addIn + text)
 						.substring(0, limit > getLength() ? getLength() : limit));
 			}
 			
 			public int getLength() {
-				return text.length() + modifier.getAddIn().length();
+				return text.length() + modifier.addIn.length();
 			}
 			
 		}
 		
 	}
-	
+
 }

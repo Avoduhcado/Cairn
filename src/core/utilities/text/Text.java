@@ -6,6 +6,8 @@ public class Text {
 
 	private static HashMap<String, GameFont> fonts = new HashMap<String, GameFont>();
 	
+	private static final TextModifier plainText = new TextModifier("t+");
+	
 	/**
 	 * Loads a font to be used. If no other fonts exist, will load given font under "DEFAULT" tag.
 	 * @param key to identify given font. eg. "DEFAULT", "SYSTEM", "DIALOGUE"
@@ -40,6 +42,14 @@ public class Text {
 	 */
 	public static GameFont getDefault() {
 		return fonts.get("DEFAULT");
+	}
+	
+	public static void drawString(String text, float x, float y) {
+		getDefault().drawString(text, x, y, plainText);
+	}
+	
+	public static void drawString(String text, float x, float y, String modifier) {
+		getDefault().drawString(text, x, y, new TextModifier(modifier));
 	}
 	
 }

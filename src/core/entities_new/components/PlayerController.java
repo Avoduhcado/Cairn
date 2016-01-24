@@ -7,7 +7,7 @@ import core.entities_new.event.ActionEvent;
 import core.entities_new.event.ControllerEvent;
 import core.entities_new.event.InteractEvent;
 import core.entities_new.event.StateChangeEvent;
-import core.utilities.keyboard.Keybinds;
+import core.utilities.keyboard.Keybind;
 
 public class PlayerController extends EntityController {
 					
@@ -25,21 +25,21 @@ public class PlayerController extends EntityController {
 	}
 
 	private void controlActions() {
-		if(Keybinds.DODGE.clicked()) {
+		if(Keybind.DODGE.clicked()) {
 			setEventQueue(new ControllerEvent(ControllerEvent.DODGE));
-		} else if(Keybinds.ATTACK.clicked()) {
+		} else if(Keybind.ATTACK.clicked()) {
 			setEventQueue(new ControllerEvent(ControllerEvent.ATTACK));
-		} else if(Keybinds.DEFEND.clicked()) {
+		} else if(Keybind.DEFEND.clicked()) {
 			setEventQueue(new ControllerEvent(ControllerEvent.DEFEND));
-		} else if(Keybinds.SLOT1.clicked()) {
+		} else if(Keybind.SLOT1.clicked()) {
 			setEventQueue(new ControllerEvent(ControllerEvent.COLLAPSE) {{
 				setData(entity.getBody().getLinearVelocity().clone());
 			}});
-		} else if(Keybinds.SLOT2.clicked()) {
+		} else if(Keybind.SLOT2.clicked()) {
 			setEventQueue(new ControllerEvent(ControllerEvent.JUMP) {{
 				setData(new Vec2(0, -6f));
 			}});
-		} else if(Keybinds.CONFIRM.clicked()) {
+		} else if(Keybind.CONFIRM.clicked()) {
 			if(!entity.getZBody().getInteractables().isEmpty()) {
 				entity.getZBody().getInteractables().get(0).fireEvent(new InteractEvent(InteractEvent.ON_ACTIVATE, entity));
 			}
@@ -50,14 +50,14 @@ public class PlayerController extends EntityController {
 
 	private void controlMovement() {
 		speedMod = 1f;
-		if(Keybinds.RUN.held()) {
+		if(Keybind.RUN.held()) {
 			speedMod = 1.5f;
 		}
 		
-		if(Keybinds.movement()) {
+		if(Keybind.movement()) {
 			move(new ControllerEvent(ControllerEvent.MOVE) {{
-				setData(new Vec2(Keybinds.RIGHT.press() ? 1f : Keybinds.LEFT.press() ? -1f : 0f,
-							Keybinds.UP.press() ? -0.65f : Keybinds.DOWN.press() ? 0.65f : 0f));
+				setData(new Vec2(Keybind.RIGHT.press() ? 1f : Keybind.LEFT.press() ? -1f : 0f,
+						Keybind.UP.press() ? -0.65f : Keybind.DOWN.press() ? 0.65f : 0f));
 			}});
 		}
 	}

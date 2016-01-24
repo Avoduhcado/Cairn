@@ -1,170 +1,91 @@
 package core.render.textured;
 
 import java.awt.geom.Rectangle2D;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import core.Camera;
 
-public class UIFrame extends Sprite {
+import org.lwjgl.util.vector.Vector4f;
+import org.newdawn.slick.opengl.Texture;
+
+import core.render.SpriteList;
+import core.render.transform.Transform;
+
+public class UIFrame {
+
+	private String frame;
 	
-	private float opacity = 1f;
-	private float width;
-	private float height;
+	private float opacity = 0.8f;
+	private boolean still;
+	
+	private Transform transform;
 	
 	public UIFrame(String ref) {
-		super("ui/" + ref);
+		this.frame = ref;
 		
-		width = getWidth() / 3f;
-		height = getHeight() / 3f;
+		this.transform = new Transform();
 	}
 
-	public void draw(float x, float y, Rectangle2D box) {
-		if(Float.isNaN(x))
-			x = Camera.get().getDisplayWidth(0.5f) - (getWidth() / 2f);
-		if(Float.isNaN(y))
-			y = Camera.get().getDisplayHeight(0.5f) - (getHeight() / 2f);
+	private void setTransform(int row, int col, Rectangle2D box) {
+		Texture texture = SpriteList.get(frame).getTexture();
+		transform.clear();
+		transform.textureOffsets = new Vector4f();
+		transform.color = new Vector4f(1f, 1f, 1f, opacity);
+		transform.still = still;
 		
-		x -= width / 2f;
-		y -= height / 2f;
+		switch(row) {
+		case 0:
+			transform.y = (float) (box.getY() - (texture.getImageHeight() / 3f));
+			transform.height = (texture.getImageHeight() / 3f);
+			transform.textureOffsets.y = 0;
+			transform.textureOffsets.w = (texture.getHeight() / 3f);
+			break;
+		case 1:
+			transform.y = (float) box.getY();
+			transform.height = (float) box.getHeight();
+			transform.textureOffsets.y = (texture.getHeight() / 3f);
+			transform.textureOffsets.w = (texture.getHeight() * 0.667f);
+			break;
+		case 2:
+			transform.y = (float) box.getMaxY();
+			transform.height = (texture.getImageHeight() / 3f);
+			transform.textureOffsets.y = (texture.getHeight() * 0.667f);
+			transform.textureOffsets.w = (texture.getHeight());
+			break;
+		}
 		
-		texture.bind();
-
-		GL11.glPushMatrix();
-		
-		if(still)
-			GL11.glTranslatef((int) x, (int) y, 0f);
-		else
-			GL11.glTranslatef((int) (x - Camera.get().frame.getX()), (int) (y - Camera.get().frame.getY()), 0f);
-		GL11.glColor4f(1f, 1f, 1f, opacity);
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-
-		GL11.glBegin(GL11.GL_QUADS);
-		{
-			for(int a = 0; a<3; a++) {
-				for(int b = 0; b<3; b++) {
-					if(a % 2 == 0 && b % 2 == 0) {
-						setCornerQuads(a, b, box);
-					} else if((a + 1) % 2 == 0 && (b + 1) % 2 == 0) {
-						if(box.getHeight() > height && box.getWidth() > width)
-							setInnerQuads(a, b, box);
-					} else if ((a + 1) % 2 != 0) {
-						if(box.getHeight() > height)
-							setVertQuads(a, b, box);
-					} else {
-						if(box.getWidth() > width)
-							setHorizQuads(a, b, box);
-					}
-				}
+		switch(col) {
+		case 0:
+			transform.x = (float) (box.getX() - (texture.getImageWidth() / 3f));
+			transform.width = (texture.getImageWidth() / 3f);
+			transform.textureOffsets.x = 0;
+			transform.textureOffsets.z = (texture.getWidth() / 3f);
+			break;
+		case 1:
+			transform.x = (float) box.getX();
+			transform.width = (float) box.getWidth();
+			transform.textureOffsets.x = (texture.getWidth() / 3f);
+			transform.textureOffsets.z = (texture.getWidth() * 0.667f);
+			break;
+		case 2:
+			transform.x = (float) box.getMaxX();
+			transform.width = (texture.getImageWidth() / 3f);
+			transform.textureOffsets.x = (texture.getWidth() * 0.667f);
+			transform.textureOffsets.z = (texture.getWidth());
+			break;
+		}
+	}
+	
+	/**
+	 * Draw frame around supplied <code>Rectangle2D</code> box
+	 * @param box
+	 */
+	public void draw(Rectangle2D box) {
+		for(int row = 0; row < 3; row++) {
+			for(int col = 0; col < 3; col++) {
+				setTransform(row, col, box);
+								
+				SpriteList.get(frame).draw(transform);
 			}
 		}
-		GL11.glEnd();
-		GL11.glPopMatrix();
 	}
-	
-	public void setCornerQuads(int x, int y, Rectangle2D box) {
-		double texWidth = texture.getWidth() / 3f;
-		double texHeight = texture.getHeight() / 3f;
-		double verWidth = box.getWidth() * (x / 2);
-		double verHeight = box.getHeight() * (y / 2);
-				
-		
-		GL11.glTexCoord2d(x * texWidth, y * texHeight);
-		GL11.glVertex2d(verWidth, verHeight);
-
-		GL11.glTexCoord2d((x * texWidth) + texWidth, y * texHeight);
-		GL11.glVertex2d(verWidth + width, verHeight);
-
-		GL11.glTexCoord2d((x * texWidth) + texWidth, (y * texHeight) + texHeight);
-		GL11.glVertex2d(verWidth + width, verHeight + height);
-
-		GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
-		GL11.glVertex2d(verWidth, verHeight + height);
-		
-	}
-	
-	public void setVertQuads(int x, int y, Rectangle2D box) {
-		double texWidth = texture.getWidth() / 3f;
-		double texHeight = texture.getHeight() / 3f;
-		double verWidth = (box.getWidth()) * x / 2;
-		double verHeight = box.getHeight();
-		
-		//GL11.glBegin(GL11.GL_QUADS);
-		//{
-			GL11.glTexCoord2d(x * texWidth, y * texHeight);
-		    GL11.glVertex2d(verWidth, height);
-		    
-		    GL11.glTexCoord2d((x * texWidth) + texWidth, y * texHeight);
-		    GL11.glVertex2d(verWidth + width, height);
-		    
-		    GL11.glTexCoord2d((x * texWidth) + texWidth, (y * texHeight) + texHeight);
-		    GL11.glVertex2d(verWidth + width, verHeight);
-		    
-		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
-		    GL11.glVertex2d(verWidth, verHeight);
-		//}
-		//GL11.glEnd();
-	}
-	
-	public void setHorizQuads(int x, int y, Rectangle2D box) {
-		double texWidth = texture.getWidth() / 3f;
-		double texHeight = texture.getHeight() / 3f;
-		double verWidth = box.getWidth();
-		double verHeight = (box.getHeight()) * y / 2;
-		
-		//GL11.glBegin(GL11.GL_QUADS);
-		//{
-			GL11.glTexCoord2d(texWidth, y * texHeight);
-		    GL11.glVertex2d(width, verHeight);
-		    
-		    GL11.glTexCoord2d((x * texWidth) + texWidth, y * texHeight);
-		    GL11.glVertex2d(verWidth, verHeight);
-		    
-		    GL11.glTexCoord2d((x * texWidth) + texWidth, (y * texHeight) + texHeight);
-		    GL11.glVertex2d(verWidth, verHeight + height);
-		    
-		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
-		    GL11.glVertex2d(width, verHeight + height);
-		//}
-		//GL11.glEnd();
-	}
-	
-	public void setInnerQuads(int x, int y, Rectangle2D box) {
-		double texWidth = texture.getWidth() / 3f;
-		double texHeight = texture.getHeight() / 3f;
-		double verWidth = box.getWidth();
-		double verHeight = box.getHeight();
-		
-		//GL11.glBegin(GL11.GL_QUADS);
-		//{
-			GL11.glTexCoord2d(x * texWidth, y * texHeight);
-			GL11.glVertex2d(width, height);
-		    
-		    GL11.glTexCoord2d((x * texWidth) + texWidth, y * texHeight);
-		    GL11.glVertex2d(verWidth, height);
-		    
-		    GL11.glTexCoord2d((x * texWidth) + texWidth, (y * texHeight) + texHeight);
-		    GL11.glVertex2d(verWidth, verHeight);
-		    
-		    GL11.glTexCoord2d(x * texWidth, (y * texHeight) + texHeight);
-		    GL11.glVertex2d(width, verHeight);
-		//}
-		//GL11.glEnd();
-	}
-	
-	/*@Override
-	public void setTexture(String ref) throws IOException {
-		this.texture = TextureLoader.getTexture("PNG",
-				ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/ui/" + ref + ".png"));
-		/*this.texture = new DeferredTexture(ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/ui/" + ref + ".png"), 
-				ref, false, 0, null);
-		this.texture.load();
-		LoadingList.get().remove(texture);*/
-	//}
 	
 	public float getOpacity() {
 		return opacity;
@@ -173,13 +94,13 @@ public class UIFrame extends Sprite {
 	public void setOpacity(float opacity) {
 		this.opacity = opacity;
 	}
-
-	public float getWidth() {
-		return texture.getImageWidth();
+	
+	public boolean isStill() {
+		return still;
 	}
 	
-	public float getHeight() {
-		return texture.getImageHeight();
+	public void setStill(boolean still) {
+		this.still = still;
 	}
 	
 }

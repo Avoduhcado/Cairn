@@ -1,6 +1,5 @@
 package core.ui;
 
-import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -9,129 +8,79 @@ import java.io.IOException;
 
 import org.lwjgl.input.Keyboard;
 
-import core.Theater;
+import core.ui.event.ActionEvent;
+import core.ui.event.ActionListener;
+import core.ui.event.KeyEvent;
+import core.ui.event.KeyListener;
+import core.ui.event.MouseEvent;
+import core.ui.event.MouseListener;
+import core.ui.event.TimeEvent;
+import core.ui.event.TimeListener;
+import core.ui.event.UIEvent;
+import core.ui.event.ValueChangeEvent;
+import core.ui.event.ValueChangeListener;
 import core.ui.utils.Accessible;
-import core.utilities.keyboard.Keybinds;
 import core.utilities.text.Text;
 
 public class InputBox extends UIElement implements Accessible {
 
+	private static final String CARET = "/";
+	
 	private int style; // 0 = plain text; 1 = Integers; -1 = Keybinds;
 	private String text;
 	private int textLimit = 100;
+	private String textColor = "white";
 	private float flash = 0.0f;
-	private boolean centered = true;
-	private boolean valueChanged;
+	//private boolean centered = true;
+	
+	private ActionListener actionListener;
+	private KeyListener keyListener;
+	private ValueChangeListener valueChangeListener;
 	
 	/**
 	 * @param text Preset text
 	 * @param x coordinate of box
 	 * @param y coordinate of box
-	 * @param image Background frame
 	 * @param style Type of input accepted
+	 * @param image Background frame
 	 * @param textLimit Total number of characters accepted
 	 */
-	public InputBox(String text, float x, float y, String image, int style, int textLimit) {		
-		Keybinds.clear();
-		Keyboard.enableRepeatEvents(true);
-		
+	public InputBox(float x, float y, String frame, String text, int style, int textLimit) {
 		this.style = style;
 		this.text = text != null ? text : "";
-		if(textLimit != 0)
+		if(textLimit != 0) {
 			this.textLimit = textLimit;
+			trimText();
+		}
 		
-		setBounds(x, y, Text.getDefault().getWidth(this.text), Text.getDefault().getHeight(this.text));
-	}
-	
-	@Override
-	public void update() {
-		super.update();
-		// TODO
-		if(isClicked()) {
-			enabled = !enabled;
-			Keybinds.clear();
-			if(!enabled)
-				flash = 0f;
-		}
-		if(enabled) {
-			// Check for input
-			if(input() != null) {
-				valueChanged = true;
-			} else {
-				valueChanged = false;
-			}
-			
-			// Display flashing cursor
-			if(flash < 1.0f)
-				flash += Theater.getDeltaSpeed(0.025f);
-			else
-				flash = 0;
-		}
+		setBounds(x, y, 
+				text != null ? Text.getDefault().getWidth(text) : Text.getDefault().getWidth(CARET),
+				text != null ? Text.getDefault().getHeight(text) : Text.getDefault().getHeight(CARET));
+		setFrame(frame);
+		
+		addMouseListener(new DefaultInputMouseAdapter());
+		addTimeListener(new DefaultInputTimeAdapter());
+		addKeyListener(createKeyListener(style));
 	}
 	
 	@Override
 	public void draw() {
 		super.draw();
 		
-		Text.getDefault().setStill(still);
-		Text.getDefault().setCentered(centered);
-		Text.getDefault().setColor(enabled ? Color.white : (this.isHovering() ? Color.gray : Color.darkGray));
-		Text.getDefault().drawString(flash > 0.5f ? text + "|" : text, (float) bounds.getX(), (float) bounds.getY());
+		Text.drawString(flash > 0.5f ? text + CARET : text, getX(), getY(), "c" + textColor);
 	}
-	
+
 	/**
-	 * Collect input from user.
-	 * @return null if Confirm is not pressed. Text if Confirm is pressed.
+	 * Fit bounds to included text
 	 */
-	public String input() {
-		// Loop through all existing key presses
-		while(Keyboard.next()) {
-			// If a key was both pressed and isn't a modifier
-			if(Keyboard.getEventKeyState()) {
-				switch(style) {
-				case 0:
-				case 1:
-					if(!isModifierKey()) {
-						// Check for backspace and if text can be removed
-						if(Keyboard.getEventKey() == Keyboard.KEY_BACK && !text.isEmpty()) {
-							// Remove the last character from text
-							text = (String)text.subSequence(0, text.length() - 1);
-						} else if(text.length() <= textLimit && Keyboard.getEventKey() != Keyboard.KEY_BACK) {
-							// If the user is pasting text
-							if(Keyboard.getEventKey() == Keyboard.KEY_V && (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) 
-									|| Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))) {
-								paste();
-							} else if(Keyboard.getEventCharacter() != Keyboard.CHAR_NONE && Keyboard.getEventKey() != Keyboard.KEY_RETURN) {
-								// Add a regular character
-								addCharacter();
-							}
-							// Make sure text is still inside limit
-							trimText();
-						}
-						resizeBounds();
-					}
-					break;
-				case -1:
-					text = Keyboard.getKeyName(Keyboard.getEventKey());
-					Keyboard.enableRepeatEvents(false);
-					resizeBounds();
-					return text;
-				}
-			}
-		}
-		
-		if(Keybinds.CONFIRM.clicked()) {
-			Keyboard.enableRepeatEvents(false);
-			return text;
-		}
-		
-		return null;
+	public void resizeBounds() {
+		setBounds(bounds.getX(), bounds.getY(), Text.getDefault().getWidth(text + CARET), Text.getDefault().getHeight(text + CARET));
 	}
 	
 	/**
 	 * Paste contents of clipboard into text.
 	 */
-	public void paste() {
+	private void paste() {
 		try {
 			switch(style) {
 			case 1: 
@@ -150,15 +99,15 @@ public class InputBox extends UIElement implements Accessible {
 	/**
 	 * Add the next character from the keyboard to text.
 	 */
-	public void addCharacter() {
+	private void addCharacter(char c) {
 		switch(style) {
 		case 0: 
-			text = text + Keyboard.getEventCharacter();
+			text = text + c;
 			break;
 		case 1:
 			try {
-				Integer.parseInt(text + Keyboard.getEventCharacter());
-				text = text + Keyboard.getEventCharacter();
+				Integer.parseInt(text + c);
+				text = text + c;
 			} catch (NumberFormatException e) {}
 			break;
 		}
@@ -167,41 +116,50 @@ public class InputBox extends UIElement implements Accessible {
 	/**
 	 * Trim the text to fit limit constraints.
 	 */
-	public void trimText() {
+	private void trimText() {
 		if(text.length() > textLimit) {
 			text = text.substring(0, textLimit);
+			resizeBounds();
 		}
 	}
 	
 	/**
 	 * @return true if the next key is a modifier
 	 */
-	public boolean isModifierKey() {
-		if(Keyboard.getEventKey() == Keyboard.KEY_LSHIFT || Keyboard.getEventKey() == Keyboard.KEY_RSHIFT || Keyboard.getEventKey() == Keyboard.KEY_RIGHT
-				|| Keyboard.getEventKey() == Keyboard.KEY_LEFT || Keyboard.getEventKey() == Keyboard.KEY_DOWN || Keyboard.getEventKey() == Keyboard.KEY_UP
-				|| Keyboard.getEventKey() == Keyboard.KEY_LCONTROL || Keyboard.getEventKey() == Keyboard.KEY_RCONTROL) {
+	private boolean isModifierKey(int key) {
+		switch(key) {
+		case Keyboard.KEY_LSHIFT:
+		case Keyboard.KEY_RSHIFT:
+		case Keyboard.KEY_RIGHT:
+		case Keyboard.KEY_LEFT:
+		case Keyboard.KEY_DOWN:
+		case Keyboard.KEY_UP:
+		case Keyboard.KEY_LCONTROL:
+		case Keyboard.KEY_RCONTROL:
 			return true;
+		default:
+			return false;
 		}
-		
-		return false;
 	}
 	
 	@Override
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-		Keybinds.clear();
-		if(!enabled) {
-			flash = 0f;
-			valueChanged = false;
+	public void setState(int state) {
+		super.setState(state);
+		
+		if(state == ENABLED) {
+			textColor = "white";
+		} else {
+			flash = 0;
+			textColor = "gray";
 		}
 	}
-	
+
 	/**
 	 * Center the text in this input.
 	 * @param centered
 	 */
 	public void setCentered(boolean centered) {
-		this.centered = centered;
+		//this.centered = centered;
 	}
 	
 	/**
@@ -210,18 +168,158 @@ public class InputBox extends UIElement implements Accessible {
 	public String getText() {
 		return text;
 	}
-	
-	public void resizeBounds() {
-		if(!text.isEmpty()) {
-			bounds.setFrame(bounds.getX(), bounds.getY(), Text.getDefault().getWidth(text), Text.getDefault().getHeight(text));
-		} else {
-			bounds.setFrame(bounds.getX(), bounds.getY(), 15f, 15f);
+
+	public void removeActionListener(ActionListener l) {
+		if(l == null) {
+			return;
 		}
+		
+		actionListener = null;
+	}
+	
+	public void addActionListener(ActionListener l) {
+		this.actionListener = l;
+	}
+	
+	private KeyListener createKeyListener(int style) {
+		switch(style) {
+		case 0:
+		case 1:
+			return (e -> {
+				if(!isModifierKey(e.getKey())) {
+					if(e.getKey() == Keyboard.KEY_BACK && text.isEmpty()) {
+						return;
+					} else if(e.getKey() == Keyboard.KEY_BACK && !text.isEmpty()) {
+						// Remove the last character from text
+						text = text.substring(0, text.length() - 1);
+					} else if(text.length() <= textLimit) {
+						// If the user is pasting text
+						if(e.getKey() == Keyboard.KEY_V && (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) 
+								|| Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))) {
+							paste();
+						} else if(e.getKeyChar() != Keyboard.CHAR_NONE && e.getKey() != Keyboard.KEY_RETURN) {
+							// Add a regular character
+							addCharacter(e.getKeyChar());
+						}
+						// Make sure text is still inside limit
+						trimText();
+					}
+					resizeBounds();
+				}
+				
+				if(e.getKey() == Keyboard.KEY_RETURN) {
+					InputBox.this.fireEvent(new ValueChangeEvent(text, null));
+					InputBox.this.setState(DISABLED);
+				}
+			});
+		case -1:
+			return (e -> {
+				text = e.getKeyName();
+				resizeBounds();
+
+				InputBox.this.fireEvent(new ValueChangeEvent(text, null));
+				InputBox.this.setState(DISABLED);
+			});
+		}
+		
+		return null;
+	}
+	
+	public void removeKeyListener(KeyListener l) {
+		if(l == null) {
+			return;
+		}
+		this.keyListener = null;
+	}
+
+	public void addKeyListener(KeyListener l) {
+		this.keyListener = l;
+	}
+	
+	public void removeValueChangeListener(ValueChangeListener l) {
+		if(l == null) {
+			return;
+		}
+		this.valueChangeListener = null;
+	}
+
+	public void addValueChangeListener(ValueChangeListener l) {
+		this.valueChangeListener = l;
 	}
 	
 	@Override
-	public boolean isValueChanged() {
-		return valueChanged;
+	public void fireEvent(UIEvent e) {
+		super.fireEvent(e);
+		
+		if(e instanceof ActionEvent) {
+			processActionEvent((ActionEvent) e);
+		} else if(e instanceof KeyEvent) {
+			processKeyEvent((KeyEvent) e);
+		} else if(e instanceof ValueChangeEvent) {
+			processValueChangeEvent((ValueChangeEvent) e);
+		}
+	}
+	
+	protected void processActionEvent(ActionEvent e) {
+		if(actionListener != null) {
+			actionListener.actionPerformed(e);
+		}
+	}
+	
+	protected void processKeyEvent(KeyEvent e) {
+		if(keyListener != null) {
+			keyListener.keyPress(e);
+		}
+	}
+
+	protected void processValueChangeEvent(ValueChangeEvent e) {
+		if(valueChangeListener != null) {
+			valueChangeListener.valueChanged(e);
+		}
+	}
+	
+	class DefaultInputMouseAdapter implements MouseListener {
+
+		public void mouseClicked(MouseEvent e) {
+			setState(getState() == ENABLED ? DISABLED : ENABLED);
+			InputBox.this.fireEvent(new ActionEvent());
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+		}
+		
+		@Override
+		public void mouseReleased(MouseEvent e) {
+		}
+		
+		public void mouseEntered(MouseEvent e) {
+			if(getState() == ENABLED) {
+				textColor = "white";
+			} else {
+				textColor = "lightGray";
+			}
+		}
+		
+		public void mouseExited(MouseEvent e) {
+			if(getState() == ENABLED) {
+				textColor = "white";
+			} else {
+				textColor = "gray";
+			}
+		}
+	}
+
+	class DefaultInputTimeAdapter implements TimeListener {
+		@Override
+		public void timeStep(TimeEvent e) {
+			if(getState() == ENABLED) {
+				flash += e.getDelta();
+				if(flash > 1f) {
+					flash = 0;
+				}
+			}
+		}
 	}
 	
 }

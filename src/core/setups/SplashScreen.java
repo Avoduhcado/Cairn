@@ -11,7 +11,7 @@ import java.util.Queue;
 import core.Camera;
 import core.Theater;
 import core.ui.Icon;
-import core.utilities.keyboard.Keybinds;
+import core.utilities.keyboard.Keybind;
 
 public class SplashScreen extends GameSetup {
 
@@ -39,8 +39,7 @@ public class SplashScreen extends GameSetup {
 			String line = null;
 			while((line = reader.readLine()) != null) {
 				// Load each screen
-				Icon icon = new Icon(line);
-				icon.setPosition(Float.NaN, Float.NaN);
+				Icon icon = new Icon(Float.NaN, Float.NaN, line);
 				splashImages.add(icon);
 			}
 		} catch (IOException e) {
@@ -72,8 +71,7 @@ public class SplashScreen extends GameSetup {
 						tempNumber--;
 					}
 					
-					Icon icon = new Icon(line);
-					icon.setPosition(Float.NaN, Float.NaN);
+					Icon icon = new Icon(Float.NaN, Float.NaN, line);
 					splashImages.add(icon);
 					
 					reader.close();
@@ -101,7 +99,7 @@ public class SplashScreen extends GameSetup {
 	 */
 	public void update() {
 		// If player wishes to skip screen
-		if(Keybinds.CONFIRM.clicked()) {
+		if(Keybind.CONFIRM.clicked()) {
 			// Remove current screen
 			splashImages.poll();
 			// Stop any sound effects playing
@@ -160,10 +158,6 @@ public class SplashScreen extends GameSetup {
 		if(splashImages.peek() != null) {
 			splashImages.peek().draw();
 		}
-	}
-	
-	@Override
-	public void resizeRefresh() {
 	}
 	
 }

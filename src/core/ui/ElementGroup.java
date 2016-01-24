@@ -1,66 +1,45 @@
 package core.ui;
 
-import java.awt.Dimension;
-import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.lwjgl.util.vector.Vector2f;
 
-import core.Camera;
-import core.Theater;
-import core.render.SpriteIndex;
+import core.ui.event.ActionEvent;
+import core.ui.event.KeyEvent;
+import core.ui.event.KeybindEvent;
+import core.ui.event.KeybindListener;
+import core.ui.event.MouseEvent;
+import core.ui.event.MouseListener;
+import core.ui.event.MouseMotionListener;
+import core.ui.event.TimeEvent;
+import core.ui.event.TimeListener;
+import core.ui.event.UIEvent;
 import core.ui.utils.Accessible;
-import core.utilities.MathFunctions;
-import core.utilities.keyboard.Keybinds;
-import core.utilities.mouse.MouseInput;
+import core.utilities.MathUtils;
 
-public class ElementGroup<T extends UIElement> extends ArrayList<T> {
+public class ElementGroup<T extends UIElement> extends UIElement {
 	
-	private static final long serialVersionUID = 1L;
+	protected ArrayList<T> uiElements = new ArrayList<T>();
 	
 	private boolean singleSelection = true;
-	private EmptyFrame frame;
 	protected int selection = -1;
-	private SelectionPointer pointer;
-	private CancelListener listener;
-
-	public void update() {
-		for(UIElement e : this) {
-			e.update();
-		}
-		
-		if(pointer != null) {
-			pointer.update();
-		}
-		
-		if(selection != -1 && (frame != null ? !frame.getBounds().contains(MouseInput.getScreenMouse()) : true)) {
-			get(selection).setSelected(true);
-			if(Keybinds.MENU_UP.clicked() && get(selection).getSurroundings()[0] != null) {
-				changeSelection(0);
-			} else if(Keybinds.MENU_RIGHT.clicked() && get(selection).getSurroundings()[1] != null) {
-				changeSelection(1);
-			} else if(Keybinds.MENU_LEFT.clicked() && get(selection).getSurroundings()[2] != null) {
-				changeSelection(2);
-			} else if(Keybinds.MENU_DOWN.clicked() && get(selection).getSurroundings()[3] != null) {
-				changeSelection(3);
-			}
-		} else if(selection != -1 && frame.getBounds().contains(MouseInput.getScreenMouse())) {
-			get(selection).setSelected(false);
-			// TODO Get mouse coordinates and update pointer position
-		}
-		
-		if(listener != null && Keybinds.CANCEL.clicked()) {
-			listener.cancel();
-		}
-	}
 	
+	private SelectionPointer pointer;
+	
+	private KeybindListener keybindListener;
+	
+	public ElementGroup() {
+		addMouseListener(new DefaultMouseAdapter());
+		addMouseMotionListener(new DefaultMouseMotionAdapter());
+		addKeybindListener(new DefaultKeybindAdapter());
+	}
+
 	public void draw() {
-		if(frame != null) {
-			frame.draw();
-		}
+		super.draw();
 		
-		for(UIElement e : this) {
+		for(UIElement e : uiElements) {
 			e.draw();
 		}
 		
@@ -70,30 +49,31 @@ public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 	}
 	
 	public void setEnabledAll(boolean enabled) {
-		for(UIElement e : this) {
-			e.setEnabled(enabled);
+		for(UIElement e : uiElements) {
+			e.setState(enabled ? ENABLED : DISABLED);
 		}
 	}
 	
 	public void setEnabledAllExcept(boolean enabled, UIElement except) {
-		for(UIElement e : this) {
-			if(e != except)
-				e.setEnabled(enabled);
+		for(UIElement e : uiElements) {
+			if(e != except) {
+				e.setState(enabled ? ENABLED : DISABLED);
+			}
 		}
 	}
 	
 	public void setEnabledAllExcept(boolean enabled, int index) {
 		for(int i = 0; i<size(); i++) {
 			if(i != index) {
-				get(i).setEnabled(enabled);
+				get(i).setState(enabled ? ENABLED : DISABLED);
 			}
 		}
 	}
 	
 	public void setFocus(Accessible focus) {
-		for(UIElement e : this) {
+		for(UIElement e : uiElements) {
 			if(e instanceof Accessible && e != focus) {
-				e.setEnabled(false);
+				e.setState(DISABLED);
 			}
 		}
 	}
@@ -107,7 +87,9 @@ public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 	}
 	
 	public void setSelectionPointer(String pointerName) {
-		this.pointer = new SelectionPointer(pointerName, (!isEmpty() ? get(0).still : false));
+		this.pointer = new SelectionPointer(0, 0, pointerName);
+		pointer.setStill(!isEmpty() ? get(0).still : false);
+		
 		if(selection != -1) {
 			pointer.setPosition(get(selection));
 		}
@@ -128,59 +110,218 @@ public class ElementGroup<T extends UIElement> extends ArrayList<T> {
 		}
 	}
 	
-	public void setCancelListener(CancelListener listener) {
-		this.listener = listener;
+	public void setSelection(int index) {
+		if(get(index) != null) {
+			if(selection != -1) {
+				get(selection).setSelected(false);
+			}
+			selection = index;
+			get(selection).setSelected(true);
+			
+			if(pointer != null) {
+				pointer.setPosition(get(selection));
+			}
+		}
 	}
 	
 	private void changeSelection(int direction) {
-		get(selection).setSelected(false);
-		selection = this.indexOf(get(selection).getSurroundings()[direction]);
-		get(selection).setSelected(true);
-		
-		if(pointer != null) {
-			pointer.setPosition(get(selection));
+		if(get(selection).getSurroundings()[direction] != null) {
+			get(selection).setSelected(false);
+			selection = indexOf(get(selection).getSurroundings()[direction]);
+			get(selection).setSelected(true);
+			
+			if(pointer != null) {
+				pointer.setPosition(get(selection));
+			}
 		}
 	}
 	
-	private Rectangle2D getBounds() {
-		if(this.isEmpty()) {
-			return null;
+	public void setBounds() {
+		if(isEmpty()) {
+			this.bounds = new Rectangle2D.Double(0, 0, 1, 1);
 		} else {
 			Rectangle2D tempBounds = (Rectangle2D) get(0).getBounds().clone();
-			for(UIElement e : this) {
+			for(UIElement e : uiElements) {
 				Rectangle2D.union(tempBounds, e.getBounds(), tempBounds);
 			}
 			
-			return tempBounds;
+			this.bounds = tempBounds;
 		}
 	}
 	
-	public void addFrame(String image) {
-		frame = new EmptyFrame(getBounds(), image);
-		frame.setStill(true);
+	public void removeKeybindListener(KeybindListener l) {
+		if(l == null) {
+			return;
+		}
+		keybindListener = null;
 	}
 	
-	public void addFrame(String image, float xBorder, float yBorder) {
-		frame = new EmptyFrame(getBounds(), image);
-		frame.setStill(true);
-		frame.setXBorder(xBorder);
-		frame.setYBorder(yBorder);
+	public void addKeybindListener(KeybindListener l) {
+		keybindListener = l;
 	}
 	
-	public interface CancelListener {
-		
-		public void cancel();
+	// TODO Likely can use stream operations to clean this up later
+	@Override
+	public void fireEvent(UIEvent e) {
+		if(e instanceof MouseEvent) {
+			processMouseEvent((MouseEvent) e);
+		} else if(e instanceof TimeEvent) {
+			processTimeEvent((TimeEvent) e);
+			
+			if(!isEmpty()) {
+				for(UIElement ui : uiElements) {
+					if(ui.getState() == ENABLED) {
+						ui.fireEvent(e);
+					}
+				}
+			}
+		} else if(e instanceof KeyEvent) {
+			if(!isEmpty()) {
+				for(UIElement ui : uiElements) {
+					if(ui.getState() == ENABLED) {
+						ui.fireEvent(e);
+					}
+				}
+			}
+		} else if(e instanceof KeybindEvent) {
+			processKeybindEvent((KeybindEvent) e);
+			
+			if(!isEmpty()) {
+				for(UIElement ui : uiElements) {
+					if(ui.getState() == ENABLED) {
+						ui.fireEvent(e);
+					}
+				}
+			}
+		}
+	}
+	
+	protected void processKeybindEvent(KeybindEvent e) {
+		if(keybindListener != null) {
+			keybindListener.KeybindTouched(e);
+		}
+	}
+	
+	class DefaultMouseAdapter implements MouseListener {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if(!isEmpty()) {
+				for(UIElement ui : uiElements) {
+					if(ui.getBounds().contains(((MouseEvent) e).getPosition())) {
+						ui.fireEvent(e);
+					}
+				}
+			}
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			if(!isEmpty()) {
+				for(int i = 0; i < uiElements.size(); i++) {
+					if(uiElements.get(i).getBounds().contains(((MouseEvent) e).getPosition())) {
+						setSelection(i);
+					}
+				}
+			}
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+		}
+
 		
 	}
+	
+	class DefaultMouseMotionAdapter implements MouseMotionListener {
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			if(!isEmpty()) {
+				for(int i = 0; i < uiElements.size(); i++) {
+					if(uiElements.get(i).getBounds().contains(((MouseEvent) e).getPosition()) && 
+							!uiElements.get(i).getBounds().contains(((MouseEvent) e).getPrevPosition())) {
+						setSelection(i);
+					}
+				}
+			}
+		}
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+		}
+	}
+	
+	class DefaultKeybindAdapter implements KeybindListener {
+
+		@Override
+		public void KeybindTouched(KeybindEvent e) {
+			if(selection != -1) {
+				get(selection).setSelected(true);
+				if(e.getKeybind().clicked()) {
+					switch(e.getKeybind()) {
+					case UP:
+						changeSelection(0);
+						break;
+					case RIGHT:
+						changeSelection(1);
+						break;
+					case LEFT:
+						changeSelection(2);
+						break;
+					case DOWN:
+						changeSelection(3);
+						break;
+					case CONFIRM:
+						get(selection).fireEvent(new ActionEvent());
+						break;
+					default:
+					}
+				}
+			}
+		}
+		
+	}
+	
+	public T get(int index) {
+		return uiElements.get(index);
+	}
+	
+	public int size() {
+		return uiElements.size();
+	}
+	
+	public boolean isEmpty() {
+		return uiElements.isEmpty();
+	}
+	
+	public int indexOf(UIElement element) {
+		return uiElements.indexOf(element);
+	}
+
+	public void add(T element) {
+		uiElements.add(element);
+		setBounds();
+	}
+	
+	public void addAll(Collection<T> elements) {
+		this.uiElements.addAll(elements);
+		setBounds();
+	}
+
 }
 
-class SelectionPointer {
+class SelectionPointer extends Icon {
 	
-	private String texture;
-	private Vector2f position = new Vector2f(0, 0);
 	private Vector2f offset = new Vector2f(0, 0);
-	private Dimension2D bounds = new Dimension();
-	private boolean still;
 	
 	/** Tween variables */
 	private float time;
@@ -188,44 +329,38 @@ class SelectionPointer {
 	private float distance;
 	private boolean tweenOut;
 	
-	public SelectionPointer(String texture, boolean still) {
-		this.texture = texture;
-		this.still = still;
-		this.bounds.setSize(SpriteIndex.getSprite(texture).getWidth() * Camera.ASPECT_RATIO,
-				SpriteIndex.getSprite(texture).getHeight() * Camera.ASPECT_RATIO);
+	public SelectionPointer(float x, float y, String icon) {
+		super(x, y, icon);
 		
 		this.time = 0f;
 		this.duration = 1.5f;
 		this.distance = 15f;
 		this.tweenOut = true;
-	}
-	
-	public void update() {
-		time = MathFunctions.clamp(time + Theater.getDeltaSpeed(0.025f), 0, duration);
-		if(tweenOut) {
-			offset.setX(MathFunctions.easeOut(time, 0, -distance, duration));
-		} else {
-			offset.setX(MathFunctions.easeOut(time, -distance, distance, duration));
-		}
-		if(time == duration) {
-			time = 0;
-			tweenOut = !tweenOut;
-		}
-	}
-	
-	public void draw() {
-		SpriteIndex.getSprite(texture).setStill(still);
-		SpriteIndex.getSprite(texture).set2DScale(Camera.ASPECT_RATIO);
-		SpriteIndex.getSprite(texture).draw(position.x + offset.x, position.y + offset.y);
-	}
-	
-	public void setPosition(float x, float y) {
-		position.set(x, y);
+		
+		addTimeListener(new DefaultPointerTimeAdapter());
 	}
 	
 	public void setPosition(UIElement element) {
-		position.setX((float) (element.getBounds().getX() - (bounds.getWidth() * 0.8f)));
-		position.setY((float) (element.getBounds().getCenterY() - (bounds.getHeight() * 0.5f)));
+		setX((float) (element.getBounds().getX() - (bounds.getWidth() * 0.8f)));
+		setY((float) (element.getBounds().getCenterY() - (bounds.getHeight() * 0.5f)));
+	}
+	
+	class DefaultPointerTimeAdapter implements TimeListener {
+
+		@Override
+		public void timeStep(TimeEvent e) {
+			time = MathUtils.clamp(time + e.getDelta(), 0, duration);
+			if(tweenOut) {
+				offset.setX(MathUtils.easeOut(time, 0, -distance, duration));
+			} else {
+				offset.setX(MathUtils.easeOut(time, -distance, distance, duration));
+			}
+			if(time == duration) {
+				time = 0;
+				tweenOut = !tweenOut;
+			}
+		}
+		
 	}
 	
 }
