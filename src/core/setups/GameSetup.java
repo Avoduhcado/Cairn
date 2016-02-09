@@ -61,6 +61,12 @@ public abstract class GameSetup implements UIContainer {
 		uiElements.add(index, element);
 	}
 	
+	public void addAllUI(UIElement...elements) {
+		for(UIElement e : elements) {
+			addUI(e);
+		}
+	}
+	
 	public void fireEvent(UIEvent e) {
 		if(e instanceof StateChangeEvent) {
 			processStateChangeEvent(e);

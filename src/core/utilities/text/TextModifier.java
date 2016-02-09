@@ -19,7 +19,7 @@ public class TextModifier {
 	public String fontFace = "DEBUG";
 	
 	public TextModifier(String modifier) {
-		if(modifier != null) {
+		if(modifier != null && !modifier.isEmpty()) {
 			String[] temp = modifier.split(",");
 			for(int x = 0; x<temp.length; x++) {
 				switch(temp[x].charAt(0)) {
@@ -67,6 +67,8 @@ public class TextModifier {
 						break;
 					}
 					break;
+				default:
+					System.out.println("No such modifier: " + temp[x]);
 				}
 			}
 		}

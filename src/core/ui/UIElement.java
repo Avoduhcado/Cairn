@@ -41,10 +41,14 @@ public abstract class UIElement {
 	
 	public void draw() {
 		if(frame != null) {
-			frame.draw(bounds);
+			frame.draw(this);
 		}
 	}
 
+	public boolean isStill() {
+		return still;
+	}
+	
 	public void setStill(boolean still) {
 		this.still = still;
 	}

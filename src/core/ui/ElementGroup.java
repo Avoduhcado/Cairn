@@ -48,6 +48,14 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 		}
 	}
 	
+	@Override
+	public void setStill(boolean still) {
+		super.setStill(still);
+		for(UIElement e : uiElements) {
+			e.setStill(still);
+		}
+	}
+	
 	public void setEnabledAll(boolean enabled) {
 		for(UIElement e : uiElements) {
 			e.setState(enabled ? ENABLED : DISABLED);
@@ -227,7 +235,7 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 		public void mouseEntered(MouseEvent e) {
 			if(!isEmpty()) {
 				for(int i = 0; i < uiElements.size(); i++) {
-					if(uiElements.get(i).getBounds().contains(((MouseEvent) e).getPosition())) {
+					if(uiElements.get(i).getBounds().contains(e.getPosition())) {
 						setSelection(i);
 					}
 				}
@@ -247,9 +255,14 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 		public void mouseMoved(MouseEvent e) {
 			if(!isEmpty()) {
 				for(int i = 0; i < uiElements.size(); i++) {
+					// Check for mouse entering or exiting element
 					if(uiElements.get(i).getBounds().contains(((MouseEvent) e).getPosition()) && 
 							!uiElements.get(i).getBounds().contains(((MouseEvent) e).getPrevPosition())) {
 						setSelection(i);
+						uiElements.get(i).fireEvent(e);
+					} else if(!uiElements.get(i).getBounds().contains(e.getPosition()) && 
+							uiElements.get(i).getBounds().contains(e.getPrevPosition())) {
+						uiElements.get(i).fireEvent(e);
 					}
 				}
 			}

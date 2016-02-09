@@ -72,6 +72,13 @@ public abstract class MenuOverlay extends ElementGroup<UIElement> implements UIC
 	}
 	
 	@Override
+	public void addAllUI(UIElement...elements) {
+		for(UIElement e : elements) {
+			addUI(e);
+		}
+	}
+	
+	@Override
 	public void fireEvent(UIEvent e) {
 		super.fireEvent(e);
 		

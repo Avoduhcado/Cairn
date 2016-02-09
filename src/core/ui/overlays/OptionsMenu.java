@@ -30,13 +30,11 @@ public class OptionsMenu extends MenuOverlay {
 		
 		Label optionsLabel = new Label(Float.NaN, Camera.get().getDisplayHeight(0.1f), null, "Options");
 		optionsLabel.setAlign(Align.CENTER);
-		optionsLabel.setStill(true);
 		add(optionsLabel);
 
 		Slider musicSlider = new Slider(Camera.get().getDisplayWidth(0.35f), 
 				Camera.get().getDisplayHeight(0.1667f), 
 				SoundStore.get().getMusicVolume());
-		musicSlider.setStill(true);
 		musicSlider.addValueChangeListener(e -> {
 			if(SoundStore.get().getMusicVolume() != musicSlider.getValue()) {
 				SoundStore.get().setMusicVolume(musicSlider.getValue());
@@ -48,14 +46,12 @@ public class OptionsMenu extends MenuOverlay {
 		Label musicLabel = new Label(Camera.get().getDisplayWidth(0.35f), 
 				(float) (musicSlider.getBounds().getY() - (musicSlider.getBounds().getHeight() / 2f)),
 				null, "Music Volume: ");
-		musicLabel.setStill(true);
 		musicLabel.setAlign(Align.LEFT);
 		add(musicLabel);
 
 		Slider sfxSlider = new Slider(Camera.get().getDisplayWidth(0.35f),
 				(float) (musicSlider.getBounds().getMaxY() + musicSlider.getBounds().getHeight()), 
 				SoundStore.get().getSoundVolume());
-		sfxSlider.setStill(true);
 		sfxSlider.addValueChangeListener(e -> {
 			if(SoundStore.get().getSoundVolume() != sfxSlider.getValue()) {
 				SoundStore.get().setSoundVolume(sfxSlider.getValue());
@@ -66,14 +62,12 @@ public class OptionsMenu extends MenuOverlay {
 		Label sfxLabel = new Label(Camera.get().getDisplayWidth(0.35f), 
 				(float) (sfxSlider.getBounds().getY() - (sfxSlider.getBounds().getHeight() / 2f)),
 				null, "Sound Volume: ");
-		sfxLabel.setStill(true);
 		sfxLabel.setAlign(Align.LEFT);
 		add(sfxLabel);
 		
 		CheckBox fullscreenCheck = new CheckBox(Camera.get().getDisplayWidth(0.6f),
 				Camera.get().getDisplayHeight(0.1667f), 
 				null, "Fullscreen");
-		fullscreenCheck.setStill(true);
 		fullscreenCheck.setChecked(Camera.get().isFullscreen());
 		fullscreenCheck.addActionListener(e -> {
 			Camera.get().setFullscreen(fullscreenCheck.isChecked());
@@ -82,7 +76,6 @@ public class OptionsMenu extends MenuOverlay {
 		
 		CheckBox vsyncCheck = new CheckBox(Camera.get().getDisplayWidth(0.6f),
 				(float) fullscreenCheck.getBounds().getMaxY(), null, "VSync");
-		vsyncCheck.setStill(true);
 		vsyncCheck.setChecked(Camera.get().isVSyncEnabled());
 		vsyncCheck.addActionListener(e -> {
 			Camera.get().setVSync(vsyncCheck.isChecked());
@@ -106,13 +99,10 @@ public class OptionsMenu extends MenuOverlay {
 					Camera.get().getDisplayHeight(0.285f) + keyY,
 					 null, Keybind.values()[i].getKey(), -1, 0);
 			keyBox.setState(DISABLED);
-			keyBox.setStill(true);
 			keyBox.setCentered(false);
-			keyBox.addActionListener(e -> {
-				OptionsMenu.this.setFocus(keyBox);
-			});
+			keyBox.addActionListener(e -> OptionsMenu.this.setFocus(keyBox));
 			keyBox.addValueChangeListener(e -> {
-				Keybind.valueOf(keyLabel.getText().split(":")[0]).setKey(Keyboard.getKeyIndex(keyBox.getText()));
+				Keybind.valueOf(keyLabel.getPlainText().split(":")[0]).setKey(Keyboard.getKeyIndex(keyBox.getText()));
 				keyBox.setState(DISABLED);
 			});
 			key.add(keyBox);
@@ -129,11 +119,12 @@ public class OptionsMenu extends MenuOverlay {
 		
 		Button close = new Button(Float.NaN, Camera.get().getDisplayHeight(0.85f), null, "Close");
 		close.setAlign(Align.CENTER);
-		close.setStill(true);
 		close.addActionListener(e -> setState(KILL_FLAG));
 		add(close);
 		
+		setBounds();
 		setFrame("Menu2");
+		setStill(true);
 	}
 
 }

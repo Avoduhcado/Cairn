@@ -7,16 +7,17 @@ import core.ui.event.MouseListener;
 import core.ui.event.UIEvent;
 import core.ui.utils.Align;
 import core.utilities.text.Text;
+import core.utilities.text.UIText;
 
 public class Button extends UIElement {
 	
-	private String text;
-	protected String textColor = "gray";
+	protected UIText text;
+	protected String textColor;
 	
 	private ActionListener actionListener;
 			
 	public Button(String text) {
-		this.text = text;
+		setText(text);
 		setBounds(0, 0,
 				text != null ? Text.getDefault().getWidth(text) : 1,
 				text != null ? Text.getDefault().getHeight(text) : 1);
@@ -25,7 +26,7 @@ public class Button extends UIElement {
 	}
 	
 	public Button(float x, float y, String frame, String text) {		
-		this.text = text;
+		setText(text);
 		setBounds(x, y,
 				Text.getDefault().getWidth(text), 
 				Text.getDefault().getHeight(text));
@@ -39,11 +40,7 @@ public class Button extends UIElement {
 		super.draw();
 
 		if(text != null) {
-			if(textColor == null) {
-				Text.drawString(text, getX(), getY());
-			} else {
-				Text.drawString(text, getX(), getY(), "c" + textColor);
-			}
+			text.draw(getX(), getY());
 		}
 	}
 
@@ -68,18 +65,30 @@ public class Button extends UIElement {
 	@Override
 	public void setSelected(boolean selected) {
 		if(selected) {
-			textColor = "white";
+			setTextColor("white");
 		} else {
-			textColor = "gray";
+			setTextColor("gray");
 		}
 	}
 	
-	public String getText() {
+	@Override
+	public void setStill(boolean still) {
+		super.setStill(still);
+		
+		if(still) {
+			text.changeModifier("t+", true);
+		} else {
+			text.changeModifier("t\\+", false);
+		}
+	}
+	
+	public UIText getText() {
 		return text;
 	}
 	
 	public void setText(String text) {
-		this.text = text;
+		this.text = new UIText(text);
+		setTextColor("gray");
 	}
 	
 	public String getTextColor() {
@@ -87,7 +96,10 @@ public class Button extends UIElement {
 	}
 
 	public void setTextColor(String textColor) {
+		// TODO Sloppyyyy
+		getText().changeModifier("c" + this.textColor, false);
 		this.textColor = textColor;
+		getText().changeModifier("c" + this.textColor, true);
 	}
 	
 	/**
@@ -143,11 +155,11 @@ public class Button extends UIElement {
 		}
 		
 		public void mouseEntered(MouseEvent e) {
-			textColor = "white";
+			setTextColor("white");
 		}
 		
 		public void mouseExited(MouseEvent e) {
-			textColor = "gray";
+			setTextColor("gray");
 		}
 	}
 }

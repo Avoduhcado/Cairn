@@ -13,7 +13,7 @@ public class GameFont {
 	private HashMap<Character, Glyph> glyphs = new HashMap<Character, Glyph>();
 	private String fontName;
 	
-	public static final float defaultSize = 0.5f;
+	public static final float defaultSize = 0.6f;
 	public static final Color defaultColor = Color.white;
 	
 	public GameFont(String fontName) {
@@ -118,7 +118,7 @@ public class GameFont {
 	public void drawString(String text, float x, float y, TextModifier modifier) {
 		float advance = 0;
 		
-		for(int i = 0; i<text.length(); i++) {			
+		for(int i = 0; i<text.length(); i++) {
 			if(modifier.dropShadow) {
 				getChar(text.charAt(i)).draw(x + advance + 2, y + 2, modifier, modifier.dropColor);
 			}

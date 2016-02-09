@@ -1,5 +1,7 @@
 package core.setups;
 
+import org.lwjgl.util.vector.Vector4f;
+
 import core.Camera;
 import core.Theater;
 import core.ui.Button;
@@ -17,6 +19,7 @@ public class TitleMenu extends GameSetup {
 	public TitleMenu() {
 		// Ensure fading has reset
 		Camera.get().setFade(-0.1f);
+		Camera.get().setFillColor(new Vector4f(1, 1, 1, 1));
 		
 		// Load title logo
 		Icon logo = new Icon(Float.NaN, Camera.get().getDisplayHeight(0.1667f), "Avogine Title");
@@ -24,17 +27,14 @@ public class TitleMenu extends GameSetup {
 		
 		// Initialize game buttons
 		Button newGame = new Button(Float.NaN, Camera.get().getDisplayHeight(0.55f), null, "New Game");
-		newGame.setStill(true);
 		newGame.setAlign(Align.CENTER);
 		newGame.addActionListener(e -> Theater.get().swapSetup(new Stage_new()));
 		
 		Button options = new Button(Float.NaN, (float) newGame.getBounds().getMaxY(), null, "Options");
-		options.setStill(true);
 		options.setAlign(Align.CENTER);
 		options.addActionListener(e -> addUI(new OptionsMenu()));
 		
 		Button exit = new Button(Float.NaN, (float) options.getBounds().getMaxY(), null, "Exit");
-		exit.setStill(true);
 		exit.setAlign(Align.CENTER);
 		exit.addActionListener(e -> Theater.get().close());
 		
@@ -50,6 +50,7 @@ public class TitleMenu extends GameSetup {
 		buttons.setKeyboardNavigable(true, newGame);
 		//buttons.setSelectionPointer("screen ui/Pointer");
 		buttons.setFrame("Menu2");
+		buttons.setStill(true);
 		addUI(buttons);
 	}
 	

@@ -7,13 +7,13 @@ import org.newdawn.slick.opengl.Texture;
 
 import core.render.SpriteList;
 import core.render.transform.Transform;
+import core.ui.UIElement;
 
 public class UIFrame {
 
 	private String frame;
 	
 	private float opacity = 0.8f;
-	private boolean still;
 	
 	private Transform transform;
 	
@@ -23,12 +23,14 @@ public class UIFrame {
 		this.transform = new Transform();
 	}
 
-	private void setTransform(int row, int col, Rectangle2D box) {
+	private void setTransform(int row, int col, UIElement element) {
+		Rectangle2D box = element.getBounds();
+		
 		Texture texture = SpriteList.get(frame).getTexture();
 		transform.clear();
 		transform.textureOffsets = new Vector4f();
 		transform.color = new Vector4f(1f, 1f, 1f, opacity);
-		transform.still = still;
+		transform.still = element.isStill();
 		
 		switch(row) {
 		case 0:
@@ -73,14 +75,10 @@ public class UIFrame {
 		}
 	}
 	
-	/**
-	 * Draw frame around supplied <code>Rectangle2D</code> box
-	 * @param box
-	 */
-	public void draw(Rectangle2D box) {
+	public void draw(UIElement element) {
 		for(int row = 0; row < 3; row++) {
 			for(int col = 0; col < 3; col++) {
-				setTransform(row, col, box);
+				setTransform(row, col, element);
 								
 				SpriteList.get(frame).draw(transform);
 			}
@@ -93,14 +91,6 @@ public class UIFrame {
 	
 	public void setOpacity(float opacity) {
 		this.opacity = opacity;
-	}
-	
-	public boolean isStill() {
-		return still;
-	}
-	
-	public void setStill(boolean still) {
-		this.still = still;
 	}
 	
 }

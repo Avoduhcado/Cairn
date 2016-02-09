@@ -30,7 +30,7 @@ public class CheckBox extends Button {
 		public void mouseClicked(MouseEvent e) {
 			checked = !checked;
 			if(checked) {
-				textColor = "white";
+				setTextColor("white");
 			}
 			CheckBox.this.fireEvent(new ActionEvent());
 		}
@@ -44,14 +44,14 @@ public class CheckBox extends Button {
 		}
 		
 		public void mouseEntered(MouseEvent e) {
-			textColor = "lightGray";
+			setTextColor("lightGray");
 		}
 		
 		public void mouseExited(MouseEvent e) {
 			if(!checked) {
-				textColor = "gray";
+				setTextColor("gray");
 			} else {
-				textColor = "white";
+				setTextColor("white");
 			}
 		}
 	}
