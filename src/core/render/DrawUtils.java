@@ -16,7 +16,7 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Camera;
-import core.setups.Stage_new;
+import core.setups.Stage;
 
 public class DrawUtils {
 	
@@ -279,8 +279,8 @@ public class DrawUtils {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
 		GL11.glPushMatrix();
-		GL11.glTranslated((body.getPosition().x * Stage_new.SCALE_FACTOR) - Camera.get().frame.getX(), 
-				(body.getPosition().y * Stage_new.SCALE_FACTOR) - Camera.get().frame.getY(), 0);
+		GL11.glTranslated((body.getPosition().x * Stage.SCALE_FACTOR) - Camera.get().frame.getX(), 
+				(body.getPosition().y * Stage.SCALE_FACTOR) - Camera.get().frame.getY(), 0);
 		GL11.glRotated(Math.toDegrees(body.getAngle()), 0, 0, 1f);
 		//GL11.glScalef(Camera.ASPECT_RATIO, Camera.ASPECT_RATIO, 0);
 		
@@ -288,7 +288,7 @@ public class DrawUtils {
 		GL11.glBegin(GL11.GL_QUADS);
 		{
 			for(int n = 0; n<poly.getVertexCount(); n++) {
-				GL11.glVertex2f(poly.getVertex(n).x * Stage_new.SCALE_FACTOR, poly.getVertex(n).y * Stage_new.SCALE_FACTOR);
+				GL11.glVertex2f(poly.getVertex(n).x * Stage.SCALE_FACTOR, poly.getVertex(n).y * Stage.SCALE_FACTOR);
 			}
 		}
 		GL11.glEnd();
@@ -297,7 +297,7 @@ public class DrawUtils {
 		GL11.glBegin(GL11.GL_LINE_LOOP);
 		{
 			for(int n = 0; n<poly.getVertexCount(); n++) {
-				GL11.glVertex2f(poly.getVertex(n).x * Stage_new.SCALE_FACTOR, poly.getVertex(n).y * Stage_new.SCALE_FACTOR);
+				GL11.glVertex2f(poly.getVertex(n).x * Stage.SCALE_FACTOR, poly.getVertex(n).y * Stage.SCALE_FACTOR);
 			}
 		}
 		GL11.glEnd();
@@ -313,14 +313,14 @@ public class DrawUtils {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
 		GL11.glPushMatrix();
-		GL11.glTranslatef((int) ((position.x * Stage_new.SCALE_FACTOR) - Camera.get().frame.getX()), 
-				(int) ((position.y * Stage_new.SCALE_FACTOR) - Camera.get().frame.getY()), 0);
+		GL11.glTranslatef((int) ((position.x * Stage.SCALE_FACTOR) - Camera.get().frame.getX()), 
+				(int) ((position.y * Stage.SCALE_FACTOR) - Camera.get().frame.getY()), 0);
 		GL11.glColor3f(color.x, color.y, color.z);
 		
 		GL11.glBegin(GL11.GL_LINE_LOOP);
 		{
-			GL11.glVertex2f(edge.m_vertex1.x * Stage_new.SCALE_FACTOR, edge.m_vertex1.y * Stage_new.SCALE_FACTOR);
-			GL11.glVertex2f(edge.m_vertex2.x * Stage_new.SCALE_FACTOR, edge.m_vertex2.y * Stage_new.SCALE_FACTOR);
+			GL11.glVertex2f(edge.m_vertex1.x * Stage.SCALE_FACTOR, edge.m_vertex1.y * Stage.SCALE_FACTOR);
+			GL11.glVertex2f(edge.m_vertex2.x * Stage.SCALE_FACTOR, edge.m_vertex2.y * Stage.SCALE_FACTOR);
 		}
 		GL11.glEnd();
 		GL11.glPopMatrix();
@@ -335,16 +335,16 @@ public class DrawUtils {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
 		GL11.glPushMatrix();
-		GL11.glTranslatef((int) ((body.getPosition().x * Stage_new.SCALE_FACTOR) - Camera.get().frame.getX()), 
-				(int) ((body.getPosition().y * Stage_new.SCALE_FACTOR) - Camera.get().frame.getY()), 0);
+		GL11.glTranslatef((int) ((body.getPosition().x * Stage.SCALE_FACTOR) - Camera.get().frame.getX()), 
+				(int) ((body.getPosition().y * Stage.SCALE_FACTOR) - Camera.get().frame.getY()), 0);
 		GL11.glColor4f(color.x, color.y, color.z, 0.5f);
 		
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
 		{
 			GL11.glVertex2f(0, 0);
 			for(int i = 0; i<=360; i += 10) {
-				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * (circle.m_radius * Stage_new.SCALE_FACTOR)),
-						(float) Math.cos(Math.toRadians(i)) * (circle.m_radius * Stage_new.SCALE_FACTOR));
+				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * (circle.m_radius * Stage.SCALE_FACTOR)),
+						(float) Math.cos(Math.toRadians(i)) * (circle.m_radius * Stage.SCALE_FACTOR));
 			}
 		}
 		GL11.glEnd();
@@ -353,8 +353,8 @@ public class DrawUtils {
 		GL11.glBegin(GL11.GL_LINE_LOOP);
 		{
 			for(int i = 0; i<=360; i += 10) {
-				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * (circle.m_radius * Stage_new.SCALE_FACTOR)),
-						(float) Math.cos(Math.toRadians(i)) * (circle.m_radius * Stage_new.SCALE_FACTOR));
+				GL11.glVertex2f((float) (Math.sin(Math.toRadians(i)) * (circle.m_radius * Stage.SCALE_FACTOR)),
+						(float) Math.cos(Math.toRadians(i)) * (circle.m_radius * Stage.SCALE_FACTOR));
 			}
 		}
 		GL11.glEnd();

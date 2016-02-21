@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
 import core.Theater;
 import core.entities_new.Entity;
 import core.render.DrawUtils;
-import core.setups.Stage_new;
+import core.setups.Stage;
 import core.utilities.MathFunctions;
 
 public class ShadowMap {
@@ -82,8 +82,8 @@ public class ShadowMap {
 					illumSource.getRender().getTransform().getRotation(),
 					0, 0, 0);
 			DrawUtils.drawShadowFan(
-					(illumSource.getBody().getPosition().x * Stage_new.SCALE_FACTOR) + illumOffset.x,
-					(illumSource.getBody().getPosition().y * Stage_new.SCALE_FACTOR) + illumOffset.y,
+					(illumSource.getBody().getPosition().x * Stage.SCALE_FACTOR) + illumOffset.x,
+					(illumSource.getBody().getPosition().y * Stage.SCALE_FACTOR) + illumOffset.y,
 					i.shadowWidth + (i.glow * i.haloRatio), i.shadowHeight + (i.glow * i.haloRatio), (int) (Math.random() * 3) + 8);
 		}
 		
@@ -101,8 +101,8 @@ public class ShadowMap {
 					illumSource.getRender().getTransform().getRotation(),
 					0, 0, 0);
 			DrawUtils.drawShadowFan(
-					(illumSource.getBody().getPosition().x * Stage_new.SCALE_FACTOR) + illumOffset.x,
-					(illumSource.getBody().getPosition().y * Stage_new.SCALE_FACTOR) + illumOffset.y,
+					(illumSource.getBody().getPosition().x * Stage.SCALE_FACTOR) + illumOffset.x,
+					(illumSource.getBody().getPosition().y * Stage.SCALE_FACTOR) + illumOffset.y,
 					(i.shadowWidth + (i.glow * 1.5f)) * i.haloRatio, (i.shadowHeight + (i.glow * 1.5f)) * i.haloRatio,
 					(int) (Math.random() * 3) + 8);
 		}

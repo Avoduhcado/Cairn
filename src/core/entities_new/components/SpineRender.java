@@ -46,7 +46,7 @@ import core.render.DrawUtils;
 import core.render.Sprite;
 import core.render.SpriteList;
 import core.render.transform.Transform;
-import core.setups.Stage_new;
+import core.setups.Stage;
 
 public class SpineRender implements Renderable, Serializable {
 
@@ -104,7 +104,7 @@ public class SpineRender implements Renderable, Serializable {
 			skeleton = new Skeleton(json.readSkeletonData(ref, ref));
 		}
 
-		skeleton.setPosition(entity.getBody().getPosition().x * Stage_new.SCALE_FACTOR, entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
+		skeleton.setPosition(entity.getBody().getPosition().x * Stage.SCALE_FACTOR, entity.getBody().getPosition().y * Stage.SCALE_FACTOR);
 		skeleton.setFlipY(true);
 		skeleton.updateWorldTransform();
 
@@ -132,14 +132,14 @@ public class SpineRender implements Renderable, Serializable {
 		
 		PolygonShape bodyShape = new PolygonShape();
 		Vec2[] verts = new Vec2[] {
-				new Vec2((attVerts[Attachment.X1] - skeleton.getX()) / Stage_new.SCALE_FACTOR,
-						(attVerts[Attachment.Y1] - skeleton.getY()) / Stage_new.SCALE_FACTOR),
-				new Vec2((attVerts[Attachment.X2] - skeleton.getX()) / Stage_new.SCALE_FACTOR,
-						(attVerts[Attachment.Y2] - skeleton.getY()) / Stage_new.SCALE_FACTOR),
-				new Vec2((attVerts[Attachment.X3] - skeleton.getX()) / Stage_new.SCALE_FACTOR,
-						(attVerts[Attachment.Y3] - skeleton.getY()) / Stage_new.SCALE_FACTOR),
-				new Vec2((attVerts[Attachment.X4] - skeleton.getX()) / Stage_new.SCALE_FACTOR,
-						(attVerts[Attachment.Y4] - skeleton.getY()) / Stage_new.SCALE_FACTOR)	
+				new Vec2((attVerts[Attachment.X1] - skeleton.getX()) / Stage.SCALE_FACTOR,
+						(attVerts[Attachment.Y1] - skeleton.getY()) / Stage.SCALE_FACTOR),
+				new Vec2((attVerts[Attachment.X2] - skeleton.getX()) / Stage.SCALE_FACTOR,
+						(attVerts[Attachment.Y2] - skeleton.getY()) / Stage.SCALE_FACTOR),
+				new Vec2((attVerts[Attachment.X3] - skeleton.getX()) / Stage.SCALE_FACTOR,
+						(attVerts[Attachment.Y3] - skeleton.getY()) / Stage.SCALE_FACTOR),
+				new Vec2((attVerts[Attachment.X4] - skeleton.getX()) / Stage.SCALE_FACTOR,
+						(attVerts[Attachment.Y4] - skeleton.getY()) / Stage.SCALE_FACTOR)	
 		};
 		bodyShape.set(verts, 4);
 
@@ -294,8 +294,8 @@ public class SpineRender implements Renderable, Serializable {
 		animState.update(Theater.getDeltaSpeed(0.016f) * speed);
 		animState.apply(skeleton);
 		
-		skeleton.setPosition(entity.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
-				entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
+		skeleton.setPosition(entity.getBody().getPosition().x * Stage.SCALE_FACTOR,
+				entity.getBody().getPosition().y * Stage.SCALE_FACTOR);
 		skeleton.updateWorldTransform();
 
 		for(Slot slot : skeleton.getDrawOrder()) {
@@ -307,8 +307,8 @@ public class SpineRender implements Renderable, Serializable {
 				if(f.getShape() instanceof PolygonShape) {
 					PolygonShape shape = (PolygonShape) f.getShape();
 					for(int i = 0; i < shape.getVertexCount(); i++) {
-						shape.getVertex(i).set((attVerts[Attachment.X2 * i] - skeleton.getX()) / Stage_new.SCALE_FACTOR,
-								(attVerts[(Attachment.X2 * i) + 1] - skeleton.getY()) / Stage_new.SCALE_FACTOR);
+						shape.getVertex(i).set((attVerts[Attachment.X2 * i] - skeleton.getX()) / Stage.SCALE_FACTOR,
+								(attVerts[(Attachment.X2 * i) + 1] - skeleton.getY()) / Stage.SCALE_FACTOR);
 					}
 				}
 			}

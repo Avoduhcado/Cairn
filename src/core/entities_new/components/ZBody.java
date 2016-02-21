@@ -9,14 +9,13 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.lwjgl.util.vector.Vector2f;
 
-import com.esotericsoftware.spine.Slot;
-
 import core.Camera;
 import core.entities_new.Entity;
 import core.entities_new.State;
+import core.entities_new.event.InteractEvent;
 import core.entities_new.event.StateChangeEvent;
 import core.entities_new.utils.SensorData;
-import core.setups.Stage_new;
+import core.setups.Stage;
 
 public class ZBody implements Geometric {
 
@@ -35,7 +34,7 @@ public class ZBody implements Geometric {
 	@Override
 	public void move() {
 		if(getBody().getGravityScale() > 0 && getGroundZ() != 0) {
-			setZ(getGroundZ() - (getBody().getPosition().y * Stage_new.SCALE_FACTOR));
+			setZ(getGroundZ() - (getBody().getPosition().y * Stage.SCALE_FACTOR));
 			if(getBody().getLinearVelocity().y > 0 && entity.getState() == State.JUMPING) {
 				entity.fireEvent(new StateChangeEvent(State.FALLING));
 			}
@@ -139,7 +138,7 @@ public class ZBody implements Geometric {
 				RayCastInput input = new RayCastInput();
 				input.p1.set(this.getBody().getPosition());
 				input.p2.set(this.getBody().getPosition().x,
-						this.getBody().getPosition().y + (fractionStep / Stage_new.SCALE_FACTOR));
+						this.getBody().getPosition().y + (fractionStep / Stage.SCALE_FACTOR));
 				input.maxFraction = closestFraction;
 
 				if(!fixture.raycast(output, input, 0)) {
@@ -147,7 +146,7 @@ public class ZBody implements Geometric {
 				}
 				if(output.fraction < closestFraction) {
 					closestFraction = output.fraction;
-					closestGroundY = fixture.getBody().getPosition().y * Stage_new.SCALE_FACTOR;
+					closestGroundY = fixture.getBody().getPosition().y * Stage.SCALE_FACTOR;
 					System.out.println(output.fraction + " " + output.normal);
 				}
 			}
@@ -167,11 +166,12 @@ public class ZBody implements Geometric {
 	
 	public void removeInteractable(Entity interactable) {
 		this.interactables.remove(interactable);
+		interactable.fireEvent(new InteractEvent(InteractEvent.INTERRUPT, this.entity));
 	}
 
 	@Override
 	public Vector2f getPosition() {
-		return new Vector2f(body.getPosition().x * Stage_new.SCALE_FACTOR, body.getPosition().y * Stage_new.SCALE_FACTOR);
+		return new Vector2f(body.getPosition().x * Stage.SCALE_FACTOR, body.getPosition().y * Stage.SCALE_FACTOR);
 	}
 
 	/**
@@ -184,12 +184,12 @@ public class ZBody implements Geometric {
 
 	@Override
 	public float getX() {
-		return body.getPosition().x * Stage_new.SCALE_FACTOR;
+		return body.getPosition().x * Stage.SCALE_FACTOR;
 	}
 
 	@Override
 	public float getY() {
-		return body.getPosition().y * Stage_new.SCALE_FACTOR;
+		return body.getPosition().y * Stage.SCALE_FACTOR;
 	}
 	
 	public Body getBody() {
@@ -217,7 +217,7 @@ public class ZBody implements Geometric {
 	}
 	
 	public float getScreenY() {
-		return (body.getPosition().y * Stage_new.SCALE_FACTOR) + z;
+		return (body.getPosition().y * Stage.SCALE_FACTOR) + z;
 	}
 
 }

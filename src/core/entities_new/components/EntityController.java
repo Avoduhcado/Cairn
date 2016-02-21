@@ -1,5 +1,8 @@
 package core.entities_new.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -18,8 +21,9 @@ import core.entities_new.event.ControllerEvent;
 import core.entities_new.event.ControllerListener;
 import core.entities_new.event.InventoryEvent;
 import core.entities_new.event.StateChangeEvent;
+import core.entities_new.utils.ControllerValidator;
 import core.entities_new.utils.SensorData;
-import core.setups.Stage_new;
+import core.setups.Stage;
 
 public abstract class EntityController implements ControllerListener {
 
@@ -29,19 +33,40 @@ public abstract class EntityController implements ControllerListener {
 	protected float speedMod = 1f;
 	protected Vec2 movement = new Vec2();
 	
-	private ControllerEvent eventQueue;
+	protected List<FollowController> followers = new ArrayList<FollowController>();
+	
+	protected ControllerEvent eventQueue;
 	
 	public EntityController(Entity entity) {
 		this.entity = entity;
 	}
 
 	@Override
-	public abstract void control();
-	
+	public void control() {
+		controlMovement();
+		controlActions();
+		
+		processEventQueue();
+	}
+
+	protected abstract void controlMovement();
+	protected abstract void controlActions();
+
 	@Override
 	public void move(ControllerEvent e) {
-		// TODO Auto-generated method stub
-		
+		if(entity.getState().canMove()) {
+			Vec2 movement = (Vec2) e.getData();
+			movement.normalize();
+			if(entity.isWalkingBackwards()) {
+				speedMod -= 0.25f;
+			}
+			entity.getBody().applyForceToCenter(movement.mul(speed * speedMod));
+			entity.fireEvent(new StateChangeEvent(speedMod > 1 ? State.RUN : State.WALK));
+			
+			if(entity.getBody().getLinearVelocity().x != 0 && !entity.isFixDirection() && entity.getRender() != null) {
+				entity.getRender().setFlipped(entity.getBody().getLinearVelocity().x < 0);
+			}
+		}
 	}
 
 	@Override
@@ -68,8 +93,7 @@ public abstract class EntityController implements ControllerListener {
 
 	@Override
 	public void defend(ControllerEvent e) {
-		// TODO Auto-generated method stub
-		
+		entity.setFixDirection((boolean) e.getData());
 	}
 
 	@Override
@@ -86,13 +110,13 @@ public abstract class EntityController implements ControllerListener {
 				float[] attVerts = attachment.getWorldVertices();
 				
 				BodyDef bodyDef = new BodyDef();
-				bodyDef.position.set(attVerts[Attachment.X3] / Stage_new.SCALE_FACTOR,
-						attVerts[Attachment.Y3] / Stage_new.SCALE_FACTOR);
+				bodyDef.position.set(attVerts[Attachment.X3] / Stage.SCALE_FACTOR,
+						attVerts[Attachment.Y3] / Stage.SCALE_FACTOR);
 				bodyDef.angle = (float) Math.toRadians(-slot.getBone().getWorldRotation() - attachment.getRotation());
 				bodyDef.type = BodyType.DYNAMIC;
 
 				PolygonShape bodyShape = new PolygonShape();
-				bodyShape.setAsBox(attachment.getWidth() / Stage_new.SCALE_FACTOR / 2f, attachment.getHeight() / Stage_new.SCALE_FACTOR / 2f);
+				bodyShape.setAsBox(attachment.getWidth() / Stage.SCALE_FACTOR / 2f, attachment.getHeight() / Stage.SCALE_FACTOR / 2f);
 
 				FixtureDef boxFixture = new FixtureDef();
 				boxFixture.density = 1f;
@@ -116,23 +140,37 @@ public abstract class EntityController implements ControllerListener {
 				entity.getBody().destroyFixture(attachment.getFixture());
 				slot.setAttachment(null);
 				
-				entity.getContainer().addEntity(bone);
+				entity.getContainer().queueEntity(bone, true);
 			}
 		}
 	}
 
 	@Override
 	public void jump(ControllerEvent e) {
-		entity.fireEvent(new StateChangeEvent(State.JUMPING));
-		entity.getBody().applyLinearImpulse((Vec2) e.getData(), entity.getBody().getWorldCenter());
-		entity.getBody().setGravityScale(1f);
-		entity.getBody().setLinearDamping(1f);
-		entity.getZBody().setGroundZ(entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR);
+		if(entity.getZBody().getGroundZ() == 0) {
+			entity.fireEvent(new StateChangeEvent(State.JUMPING));
+			entity.getBody().applyLinearImpulse((Vec2) e.getData(), entity.getBody().getWorldCenter());
+			entity.getBody().setGravityScale(1f);
+			entity.getBody().setLinearDamping(1f);
+			entity.getZBody().setGroundZ(entity.getBody().getPosition().y * Stage.SCALE_FACTOR);
+		}
 	}
 
 	@Override
 	public void changeWeapon(ControllerEvent e) {
 		entity.fireEvent(new InventoryEvent(InventoryEvent.CYCLE));
+	}
+	
+	public List<FollowController> getFollowers() {
+		return followers;
+	}
+	
+	public void addFollower(FollowController follower) {
+		this.followers.add(follower);
+	}
+	
+	public boolean removeFollower(FollowController follower) {
+		return this.followers.remove(follower);
 	}
 
 	public void fireEvent(ControllerEvent e) {
@@ -158,6 +196,9 @@ public abstract class EntityController implements ControllerListener {
 		case ControllerEvent.CHANGE_WEAPON:
 			changeWeapon(e);
 			break;
+		case ControllerEvent.REMOVE:
+			entity.getContainer().queueEntity(entity, false);
+			break;
 		}
 	}
 
@@ -165,12 +206,24 @@ public abstract class EntityController implements ControllerListener {
 		if(eventQueue != null && !entity.getState().isActing()) {
 			fireEvent(eventQueue);
 			
+			// Notify any followers of your actions, oh Lord
+			followers.stream().forEach(e -> e.setEventQueue(eventQueue));
+			
 			eventQueue = null;
 		}
 	}
 	
+	protected ControllerEvent validateEvent(ControllerEvent event) {
+		switch(event.getType()) {
+		default:
+			return event;
+		case ControllerEvent.ATTACK:
+			return ControllerValidator.validateAttack(event, entity);
+		}
+	}
+	
 	public void setEventQueue(ControllerEvent event) {
-		this.eventQueue = event;
+		this.eventQueue = validateEvent(event);
 	}
 	
 }

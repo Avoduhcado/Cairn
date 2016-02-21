@@ -21,7 +21,8 @@ public class Inventory implements EntityComponent, Serializable {
 	
 	public Inventory(Entity entity) {
 		this.owner = entity;
-		equipment = new Equipment();
+		equipment = Equipment.testLoadout();
+		//equipment = new Equipment();
 	}
 	
 	public void cycle(InventoryEvent event) {
@@ -36,6 +37,14 @@ public class Inventory implements EntityComponent, Serializable {
 			SpineRender render = (SpineRender) owner.getRender();
 			render.setAttachment("WEAPON", equipment.getEquippedWeapon().getName().toUpperCase());
 		}
+	}
+	
+	public Equipment getEquipment() {
+		return equipment;
+	}
+	
+	public void setEquipment(Equipment equipment) {
+		this.equipment = equipment;
 	}
 	
 }

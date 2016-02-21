@@ -9,6 +9,7 @@ import core.ui.UIElement;
 import core.ui.event.TimeEvent;
 import core.utilities.Config;
 import core.utilities.Resources;
+import core.utilities.keyboard.Keybind;
 import core.utilities.text.Text;
 
 public class Theater {
@@ -109,7 +110,7 @@ public class Theater {
 		}
 
 		Input.checkInput(getSetup());
-
+		
 		if(Camera.get().toBeClosed()) {
 			close();
 		}
@@ -176,7 +177,7 @@ public class Theater {
 	 * Swap to a new Game Setup.
 	 * @param setup New GameSetup to swap to
 	 */
-	public void swapSetup(GameSetup setup) {
+	public void setSetup(GameSetup setup) {
 		this.setup = setup;
 	}
 

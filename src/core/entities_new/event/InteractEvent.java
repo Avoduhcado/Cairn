@@ -8,6 +8,8 @@ public class InteractEvent extends EntityEvent {
 	public static final int ON_TOUCH = 2;
 	public static final int ON_ACTIVATE = 3;
 	
+	public static final int INTERRUPT = -1;
+	
 	private int interactType;
 	private Entity interactor;
 	

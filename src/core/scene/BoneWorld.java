@@ -16,7 +16,7 @@ import core.entities_new.EntityData;
 import core.entities_new.event.CombatEvent;
 import core.entities_new.event.InteractEvent;
 import core.entities_new.utils.SensorData;
-import core.setups.Stage_new;
+import core.setups.Stage;
 import core.setups.WorldContainer;
 
 public class BoneWorld implements ContactListener {
@@ -31,7 +31,7 @@ public class BoneWorld implements ContactListener {
 
 	@Override
 	public void beginContact(Contact contact) {
-		System.out.println("Begin: " + getContactData(contact));
+		//System.out.println("Begin: " + getContactData(contact));
 		
 		if(sortSensors(contact)) {
 			switch(sensor.getType()) {
@@ -44,10 +44,10 @@ public class BoneWorld implements ContactListener {
 				//System.out.println("Bodies colliding!! " + sensor.getEntity().toString() + " " + entity.toString());
 				break;
 			case SensorData.WEAPON:
-				System.out.println("Weapon colliding: " + sensor.getEntity() + ", " + entity);
+				//System.out.println("Weapon colliding: " + sensor.getEntity() + ", " + entity);
 				// TODO Hitting ground/wall? Check for hitting friendlies
 				if(sensor.getEntity() != entity) {
-					System.out.println("Hit boys!!! " + sensor.getEntity() + ", " + entity);
+					//System.out.println("Hit boys!!! " + sensor.getEntity() + ", " + entity);
 					// TODO Pass in proper weapons, maybe include slots that were hit?
 					entity.fireEvent(new CombatEvent(sensor.getEntity(), null, entity));
 				}
@@ -83,7 +83,7 @@ public class BoneWorld implements ContactListener {
 
 	@Override
 	public void endContact(Contact contact) {
-		System.out.println("Ended: " + getContactData(contact));
+		//System.out.println("Ended: " + getContactData(contact));
 		
 		if(sortSensors(contact)) {
 			switch(sensor.getType()) {

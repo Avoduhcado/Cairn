@@ -26,7 +26,7 @@ public class Script implements Scriptable {
 		setReading(true);
 		setReader(reader);
 		
-		TextBox dialog = new TextBox(source.getZBody().getY(), source.getZBody().getX(), null, "We reading now", true);
+		TextBox dialog = new TextBox(source.getZBody().getX(), source.getZBody().getY(), null, "We reading now", true);
 		((GameSetup) source.getContainer()).addUI(dialog);
 		
 		System.out.println("We reading");
@@ -44,7 +44,11 @@ public class Script implements Scriptable {
 
 	@Override
 	public void interrupt() {
+		TextBox dialog = new TextBox(reader.getZBody().getX(), reader.getZBody().getY(), null, "See ya later faaaag", true);
+		((GameSetup) source.getContainer()).addUI(dialog);
+		
 		setReading(false);
+		setReader(null);
 	}
 
 	@Override

@@ -12,9 +12,7 @@ public interface WorldContainer {
 	public World getWorld();
 	
 	public ArrayList<Entity> getEntities();
-	public void addEntity(Entity entity);
-	public boolean removeEntity(Entity entity);
-	
-	public void queueEntity(EntityData entityData);
+
+	public void queueEntity(Entity entity, boolean add);
 	
 }

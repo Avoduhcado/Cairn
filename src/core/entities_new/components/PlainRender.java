@@ -17,7 +17,7 @@ import core.entities_new.event.EntityEvent;
 import core.render.DrawUtils;
 import core.render.SpriteList;
 import core.render.transform.Transform;
-import core.setups.Stage_new;
+import core.setups.Stage;
 
 public class PlainRender implements Renderable, Serializable {
 
@@ -92,8 +92,8 @@ public class PlainRender implements Renderable, Serializable {
 		Body body = entity.getBody();
 		PolygonShape shape = ((PolygonShape) body.getFixtureList().getShape());
 		
-		transform.x = (body.getPosition().x + shape.getVertex(0).x) * Stage_new.SCALE_FACTOR;
-		transform.y = (body.getPosition().y + shape.getVertex(0).y) * Stage_new.SCALE_FACTOR;
+		transform.x = (body.getPosition().x + shape.getVertex(0).x) * Stage.SCALE_FACTOR;
+		transform.y = (body.getPosition().y + shape.getVertex(0).y) * Stage.SCALE_FACTOR;
 		transform.flipX = isFlipped();
 		transform.scaleY = 1f;
 		transform.scaleX = 1f;

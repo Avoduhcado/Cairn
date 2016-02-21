@@ -5,7 +5,7 @@ import org.jbox2d.dynamics.FixtureDef;
 
 import core.entities_new.Entity;
 import core.entities_new.utils.SensorData;
-import core.setups.Stage_new;
+import core.setups.Stage;
 
 public class ActivateInteraction extends Interaction {
 
@@ -17,7 +17,7 @@ public class ActivateInteraction extends Interaction {
 	
 	private FixtureDef createActivationRange() {
 		CircleShape bodyShape = new CircleShape();
-		bodyShape.setRadius(100f / Stage_new.SCALE_FACTOR);
+		bodyShape.setRadius(100f / Stage.SCALE_FACTOR);
 
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 0f;

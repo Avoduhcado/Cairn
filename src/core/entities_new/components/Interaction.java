@@ -15,8 +15,10 @@ public abstract class Interaction implements EntityComponent {
 	}
 	
 	public void interact(InteractEvent e) {
-		if(!script.isBusyReading()) {
+		if(!script.isBusyReading() && e.getInteractType() != InteractEvent.INTERRUPT) {
 			script.startReading(e.getInteractor());
+		} else if(script.isBusyReading() && e.getInteractType() == InteractEvent.INTERRUPT) {
+			script.interrupt();
 		}
 	}
 	

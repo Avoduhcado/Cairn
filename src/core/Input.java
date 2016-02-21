@@ -3,7 +3,7 @@ package core;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-import core.setups.Stage_new;
+import core.setups.Stage;
 import core.ui.UIElement;
 import core.ui.event.KeyEvent;
 import core.ui.event.KeybindEvent;
@@ -16,7 +16,7 @@ public class Input {
 	
 	// TODO Create a proper SINGLETONNNNN out of Input class
 	static {
-		Keyboard.enableRepeatEvents(true);
+		//Keyboard.enableRepeatEvents(true);
 	}
 	
 	/**
@@ -47,7 +47,7 @@ public class Input {
 		}
 		
 		// Setup specific processing
-		if(setup instanceof Stage_new) {
+		if(setup instanceof Stage) {
 			if(Keybind.PAUSE.clicked()) {
 				Theater.get().pause();
 			} else if(Keybind.EXIT.clicked()) {

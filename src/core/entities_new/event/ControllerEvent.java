@@ -1,7 +1,5 @@
 package core.entities_new.event;
 
-import org.jbox2d.common.Vec2;
-
 public class ControllerEvent extends EntityEvent {
 
 	public static final int MOVE = 1;
@@ -11,6 +9,7 @@ public class ControllerEvent extends EntityEvent {
 	public static final int COLLAPSE = 5;
 	public static final int JUMP = 6;
 	public static final int CHANGE_WEAPON = 7;
+	public static final int REMOVE = 8;
 	
 	private int type;
 	private Object data;

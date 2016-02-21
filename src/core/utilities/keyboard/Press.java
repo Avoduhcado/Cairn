@@ -33,10 +33,11 @@ public class Press {
 			setPressed(true);
 			setReleased(false);
 		} else {
-			if(isPressed())
+			if(isPressed()) {
 				setReleased(true);
-			else
+			} else {
 				setReleased(false);
+			}
 			setPressed(false);
 			setHeld(false);
 		}

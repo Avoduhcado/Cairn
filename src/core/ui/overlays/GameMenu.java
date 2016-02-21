@@ -22,7 +22,7 @@ public class GameMenu extends MenuOverlay {
 		
 		Button toTitle = new Button(Float.NaN, (float) openOptions.getBounds().getMaxY(), null, "Quit to Title");
 		toTitle.setAlign(Align.CENTER);
-		toTitle.addActionListener(e -> Theater.get().swapSetup(new TitleMenu()));
+		toTitle.addActionListener(e -> Theater.get().setSetup(new TitleMenu()));
 		
 		Button toDesktop = new Button(Float.NaN, (float) toTitle.getBounds().getMaxY(), null, "Quit to Desktop");
 		toDesktop.setAlign(Align.CENTER);

@@ -111,7 +111,7 @@ public class SplashScreen extends GameSetup {
 				Camera.get().setFade(-1f);
 			// Proceed with setup swap
 			} else {
-				Theater.get().swapSetup(new TitleMenu());
+				Theater.get().setSetup(new TitleMenu());
 				//Theater.get().swapSetup(new Stage());
 			}
 		}
@@ -139,7 +139,7 @@ public class SplashScreen extends GameSetup {
 				Camera.get().setFade(-1f);
 			// Proceed with setup swap
 			} else {
-				Theater.get().swapSetup(new TitleMenu());
+				Theater.get().setSetup(new TitleMenu());
 				//Theater.get().swapSetup(new Stage());
 			}
 		}

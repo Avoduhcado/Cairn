@@ -13,7 +13,7 @@ import core.entities_new.Entity;
 import core.entities_new.event.EntityEvent;
 import core.render.SpriteList;
 import core.render.transform.Transform;
-import core.setups.Stage_new;
+import core.setups.Stage;
 import core.utilities.AvoFileDecoder;
 import core.utilities.Resources;
 import net.lingala.zip4j.model.FileHeader;
@@ -101,8 +101,8 @@ public class GridRender implements Renderable, Serializable {
 
 	@Override
 	public void setTransform(int index) {
-		transform.x = (entity.getBody().getPosition().x * Stage_new.SCALE_FACTOR) + (tiles.get(index).y * height);
-		transform.y = (entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR) - (tiles.get(index).x * width);
+		transform.x = (entity.getBody().getPosition().x * Stage.SCALE_FACTOR) + (tiles.get(index).y * height);
+		transform.y = (entity.getBody().getPosition().y * Stage.SCALE_FACTOR) - (tiles.get(index).x * width);
 		transform.flipX = isFlipped();
 		transform.scaleY = 1f;
 		transform.scaleX = 1f;

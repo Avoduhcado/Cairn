@@ -18,7 +18,7 @@ import core.entities_new.components.TimedStateManager;
 import core.entities_new.components.ZBody;
 import core.entities_new.utils.BodyData;
 import core.entities_new.utils.BodyLoader;
-import core.setups.Stage_new;
+import core.setups.Stage;
 import core.setups.WorldContainer;
 
 public class EntityData {
@@ -63,7 +63,7 @@ public class EntityData {
 			
 			entity.getBody().setGravityScale(2f);
 			entity.getBody().setLinearDamping(1f);
-			entity.getZBody().setGroundZ((entity.getBody().getPosition().y * Stage_new.SCALE_FACTOR) +
+			entity.getZBody().setGroundZ((entity.getBody().getPosition().y * Stage.SCALE_FACTOR) +
 					(float) ((Math.random() * 15f) + 15f));
 		}
 		if(entity.getRender() == null) {
@@ -72,15 +72,15 @@ public class EntityData {
 			{
 				entity.getContainer().getWorld().destroyBody(entity.getBody());
 				BodyDef bodyDef = new BodyDef();
-				bodyDef.position.set(x / Stage_new.SCALE_FACTOR, y / Stage_new.SCALE_FACTOR);
+				bodyDef.position.set(x / Stage.SCALE_FACTOR, y / Stage.SCALE_FACTOR);
 				bodyDef.type = BodyType.DYNAMIC;
 
 				PolygonShape bodyShape = new PolygonShape();
 				Vec2[] verts = new Vec2[] {
 						new Vec2(0, 0),
-						new Vec2(15 / Stage_new.SCALE_FACTOR, 0),
-						new Vec2(15 / Stage_new.SCALE_FACTOR, 15 / Stage_new.SCALE_FACTOR),
-						new Vec2(0, 15 / Stage_new.SCALE_FACTOR),
+						new Vec2(15 / Stage.SCALE_FACTOR, 0),
+						new Vec2(15 / Stage.SCALE_FACTOR, 15 / Stage.SCALE_FACTOR),
+						new Vec2(0, 15 / Stage.SCALE_FACTOR),
 				};
 				for(Vec2 v : verts) {
 					v.mulLocal(Camera.ASPECT_RATIO);

@@ -1,6 +1,8 @@
 package core.setups;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector4f;
@@ -10,10 +12,10 @@ import core.entities_new.Entity;
 import core.entities_new.EntityData;
 import core.entities_new.components.ActivateInteraction;
 import core.entities_new.components.Combatant;
+import core.entities_new.components.FollowController;
 import core.entities_new.components.Inventory;
 import core.entities_new.components.PlayerController;
 import core.entities_new.components.Script;
-import core.entities_new.components.TouchInteraction;
 import core.entities_new.event.InteractEvent;
 import core.entities_new.utils.BodyData;
 import core.entities_new.utils.BodyLoader;
@@ -21,19 +23,21 @@ import core.entities_new.utils.CombatLoader;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
 
-public class Stage_new extends GameSetup implements WorldContainer {
+public class Stage extends GameSetup implements WorldContainer {
 
 	private ArrayList<Entity> background = new ArrayList<Entity>();
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	private World world = new World(new Vec2(0, 15f));
 
 	private BoneWorld boneWorld;
-	private ArrayList<EntityData> queuedEntities = new ArrayList<EntityData>();
+	
+	private ArrayList<Entity> queuedEntities = new ArrayList<Entity>();
+	private ArrayList<Entity> entitiesToRemove = new ArrayList<Entity>();
 
 	public static final float SCALE_FACTOR = 30f;
 
-	public Stage_new() {
-		Camera.get().setFade(-2.5f);
+	public Stage() {
+		//Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 
 		ShadowMap.init();
@@ -53,6 +57,10 @@ public class Stage_new extends GameSetup implements WorldContainer {
 
 		addPlayer(new Entity("Skelebones", new BodyData(495, 450, BodyLoader.PLAIN_ENTITY), this));
 
+		Entity dad = new Entity("Skull", new BodyData(495, 450, BodyLoader.FLOATING_ENTITY), this);
+		dad.setController(new FollowController(dad, getPlayer()));
+		addEntity(dad);
+		
 		/*Entity dad = new Entity("Skull",
 				player.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
 				player.getBody().getPosition().y * Stage_new.SCALE_FACTOR,
@@ -84,7 +92,7 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		//collector.addCombatListener(CombatLoader.plainCombatant());
 		collector.addComponent(Combatant.class, CombatLoader.plainCombatant());
 		//collector.addComponent(AutorunInteraction.class, new AutorunInteraction(collector, new Script(collector, "")));
-		collector.addComponent(TouchInteraction.class, new TouchInteraction(collector, new Script(collector, "")));
+		//collector.addComponent(TouchInteraction.class, new TouchInteraction(collector, new Script(collector, "")));
 		collector.addComponent(ActivateInteraction.class, new ActivateInteraction(collector, new Script(collector, "")));
 		addEntity(collector);
 
@@ -142,20 +150,22 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	public void update() {
 		world.step(1 / 60f, 8, 3);
 
-		if(!queuedEntities.isEmpty()) {
-			for(EntityData e : queuedEntities) {
-				entities.add(e.createEntity());
+		for(Entity e : entities) {
+			if(e.controller()) {
+				e.getController().control();
 			}
-			queuedEntities.clear();
+			e.updateBodyAndState();
 		}
-		
-		entities.stream()
+				
+		/*entities.stream()
 			.filter(e -> e.controller())
 			.map(e -> e.getController())
 			.forEach(e -> e.control());
 
 		entities.stream()
-			.forEach(e -> e.updateBodyAndState());
+			.forEach(e -> e.updateBodyAndState());*/
+		
+		queuedOperations();
 	}
 
 	@Override
@@ -189,17 +199,57 @@ public class Stage_new extends GameSetup implements WorldContainer {
 	}
 
 	@Override
-	public void addEntity(Entity entity) {
+	public void queueEntity(Entity entity, boolean add) {
+		if(add) {
+			queuedEntities.add(entity);
+		} else {
+			entitiesToRemove.add(entity);
+		}
+	}
+
+	private void queuedOperations() {
+		cleanUpEntities();
+		addQueuedEntities();
+	}
+
+	private void addEntity(Entity entity) {
 		entities.add(entity);
 	}
 
-	@Override
-	public boolean removeEntity(Entity entity) {
+	private boolean removeEntity(Entity entity) {
 		return entities.remove(entity);
+	}
+	
+	private void cleanUpEntities() {
+		if(entitiesToRemove.isEmpty()) {
+			return;
+		}
+		
+		for(Entity e : entitiesToRemove) {
+			removeEntity(e);
+		}
+		entitiesToRemove.clear();
+	}
+	
+	private void addQueuedEntities() {
+		if(queuedEntities.isEmpty()) {
+			return;
+		}
+		
+		for(Entity e : queuedEntities) {
+			entities.add(e);
+		}
+		queuedEntities.clear();
+	}
+
+	public Entity getPlayer() {
+		return entities.stream()
+				.filter(e -> e.controller() && e.getController() instanceof PlayerController)
+				.findFirst().get();
 	}
 
 	/** TODO
-	 * Is this necessary? Could be useful for insuring there's a single player character.
+	 * Is this necessary? Could be useful for ensuring there's a single player character.
 	 * @param player
 	 */
 	public void addPlayer(Entity player) {
@@ -208,11 +258,6 @@ public class Stage_new extends GameSetup implements WorldContainer {
 		addEntity(player);
 		
 		Camera.get().setFocus(player);
-	}
-
-	@Override
-	public void queueEntity(EntityData entityData) {
-		queuedEntities.add(entityData);
 	}
 
 }

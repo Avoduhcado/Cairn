@@ -114,7 +114,7 @@ public class Entity implements DepthSort, Serializable {
 	
 	public void destroy() {
 		container.getWorld().destroyBody(getBody());
-		container.removeEntity(this);
+		container.queueEntity(this, false);
 	}
 	
 	public String getName() {
@@ -184,6 +184,13 @@ public class Entity implements DepthSort, Serializable {
 
 	public void setComponents(HashMap<Class<?>, EntityComponent> components) {
 		this.components = components;
+	}
+	
+	public EntityComponent getComponent(Class<?> clazz) {
+		if(components.containsKey(clazz)) {
+			return components.get(clazz);
+		}
+		return null;
 	}
 	
 	public void addComponent(Class<?> clazz, EntityComponent component) {
@@ -261,6 +268,7 @@ public class Entity implements DepthSort, Serializable {
 			}
 			break;
 		case InteractEvent.ON_ACTIVATE:
+		case InteractEvent.INTERRUPT:
 			if(components.containsKey(ActivateInteraction.class)) {
 				((Interaction) components.get(ActivateInteraction.class)).interact(e);
 			}

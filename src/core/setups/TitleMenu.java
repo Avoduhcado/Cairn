@@ -28,7 +28,7 @@ public class TitleMenu extends GameSetup {
 		// Initialize game buttons
 		Button newGame = new Button(Float.NaN, Camera.get().getDisplayHeight(0.55f), null, "New Game");
 		newGame.setAlign(Align.CENTER);
-		newGame.addActionListener(e -> Theater.get().swapSetup(new Stage_new()));
+		newGame.addActionListener(e -> Theater.get().setSetup(new Stage()));
 		
 		Button options = new Button(Float.NaN, (float) newGame.getBounds().getMaxY(), null, "Options");
 		options.setAlign(Align.CENTER);

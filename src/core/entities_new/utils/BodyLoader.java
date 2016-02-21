@@ -11,7 +11,7 @@ import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 
 import core.entities_new.Entity;
-import core.setups.Stage_new;
+import core.setups.Stage;
 
 public class BodyLoader {
 
@@ -41,11 +41,11 @@ public class BodyLoader {
 	
 	private static Body nullBody(Entity entity, World world, BodyData bodyData) {
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(bodyData.getX() / Stage_new.SCALE_FACTOR, bodyData.getY() / Stage_new.SCALE_FACTOR);
+		bodyDef.position.set(bodyData.getX() / Stage.SCALE_FACTOR, bodyData.getY() / Stage.SCALE_FACTOR);
 		bodyDef.type = BodyType.STATIC;
 
 		CircleShape bodyShape = new CircleShape();
-		bodyShape.m_radius = bodyData.getWidth() / Stage_new.SCALE_FACTOR / 2f;
+		bodyShape.m_radius = bodyData.getWidth() / Stage.SCALE_FACTOR / 2f;
 
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 0f;
@@ -64,11 +64,11 @@ public class BodyLoader {
 
 	private static Body groundBody(Entity entity, World world, BodyData bodyData) {
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(bodyData.getX() / Stage_new.SCALE_FACTOR, bodyData.getY() / Stage_new.SCALE_FACTOR);
+		bodyDef.position.set(bodyData.getX() / Stage.SCALE_FACTOR, bodyData.getY() / Stage.SCALE_FACTOR);
 		bodyDef.type = BodyType.STATIC;
 
 		PolygonShape bodyShape = new PolygonShape();
-		bodyShape.setAsBox(bodyData.getWidth() / Stage_new.SCALE_FACTOR, bodyData.getHeight() / Stage_new.SCALE_FACTOR);
+		bodyShape.setAsBox(bodyData.getWidth() / Stage.SCALE_FACTOR, bodyData.getHeight() / Stage.SCALE_FACTOR);
 
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 1f;
@@ -84,11 +84,11 @@ public class BodyLoader {
 	
 	private static Body wallBody(Entity entity, World world, BodyData bodyData) {
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(bodyData.getX() / Stage_new.SCALE_FACTOR, bodyData.getY() / Stage_new.SCALE_FACTOR);
+		bodyDef.position.set(bodyData.getX() / Stage.SCALE_FACTOR, bodyData.getY() / Stage.SCALE_FACTOR);
 		bodyDef.type = BodyType.STATIC;
 
 		EdgeShape bodyShape = new EdgeShape();
-		bodyShape.set(new Vec2(0, 0), new Vec2(bodyData.getWidth() / Stage_new.SCALE_FACTOR, bodyData.getHeight() / Stage_new.SCALE_FACTOR));
+		bodyShape.set(new Vec2(0, 0), new Vec2(bodyData.getWidth() / Stage.SCALE_FACTOR, bodyData.getHeight() / Stage.SCALE_FACTOR));
 
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 1f;
@@ -104,11 +104,11 @@ public class BodyLoader {
 
 	private static Body plainEntity(Entity entity, World world, BodyData bodyData) {
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(bodyData.getX() / Stage_new.SCALE_FACTOR, bodyData.getY() / Stage_new.SCALE_FACTOR);
+		bodyDef.position.set(bodyData.getX() / Stage.SCALE_FACTOR, bodyData.getY() / Stage.SCALE_FACTOR);
 		bodyDef.type = BodyType.DYNAMIC;
 
 		CircleShape bodyShape = new CircleShape();
-		bodyShape.m_radius = bodyData.getWidth() / Stage_new.SCALE_FACTOR / 2f;
+		bodyShape.m_radius = bodyData.getWidth() / Stage.SCALE_FACTOR / 2f;
 
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 1f;
@@ -130,11 +130,11 @@ public class BodyLoader {
 
 	private static Body floatingEntity(Entity entity, World world, BodyData bodyData) {
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(bodyData.getX() / Stage_new.SCALE_FACTOR, bodyData.getY() / Stage_new.SCALE_FACTOR);
+		bodyDef.position.set(bodyData.getX() / Stage.SCALE_FACTOR, bodyData.getY() / Stage.SCALE_FACTOR);
 		bodyDef.type = BodyType.DYNAMIC;
 
 		CircleShape bodyShape = new CircleShape();
-		bodyShape.m_radius = bodyData.getWidth() / Stage_new.SCALE_FACTOR / 2f;
+		bodyShape.m_radius = bodyData.getWidth() / Stage.SCALE_FACTOR / 2f;
 
 		FixtureDef boxFixture = new FixtureDef();
 		boxFixture.density = 1f;

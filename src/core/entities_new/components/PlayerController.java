@@ -1,12 +1,9 @@
 package core.entities_new.components;
 
 import org.jbox2d.common.Vec2;
-import core.entities_new.State;
 import core.entities_new.Entity;
-import core.entities_new.event.ActionEvent;
 import core.entities_new.event.ControllerEvent;
 import core.entities_new.event.InteractEvent;
-import core.entities_new.event.StateChangeEvent;
 import core.utilities.keyboard.Keybind;
 
 public class PlayerController extends EntityController {
@@ -16,21 +13,13 @@ public class PlayerController extends EntityController {
 	}
 
 	@Override
-	public void control() {
-		controlMovement();
-		
-		controlActions();
-		
-		processEventQueue();
-	}
-
-	private void controlActions() {
+	protected void controlActions() {
 		if(Keybind.DODGE.clicked()) {
 			setEventQueue(new ControllerEvent(ControllerEvent.DODGE));
 		} else if(Keybind.ATTACK.clicked()) {
-			setEventQueue(new ControllerEvent(ControllerEvent.ATTACK));
-		} else if(Keybind.DEFEND.clicked()) {
-			setEventQueue(new ControllerEvent(ControllerEvent.DEFEND));
+			setEventQueue(new ControllerEvent(ControllerEvent.ATTACK) {{
+				setData(((Inventory) entity.getComponent(Inventory.class)).getEquipment().getEquippedWeapon().getAnimation());
+			}});
 		} else if(Keybind.SLOT1.clicked()) {
 			setEventQueue(new ControllerEvent(ControllerEvent.COLLAPSE) {{
 				setData(entity.getBody().getLinearVelocity().clone());
@@ -46,9 +35,20 @@ public class PlayerController extends EntityController {
 			//entity.getZBody().getInteractables().stream()
 				//.forEach(e -> e.fireEvent(new InteractEvent(InteractEvent.ON_ACTIVATE, entity)));
 		}
+		
+		if(Keybind.DEFEND.press()) {
+			setEventQueue(new ControllerEvent(ControllerEvent.DEFEND) {{
+				setData(true);
+			}});
+		} else if(Keybind.DEFEND.released()) {
+			setEventQueue(new ControllerEvent(ControllerEvent.DEFEND) {{
+				setData(false);
+			}});
+		}
 	}
 
-	private void controlMovement() {
+	@Override
+	protected void controlMovement() {
 		speedMod = 1f;
 		if(Keybind.RUN.held()) {
 			speedMod = 1.5f;
@@ -60,39 +60,6 @@ public class PlayerController extends EntityController {
 						Keybind.UP.press() ? -0.65f : Keybind.DOWN.press() ? 0.65f : 0f));
 			}});
 		}
-	}
-	
-	@Override
-	public void move(ControllerEvent e) {
-		if(entity.getState().canMove()) {
-			Vec2 movement = (Vec2) e.getData();
-			movement.normalize();
-			if(entity.isWalkingBackwards()) {
-				speedMod -= 0.25f;
-			}
-			entity.getBody().applyForceToCenter(movement.mul(speed * speedMod));
-			entity.fireEvent(new StateChangeEvent(speedMod > 1 ? State.RUN : State.WALK));
-			
-			if(entity.getBody().getLinearVelocity().x != 0 && !entity.isFixDirection() && entity.getRender() != null) {
-				entity.getRender().setFlipped(entity.getBody().getLinearVelocity().x < 0);
-			}
-		}
-	}
-
-	public void attack() {
-		entity.getContainer().getEntities().stream()
-			.filter(e -> e.getController() instanceof FollowController 
-					&& ((FollowController) e.getController()).getLeader() == entity)
-			.map(e -> (FollowController) e.getController())
-			.forEach(e -> e.fireEvent(new ActionEvent(State.ATTACK, e.getFollower().getState())));
-	}
-	
-	public void defend(boolean release) {
-		entity.getContainer().getEntities().stream()
-			.filter(e -> e.getController() instanceof FollowController 
-					&& ((FollowController) e.getController()).getLeader() == entity)
-			.map(e -> (FollowController) e.getController())
-			.forEach(e -> e.fireEvent(new ActionEvent(State.DEFEND, release ? State.IDLE : State.DEFEND)));
 	}
 	
 }
