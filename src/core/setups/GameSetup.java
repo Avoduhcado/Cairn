@@ -68,6 +68,14 @@ public abstract class GameSetup implements UIContainer {
 	}
 	
 	public void fireEvent(UIEvent e) {
+		// Consume from the front most element
+		for(int i = uiElements.size() - 1; i > 0; i--) {
+			uiElements.get(i).fireEvent(e);
+			if(e.isConsumed()) {
+				return;
+			}
+		}
+		
 		if(e instanceof StateChangeEvent) {
 			processStateChangeEvent(e);
 		}

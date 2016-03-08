@@ -2,6 +2,7 @@ package core.entities_new;
 
 public enum State {
 	
+	// Top Level States
 	IDLE ("Idle", true),
 	WALK ("Walk", true),
 	RUN ("Run", true), 
@@ -10,10 +11,9 @@ public enum State {
 	FALLING ("QuickStep", true), 
 	LAND ("QuickStep", false), 
 	ATTACK ("Attack", false), 
-	DEFEND ("Defend", false), 
+	DEFEND ("DefendStart", true), 
 	HIT ("Hit", false),
 	CHANGE_WEAPON ("ChangeWeapon", false);
-	
 	
 	public String animation;
 	public boolean loop;
@@ -30,7 +30,7 @@ public enum State {
 	}
 	
 	/**
-	 * @return Whether quick-stepping, attacking, or defending
+	 * @return Whether quick-stepping, attacking
 	 */
 	public boolean isActing() {
 		return this == QUICKSTEP || this == ATTACK;

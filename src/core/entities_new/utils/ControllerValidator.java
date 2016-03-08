@@ -2,22 +2,25 @@ package core.entities_new.utils;
 
 import core.entities_new.Entity;
 import core.entities_new.State;
-import core.entities_new.event.ControllerEvent;
+import core.entities_new.event.controllers.AttackEvent;
+import core.entities_new.event.controllers.ControllerEvent;
+import core.inventory.Weapon;
 
 public class ControllerValidator {
 
-	public static ControllerEvent validateAttack(ControllerEvent event, Entity entity) {
+	public static ControllerEvent validateAttack(AttackEvent event, Entity entity) {
 		int comboStep = 0;
+		Weapon weapon = event.getWeapon();
 		if(entity.getState().equals(State.ATTACK)) {
-			if(entity.render() && entity.getRender().getAnimation().startsWith(((String) event.getData()).split("-")[0])) {
-				String[] animation = entity.getRender().getAnimation().split("-");
-				comboStep = Integer.parseInt(animation[1]) + 1;
-				if(!entity.getRender().hasAnimation(animation[0] + "-" + comboStep)) {
+			if(entity.render() && entity.getRender().getAnimation().startsWith(weapon.getAnimation())) {
+				comboStep = Integer.parseInt(entity.getRender().getAnimation().split("-")[1]);
+				comboStep++;
+				if(!entity.getRender().hasAnimation(weapon.getAnimation() + "-" + comboStep)) {
 					comboStep = 0;
 				}
 			}
 		}
-		event.setData(((String) event.getData()).split("-")[0] + "-" + comboStep);
+		event.setAnimation(weapon.getAnimation() + "-" + comboStep);
 		
 		return event;
 	}

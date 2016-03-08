@@ -67,10 +67,11 @@ public enum Keybind {
 	
 	/** Key was pressed and is no longer pressed. */
 	public boolean clicked() {
-		if(key.isPressed() && !key.isHeld())
+		if(key.isPressed() && !key.isHeld()) {
 			return true;
-		else
+		} else {
 			return false;
+		}
 	}
 	
 	/** Key was released. */

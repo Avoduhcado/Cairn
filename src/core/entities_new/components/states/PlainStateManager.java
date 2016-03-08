@@ -1,4 +1,4 @@
-package core.entities_new.components;
+package core.entities_new.components.states;
 
 import core.entities_new.Entity;
 import core.entities_new.State;
@@ -38,7 +38,7 @@ public class PlainStateManager implements StateManager {
 	@Override
 	public void changeStateForced(State state) {
 		if(entity.render()) {
-			entity.getRender().fireEvent(new StateChangeEvent(state, this.state));
+			entity.getRender().fireEvent(new StateChangeEvent(state));
 		}
 		
 		this.state = state;

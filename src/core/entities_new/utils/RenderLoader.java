@@ -1,10 +1,10 @@
 package core.entities_new.utils;
 
 import core.entities_new.Entity;
-import core.entities_new.components.GridRender;
-import core.entities_new.components.PlainRender;
-import core.entities_new.components.Renderable;
-import core.entities_new.components.SpineRender;
+import core.entities_new.components.renders.GridRender;
+import core.entities_new.components.renders.PlainRender;
+import core.entities_new.components.renders.Renderable;
+import core.entities_new.components.renders.SpineRender;
 import core.utilities.Resources;
 import net.lingala.zip4j.model.FileHeader;
 

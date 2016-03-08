@@ -1,4 +1,4 @@
-package core.entities_new.components;
+package core.entities_new.components.states;
 
 import core.Theater;
 import core.entities_new.Entity;

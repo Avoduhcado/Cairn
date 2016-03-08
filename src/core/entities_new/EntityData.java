@@ -12,10 +12,10 @@ import com.esotericsoftware.spine.Slot;
 import com.esotericsoftware.spine.attachments.Box2dAttachment;
 
 import core.Camera;
-import core.entities_new.components.PlainRender;
-import core.entities_new.components.SpineRender;
-import core.entities_new.components.TimedStateManager;
-import core.entities_new.components.ZBody;
+import core.entities_new.components.geometrics.ZBody;
+import core.entities_new.components.renders.PlainRender;
+import core.entities_new.components.renders.SpineRender;
+import core.entities_new.components.states.TimedStateManager;
 import core.entities_new.utils.BodyData;
 import core.entities_new.utils.BodyLoader;
 import core.setups.Stage;

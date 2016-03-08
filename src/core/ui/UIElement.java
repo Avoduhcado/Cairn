@@ -233,17 +233,22 @@ public abstract class UIElement {
 					return;
 				}
 			}
-			
-			switch(e.getEvent()) {
-			case MouseEvent.CLICKED:
-				mouseListener.mouseClicked(e);
-				break;
-			case MouseEvent.PRESSED:
-				mouseListener.mousePressed(e);
-				break;
-			case MouseEvent.RELEASED:
-				mouseListener.mouseReleased(e);
-				break;
+
+			if(getBounds().contains(e.getPosition())) {
+				switch(e.getEvent()) {
+				case MouseEvent.CLICKED:
+						mouseListener.mouseClicked(e);
+						e.consume();
+					break;
+				case MouseEvent.PRESSED:
+					mouseListener.mousePressed(e);
+					e.consume();
+					break;
+				case MouseEvent.RELEASED:
+					mouseListener.mouseReleased(e);
+					e.consume();
+					break;
+				}
 			}
 		}
 		
@@ -253,7 +258,10 @@ public abstract class UIElement {
 				mouseMotionListener.mouseMoved(e);
 				break;
 			case MouseEvent.DRAGGED:
-				mouseMotionListener.mouseDragged(e);
+				if(getBounds().contains(e.getPrevPosition())) {
+					mouseMotionListener.mouseDragged(e);
+					e.consume();
+				}
 				break;
 			}
 		}

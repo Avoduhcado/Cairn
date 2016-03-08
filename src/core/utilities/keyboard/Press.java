@@ -14,7 +14,7 @@ public class Press {
 	private boolean released;
 	/** True if key presses are to be ignored */
 	private boolean disabled;
-	
+		
 	/**
 	 * Manage key mappings for button input.
 	 * @param k int for this key mapping
@@ -41,7 +41,6 @@ public class Press {
 			setPressed(false);
 			setHeld(false);
 		}
-			
 	}
 
 	/**
@@ -130,4 +129,5 @@ public class Press {
 	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
 	}
+
 }

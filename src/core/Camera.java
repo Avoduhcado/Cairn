@@ -1,12 +1,12 @@
 package core;
 
-import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
@@ -22,6 +22,7 @@ import core.render.DrawUtils;
 import core.setups.GameSetup;
 import core.setups.Stage;
 import core.utilities.MathFunctions;
+import core.utilities.MathUtils;
 import core.utilities.text.Text;
 
 public class Camera {
@@ -50,7 +51,10 @@ public class Camera {
 	private Rectangle2D frameBorder = new Rectangle2D.Float();
 	
 	/** World scale variable */
+	private float minScale = 0.01f;
+	private float maxScale = 3f;
 	private float scale = 1f;
+	
 	/** VSync status */
 	private boolean vsync;
 	
@@ -122,7 +126,7 @@ public class Camera {
 			GL11.glLoadIdentity();
 			GL11.glOrtho(0, displayWidth, displayHeight, 0, -1, 1);
 			GL11.glViewport(0, 0, displayWidth, displayHeight);
-			GL11.glClearColor(0f, 0f, 0f, 0f);
+			//GL11.glClearColor(0f, 0f, 0f, 0f);
 			GL11.glClearStencil(0);
 		} catch (LWJGLException e) {
 			System.err.println("Could not create display.");
@@ -160,8 +164,11 @@ public class Camera {
 			frameSpeed.set(0, 0);
 		}
 		
-		if(resized())
+		if(resized()) {
 			resize();
+		}
+		
+		Theater.get().paused = !Display.isActive();
 	}
 	
 	public void updateHeader() {
@@ -214,15 +221,17 @@ public class Camera {
 		fade();
 		
 		if(Theater.get().paused) {
-			/*Text.getDefault().setStill(true);
-			Text.getDefault().setCentered(true);
-			Text.getDefault().drawString("Paused", getDisplayWidth(0.5f), getDisplayHeight(0.5f));*/
+			DrawUtils.fillColor(0, 0, 0, 0.65f);
+			Text.drawString("Paused", getDisplayWidth(0.5f), getDisplayHeight(0.5f), "t+,cwhite");
 		}
 		
 		// Draw debug info
 		if(Theater.get().debug) {
-			Text.drawString("Current Setup: " + Theater.get().getSetup().getClass().getName(), 15, 15, "t+,cwhite,d-");
-			Text.drawString("Avogine v" + Theater.AVOGINE_VERSION, 15, 45, "t+,cwhite,d-");
+			Text.drawString("Current Setup: " + Theater.get().getSetup().getClass().getName(), 15, 15, "t+,cwhite");
+			Text.drawString("Avogine v" + Theater.AVOGINE_VERSION, 15, 45, "t+,cwhite");
+			Text.drawString("Scene scale: " + scale, 15, 75, "t+,cwhite");
+			
+			Text.drawString(getScreenMouseX() + ", " + getScreenMouseY(), getSizedMouseX(), getSizedMouseY() - 32, "t+,cwhite");
 		}
 		
 		// Draw debug info
@@ -246,6 +255,47 @@ public class Camera {
 		}*/
 	}
 	
+	public int getScreenMouseX() {
+		return (int) ((getScaledWidth() / (frame.getWidth() / getSizedMouseX())) - (getScreenSpaceXOffset() - frame.getX()));
+	}
+	
+	public int getScreenMouseY() {
+		return (int) ((getScaledHeight() / (frame.getHeight() / getSizedMouseY()) - (getScreenSpaceYOffset() - frame.getY())));
+	}
+	
+	private float getSizedMouseX() {
+		return Mouse.getX() / getWindowXScale();
+	}
+
+	private float getWindowXScale() {
+		return (displayWidth / (float) WIDTH);
+	}
+	
+	private float getScreenSpaceXOffset() {
+		return (float) ((getScaledWidth() - frame.getWidth()) / 2f);
+	}
+	
+	private float getSizedMouseY() {
+		// Invert Mouse Y because 0 is the bottom of the window but we dumb and count top to bottom
+		return (-Mouse.getY() + displayHeight) / getWindowYScale();
+	}
+	
+	private float getWindowYScale() {
+		return (displayHeight / (float) HEIGHT);
+	}
+	
+	private float getScreenSpaceYOffset() {
+		return (float) ((getScaledHeight() - frame.getHeight()) / 2f);
+	}
+	
+	private float getScaledWidth() {
+		return (float) (frame.getWidth() / scale);
+	}
+	
+	private float getScaledHeight() {
+		return (float) (frame.getHeight() / scale);
+	}
+	
 	public boolean getUpscale() {
 		return upscale;
 	}
@@ -259,7 +309,7 @@ public class Camera {
 	}
 
 	public void setScale(float scale) {
-		this.scale = scale;
+		this.scale = MathUtils.clamp(scale, minScale, maxScale);
 	}
 	
 	public void setZoom(float duration, float change) {
@@ -575,10 +625,6 @@ public class Camera {
 		}
 	}
 	
-	public float getWindowXScale() {
-		return (displayWidth / (float) WIDTH);
-	}
-	
 	public float getFrameYScale() {
 		if(upscale) {
 			return (float) (HEIGHT / frame.getHeight());
@@ -586,10 +632,6 @@ public class Camera {
 		} else {
 			return 1f;
 		}
-	}
-	
-	public float getWindowYScale() {
-		return (displayHeight / (float) HEIGHT);
 	}
 	
 	public float getDisplayWidth() {

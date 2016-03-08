@@ -1,6 +1,8 @@
-package core.entities_new.event;
+package core.entities_new.event.controllers;
 
-public class ControllerEvent extends EntityEvent {
+import core.entities_new.event.EntityEvent;
+
+public abstract class ControllerEvent extends EntityEvent {
 
 	public static final int MOVE = 1;
 	public static final int DODGE = 2;
@@ -11,29 +13,14 @@ public class ControllerEvent extends EntityEvent {
 	public static final int CHANGE_WEAPON = 7;
 	public static final int REMOVE = 8;
 	
-	private int type;
-	private Object data;
+	private final int type;
 	
 	public ControllerEvent(int type) {
-		setType(type);
+		this.type = type;
 	}
 
 	public int getType() {
 		return type;
 	}
 
-	public void setType(int type) {
-		this.type = type;
-	}
-
-	public Object getData() {
-		return data;
-	}
-
-	public void setData(Object data) {
-		this.data = data;
-	}
-
-	
-	
 }

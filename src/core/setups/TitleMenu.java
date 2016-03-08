@@ -42,7 +42,7 @@ public class TitleMenu extends GameSetup {
 		newGame.setSurrounding(3, options);
 		options.setSurrounding(3, exit);
 		exit.setSurrounding(3, newGame);
-		
+
 		ElementGroup<Button> buttons = new ElementGroup<Button>();
 		buttons.add(newGame);
 		buttons.add(options);

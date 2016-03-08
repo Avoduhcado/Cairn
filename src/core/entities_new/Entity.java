@@ -3,21 +3,26 @@ package core.entities_new;
 import java.io.Serializable;
 import java.util.HashMap;
 
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.EdgeShape;
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.Fixture;
 import org.lwjgl.util.vector.Vector3f;
 
 import core.Theater;
-import core.entities_new.components.ActivateInteraction;
-import core.entities_new.components.AutorunInteraction;
 import core.entities_new.components.Combatant;
-import core.entities_new.components.Controllable;
-import core.entities_new.components.Interaction;
 import core.entities_new.components.Inventory;
-import core.entities_new.components.PlainStateManager;
-import core.entities_new.components.Renderable;
-import core.entities_new.components.StateManager;
-import core.entities_new.components.TouchInteraction;
-import core.entities_new.components.ZBody;
+import core.entities_new.components.controllers.Controllable;
+import core.entities_new.components.geometrics.ZBody;
+import core.entities_new.components.interactions.ActivateInteraction;
+import core.entities_new.components.interactions.AutorunInteraction;
+import core.entities_new.components.interactions.Interaction;
+import core.entities_new.components.interactions.TouchInteraction;
+import core.entities_new.components.renders.Renderable;
+import core.entities_new.components.renders.SpineRender;
+import core.entities_new.components.states.PlainStateManager;
+import core.entities_new.components.states.StateManager;
 import core.entities_new.event.ActionEvent;
 import core.entities_new.event.CombatEvent;
 import core.entities_new.event.EntityEvent;
@@ -85,8 +90,24 @@ public class Entity implements DepthSort, Serializable {
 			if(render()) {
 				render.debugDraw();
 			} else {
-				DrawUtils.setColor(new Vector3f(1, 0, 0));
-				DrawUtils.drawBox2DShape(getBody(), getBody().getFixtureList().getShape());
+				for(Fixture f = getBody().getFixtureList(); f != null; f = f.getNext()) {
+					switch(f.getShape().m_type) {
+					case CIRCLE:
+						DrawUtils.setColor(new Vector3f(0.2f, 0f, 1f));
+						DrawUtils.drawBox2DCircle(getBody(), (CircleShape) f.m_shape);
+						break;
+					case EDGE:
+						DrawUtils.setColor(new Vector3f(1f, 0f, 0.2f));
+						DrawUtils.drawBox2DEdge(getBody().getPosition(), (EdgeShape) f.m_shape);
+						break;
+					case POLYGON:
+						DrawUtils.setColor(new Vector3f(0f, 1f, 0.2f));
+						DrawUtils.drawBox2DPoly(getBody(), (PolygonShape) f.m_shape);
+						break;
+					case CHAIN:
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -135,6 +156,18 @@ public class Entity implements DepthSort, Serializable {
 	
 	public Renderable getRender() {
 		return render;
+	}
+	
+	/**
+	 * Make sure this is only called on a Spine enabled entity
+	 * @return render as a SpineRender or null
+	 */
+	public SpineRender getSpineRender() {
+		if(render() && render instanceof SpineRender) {
+			return (SpineRender) render;
+		}
+		
+		return null;
 	}
 	
 	public void setRender(Renderable render) {
@@ -231,7 +264,7 @@ public class Entity implements DepthSort, Serializable {
 		} else if(e instanceof CombatEvent) {
 			processCombatEvent((CombatEvent) e);
 		} else if(e instanceof StateChangeEvent) {
-			getStateManager().changeState(((StateChangeEvent) e).getNewState());
+			getStateManager().changeState(((StateChangeEvent) e).getState());
 		} else if(e instanceof InventoryEvent) {
 			processEquipmentEvent((InventoryEvent) e);
 		} else if(e instanceof InteractEvent) {

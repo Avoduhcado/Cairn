@@ -1,4 +1,4 @@
-package core.entities_new.components;
+package core.entities_new.components.geometrics;
 
 import org.lwjgl.util.vector.Vector2f;
 

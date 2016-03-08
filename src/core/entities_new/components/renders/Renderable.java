@@ -1,4 +1,4 @@
-package core.entities_new.components;
+package core.entities_new.components.renders;
 
 import core.entities_new.event.EntityEvent;
 import core.render.transform.Transform;

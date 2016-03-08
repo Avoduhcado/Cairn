@@ -1,13 +1,17 @@
 package core.render;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import javax.imageio.ImageIO;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.vector.Vector4f;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
-import org.newdawn.slick.util.ResourceLoader;
-
 import core.Camera;
 import core.render.transform.Transform;
 import core.utilities.Resources;
@@ -26,6 +30,17 @@ public class Sprite {
 	}
 	
 	protected Texture load(String ref) throws IOException {
+		// Load time pre-multiplied alpha conversion
+		/*BufferedImage image = ImageIO.read(Resources.get().getResource(ref + ".png"));
+		if(!image.isAlphaPremultiplied()) {
+			image.coerceData(true);
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			ImageIO.write(image, "png", os);
+			InputStream is = new ByteArrayInputStream(os.toByteArray());
+			
+			return TextureLoader.getTexture("PNG", is);
+		}*/
+		
 		return TextureLoader.getTexture("PNG",
 				//ResourceLoader.getResourceAsStream(System.getProperty("resources") + "/sprites/" + ref + ".png"));
 				//Files.newInputStream(Resources.get().getFileSystem().getPath("/" + ref + ".png")));
@@ -75,6 +90,9 @@ public class Sprite {
 		
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		// This one is actually p cool, spooky wireframes
+		//GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);

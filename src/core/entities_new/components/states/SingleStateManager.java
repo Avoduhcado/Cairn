@@ -1,4 +1,4 @@
-package core.entities_new.components;
+package core.entities_new.components.states;
 
 import core.entities_new.Entity;
 import core.entities_new.State;
@@ -13,7 +13,7 @@ public class SingleStateManager implements StateManager {
 		this.entity = entity;
 		this.state = state;
 		
-		this.entity.getRender().fireEvent(new StateChangeEvent(state, null));
+		this.entity.getRender().fireEvent(new StateChangeEvent(state));
 	}
 	
 	@Override

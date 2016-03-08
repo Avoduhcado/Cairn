@@ -1,4 +1,4 @@
-package core.entities_new.components;
+package core.entities_new.components.renders;
 
 import java.io.Serializable;
 
@@ -7,12 +7,8 @@ import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.Filter;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
-import org.jbox2d.dynamics.World;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
@@ -37,6 +33,7 @@ import com.esotericsoftware.spine.attachments.SkinnedMeshAttachment;
 import core.Camera;
 import core.Theater;
 import core.entities_new.State;
+import core.entities_new.components.geometrics.ZBody;
 import core.entities_new.Entity;
 import core.entities_new.event.EntityEvent;
 import core.entities_new.event.StateChangeEvent;
@@ -64,17 +61,19 @@ public class SpineRender implements Renderable, Serializable {
 
 	private Transform transform;
 
+	// TODO Make this final?
 	private StateChangeListener stateChangeListener;
 
 	public SpineRender(String ref, Entity entity) {
 		this.entity = entity;
 
 		this.stateChangeListener = e -> {
-			String animation = e.getNewState().getAnimation();
-			boolean loop = e.getNewState().loop;
+			String animation = e.getState().getAnimation();
+			boolean loop = e.getState().loop;
+			int track = e.getTrack();
 
 			if(animState.getData().getSkeletonData().findAnimation(animation) != null) {
-				animState.setAnimation(0, animation, loop);
+				animState.setAnimation(track, animation, loop);
 			}
 		};
 		
@@ -213,8 +212,10 @@ public class SpineRender implements Renderable, Serializable {
 			public void complete(int trackIndex, int totalLoops) {
 				switch(entity.getState()) {
 				case DEFEND:
-					if(animState.getCurrent(trackIndex).getAnimation().getName().matches(State.DEFEND.animation)) {
-						animState.setAnimation(trackIndex, "Defending", true);
+					if(totalLoops == 1) {
+						if(hasAnimation("DefendNew")) {
+							animState.setAnimation(trackIndex, "DefendNew", true);
+						}
 					}
 					break;
 				case ATTACK:
@@ -294,8 +295,7 @@ public class SpineRender implements Renderable, Serializable {
 		animState.update(Theater.getDeltaSpeed(0.016f) * speed);
 		animState.apply(skeleton);
 		
-		skeleton.setPosition(entity.getBody().getPosition().x * Stage.SCALE_FACTOR,
-				entity.getBody().getPosition().y * Stage.SCALE_FACTOR);
+		skeleton.setPosition(entity.getZBody().getX(), entity.getZBody().getY());
 		skeleton.updateWorldTransform();
 
 		for(Slot slot : skeleton.getDrawOrder()) {
@@ -352,7 +352,7 @@ public class SpineRender implements Renderable, Serializable {
 		transform.setFlipX(skeleton.getFlipX());
 		transform.setScaleX(region.getScaleX());
 		transform.setScaleY(region.getScaleY());
-		transform.setColor(skeleton.drawOrder.get(index).getColor());
+		transform.setColor(skeleton.drawOrder.get(index).getColor().premultiplyAlpha());
 	}
 
 	@Override
@@ -369,13 +369,13 @@ public class SpineRender implements Renderable, Serializable {
 	}
 	
 	public void setAttachment(String slotName, String attachmentName) {
-		getSkeleton().setAttachment(slotName, attachmentName);
-		/*if(skeleton.findSlot(slotName).getAttachment() != null) {
+		if(skeleton.findSlot(slotName).getAttachment() != null) {
 			Box2dAttachment attachment = (Box2dAttachment) skeleton.findSlot(slotName).getAttachment();
 			if(attachment.getFixture() != null) {
 				entity.getBody().destroyFixture(attachment.getFixture());
 			}
-		}*/
+		}
+		getSkeleton().setAttachment(slotName, attachmentName);
 		buildFixture(getSkeleton().findSlot(slotName), entity.getBody());
 		
 	}

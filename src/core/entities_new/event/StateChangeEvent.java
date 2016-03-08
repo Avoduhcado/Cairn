@@ -4,40 +4,34 @@ import core.entities_new.State;
 
 public class StateChangeEvent extends EntityEvent {
 
-	private State oldState;
-	private State newState;
+	private State state;
 	private boolean forced;
-	
-	public StateChangeEvent(State newState, State oldState) {
-		this.setNewState(newState);
-		this.setOldState(oldState);
-	}
+	private int track;
 
-	public StateChangeEvent(State newState) {
-		this.setNewState(newState);
-		this.setOldState(null);
-	}
-
+	/**
+	 * @param newState The new state to apply to the entity
+	 * @param forced Whether or not this state should be forced to apply (will reset animation)
+	 */
 	public StateChangeEvent(State newState, boolean forced) {
-		this.setNewState(newState);
-		this.setOldState(null);
-		this.setForced(forced);
+		setState(newState);
+		setForced(forced);
+		setTrack(0);
 	}
 
-	public State getOldState() {
-		return oldState;
+	/**
+	 * Set a non forced, top level track State
+	 * @param newState The new state to apply to the entity
+	 */
+	public StateChangeEvent(State newState) {
+		this(newState, false);
+	}
+	
+	public State getState() {
+		return state;
 	}
 
-	public void setOldState(State oldState) {
-		this.oldState = oldState;
-	}
-
-	public State getNewState() {
-		return newState;
-	}
-
-	public void setNewState(State newState) {
-		this.newState = newState;
+	public void setState(State newState) {
+		this.state = newState;
 	}
 
 	public boolean isForced() {
@@ -46,6 +40,14 @@ public class StateChangeEvent extends EntityEvent {
 
 	public void setForced(boolean forced) {
 		this.forced = forced;
+	}
+
+	public int getTrack() {
+		return track;
+	}
+	
+	public void setTrack(int track) {
+		this.track = track;
 	}
 	
 }

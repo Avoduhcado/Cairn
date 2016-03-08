@@ -1,29 +1,42 @@
 package core.setups;
 
+import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.List;
 
+import org.jbox2d.callbacks.QueryCallback;
+import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
+import core.Input;
 import core.entities_new.Entity;
-import core.entities_new.EntityData;
-import core.entities_new.components.ActivateInteraction;
 import core.entities_new.components.Combatant;
-import core.entities_new.components.FollowController;
 import core.entities_new.components.Inventory;
-import core.entities_new.components.PlayerController;
-import core.entities_new.components.Script;
+import core.entities_new.components.controllers.FollowController;
+import core.entities_new.components.controllers.PlayerController;
+import core.entities_new.components.interactions.ActivateInteraction;
+import core.entities_new.components.interactions.Script;
 import core.entities_new.event.InteractEvent;
 import core.entities_new.utils.BodyData;
 import core.entities_new.utils.BodyLoader;
 import core.entities_new.utils.CombatLoader;
+import core.entities_new.utils.SensorData;
 import core.scene.BoneWorld;
 import core.scene.ShadowMap;
+import core.swing.EntityDisplay;
+import core.ui.event.MouseEvent;
+import core.ui.event.MouseListener;
+import core.ui.event.UIEvent;
+import core.utilities.keyboard.Keybind;
 
 public class Stage extends GameSetup implements WorldContainer {
+
+	public static final float SCALE_FACTOR = 30f;
 
 	private ArrayList<Entity> background = new ArrayList<Entity>();
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
@@ -33,11 +46,13 @@ public class Stage extends GameSetup implements WorldContainer {
 	
 	private ArrayList<Entity> queuedEntities = new ArrayList<Entity>();
 	private ArrayList<Entity> entitiesToRemove = new ArrayList<Entity>();
-
-	public static final float SCALE_FACTOR = 30f;
+	
+	private MouseListener mouseListener;
+	
+	private Point2D start;
 
 	public Stage() {
-		//Camera.get().setFade(-2.5f);
+		Camera.get().setFade(-2.5f);
 		Camera.get().frame.setFrame(0, 0, Camera.get().frame.getWidth(), Camera.get().frame.getHeight());
 
 		ShadowMap.init();
@@ -55,11 +70,12 @@ public class Stage extends GameSetup implements WorldContainer {
 
 		Camera.get().setFillColor(new Vector4f(0, 0, 0, 1));
 
-		addPlayer(new Entity("Skelebones", new BodyData(495, 450, BodyLoader.PLAIN_ENTITY), this));
+		addPlayer(new Entity("Skelebones", new BodyData(490, 150, BodyLoader.PLAIN_ENTITY), this));
 
-		Entity dad = new Entity("Skull", new BodyData(495, 450, BodyLoader.FLOATING_ENTITY), this);
+		Entity dad = new Entity("Skull", new BodyData(490, 150, BodyLoader.FLOATING_ENTITY), this);
 		dad.setController(new FollowController(dad, getPlayer()));
 		addEntity(dad);
+		ShadowMap.get().addIllumination(dad, new Point(0, -105), 300f);
 		
 		/*Entity dad = new Entity("Skull",
 				player.getBody().getPosition().x * Stage_new.SCALE_FACTOR,
@@ -85,7 +101,7 @@ public class Stage extends GameSetup implements WorldContainer {
 		//((SpineRender) shp.getRender()).getSkeleton().findSlot("CROOK").setAttachment(null);
 		//addEntity(shp);
 
-		Entity collector = new Entity("Collector", new BodyData(575, 455, BodyLoader.PLAIN_ENTITY), this);
+		Entity collector = new Entity("Collector", new BodyData(760, 160, BodyLoader.PLAIN_ENTITY), this);
 		//collector.getBody().setGravityScale(2f);
 		//collector.getBody().setLinearDamping(1f);
 		//collector.getZBody().setGroundZ(455);
@@ -96,9 +112,9 @@ public class Stage extends GameSetup implements WorldContainer {
 		collector.addComponent(ActivateInteraction.class, new ActivateInteraction(collector, new Script(collector, "")));
 		addEntity(collector);
 
-		Entity light = new Entity("Hanging Light", new BodyData(690, 185, BodyLoader.FLOATING_ENTITY), this);
+		Entity light = new Entity("Hanging Light", new BodyData(990, 70, BodyLoader.FLOATING_ENTITY), this);
 		addEntity(light);
-		ShadowMap.get().addIllumination(light, null, 225f);
+		ShadowMap.get().addIllumination(light, null, 165f);
 
 		/*Entity wall = new Entity(null, 0, 300, this);
 		{
@@ -144,6 +160,43 @@ public class Stage extends GameSetup implements WorldContainer {
 		for(Entity e : entities) {
 			e.fireEvent(new InteractEvent(InteractEvent.AUTORUN, null));
 		}
+		
+		mouseListener = new MouseListener() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				world.queryAABB(new QueryCallback() {
+					@Override
+					public boolean reportFixture(Fixture fixture) {
+						SensorData data = (SensorData) fixture.m_userData;
+						EntityDisplay entityDisplay = new EntityDisplay(data.getEntity());
+						entityDisplay.setVisible(true);
+						return false;
+					}
+				}, new AABB(new Vec2(Camera.get().getScreenMouseX() / SCALE_FACTOR, Camera.get().getScreenMouseY() / SCALE_FACTOR),
+						new Vec2((Camera.get().getScreenMouseX() + 1) / SCALE_FACTOR, (Camera.get().getScreenMouseY() + 1) / SCALE_FACTOR)));
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				//start = new Point2D.Double(Camera.get().getScreenMouseX(), Camera.get().getScreenMouseY());
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				/*Point2D end = new Point2D.Double(Camera.get().getScreenMouseX(), Camera.get().getScreenMouseY());
+				queueEntity(new Entity("Wall", new BodyData((float) start.getX(), (float) start.getY(),
+						(float) (end.getX() - start.getX()), (float) (end.getY() - start.getY()), BodyLoader.WALL), Stage.this),
+						true);*/
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+			}
+		};
 	}
 	
 	@Override
@@ -156,14 +209,6 @@ public class Stage extends GameSetup implements WorldContainer {
 			}
 			e.updateBodyAndState();
 		}
-				
-		/*entities.stream()
-			.filter(e -> e.controller())
-			.map(e -> e.getController())
-			.forEach(e -> e.control());
-
-		entities.stream()
-			.forEach(e -> e.updateBodyAndState());*/
 		
 		queuedOperations();
 	}
@@ -185,7 +230,7 @@ public class Stage extends GameSetup implements WorldContainer {
 				new Rectangle2D.Double(e.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR).x,
 						e.getFixtureA().getBody().getPosition().mul(Stage_new.SCALE_FACTOR).y, 15, 15)));*/
 
-		//ShadowMap.get().drawIllumination();
+		ShadowMap.get().drawIllumination();
 	}
 
 	@Override
@@ -258,6 +303,36 @@ public class Stage extends GameSetup implements WorldContainer {
 		addEntity(player);
 		
 		Camera.get().setFocus(player);
+	}
+	
+	@Override
+	public void fireEvent(UIEvent e) {
+		super.fireEvent(e);
+		
+		if(e instanceof MouseEvent) {
+			processMouseEvent((MouseEvent) e);
+		}
+	}
+	
+	protected void processMouseEvent(MouseEvent event) {
+		if(mouseListener != null) {
+			switch(event.getEvent()) {
+			case MouseEvent.CLICKED:
+				mouseListener.mouseClicked(event);
+				break;
+			case MouseEvent.PRESSED:
+				mouseListener.mousePressed(event);
+				break;
+			case MouseEvent.RELEASED:
+				mouseListener.mouseReleased(event);
+				break;
+			case MouseEvent.MOVED:
+				//getPlayer().getBody().applyForceToCenter(new Vec2(event.getDx(), event.getDy()).mul(15));
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 }

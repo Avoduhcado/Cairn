@@ -4,6 +4,7 @@ import java.io.Serializable;
 import core.entities_new.Entity;
 import core.entities_new.EntityComponent;
 import core.entities_new.State;
+import core.entities_new.components.renders.SpineRender;
 import core.entities_new.event.InventoryEvent;
 import core.entities_new.event.StateChangeEvent;
 import core.inventory.Equipment;
@@ -33,7 +34,7 @@ public class Inventory implements EntityComponent, Serializable {
 	
 	private void changeRenderWeapon() {
 		owner.fireEvent(new StateChangeEvent(State.CHANGE_WEAPON));
-		if(owner.getRender() != null && owner.getRender() instanceof SpineRender) {
+		if(owner.render() && owner.getRender() instanceof SpineRender) {
 			SpineRender render = (SpineRender) owner.getRender();
 			render.setAttachment("WEAPON", equipment.getEquippedWeapon().getName().toUpperCase());
 		}

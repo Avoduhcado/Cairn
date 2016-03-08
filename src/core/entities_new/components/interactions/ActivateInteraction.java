@@ -1,4 +1,4 @@
-package core.entities_new.components;
+package core.entities_new.components.interactions;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.dynamics.FixtureDef;

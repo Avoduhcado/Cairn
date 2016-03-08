@@ -1,4 +1,4 @@
-package core.entities_new.components;
+package core.entities_new.components.interactions;
 
 import core.entities_new.Entity;
 import core.entities_new.EntityComponent;

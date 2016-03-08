@@ -1,5 +1,6 @@
 package core;
 
+import java.awt.geom.Point2D;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -18,6 +19,9 @@ public class Input {
 	static {
 		//Keyboard.enableRepeatEvents(true);
 	}
+		
+	private static final float CLICK_DISTANCE = 5f;
+	private static Point2D mouseClick = new Point2D.Double();
 	
 	/**
 	 * Main processing of any and all input depending on current setup.
@@ -25,11 +29,12 @@ public class Input {
 	 */
 	public static void checkInput(UIContainer setup) {
 		// TODO Menu Overlays isn't processed as ElementGroup
-		if(!setup.getUI().isEmpty()) {
+		// They should be contained by the current GameSetup anyway ya dummy
+		/*if(!setup.getUI().isEmpty()) {
 			while(setup.getElement(setup.getUI().size() - 1) != null && setup.getElement(setup.getUI().size() - 1) instanceof UIContainer) {
 				setup = (UIContainer) setup.getElement(setup.getUI().size() - 1);
 			}
-		}
+		}*/
 		
 		// Detect any keyboard events
 		processKeyboard(setup);
@@ -91,14 +96,21 @@ public class Input {
 		while(Mouse.next()) {
 			if(Mouse.getEventButton() != -1) {
 				if(Mouse.getEventButtonState()) {
+					mouseClick.setLocation(Mouse.getEventX(), Mouse.getEventY());
 					processMouseEvent(setup,
 							new MouseEvent(MouseEvent.PRESSED,
 									Mouse.getEventX(), Camera.get().displayHeight - Mouse.getEventY()));
 					//System.out.println(Mouse.getEventButton() + " " + Mouse.getEventButtonState());
 				} else {
 					processMouseEvent(setup,
-							new MouseEvent(MouseEvent.CLICKED,
+							new MouseEvent(MouseEvent.RELEASED,
 									Mouse.getEventX(), Camera.get().displayHeight - Mouse.getEventY()));
+					
+					if(mouseClick.distance(Mouse.getEventX(), Mouse.getEventY()) <= CLICK_DISTANCE) {
+						processMouseEvent(setup,
+								new MouseEvent(MouseEvent.CLICKED,
+										Mouse.getEventX(), Camera.get().displayHeight - Mouse.getEventY()));
+					}
 
 					//System.out.println(Mouse.getEventX() + " " + (Camera.get().displayHeight - Mouse.getEventY()));
 					//System.out.println(Mouse.getEventButton() + " " + Mouse.getEventButtonState());
@@ -123,29 +135,13 @@ public class Input {
 		
 		if(Mouse.hasWheel() && Mouse.getDWheel() != 0) {
 			// TODO Implement mouseWheelListener
-			System.out.println(Mouse.getEventDWheel());
+			System.out.println(Mouse.getEventDWheel() / 1200f);
+			Camera.get().setScale(Camera.get().getScale() + (Mouse.getEventDWheel() / 1200f));
 		}
 	}
 	
 	private static void processMouseEvent(UIContainer setup, MouseEvent e) {
-		for(int i = 0; i<setup.getUI().size(); i++) {
-			UIElement ui = setup.getUI().get(i);
-			switch(e.getEvent()) {
-			case MouseEvent.CLICKED:
-			case MouseEvent.RELEASED:
-			case MouseEvent.PRESSED:
-				if(ui.getBounds().contains(e.getPosition())) {
-					ui.fireEvent(e);
-				}
-				break;
-			case MouseEvent.MOVED:
-			case MouseEvent.DRAGGED:
-				if(ui.getBounds().contains(e.getPosition()) || ui.getBounds().contains(e.getPrevPosition())) {
-					ui.fireEvent(e);
-				}
-				break;
-			}
-		}
+		setup.fireEvent(e);
 	}
 	
 }

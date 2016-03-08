@@ -7,7 +7,6 @@ import java.util.Collection;
 import org.lwjgl.util.vector.Vector2f;
 
 import core.ui.event.ActionEvent;
-import core.ui.event.KeyEvent;
 import core.ui.event.KeybindEvent;
 import core.ui.event.KeybindListener;
 import core.ui.event.MouseEvent;
@@ -132,6 +131,14 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 		}
 	}
 	
+	public void setSelection(UIElement element) {
+		if(!this.uiElements.contains(element)) {
+			return;
+		}
+		
+		setSelection(this.uiElements.indexOf(element));
+	}
+	
 	private void changeSelection(int direction) {
 		if(get(selection).getSurroundings()[direction] != null) {
 			get(selection).setSelected(false);
@@ -156,7 +163,33 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 			this.bounds = tempBounds;
 		}
 	}
+
+	public T get(int index) {
+		return uiElements.get(index);
+	}
 	
+	public int size() {
+		return uiElements.size();
+	}
+	
+	public boolean isEmpty() {
+		return uiElements.isEmpty();
+	}
+	
+	public int indexOf(UIElement element) {
+		return uiElements.indexOf(element);
+	}
+
+	public void add(T element) {
+		uiElements.add(element);
+		setBounds();
+	}
+	
+	public void addAll(Collection<T> elements) {
+		this.uiElements.addAll(elements);
+		setBounds();
+	}
+
 	public void removeKeybindListener(KeybindListener l) {
 		if(l == null) {
 			return;
@@ -171,36 +204,21 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 	// TODO Likely can use stream operations to clean this up later
 	@Override
 	public void fireEvent(UIEvent e) {
+		for(UIElement ui : uiElements) {
+			if(ui.getState() == ENABLED) {
+				ui.fireEvent(e);
+			}
+			if(e.isConsumed()) {
+				return;
+			}
+		}
+		
 		if(e instanceof MouseEvent) {
 			processMouseEvent((MouseEvent) e);
 		} else if(e instanceof TimeEvent) {
 			processTimeEvent((TimeEvent) e);
-			
-			if(!isEmpty()) {
-				for(UIElement ui : uiElements) {
-					if(ui.getState() == ENABLED) {
-						ui.fireEvent(e);
-					}
-				}
-			}
-		} else if(e instanceof KeyEvent) {
-			if(!isEmpty()) {
-				for(UIElement ui : uiElements) {
-					if(ui.getState() == ENABLED) {
-						ui.fireEvent(e);
-					}
-				}
-			}
 		} else if(e instanceof KeybindEvent) {
 			processKeybindEvent((KeybindEvent) e);
-			
-			if(!isEmpty()) {
-				for(UIElement ui : uiElements) {
-					if(ui.getState() == ENABLED) {
-						ui.fireEvent(e);
-					}
-				}
-			}
 		}
 	}
 	
@@ -214,13 +232,6 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			if(!isEmpty()) {
-				for(UIElement ui : uiElements) {
-					if(ui.getBounds().contains(((MouseEvent) e).getPosition())) {
-						ui.fireEvent(e);
-					}
-				}
-			}
 		}
 
 		@Override
@@ -233,19 +244,24 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 
 		@Override
 		public void mouseEntered(MouseEvent e) {
-			if(!isEmpty()) {
-				for(int i = 0; i < uiElements.size(); i++) {
-					if(uiElements.get(i).getBounds().contains(e.getPosition())) {
-						setSelection(i);
-					}
+			if(isEmpty()) {
+				return;
+			}
+			for(UIElement ui : uiElements) {
+				if(ui.getBounds().contains(e.getPosition())) {
+					setSelection(ui);
 				}
 			}
+			e.consume();
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e) {
+			if(selection != -1) {
+				setSelection(selection);
+			}
+			e.consume();
 		}
-
 		
 	}
 	
@@ -253,19 +269,19 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 
 		@Override
 		public void mouseMoved(MouseEvent e) {
-			if(!isEmpty()) {
-				for(int i = 0; i < uiElements.size(); i++) {
-					// Check for mouse entering or exiting element
-					if(uiElements.get(i).getBounds().contains(((MouseEvent) e).getPosition()) && 
-							!uiElements.get(i).getBounds().contains(((MouseEvent) e).getPrevPosition())) {
-						setSelection(i);
-						uiElements.get(i).fireEvent(e);
-					} else if(!uiElements.get(i).getBounds().contains(e.getPosition()) && 
-							uiElements.get(i).getBounds().contains(e.getPrevPosition())) {
-						uiElements.get(i).fireEvent(e);
-					}
+			if(isEmpty() || !ElementGroup.this.getBounds().contains(e.getPosition())) {
+				return;
+			}
+			
+			for(UIElement ui : uiElements) {
+				if(ui.getBounds().contains(e.getPosition())) {
+					setSelection(ui);
+					e.consume();
+					return;
 				}
 			}
+			
+			e.consume();
 		}
 
 		@Override
@@ -304,32 +320,6 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 		
 	}
 	
-	public T get(int index) {
-		return uiElements.get(index);
-	}
-	
-	public int size() {
-		return uiElements.size();
-	}
-	
-	public boolean isEmpty() {
-		return uiElements.isEmpty();
-	}
-	
-	public int indexOf(UIElement element) {
-		return uiElements.indexOf(element);
-	}
-
-	public void add(T element) {
-		uiElements.add(element);
-		setBounds();
-	}
-	
-	public void addAll(Collection<T> elements) {
-		this.uiElements.addAll(elements);
-		setBounds();
-	}
-
 }
 
 class SelectionPointer extends Icon {

@@ -1,4 +1,4 @@
-package core.entities_new.components;
+package core.entities_new.components.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +17,15 @@ import com.esotericsoftware.spine.attachments.Box2dAttachment;
 
 import core.entities_new.Entity;
 import core.entities_new.State;
-import core.entities_new.event.ControllerEvent;
-import core.entities_new.event.ControllerListener;
+import core.entities_new.components.renders.SpineRender;
 import core.entities_new.event.InventoryEvent;
 import core.entities_new.event.StateChangeEvent;
+import core.entities_new.event.controllers.AttackEvent;
+import core.entities_new.event.controllers.ControllerEvent;
+import core.entities_new.event.controllers.ControllerListener;
+import core.entities_new.event.controllers.DefendEvent;
+import core.entities_new.event.controllers.JumpEvent;
+import core.entities_new.event.controllers.MoveEvent;
 import core.entities_new.utils.ControllerValidator;
 import core.entities_new.utils.SensorData;
 import core.setups.Stage;
@@ -29,9 +34,10 @@ public abstract class EntityController implements ControllerListener {
 
 	protected Entity entity;
 	
-	protected float speed = 20f;
+	protected float speed = 18f;
 	protected float speedMod = 1f;
 	protected Vec2 movement = new Vec2();
+	protected boolean defending;
 	
 	protected List<FollowController> followers = new ArrayList<FollowController>();
 	
@@ -53,9 +59,9 @@ public abstract class EntityController implements ControllerListener {
 	protected abstract void controlActions();
 
 	@Override
-	public void move(ControllerEvent e) {
+	public void move(MoveEvent e) {
 		if(entity.getState().canMove()) {
-			Vec2 movement = (Vec2) e.getData();
+			Vec2 movement = e.getMovement();
 			movement.normalize();
 			if(entity.isWalkingBackwards()) {
 				speedMod -= 0.25f;
@@ -86,14 +92,20 @@ public abstract class EntityController implements ControllerListener {
 	}
 
 	@Override
-	public void attack(ControllerEvent e) {
+	public void attack(AttackEvent e) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void defend(ControllerEvent e) {
-		entity.setFixDirection((boolean) e.getData());
+	public void defend(DefendEvent e) {
+		if(e.isDefending()) {
+			entity.fireEvent(new StateChangeEvent(State.DEFEND));
+		} else {
+			entity.fireEvent(new StateChangeEvent(State.IDLE));
+		}
+		entity.setFixDirection(e.isDefending());
+		defending = e.isDefending();
 	}
 
 	@Override
@@ -146,10 +158,10 @@ public abstract class EntityController implements ControllerListener {
 	}
 
 	@Override
-	public void jump(ControllerEvent e) {
+	public void jump(JumpEvent e) {
 		if(entity.getZBody().getGroundZ() == 0) {
 			entity.fireEvent(new StateChangeEvent(State.JUMPING));
-			entity.getBody().applyLinearImpulse((Vec2) e.getData(), entity.getBody().getWorldCenter());
+			entity.getBody().applyLinearImpulse(e.getJump(), entity.getBody().getWorldCenter());
 			entity.getBody().setGravityScale(1f);
 			entity.getBody().setLinearDamping(1f);
 			entity.getZBody().setGroundZ(entity.getBody().getPosition().y * Stage.SCALE_FACTOR);
@@ -176,22 +188,22 @@ public abstract class EntityController implements ControllerListener {
 	public void fireEvent(ControllerEvent e) {
 		switch(e.getType()) {
 		case ControllerEvent.MOVE:
-			move(e);
+			move((MoveEvent) e);
 			break;
 		case ControllerEvent.DODGE:
 			dodge(e);
 			break;
 		case ControllerEvent.ATTACK:
-			attack(e);
+			attack((AttackEvent) e);
 			break;
 		case ControllerEvent.DEFEND:
-			defend(e);
+			defend((DefendEvent) e);
 			break;
 		case ControllerEvent.COLLAPSE:
 			collapse(e);
 			break;
 		case ControllerEvent.JUMP:
-			jump(e);
+			jump((JumpEvent) e);
 			break;
 		case ControllerEvent.CHANGE_WEAPON:
 			changeWeapon(e);
@@ -218,7 +230,7 @@ public abstract class EntityController implements ControllerListener {
 		default:
 			return event;
 		case ControllerEvent.ATTACK:
-			return ControllerValidator.validateAttack(event, entity);
+			return ControllerValidator.validateAttack((AttackEvent) event, entity);
 		}
 	}
 	

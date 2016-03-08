@@ -1,4 +1,4 @@
-package core.entities_new.components;
+package core.entities_new.components.controllers;
 
 public interface Controllable {
 
