@@ -65,6 +65,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.sun.xml.internal.ws.encoding.soap.SerializationException;
 
+import core.Theater;
 import core.utilities.Resources;
 
 public class SkeletonJson {

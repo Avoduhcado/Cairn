@@ -9,7 +9,6 @@ import core.ui.UIElement;
 import core.ui.event.TimeEvent;
 import core.utilities.Config;
 import core.utilities.Resources;
-import core.utilities.keyboard.Keybind;
 import core.utilities.text.Text;
 
 public class Theater {
@@ -180,7 +179,7 @@ public class Theater {
 	public void setSetup(GameSetup setup) {
 		this.setup = setup;
 	}
-
+	
 	/**
 	 * @return Current time in nanoseconds divided by 1,000,000
 	 */

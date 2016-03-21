@@ -17,7 +17,6 @@ import core.utilities.keyboard.Keybind;
 public class PlayerController extends EntityController {
 					
 	private boolean defending = false;
-	private float attackChargeTimer = 0;
 	
 	public PlayerController(Entity entity) {
 		super(entity);
@@ -33,9 +32,11 @@ public class PlayerController extends EntityController {
 		
 		if(Keybind.DODGE.clicked()) {
 			setEventQueue(new DodgeEvent());
-		} else if(Keybind.ATTACK.clicked()) {
-			setEventQueue(new AttackEvent(((Inventory) entity.getComponent(Inventory.class)).getEquipment().getEquippedWeapon()));
+		} else if(Keybind.LIGHT_ATTACK.clicked()) {
+			setEventQueue(new AttackEvent(((Inventory) entity.getComponent(Inventory.class)).getEquipment().getWeapons().get(0)));
 			//deduceAttackPattern();
+		} else if(Keybind.HEAVY_ATTACK.clicked()) {
+			setEventQueue(new AttackEvent(((Inventory) entity.getComponent(Inventory.class)).getEquipment().getWeapons().get(1)));
 		} else if(Keybind.SLOT1.clicked()) {
 			setEventQueue(new CollapseEvent(entity.getBody().getLinearVelocity().clone()));
 		} else if(Keybind.SLOT2.clicked()) {
@@ -50,13 +51,13 @@ public class PlayerController extends EntityController {
 	}
 
 	private void deduceAttackPattern() {
-		if(Keybind.ATTACK.clicked() && !Keybind.ATTACK.held()) {
+		if(Keybind.LIGHT_ATTACK.clicked() && !Keybind.LIGHT_ATTACK.held()) {
 			if(defending) {
 				setEventQueue(new AttackEvent(((Inventory) entity.getComponent(Inventory.class)).getEquipment().getWeapons().get(2)));
 			} else {
 				setEventQueue(new AttackEvent(((Inventory) entity.getComponent(Inventory.class)).getEquipment().getWeapons().get(0)));
 			}
-		} else if(Keybind.ATTACK.clicked() && Keybind.ATTACK.held()) {
+		} else if(Keybind.LIGHT_ATTACK.clicked() && Keybind.LIGHT_ATTACK.held()) {
 			setEventQueue(new AttackEvent(((Inventory) entity.getComponent(Inventory.class)).getEquipment().getWeapons().get(1)));
 		}
 	}

@@ -11,7 +11,10 @@ public enum State {
 	FALLING ("QuickStep", true), 
 	LAND ("QuickStep", false), 
 	ATTACK ("Attack", false), 
-	DEFEND ("DefendStart", true), 
+	HEAVY_ATTACK ("HeavyAttack", false), 
+	DEFEND_START ("DefendStart", false),
+	DEFEND ("Defend", true), 
+	DEFEND_END ("DefendEnd", false),
 	HIT ("Hit", false),
 	CHANGE_WEAPON ("ChangeWeapon", false);
 	

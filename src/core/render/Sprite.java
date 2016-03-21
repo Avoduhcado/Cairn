@@ -13,6 +13,7 @@ import org.lwjgl.util.vector.Vector4f;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import core.Camera;
+import core.Theater;
 import core.render.transform.Transform;
 import core.utilities.Resources;
 

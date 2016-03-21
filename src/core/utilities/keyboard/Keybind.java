@@ -14,7 +14,8 @@ public enum Keybind {
 	UP (Keyboard.KEY_UP),
 	DOWN (Keyboard.KEY_DOWN),
 	RUN (Keyboard.KEY_LSHIFT),
-	ATTACK (Keyboard.KEY_D),
+	LIGHT_ATTACK (Keyboard.KEY_D),
+	HEAVY_ATTACK (Keyboard.KEY_A),
 	DEFEND (Keyboard.KEY_W),
 	DODGE (Keyboard.KEY_S),
 	MENU (Keyboard.KEY_E),
@@ -124,8 +125,9 @@ public enum Keybind {
 			Keybind.valueOf(temp[0]).setKey(Keyboard.getKeyIndex(temp[1]));
 		} catch(IllegalArgumentException e) {
 			// Reload config
-			Config.createConfig();
-			Config.loadConfig();			
+			// XXX This causes massive looping errors if a keybind is renamed/missing/extra/nonexistant in some way
+			//Config.createConfig();
+			//Config.loadConfig();			
 		}
 	}
 	

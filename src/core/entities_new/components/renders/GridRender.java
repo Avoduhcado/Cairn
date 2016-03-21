@@ -9,6 +9,7 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
+import core.Theater;
 import core.entities_new.Entity;
 import core.entities_new.event.EntityEvent;
 import core.render.SpriteList;
@@ -48,10 +49,9 @@ public class GridRender implements Renderable, Serializable {
 		width = ByteBuffer.wrap(data, 0, 4).getInt() * Camera.ASPECT_RATIO;
 		height = ByteBuffer.wrap(data, 4, 4).getInt() * Camera.ASPECT_RATIO;
 		
-		List<FileHeader> files = Resources.get().getSubList(ref);
+		List<String> fileNames = Resources.get().getSubList(ref);
 		
-		for(FileHeader header : files) {
-			String name = header.getFileName();
+		for(String name : fileNames) {
 			if(name.endsWith(".png")) {
 				name = name.split(".png")[0];
 				String loc = name.substring(name.lastIndexOf('[') + 1, name.lastIndexOf(']'));

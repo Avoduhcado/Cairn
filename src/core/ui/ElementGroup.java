@@ -204,9 +204,9 @@ public class ElementGroup<T extends UIElement> extends UIElement {
 	// TODO Likely can use stream operations to clean this up later
 	@Override
 	public void fireEvent(UIEvent e) {
-		for(UIElement ui : uiElements) {
-			if(ui.getState() == ENABLED) {
-				ui.fireEvent(e);
+		for(int i = 0; i<uiElements.size(); i++) {
+			if(uiElements.get(i).getState() == ENABLED) {
+				uiElements.get(i).fireEvent(e);
 			}
 			if(e.isConsumed()) {
 				return;

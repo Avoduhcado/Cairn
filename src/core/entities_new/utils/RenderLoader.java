@@ -6,19 +6,17 @@ import core.entities_new.components.renders.PlainRender;
 import core.entities_new.components.renders.Renderable;
 import core.entities_new.components.renders.SpineRender;
 import core.utilities.Resources;
-import net.lingala.zip4j.model.FileHeader;
 
 public class RenderLoader {
 
 	public static Renderable loadRender(String name, Entity entity) {
-		FileHeader dir = Resources.get().getResourceHeader(name + "/");
-		if(dir != null && dir.isDirectory()) {
-			if(Resources.get().getResourceHeader(name + "/" + name + ".json") != null) {
+		if(Resources.get().isDirectory(name + "/")) {
+			if(Resources.get().resourceExists(name + "/" + name + ".json")) {
 				return new SpineRender(name, entity);
-			} else if(Resources.get().getResourceHeader(name + "/" + name + ".avl") != null) {
+			} else if(Resources.get().resourceExists(name + "/" + name + ".avl")) {
 				return new GridRender(name, entity);
 			}
-		} else if(Resources.get().getResourceHeader(name + ".png") != null) {
+		} else if(Resources.get().resourceExists(name + ".png")) {
 			return new PlainRender(name, entity);
 		}
 		
