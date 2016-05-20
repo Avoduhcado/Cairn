@@ -1,5 +1,6 @@
 package core.entities_new.components.renders;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import org.jbox2d.collision.shapes.CircleShape;
@@ -12,8 +13,10 @@ import org.jbox2d.dynamics.FixtureDef;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+import org.newdawn.slick.openal.SoundStore;
 
 import com.esotericsoftware.spine.AnimationState;
+import com.esotericsoftware.spine.AnimationState.AnimationStateAdapter;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Bone;
 import com.esotericsoftware.spine.Event;
@@ -21,7 +24,6 @@ import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonJson;
 import com.esotericsoftware.spine.Skin;
 import com.esotericsoftware.spine.Slot;
-import com.esotericsoftware.spine.AnimationState.AnimationStateAdapter;
 import com.esotericsoftware.spine.attachments.Attachment;
 import com.esotericsoftware.spine.attachments.AttachmentLoader;
 import com.esotericsoftware.spine.attachments.BoundingBoxAttachment;
@@ -32,9 +34,9 @@ import com.esotericsoftware.spine.attachments.SkinnedMeshAttachment;
 
 import core.Camera;
 import core.Theater;
+import core.entities_new.Entity;
 import core.entities_new.State;
 import core.entities_new.components.geometrics.ZBody;
-import core.entities_new.Entity;
 import core.entities_new.event.EntityEvent;
 import core.entities_new.event.StateChangeEvent;
 import core.entities_new.event.StateChangeListener;
@@ -46,10 +48,6 @@ import core.render.transform.Transform;
 import core.setups.Stage;
 
 public class SpineRender implements Renderable, Serializable {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private String sprite;
@@ -164,7 +162,12 @@ public class SpineRender implements Renderable, Serializable {
 							5.5f, Float.parseFloat(shakeData[3]));
 					break;
 				case "Footstep":
-					// TODO
+					try {
+						SoundStore.get().getOgg(System.getProperty("resources") + "/" + "soundeffects" + "step1.ogg").playAsSoundEffect(1, 1, false);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					break;
 				case "Damage":
 					//System.out.println(event.getFloat() + " " + event.getInt() + " " + event.getString() + " " + event.getData());
@@ -314,7 +317,18 @@ public class SpineRender implements Renderable, Serializable {
 			}
 		}
 	}
-	
+
+	@Override
+	// TODO
+	public void lookAt(Entity interactor) {
+		if(this.skeleton.findBone("HEAD") == null) {
+			return;
+		}
+		Bone head = this.skeleton.findBone("HEAD");
+		AnimationState lookState = new AnimationState(animStateData);
+		head.setRotation(0);
+	}
+
 	@Override
 	public String getAnimation() {
 		return animState.getCurrent(0).getAnimation().getName();

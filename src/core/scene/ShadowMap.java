@@ -1,11 +1,12 @@
 package core.scene;
 
 import java.awt.Point;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.jbox2d.dynamics.BodyType;
 import org.lwjgl.opengl.GL11;
+
 import core.Theater;
 import core.entities_new.Entity;
 import core.render.DrawUtils;
@@ -19,7 +20,7 @@ public class ShadowMap {
 	private float time;
 	private boolean flip;
 	
-	private ArrayList<Illumination> lightSources = new ArrayList<Illumination>();
+	private HashMap<Entity, Illumination> lightSources = new HashMap<Entity, Illumination>();
 
 	private static ShadowMap shadowMap;
 	
@@ -42,7 +43,6 @@ public class ShadowMap {
 		}
 	}
 	
-	@SuppressWarnings("unused")
 	private void changeSizes() {
 		time = MathFunctions.clamp(time + Theater.getDeltaSpeed(0.025f), 0, 6.5f);
 		for(int x = 0; x<sizes.length; x++) {
@@ -63,7 +63,7 @@ public class ShadowMap {
 		GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
 		GL11.glColorMask(false, false, false, false);
 		
-		for(Illumination i : lightSources) {
+		for(Illumination i : lightSources.values()) {
 			Entity illumSource = i.illumSource;
 			Point illumOffset = i.illumOffset;
 			
@@ -87,7 +87,7 @@ public class ShadowMap {
 					i.shadowWidth + (i.glow * i.haloRatio), i.shadowHeight + (i.glow * i.haloRatio), (int) (Math.random() * 3) + 8);
 		}
 		
-		for(Illumination i : lightSources) {
+		for(Illumination i : lightSources.values()) {
 			Entity illumSource = i.illumSource;
 			Point illumOffset = i.illumOffset;
 			
@@ -124,12 +124,16 @@ public class ShadowMap {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 	
-	public ArrayList<Illumination> getLightSources() {
+	public HashMap<Entity, Illumination> getLightSources() {
 		return lightSources;
 	}
 	
+	public Illumination getLightSource(Entity source) {
+		return lightSources.get(source);
+	}
+	
 	public void addIllumination(Entity source, Point offset, float radius) {
-		lightSources.add(new Illumination(source, offset, radius));
+		lightSources.put(source, new Illumination(source, offset, radius));
 	}
 	
 	public class Illumination {
@@ -152,7 +156,7 @@ public class ShadowMap {
 			shadowHeight = radius / 1.777f;
 		}
 		
-		public void resize() {
+		private void resize() {
 			resizeTime = MathFunctions.clamp(resizeTime + Theater.getDeltaSpeed(0.025f), 0, resizeDuration);
 			shadowWidth = MathFunctions.linearTween(resizeTime, resizeStart, resizeChange, resizeDuration);
 			shadowHeight = shadowWidth / 1.77777f;

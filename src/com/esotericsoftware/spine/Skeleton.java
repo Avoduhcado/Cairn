@@ -33,6 +33,7 @@ package com.esotericsoftware.spine;
 import java.util.ArrayList;
 
 import org.lwjgl.util.vector.Vector2f;
+
 import com.esotericsoftware.spine.attachments.Attachment;
 import com.esotericsoftware.spine.attachments.MeshAttachment;
 import com.esotericsoftware.spine.attachments.RegionAttachment;

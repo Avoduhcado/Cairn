@@ -9,7 +9,6 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
-import core.Theater;
 import core.entities_new.Entity;
 import core.entities_new.event.EntityEvent;
 import core.render.SpriteList;
@@ -17,7 +16,6 @@ import core.render.transform.Transform;
 import core.setups.Stage;
 import core.utilities.AvoFileDecoder;
 import core.utilities.Resources;
-import net.lingala.zip4j.model.FileHeader;
 
 public class GridRender implements Renderable, Serializable {
 
@@ -147,6 +145,12 @@ public class GridRender implements Renderable, Serializable {
 	public boolean hasAnimation(String animation) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void lookAt(Entity interactor) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

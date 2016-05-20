@@ -10,8 +10,6 @@ import org.jbox2d.dynamics.Fixture;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
-import com.esotericsoftware.spine.attachments.Attachment;
-
 import core.entities_new.Entity;
 import core.entities_new.event.EntityEvent;
 import core.render.DrawUtils;
@@ -135,6 +133,12 @@ public class PlainRender implements Renderable, Serializable {
 	public boolean hasAnimation(String animation) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void lookAt(Entity interactor) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

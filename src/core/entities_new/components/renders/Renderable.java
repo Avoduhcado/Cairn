@@ -1,5 +1,6 @@
 package core.entities_new.components.renders;
 
+import core.entities_new.Entity;
 import core.entities_new.event.EntityEvent;
 import core.render.transform.Transform;
 
@@ -12,6 +13,7 @@ public interface Renderable {
 	public void animate(float delta);
 	public boolean isFlipped();
 	public void setFlipped(boolean flipped);
+	public void lookAt(Entity interactor);
 	
 	public Transform getTransform();
 	public void setTransform(int index);

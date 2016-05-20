@@ -3,6 +3,7 @@ package core.entities_new.components.interactions;
 import core.entities_new.Entity;
 import core.setups.GameSetup;
 import core.ui.TextBox;
+import core.ui.UIElement;
 
 public class Script implements Scriptable {
 
@@ -10,6 +11,8 @@ public class Script implements Scriptable {
 	private Entity reader;
 	private String data;
 	private boolean reading;
+	
+	private UIElement screenElement;
 	
 	public Script(Entity source, String data) {
 		parseData();
@@ -26,8 +29,10 @@ public class Script implements Scriptable {
 		setReading(true);
 		setReader(reader);
 		
-		TextBox dialog = new TextBox(source.getZBody().getX(), source.getZBody().getY(), null, "We reading now", true);
-		((GameSetup) source.getContainer()).addUI(dialog);
+		// TODO Add some kinda like "FACE COORDINATES" so that people can talk and look reasonable
+		screenElement = new TextBox(source.getZBody().getX() + 50, source.getZBody().getY() - 140, "Textbox", "sup nerd", true);
+		//screenElement = new TextBox(source.getZBody().getX() + 50, source.getZBody().getY() - 140, "Textbox", "sup nerd", true);
+		((GameSetup) source.getContainer()).addUI(screenElement);
 		
 		System.out.println("We reading");
 	}
@@ -44,8 +49,12 @@ public class Script implements Scriptable {
 
 	@Override
 	public void interrupt() {
-		TextBox dialog = new TextBox(reader.getZBody().getX(), reader.getZBody().getY(), null, "See ya later faaaag", true);
-		((GameSetup) source.getContainer()).addUI(dialog);
+		if(screenElement != null) {
+			((GameSetup) source.getContainer()).getUI().remove(screenElement);
+		}
+		screenElement = new TextBox(reader.getZBody().getX(), reader.getZBody().getY(), null, "See ya later faaaag", false);
+		((TextBox) screenElement).setKillTimer(2.5f);
+		((GameSetup) source.getContainer()).addUI(screenElement);
 		
 		setReading(false);
 		setReader(null);

@@ -9,11 +9,9 @@ import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector4f;
 
 import core.Camera;
-import core.Input;
 import core.entities_new.Entity;
 import core.entities_new.components.Combatant;
 import core.entities_new.components.Inventory;
@@ -32,9 +30,9 @@ import core.swing.EntityDisplay;
 import core.ui.event.MouseEvent;
 import core.ui.event.MouseListener;
 import core.ui.event.UIEvent;
-import core.utilities.keyboard.Keybind;
+import editor.EditableScene;
 
-public class Stage extends GameSetup implements WorldContainer {
+public class Stage extends GameSetup implements WorldContainer, EditableScene {
 
 	public static final float SCALE_FACTOR = 30f;
 
@@ -110,8 +108,12 @@ public class Stage extends GameSetup implements WorldContainer {
 		//collector.addComponent(AutorunInteraction.class, new AutorunInteraction(collector, new Script(collector, "")));
 		//collector.addComponent(TouchInteraction.class, new TouchInteraction(collector, new Script(collector, "")));
 		collector.addComponent(ActivateInteraction.class, new ActivateInteraction(collector, new Script(collector, "")));
-		addEntity(collector);
+		//addEntity(collector);
 
+		Entity digger = new Entity("Gravedigger", new BodyData(700, 160, BodyLoader.PLAIN_ENTITY), this);
+		digger.addComponent(ActivateInteraction.class, new ActivateInteraction(digger, new Script(digger, "")));
+		addEntity(digger);
+		
 		Entity light = new Entity("Hanging Light", new BodyData(990, 70, BodyLoader.FLOATING_ENTITY), this);
 		addEntity(light);
 		ShadowMap.get().addIllumination(light, null, 165f);
@@ -333,6 +335,35 @@ public class Stage extends GameSetup implements WorldContainer {
 				break;
 			}
 		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		System.out.println("SDsdfsdjkfklj");
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -1,6 +1,7 @@
 package core;
 
 import java.awt.geom.Point2D;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 

@@ -2,7 +2,6 @@ package core.entities_new.components.controllers;
 
 import org.jbox2d.common.Vec2;
 
-import core.Theater;
 import core.entities_new.Entity;
 import core.entities_new.components.Inventory;
 import core.entities_new.event.InteractEvent;
@@ -12,6 +11,7 @@ import core.entities_new.event.controllers.DefendEvent;
 import core.entities_new.event.controllers.DodgeEvent;
 import core.entities_new.event.controllers.JumpEvent;
 import core.entities_new.event.controllers.MoveEvent;
+import core.scene.ShadowMap;
 import core.utilities.keyboard.Keybind;
 
 public class PlayerController extends EntityController {
@@ -47,6 +47,11 @@ public class PlayerController extends EntityController {
 			}
 			//entity.getZBody().getInteractables().stream()
 				//.forEach(e -> e.fireEvent(new InteractEvent(InteractEvent.ON_ACTIVATE, entity)));
+		}
+		
+		// XXX Remove this later
+		if(Keybind.SLOT9.clicked()) {
+			ShadowMap.get().getLightSource(this.followers.get(0).getFollower()).setResize(1.5f);;
 		}
 	}
 

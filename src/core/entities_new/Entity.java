@@ -226,7 +226,7 @@ public class Entity implements DepthSort, Serializable {
 		return null;
 	}
 	
-	public void addComponent(Class<?> clazz, EntityComponent component) {
+	public void addComponent(Class<? extends EntityComponent> clazz, EntityComponent component) {
 		components.put(clazz, component);
 	}
 	
@@ -303,6 +303,7 @@ public class Entity implements DepthSort, Serializable {
 		case InteractEvent.ON_ACTIVATE:
 		case InteractEvent.INTERRUPT:
 			if(components.containsKey(ActivateInteraction.class)) {
+				getRender().lookAt(e.getInteractor());
 				((Interaction) components.get(ActivateInteraction.class)).interact(e);
 			}
 			break;
